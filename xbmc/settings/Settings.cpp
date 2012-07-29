@@ -669,6 +669,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert("videolibrary.flattentvshows");
   settingSet.insert("videolibrary.removeduplicates");
   settingSet.insert("videolibrary.groupmoviesets");
+  settingSet.insert("videolibrary.importall");
   settingSet.insert("videolibrary.cleanup");
   settingSet.insert("videolibrary.import");
   settingSet.insert("videolibrary.export");

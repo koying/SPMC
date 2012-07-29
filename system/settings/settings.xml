@@ -355,6 +355,11 @@
           <default>false</default>
           <control type="toggle" />
         </setting>
+        <setting id="videolibrary.importall" type="boolean" label="20470" help="20471">
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
       </group>
       <group id="2">
         <setting id="videolibrary.updateonstartup" type="boolean" label="22000" help="36146">
