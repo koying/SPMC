@@ -205,6 +205,8 @@ void CAdvancedSettings::Initialize()
   m_fullScreenOnMovieStart = true;
   m_cachePath = "special://temp/";
 
+  m_videoIncludeAllVideos = false;
+
   m_videoCleanDateTimeRegExp = "(.*[^ _\\,\\.\\(\\)\\[\\]\\-])[ _\\.\\(\\)\\[\\]\\-]+(19[0-9][0-9]|20[0-1][0-9])([ _\\,\\.\\(\\)\\[\\]\\-]|[^0-9]$)";
 
   m_videoCleanStringRegExps.clear();
@@ -590,6 +592,8 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     pVideoExcludes = pElement->FirstChildElement("excludetvshowsfromscan");
     if (pVideoExcludes)
       GetCustomRegexps(pVideoExcludes, m_tvshowExcludeFromScanRegExps);
+
+    XMLUtils::GetBoolean(pElement,"includeallvideos", m_videoIncludeAllVideos);
 
     pVideoExcludes = pElement->FirstChildElement("cleanstrings");
     if (pVideoExcludes)
