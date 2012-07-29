@@ -876,6 +876,11 @@
           <level>2</level>
           <control type="button" format="action" />
         </setting>
+        <setting id="videolibrary.importall" type="boolean" label="20472" help="20473">
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
       </group>
       <group id="3" label="14237">
         <setting id="musiclibrary.updateonstartup" type="boolean" label="14245" help="36259">
