@@ -2428,7 +2428,7 @@ int CVideoDatabase::SetDetailsForEpisode(const std::string& strFilenameAndPath, 
 
     SetArtForItem(idEpisode, MediaTypeEpisode, artwork);
 
-    if (details.m_iEpisode != -1 && details.m_iSeason != -1)
+    if (!(details.m_iSeason == 0 && details.m_iEpisode == 0)) // Special episodes
     { // query DB for any episodes matching idShow, Season and Episode
       std::string strSQL = PrepareSQL("SELECT files.playCount, files.lastPlayed FROM episode INNER JOIN files ON files.idFile=episode.idFile WHERE episode.c%02d=%i AND episode.c%02d=%i AND episode.idShow=%i AND episode.idEpisode!=%i AND files.playCount > 0", VIDEODB_ID_EPISODE_SEASON, details.m_iSeason, VIDEODB_ID_EPISODE_EPISODE, details.m_iEpisode, idShow, idEpisode);
       m_pDS->query(strSQL.c_str());
