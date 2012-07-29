@@ -12640,7 +12640,15 @@ msgctxt "#20471"
 msgid "Show empty TV shows"
 msgstr ""
 
-#empty strings from id 20472 to 21329
+msgctxt "#20472"
+msgid "Import all videos"
+msgstr ""
+
+msgctxt "#20473"
+msgid "Import all videos, even if no scrapper data is available"
+msgstr ""
+
+#empty strings from id 20474 to 21329
 #up to 21329 is reserved for the video db !! !
 
 #: system/settings/settings.xml

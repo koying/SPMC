@@ -857,6 +857,11 @@
         </setting>
       </group>
       <group id="2" label="14236">
+        <setting id="videolibrary.importall" type="boolean" label="20472" help="20473">
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
         <setting id="videolibrary.updateonstartup" type="boolean" label="14245" help="36146">
           <level>1</level>
           <default>false</default>
