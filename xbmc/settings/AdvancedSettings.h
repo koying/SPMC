@@ -276,6 +276,11 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
 
     std::set<std::string> m_vecTokens;
 
+    std::string m_recentlyAddedMusicPath;
+    std::string m_recentlyAddedMoviePath;
+    std::string m_recentlyAddedEpisodePath;
+    std::string m_recentlyAddedMusicVideoPath;
+
     int m_iEpgLingerTime;           // minutes
     int m_iEpgUpdateCheckInterval;  // seconds
     int m_iEpgCleanupInterval;      // seconds
