@@ -282,6 +282,11 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     bool m_bVideoScannerIgnoreErrors;
     int m_iVideoLibraryDateAdded;
 
+    CStdString m_recentlyAddedMusicPath;
+    CStdString m_recentlyAddedMoviePath;
+    CStdString m_recentlyAddedEpisodePath;
+    CStdString m_recentlyAddedMusicVideoPath;
+
     std::vector<CStdString> m_vecTokens; // cleaning strings tied to language
     //TuxBox
     int m_iTuxBoxStreamtsPort;
