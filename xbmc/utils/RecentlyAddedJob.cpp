@@ -58,7 +58,7 @@ bool CRecentlyAddedJob::UpdateVideo()
   
   videodatabase.Open();
 
-  if (videodatabase.GetRecentlyAddedMoviesNav("videodb://recentlyaddedmovies/", items, NUM_ITEMS))
+  if (videodatabase.GetRecentlyAddedMoviesNav(g_advancedSettings.m_recentlyAddedMoviePath, items, NUM_ITEMS))
   {  
     for (; i < items.Size(); ++i)
     {
@@ -98,7 +98,7 @@ bool CRecentlyAddedJob::UpdateVideo()
   i = 0;
   CFileItemList  TVShowItems; 
  
-  if (videodatabase.GetRecentlyAddedEpisodesNav("videodb://recentlyaddedepisodes/", TVShowItems, NUM_ITEMS))
+  if (videodatabase.GetRecentlyAddedEpisodesNav(g_advancedSettings.m_recentlyAddedEpisodePath, TVShowItems, NUM_ITEMS))
   {
     for (; i < TVShowItems.Size(); ++i)
     {    
@@ -151,7 +151,7 @@ bool CRecentlyAddedJob::UpdateVideo()
   i = 0;
   CFileItemList MusicVideoItems;
 
-  if (videodatabase.GetRecentlyAddedMusicVideosNav("videodb://recentlyaddedmusicvideos/", MusicVideoItems, NUM_ITEMS))
+  if (videodatabase.GetRecentlyAddedMusicVideosNav(g_advancedSettings.m_recentlyAddedMusicVideoPath, MusicVideoItems, NUM_ITEMS))
   {
     for (; i < MusicVideoItems.Size(); ++i)
     {
@@ -206,7 +206,7 @@ bool CRecentlyAddedJob::UpdateMusic()
   
   musicdatabase.Open();
   
-  if (musicdatabase.GetRecentlyAddedAlbumSongs("musicdb://songs/", musicItems, NUM_ITEMS))
+  if (musicdatabase.GetRecentlyAddedAlbumSongs(g_advancedSettings.m_recentlyAddedMusicPath, musicItems, NUM_ITEMS))
   {
     long idAlbum = -1;
     CStdString strAlbumThumb;
