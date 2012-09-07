@@ -226,6 +226,11 @@ void CAdvancedSettings::Initialize()
   m_bVideoScannerIgnoreErrors = false;
   m_iVideoLibraryDateAdded = 1; // prefer mtime over ctime and current time
 
+  m_recentlyAddedMusicPath = "musicdb://songs/";
+  m_recentlyAddedMoviePath = "videodb://4/";
+  m_recentlyAddedEpisodePath = "videodb://5/";
+  m_recentlyAddedMusicVideoPath = "videodb://6/";
+
   m_iTuxBoxStreamtsPort = 31339;
   m_bTuxBoxAudioChannelSelection = false;
   m_bTuxBoxSubMenuSelection = false;
@@ -674,6 +679,15 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     XMLUtils::GetBoolean(pElement, "importwatchedstate", m_bVideoLibraryImportWatchedState);
     XMLUtils::GetBoolean(pElement, "importresumepoint", m_bVideoLibraryImportResumePoint);
     XMLUtils::GetInt(pElement, "dateadded", m_iVideoLibraryDateAdded);
+
+    TiXmlElement *pSubElement = pElement->FirstChildElement("recentlyaddedpath");
+    if (pSubElement)
+    {
+      XMLUtils::GetString(pSubElement, "musicpath", m_recentlyAddedMusicPath);
+      XMLUtils::GetString(pSubElement, "moviepath", m_recentlyAddedMoviePath);
+      XMLUtils::GetString(pSubElement, "episodepath", m_recentlyAddedEpisodePath);
+      XMLUtils::GetString(pSubElement, "musicvideopath", m_recentlyAddedMusicVideoPath);
+    }
   }
 
   pElement = pRootElement->FirstChildElement("videoscanner");
