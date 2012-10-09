@@ -62,6 +62,7 @@ SRCS += udf25.cpp
 SRCS += UDFDirectory.cpp
 SRCS += UDFFile.cpp
 SRCS += VideoDatabaseDirectory.cpp
+SRCS += VideoDatabaseFile.cpp
 SRCS += VirtualDirectory.cpp
 SRCS += XbtDirectory.cpp
 SRCS += XbtFile.cpp

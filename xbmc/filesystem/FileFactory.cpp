@@ -70,6 +70,7 @@
 #endif
 #include "PipeFile.h"
 #include "MusicDatabaseFile.h"
+#include "VideoDatabaseFile.h"
 #include "SpecialProtocolFile.h"
 #include "MultiPathFile.h"
 #include "UDFFile.h"
@@ -115,7 +116,7 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
   }
   else if (url.IsProtocol("xbt")) return new CXbtFile();
   else if (url.IsProtocol("musicdb")) return new CMusicDatabaseFile();
-  else if (url.IsProtocol("videodb")) return NULL;
+  else if (url.IsProtocol("videodb")) return new CVideoDatabaseFile();
   else if (url.IsProtocol("special")) return new CSpecialProtocolFile();
   else if (url.IsProtocol("multipath")) return new CMultiPathFile();
   else if (url.IsProtocol("image")) return new CImageFile();
