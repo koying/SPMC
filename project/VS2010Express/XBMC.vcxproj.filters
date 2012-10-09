@@ -3063,6 +3063,8 @@
       <Filter>music</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\filesystem\NFSDirectory.cpp" />
+      <Filter>filesystem</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\test\TestUtil.cpp">
       <Filter>test</Filter>
     </ClCompile>
@@ -3227,6 +3229,9 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\pvr\PVRSettings.cpp">
       <Filter>pvr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseFile.cpp">
+      <Filter>filesystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -6261,6 +6266,9 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\pvr\PVRSettings.h">
       <Filter>pvr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseFile.h">
+      <Filter>filesystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
