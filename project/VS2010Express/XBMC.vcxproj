@@ -425,6 +425,7 @@
     <ClCompile Include="..\..\xbmc\filesystem\win32\Win32SMBDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\win32\Win32File.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\win32\Win32SMBFile.cpp" />
+    <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseFile.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\VirtualDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\XbtDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\XbtFile.cpp" />
@@ -975,6 +976,7 @@
     <ClInclude Include="..\..\xbmc\filesystem\XbtFile.h" />
     <ClInclude Include="..\..\xbmc\filesystem\XbtManager.h" />
     <ClInclude Include="..\..\xbmc\guiinfo\GUIInfoLabels.h" />
+    <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseFile.h" />
     <ClInclude Include="..\..\xbmc\guilib\cximage.h" />
     <ClInclude Include="..\..\xbmc\guilib\Gif.h" />
     <ClInclude Include="..\..\xbmc\guilib\GUIKeyboard.h" />
