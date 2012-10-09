@@ -33,6 +33,9 @@
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GUIWindowManager.h"
 #include "dialogs/GUIDialogExtendedProgressBar.h"
+#include "video/VideoInfoTag.h"
+#include "music/tags/MusicInfoTag.h"
+#include "utils/StringUtils.h"
 
 #ifdef HAS_FILESYSTEM_RAR
 #include "filesystem/RarManager.h"
@@ -177,6 +180,59 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
         strFileName = CUtil::MakeLegalFileName(strFileName);
       }
 
+      // special case for video db
+      if ( URIUtils::IsVideoDb(pItem->GetPath()) )
+      {
+        // Build filename
+        if (pItem->HasVideoInfoTag())
+        {
+          CVideoInfoTag* tag = pItem->GetVideoInfoTag();
+          if (tag->m_type == "movie")
+          {
+            strFileName.Format("%s (%d)", tag->m_strTitle, tag->m_iYear);
+          }
+          else if (tag->m_type == "episode")
+          {
+            strFileName.Format("%s - S%dE%d - %s", tag->m_strShowTitle, tag->m_iSeason, tag->m_iEpisode, tag->m_strTitle);
+          }
+          else if (tag->m_type == "musicvideo")
+          {
+            strFileName = tag->m_strTitle;
+          }
+        } 
+        else
+          strFileName = pItem->GetLabel();
+
+        if(!pItem->m_bIsFolder && URIUtils::GetExtension(strFileName).length() == 0)
+        {
+          // FIXME: for now we only work well if the url has the extension
+          // we should map the content type to the extension otherwise
+          strFileName += URIUtils::GetExtension(pItem->GetPath());
+        }
+        strFileName = CUtil::MakeLegalFileName(strFileName);
+      }
+
+      // special case for music db
+      if ( URIUtils::IsMusicDb(pItem->GetPath()) )
+      {
+        // Build filename
+        if (pItem->HasMusicInfoTag())
+        {
+          MUSIC_INFO::CMusicInfoTag* tag = pItem->GetMusicInfoTag();
+          strFileName.Format("%s - %s - %d - %s", StringUtils::Join(tag->m_artist, "+"), tag->m_strAlbum, tag->m_iTrack, tag->m_strTitle);
+        } 
+        else
+          strFileName = pItem->GetLabel();
+
+        if(!pItem->m_bIsFolder && URIUtils::GetExtension(strFileName).length() == 0)
+        {
+          // FIXME: for now we only work well if the url has the extension
+          // we should map the content type to the extension otherwise
+          strFileName += URIUtils::GetExtension(pItem->GetPath());
+        }
+        strFileName = CUtil::MakeLegalFileName(strFileName);
+      }
+      
       std::string strnewDestFile;
       if(!strDestFile.empty()) // only do this if we have a destination
         strnewDestFile = URIUtils::ChangeBasePath(pItem->GetPath(), strFileName, strDestFile); // Convert (URL) encoding + slashes (if source / target differ)
