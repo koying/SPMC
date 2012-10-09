@@ -175,7 +175,6 @@ public:
 
   void Clear();
 
-protected:
   /*! \brief Trim whitespace off the given string
    \param value string to trim
    \return trimmed value, with spaces removed from left and right, as well as carriage returns from the right.
