@@ -21,7 +21,7 @@
 
 #include "threads/CriticalSection.h"
 #include "threads/Timer.h"
-#include "utils/Vector.h"
+#include "xbmc/utils/Vector.h"
 
 #define TOUCH_MAX_POINTERS  2
 

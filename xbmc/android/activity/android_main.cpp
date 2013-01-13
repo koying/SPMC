@@ -163,6 +163,7 @@ extern void android_main(struct android_app* state)
   CXBMCApp xbmcApp(state->activity);
   if (xbmcApp.isValid())
   {
+    g_xbmcapp = &xbmcApp;
     IInputHandler inputHandler;
     eventLoop.run(xbmcApp, inputHandler);
   }
