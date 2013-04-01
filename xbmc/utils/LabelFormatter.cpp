@@ -122,7 +122,7 @@ std::string CLabelFormatter::GetContent(unsigned int label, const CFileItem *ite
   for (unsigned int i = 0; i < m_dynamicContent[label].size(); i++)
   {
     dynamicRight = GetMaskContent(m_dynamicContent[label][i], item);
-    if ((i == 0 || !dynamicLeft.empty()) && !dynamicRight.empty())
+    if (i == 0 || !dynamicLeft.empty())
       strLabel += m_staticContent[label][i];
     strLabel += dynamicRight;
     dynamicLeft = dynamicRight;
