@@ -19446,7 +19446,21 @@ msgctxt "#38018"
 msgid "My rating"
 msgstr ""
 
-#empty strings from id 38019 to 38021
+#. Setting #38019 "Settings -> System -> Audio output -> Support 8 channel DTS-HD audio decoding"
+#: system/settings/settings.xml
+msgctxt "#38019"
+msgid "Support 8 channel DTS-HD audio decoding"
+msgstr ""
+
+#. Description of setting #38019 Settings -> System -> Audio output -> Support 8 channel DTS-HD audio decoding
+#: system/settings/settings.xml
+msgctxt "#38020"
+msgid "Enables decoding of high quality DTS-HD audio streams. Note: This increases CPU load and is only available when DTS and DTS-HD audio passthrough are disabled."
+msgstr ""
+
+msgctxt "#38021"
+msgid "Info"
+msgstr ""
 
 #. Used for the viewstate selection
 #: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
