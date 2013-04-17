@@ -64,6 +64,7 @@ protected:
   void OnRename(int iList);
   void OnSelectAll(int iList);
   void OnNewFolder(int iList);
+  void OnShowInfo(int iList);
   void Refresh();
   void Refresh(int iList);
   int GetSelectedItem(int iList);

@@ -18102,7 +18102,9 @@ msgctxt "#38020"
 msgid "Enables decoding of high quality DTS-HD audio streams. Note: This increases CPU load and is only available when DTS and DTS-HD audio passthrough are disabled."
 msgstr ""
 
-#empty string with id 38021
+msgctxt "#38021"
+msgid "Info"
+msgstr ""
 
 #. Used for the viewstate selection
 #: xbmc/video/dialogs/GUIDialogVideoInfo.cpp
