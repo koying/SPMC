@@ -713,7 +713,9 @@ msgctxt "#173"
 msgid "Display 4:3 videos as"
 msgstr ""
 
-#empty string with id 174
+msgctxt "#174"
+msgid "Info"
+msgstr ""
 
 #: xbmc/playlists/SmartPlaylist.cpp
 msgctxt "#175"
