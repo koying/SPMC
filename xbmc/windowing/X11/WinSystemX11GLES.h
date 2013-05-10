@@ -24,6 +24,7 @@
  */
 #include "windowing/WinSystem.h"
 #include <EGL/egl.h>
+#include <SDL/SDL.h>
 #include <X11/Xlib.h>
 #include "rendering/gles/RenderSystemGLES.h"
 #include "utils/GlobalsHandling.h"
