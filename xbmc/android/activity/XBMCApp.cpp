@@ -274,7 +274,7 @@ bool CXBMCApp::getWakeLock(JNIEnv *env)
 
     jclass cPowerManager = env->GetObjectClass(oPowerManager);
     jmethodID midNewWakeLock = env->GetMethodID(cPowerManager, "newWakeLock", "(ILjava/lang/String;)Landroid/os/PowerManager$WakeLock;");
-    jstring sXbmcPackage = env->NewStringUTF("org.xbmc.xbmc");
+    jstring sXbmcPackage = env->NewStringUTF("tv.ouya.xbmc");
     jobject oWakeLock = env->CallObjectMethod(oPowerManager, midNewWakeLock, (jint)0x1a /* FULL_WAKE_LOCK */, sXbmcPackage);
     m_wakeLock = env->NewGlobalRef(oWakeLock);
 

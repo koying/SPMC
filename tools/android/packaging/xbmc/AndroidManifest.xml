@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.xbmc.xbmc"
+    package="tv.ouya.xbmc"
     android:versionCode="9"
     android:versionName="12.2" >
 
