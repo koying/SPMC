@@ -129,7 +129,7 @@ void setup_env(struct android_app* state)
   {
     // Get the path to the internal storage
     // For more details see the comment on getting the path to the external storage
-    jstring sXbmcName = env->NewStringUTF("org.xbmc.xbmc");
+    jstring sXbmcName = env->NewStringUTF("tv.ouya.xbmc");
     jmethodID midActivityGetDir = env->GetMethodID(cActivity, "getDir", "(Ljava/lang/String;I)Ljava/io/File;");
     jobject oInternalDir = env->CallObjectMethod(oActivity, midActivityGetDir, sXbmcName, 1 /* MODE_WORLD_READABLE */);
     env->DeleteLocalRef(sXbmcName);

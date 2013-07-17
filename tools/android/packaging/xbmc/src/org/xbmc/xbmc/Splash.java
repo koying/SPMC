@@ -1,4 +1,4 @@
-package org.xbmc.xbmc;
+package tv.ouya.xbmc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -249,7 +249,7 @@ public class Splash extends Activity {
 				.getRunningTasks(Integer.MAX_VALUE);
 		for (RunningTaskInfo task : tasks)
 			if (task.topActivity.toString().equalsIgnoreCase(
-					"ComponentInfo{org.xbmc.xbmc/android.app.NativeActivity}")) {
+					"ComponentInfo{tv.ouya.xbmc/android.app.NativeActivity}")) {
 				// XBMC already running; just activate it
 				startXBMC();
 				return;
