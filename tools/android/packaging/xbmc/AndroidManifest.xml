@@ -2,8 +2,8 @@
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tv.ouya.xbmc"
-    android:versionCode="120201"
-    android:versionName="12.2.1" >
+    android:versionCode="120300"
+    android:versionName="12.3.0 (Ouya)" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
