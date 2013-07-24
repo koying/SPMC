@@ -2128,6 +2128,9 @@ bool CLinuxRendererGLES::Supports(EDEINTERLACEMODE mode)
   if(m_renderMethod & RENDER_OMXEGL)
     return false;
 
+  if(m_renderMethod & RENDER_EGLIMG)
+    return false;
+
   if(m_renderMethod & RENDER_CVREF)
     return false;
 
