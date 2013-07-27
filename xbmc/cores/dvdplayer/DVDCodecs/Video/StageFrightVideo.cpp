@@ -326,7 +326,7 @@ public:
           continue;
         }  
 
-        android::GraphicBuffer* graphicBuffer = static_cast<android::GraphicBuffer*>(frame->medbuf->graphicBuffer().get() );
+        ANativeWindowBuffer* graphicBuffer = frame->medbuf->graphicBuffer()->getNativeBuffer();
         native_window_set_buffers_timestamp(p->natwin.get(), frame->pts * 1000);
         int err = p->natwin.get()->queueBuffer(p->natwin.get(), graphicBuffer);
         if (err == 0)
