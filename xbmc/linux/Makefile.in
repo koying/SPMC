@@ -20,6 +20,13 @@ SRCS += OMXClock.cpp
 SRCS += OMXCore.cpp
 endif
 
+ifeq (@USE_EXYNOS4@,1)
+SRCS += LinuxV4l2.cpp
+endif
+ifeq (@USE_EXYNOS5@,1)
+SRCS += LinuxV4l2.cpp
+endif
+
 LIB = linux.a
 
 include @abs_top_srcdir@/Makefile.include

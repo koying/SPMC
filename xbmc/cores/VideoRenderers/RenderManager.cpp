@@ -896,6 +896,10 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   {
     CDVDCodecUtils::CopyNV12Picture(&image, &pic);
   }
+  else if(pic.format == RENDER_FMT_NV12MT)
+  {
+    CDVDCodecUtils::CopyNV12MTPicture(&image, &pic);
+  }
   else if(pic.format == RENDER_FMT_YUYV422
        || pic.format == RENDER_FMT_UYVY422)
   {

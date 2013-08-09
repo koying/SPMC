@@ -36,6 +36,7 @@ public:
   static DVDVideoPicture* ConvertToNV12Picture(DVDVideoPicture *pSrc);
   static DVDVideoPicture* ConvertToYUV422PackedPicture(DVDVideoPicture *pSrc, ERenderFormat format);
   static bool CopyNV12Picture(YV12Image* pImage, DVDVideoPicture *pSrc);
+  static bool CopyNV12MTPicture(YV12Image* pImage, DVDVideoPicture *pSrc); 
   static bool CopyYUV422PackedPicture(YV12Image* pImage, DVDVideoPicture *pSrc);
   static bool CopyDXVA2Picture(YV12Image* pImage, DVDVideoPicture *pSrc);
 

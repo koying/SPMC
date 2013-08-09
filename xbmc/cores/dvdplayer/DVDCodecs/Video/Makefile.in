@@ -27,6 +27,12 @@ endif
 ifeq (@USE_IMXVPU@,1)
 SRCS += DVDVideoCodecIMX.cpp 
 endif
+ifeq (@USE_EXYNOS4@,1)
+SRCS += DVDVideoCodecExynos4.cpp
+endif
+ifeq (@USE_EXYNOS5@,1)
+SRCS += DVDVideoCodecExynos5.cpp
+endif
 ifeq (@USE_LIBAMCODEC@,1)
 SRCS += AMLCodec.cpp
 SRCS += DVDVideoCodecAmlogic.cpp

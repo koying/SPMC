@@ -984,6 +984,7 @@ static std::string GetRenderFormatName(ERenderFormat format)
     case RENDER_FMT_YUV420P16: return "YV12P16";
     case RENDER_FMT_YUV420P10: return "YV12P10";
     case RENDER_FMT_NV12:      return "NV12";
+    case RENDER_FMT_NV12MT:    return "NV12MT";
     case RENDER_FMT_UYVY422:   return "UYVY";
     case RENDER_FMT_YUYV422:   return "YUY2";
     case RENDER_FMT_VDPAU:     return "VDPAU";
@@ -1250,6 +1251,7 @@ void CDVDPlayerVideo::AutoCrop(DVDVideoPicture *pPicture)
 {
   if ((pPicture->format == RENDER_FMT_YUV420P) ||
      (pPicture->format == RENDER_FMT_NV12) ||
+     (pPicture->format == RENDER_FMT_NV12MT) ||
      (pPicture->format == RENDER_FMT_YUYV422) ||
      (pPicture->format == RENDER_FMT_UYVY422))
   {
