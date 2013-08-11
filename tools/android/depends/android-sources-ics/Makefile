@@ -1,5 +1,5 @@
 include ../Makefile.include
-DEPS= ../Makefile.include Makefile 
+DEPS= ../Makefile.include Makefile
 INCLUDES += -I$(PREFIX)/opt/android-source/frameworks/base/include
 INCLUDES += -I$(PREFIX)/opt/android-source/frameworks/base/native/include
 INCLUDES += -I$(PREFIX)/opt/android-source/frameworks/base/include/media/stagefright
@@ -10,20 +10,23 @@ INCLUDES += -I$(PREFIX)/opt/android-source/libhardware/include
 ANDROID_VERSION=ics-mr0
 ANDROID_SOURCE=android-source
 ANDROID_LIBS=android-libs
+ARCHIVE=$(ANDROID_SOURCE)-$(ANDROID_VERSION)-extract.tar.gz
 
 all: .installed-$(PLATFORM)
 
 .installed-$(PLATFORM): install-sources $(ANDROID_LIBS)
-	rm -rf $(PREFIX)/opt/$(ANDROID_LIBS)
-	mkdir -p $(PREFIX)/opt/$(ANDROID_LIBS)
-	cp $(PLATFORM)/libstagefright.so $(PLATFORM)/libutils.so $(PLATFORM)/libbinder.so  $(PLATFORM)/libcutils.so $(PLATFORM)/libui.so $(PLATFORM)/libgui.so $(PREFIX)/opt/$(ANDROID_LIBS)
 	touch $@
 
-$(ANDROID_SOURCE):
+$(ANDROID_SOURCE): $(TARBALLS_LOCATION)/$(ARCHIVE)
+	cd $(CURDIR)
+#	git clone --depth=1 --branch $(ANDROID_VERSION) https://android.googlesource.com/platform/frameworks/base $(ANDROID_SOURCE)/frameworks/base
+#	git clone --depth=1 --branch $(ANDROID_VERSION) https://android.googlesource.com/platform/system/core $(ANDROID_SOURCE)/system/core
+#	git clone --depth=1 --branch $(ANDROID_VERSION) https://android.googlesource.com/platform/hardware/libhardware $(ANDROID_SOURCE)/libhardware
+	$(ARCHIVE_TOOL) -xf $(TARBALLS_LOCATION)/$(ARCHIVE)
+
+$(TARBALLS_LOCATION)/$(ARCHIVE):
 	echo "Fetching Android system headers"
-	git clone --depth=1 --branch $(ANDROID_VERSION) https://android.googlesource.com/platform/frameworks/base $(ANDROID_SOURCE)/frameworks/base
-	git clone --depth=1 --branch $(ANDROID_VERSION) https://android.googlesource.com/platform/system/core $(ANDROID_SOURCE)/system/core
-	git clone --depth=1 --branch $(ANDROID_VERSION) https://android.googlesource.com/platform/hardware/libhardware $(ANDROID_SOURCE)/libhardware
+	cd $(TARBALLS_LOCATION); $(RETRIEVE_TOOL) -Ls -f "http://www.semperpax.be/owncloud/public.php?service=files&t=62797c6fe0910eb3237cb2799a348ca9&download" -o $(TARBALLS_LOCATION)/$(ARCHIVE)
 
 install-sources: $(ANDROID_SOURCE)
 	mkdir -p $(PREFIX)/opt
@@ -32,6 +35,7 @@ install-sources: $(ANDROID_SOURCE)
 
 $(ANDROID_LIBS): $(PLATFORM)/libstagefright.so $(PLATFORM)/libutils.so $(PLATFORM)/libbinder.so $(PLATFORM)/libcutils.so $(PLATFORM)/libui.so $(PLATFORM)/libgui.so
 	mkdir -p $(PREFIX)/opt/$(ANDROID_LIBS)
+	rm -f $(PREFIX)/opt/$(ANDROID_LIBS)/*
 	cp $(PLATFORM)/libstagefright.so $(PLATFORM)/libutils.so $(PLATFORM)/libbinder.so  $(PLATFORM)/libcutils.so $(PLATFORM)/libui.so $(PLATFORM)/libgui.so $(PREFIX)/opt/$(ANDROID_LIBS)
 
 $(PLATFORM): install-sources
@@ -39,7 +43,7 @@ $(PLATFORM): install-sources
 
 $(PLATFORM)/libstagefright.so:  $(PLATFORM) $(DEPS) libstagefright.cpp
 	$(CXX) -Wno-multichar -fno-exceptions -fno-rtti $(INCLUDES) -DHAVE_PTHREADS -shared -o $(PLATFORM)/libstagefright.so libstagefright.cpp
-	
+
 $(PLATFORM)/libutils.so:  $(PLATFORM) $(DEPS) libutils.cpp
 	$(CXX) -Wno-multichar -fno-exceptions -fno-rtti $(INCLUDES) -shared -o $(PLATFORM)/libutils.so libutils.cpp
 
