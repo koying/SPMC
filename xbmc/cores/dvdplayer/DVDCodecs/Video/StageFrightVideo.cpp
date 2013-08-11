@@ -299,10 +299,11 @@ public:
       else
       {
         CLog::Log(LOGERROR, "%s - decoding error (%d)\n", CLASSNAME,frame->status);
-        decode_done   = 1;
         if (frame->medbuf)
           frame->medbuf->release();
         frame->medbuf = NULL;
+        free(frame);
+        continue;
       }
 
       if (frame->format == RENDER_FMT_EGLIMG)
@@ -686,7 +687,7 @@ bool CStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
     p->prev_frame = NULL;
   }
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::ClearPicture (%d)\n", CLASSNAME, XbmcThreads::SystemClockMillis() - time);
+  CLog::Log(LOGDEBUG, "%s::ClearPicture img:%p (%d)\n", CLASSNAME, pDvdVideoPicture->eglimg, XbmcThreads::SystemClockMillis() - time);
 #endif
 
   return true;
@@ -971,7 +972,7 @@ void CStageFrightVideo::ReleaseBuffer(EGLImageKHR eglimg)
     return;
   }
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "Unlocking %p: tm:%d\n", eglimg, XbmcThreads::SystemClockMillis() - time);
+  CLog::Log(LOGDEBUG, "Unlocking %p: cnt:%d tm:%d\n", eglimg, cnt, XbmcThreads::SystemClockMillis() - time);
 #endif
 
   if (cnt==1)
