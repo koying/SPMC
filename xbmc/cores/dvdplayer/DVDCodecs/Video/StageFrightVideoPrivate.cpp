@@ -63,6 +63,9 @@ CStageFrightVideoPrivate::CStageFrightVideoPrivate()
     eglDestroyImageKHR = (PFNEGLDESTROYIMAGEKHRPROC) CEGLWrapper::GetProcAddress("eglDestroyImageKHR");
   if (!glEGLImageTargetTexture2DOES)
     glEGLImageTargetTexture2DOES = (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC) CEGLWrapper::GetProcAddress("glEGLImageTargetTexture2DOES");
+
+  for (int i=0; i<INBUFCOUNT; ++i)
+    inbuf[i] = NULL;
 }
 
 void CStageFrightVideoPrivate::signalBufferReturned(MediaBuffer *buffer)
