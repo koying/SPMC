@@ -532,7 +532,7 @@ bool CPluginDirectory::WaitOnScriptResult(const CStdString &scriptPath, int scri
       cancelled = true;
       startTime = XbmcThreads::SystemClockMillis();
     }
-    if (cancelled && XbmcThreads::SystemClockMillis() - startTime > timeToKillScript)
+    if ((cancelled && XbmcThreads::SystemClockMillis() - startTime > timeToKillScript) || g_application.m_bStop)
     { // cancel our script
 #ifdef HAS_PYTHON
       if (scriptId != -1 && g_pythonParser.isRunning(scriptId))
