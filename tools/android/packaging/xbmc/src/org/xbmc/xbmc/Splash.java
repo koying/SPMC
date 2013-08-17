@@ -233,7 +233,7 @@ public class Splash extends Activity {
 	protected void startXBMC() {
 		// Run XBMC
 		Intent intent = new Intent();
-		intent.setClass(this, android.app.NativeActivity.class);
+		intent.setClass(this, tv.ouya.xbmc.Main.class);
 		startActivity(intent);
 		finish();
 	}
@@ -249,7 +249,7 @@ public class Splash extends Activity {
 				.getRunningTasks(Integer.MAX_VALUE);
 		for (RunningTaskInfo task : tasks)
 			if (task.topActivity.toString().equalsIgnoreCase(
-					"ComponentInfo{tv.ouya.xbmc/android.app.NativeActivity}")) {
+					"ComponentInfo{tv.ouya.xbmc/tv.ouya.xbmc.Main}")) {
 				// XBMC already running; just activate it
 				startXBMC();
 				return;
