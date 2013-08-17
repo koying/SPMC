@@ -21,12 +21,31 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <dlfcn.h>
+#include <errno.h>
 
 #include <android_native_app_glue.h>
 #include <jni.h>
 
 #include "EventLoop.h"
 #include "XBMCApp.h"
+
+// copied from new android_native_app_glue.c
+static void process_input(struct android_app* app, struct android_poll_source* source) {
+    AInputEvent* event = NULL;
+    int processed = 0;
+    while (AInputQueue_getEvent(app->inputQueue, &event) >= 0) {
+        if (AInputQueue_preDispatchEvent(app->inputQueue, event)) {
+            continue;
+        }
+        int32_t handled = 0;
+        if (app->onInputEvent != NULL) handled = app->onInputEvent(app, event);
+        AInputQueue_finishEvent(app->inputQueue, event, handled);
+        processed = 1;
+    }
+    if (processed == 0) {
+        CXBMCApp::android_printf("process_input: Failure reading next input event: %s", strerror(errno));
+    }
+}
 
 void setup_env(struct android_app* state)
 {
@@ -159,6 +178,13 @@ extern void android_main(struct android_app* state)
   app_dummy();
 
   setup_env(state);
+
+  // revector inputPollSource.process so we can shut up
+  // its useless verbose logging on new events (see ouya)
+  // and fix the error in handling multiple input events.
+  // see https://code.google.com/p/android/issues/detail?id=41755
+  state->inputPollSource.process = process_input;
+
   CEventLoop eventLoop(state);
   CXBMCApp xbmcApp(state->activity);
   if (xbmcApp.isValid())
