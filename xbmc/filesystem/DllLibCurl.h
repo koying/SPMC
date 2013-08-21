@@ -76,7 +76,7 @@ namespace XCURL
     DEFINE_METHOD1(void, multi_cleanup, (CURLM *p1))
     DEFINE_METHOD2(struct curl_slist*, slist_append, (struct curl_slist * p1, const char * p2))
     DEFINE_METHOD1(void, slist_free_all, (struct curl_slist * p1))
-#ifdef HAVE_OPENSSL
+#if defined(TARGET_ANDROID) || defined(TARGET_DARWIN_OSX) || defined(TARGET_DARWIN_IOS)
     DEFINE_METHOD1(void, crypto_set_id_callback, (unsigned long (*p1)(void)))
     DEFINE_METHOD1(void, crypto_set_locking_callback, (void (*p1)(int, int, const char *, int)))
 #endif
@@ -100,7 +100,7 @@ namespace XCURL
       RESOLVE_METHOD_RENAME(curl_multi_cleanup, multi_cleanup)
       RESOLVE_METHOD_RENAME(curl_slist_append, slist_append)
       RESOLVE_METHOD_RENAME(curl_slist_free_all, slist_free_all)
-#ifdef HAVE_OPENSSL
+#if defined(TARGET_ANDROID) || defined(TARGET_DARWIN_OSX) || defined(TARGET_DARWIN_IOS)
       RESOLVE_METHOD_RENAME(CRYPTO_set_id_callback, crypto_set_id_callback)
       RESOLVE_METHOD_RENAME(CRYPTO_set_locking_callback, crypto_set_locking_callback)
 #endif

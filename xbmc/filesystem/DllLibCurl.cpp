@@ -84,7 +84,7 @@ bool DllLibCurlGlobal::Load()
   /* check idle will clean up the last one */
   g_curlReferences = 2;
 
-#ifdef HAVE_OPENSSL
+#if defined(TARGET_ANDROID) || defined(TARGET_DARWIN_OSX) || defined(TARGET_DARWIN_IOS)
   // Initialize ssl locking array
   int i;
  
@@ -111,7 +111,7 @@ void DllLibCurlGlobal::Unload()
     // close libcurl
     global_cleanup();
 
-#ifdef HAVE_OPENSSL
+#if defined(TARGET_ANDROID) || defined(TARGET_DARWIN_OSX) || defined(TARGET_DARWIN_IOS)
     // Cleanup ssl locking array
     int i;
  
