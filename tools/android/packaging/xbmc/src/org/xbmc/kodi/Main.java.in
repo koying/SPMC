@@ -198,6 +198,16 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     manager.unregisterInputDeviceListener(mInputDeviceListener);
 
     getApplicationContext().getContentResolver().unregisterContentObserver(mSettingsContentObserver);
+    new Thread() {
+      public void run()
+      {
+        try
+        {
+          sleep(1000);
+          android.os.Process.killProcess(android.os.Process.myPid());
+        } catch (Exception e) {}
+      }
+    }.start();
     super.onDestroy();
   }
   
