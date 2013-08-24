@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2012 Team XBMC
+ *      Copyright (C) 2012-2013 Team XBMC
  *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -151,6 +151,9 @@ bool CAndroidKey::onKeyboardEvent(AInputEvent* event)
   int32_t flags = AKeyEvent_getFlags(event);
   int32_t state = AKeyEvent_getMetaState(event);
   int32_t repeatCount = AKeyEvent_getRepeatCount(event);
+
+  CXBMCApp::android_printf("CXBMCApp: key event (code: %d; repeat: %d; flags: 0x%0X; state: %d; device:%d, src:%d)", 
+    keycode, repeatCount, flags, AKeyEvent_getAction(event), AInputEvent_getDeviceId(event), AInputEvent_getSource(event));
 
   // Check if we got some special key
   uint16_t sym = XBMCK_UNKNOWN;
