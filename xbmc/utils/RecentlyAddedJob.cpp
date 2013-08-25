@@ -55,11 +55,21 @@ bool CRecentlyAddedJob::UpdateVideo()
   CFileItemList  items;
   CVideoDatabase videodatabase;
   CVideoThumbLoader loader;
+  CStdString path;
+
   loader.Initialize();
   
-  videodatabase.Open();
+  path = g_advancedSettings.m_recentlyAddedMoviePath;
+  if (g_advancedSettings.m_iVideoLibraryRecentlyAddedUnseen)
+  {
+    CVideoDbUrl url;
+    url.FromString(path);
+    url.AddOption("filter", "{\"type\":\"movies\", \"rules\":[{\"field\":\"playcount\", \"operator\":\"is\", \"value\":\"0\"}]}");
+    path = url.ToString();
+  }
 
-  if (videodatabase.GetRecentlyAddedMoviesNav(g_advancedSettings.m_recentlyAddedMoviePath, items, NUM_ITEMS))
+  videodatabase.Open();
+  if (videodatabase.GetRecentlyAddedMoviesNav(path, items, NUM_ITEMS))
   {  
     for (; i < items.Size(); ++i)
     {
@@ -101,8 +111,17 @@ bool CRecentlyAddedJob::UpdateVideo()
  
   i = 0;
   CFileItemList  TVShowItems; 
- 
-  if (videodatabase.GetRecentlyAddedEpisodesNav(g_advancedSettings.m_recentlyAddedEpisodePath, TVShowItems, NUM_ITEMS))
+
+  path = g_advancedSettings.m_recentlyAddedEpisodePath;
+  if (g_advancedSettings.m_iVideoLibraryRecentlyAddedUnseen)
+  {
+    CVideoDbUrl url;
+    url.FromString(path);
+    url.AddOption("filter", "{\"type\":\"episodes\", \"rules\":[{\"field\":\"playcount\", \"operator\":\"is\", \"value\":\"0\"}]}");
+    path = url.ToString();
+  }
+
+  if (videodatabase.GetRecentlyAddedEpisodesNav(path, TVShowItems, NUM_ITEMS))
   {
     for (; i < TVShowItems.Size(); ++i)
     {    
@@ -161,7 +180,16 @@ bool CRecentlyAddedJob::UpdateVideo()
   i = 0;
   CFileItemList MusicVideoItems;
 
-  if (videodatabase.GetRecentlyAddedMusicVideosNav(g_advancedSettings.m_recentlyAddedMusicVideoPath, MusicVideoItems, NUM_ITEMS))
+  path = g_advancedSettings.m_recentlyAddedMusicVideoPath;
+  if (g_advancedSettings.m_iVideoLibraryRecentlyAddedUnseen)
+  {
+    CVideoDbUrl url;
+    url.FromString(path);
+    url.AddOption("filter", "{\"type\":\"musicvideos\", \"rules\":[{\"field\":\"playcount\", \"operator\":\"is\", \"value\":\"0\"}]}");
+    path = url.ToString();
+  }
+
+  if (videodatabase.GetRecentlyAddedMusicVideosNav(path, MusicVideoItems, NUM_ITEMS))
   {
     for (; i < MusicVideoItems.Size(); ++i)
     {
