@@ -56,6 +56,7 @@
 #include "pvr/PVRManager.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "windowing/WindowingFactory.h"
+#include "filesystem/File.h"
 
 #include <stdio.h>
 #include <algorithm>
@@ -707,8 +708,13 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
       {
         CSingleLock lock (m_fontLock);
 
-        CStdString fontPath = "special://xbmc/media/Fonts/";
+        CStdString fontPath = "special://home/media/Fonts/";
         fontPath += g_guiSettings.GetString("subtitles.font");
+        if (!XFILE::CFile::Exists(fontPath))
+        {
+          fontPath = "special://xbmc/media/Fonts/";
+          fontPath += g_guiSettings.GetString("subtitles.font");
+        }
 
         // We scale based on PAL4x3 - this at least ensures all sizing is constant across resolutions.
         RESOLUTION_INFO pal(720, 576, 0);
