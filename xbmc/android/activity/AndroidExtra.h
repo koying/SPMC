@@ -24,7 +24,12 @@
  //Additional defines from android.view.KeyEvent (http://developer.android.com/reference/android/view/KeyEvent.html)
 #define AKEYCODE_ESCAPE 111
 #define AKEYCODE_FORWARD_DEL 112
- 
+#define AKEYCODE_CTRL_LEFT 113
+#define AKEYCODE_CTRL_RIGHT 114
+#define AKEYCODE_CAPS_LOCK 115
+#define AKEYCODE_SCROLL_LOCK 116
+#define AKEYCODE_INSERT 124
+
 //Additional defines from android.view.InputDevice (http://developer.android.com/reference/android/view/InputDevice.html)
 #define AINPUT_SOURCE_GAMEPAD 0x00000400
 #define AINPUT_SOURCE_JOYSTICK 0x01000010
