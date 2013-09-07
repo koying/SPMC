@@ -143,7 +143,10 @@ static KeyMap keyMap[] = {
   { AKEYCODE_CTRL_LEFT       , XBMCK_LCTRL },
   { AKEYCODE_CTRL_RIGHT      , XBMCK_RCTRL },
   { AKEYCODE_SCROLL_LOCK     , XBMCK_SCROLLOCK },
-  { AKEYCODE_INSERT          , XBMCK_INSERT }
+  { AKEYCODE_INSERT          , XBMCK_INSERT },
+  { AKEYCODE_FORWARD         , XBMCK_FASTFORWARD },
+  { AKEYCODE_MEDIA_PLAY      , XBMCK_MEDIA_PLAY_PAUSE },
+  { AKEYCODE_MEDIA_EJECT     , XBMCK_EJECT },
 };
 
 bool CAndroidKey::onKeyboardEvent(AInputEvent* event)
