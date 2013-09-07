@@ -29,6 +29,9 @@
 #define AKEYCODE_CAPS_LOCK 115
 #define AKEYCODE_SCROLL_LOCK 116
 #define AKEYCODE_INSERT 124
+#define AKEYCODE_FORWARD 125
+#define AKEYCODE_MEDIA_PLAY 126
+#define AKEYCODE_MEDIA_EJECT 129
 
 //Additional defines from android.view.InputDevice (http://developer.android.com/reference/android/view/InputDevice.html)
 #define AINPUT_SOURCE_GAMEPAD 0x00000400
