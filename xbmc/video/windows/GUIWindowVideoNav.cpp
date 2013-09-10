@@ -123,7 +123,7 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
       m_rootDir.AllowNonLocalSources(false);
 
       SetProperty("flattened", CSettings::Get().GetBool("myvideos.flatten"));
-      if (message.GetNumStringParams() && message.GetStringParam(0).Equals("Files") &&
+      if (message.GetNumStringParams() && message.GetStringParam(0).Equals("Sources") &&
           CMediaSourceSettings::Get().GetSources("video")->empty())
       {
         message.SetStringParam("");
@@ -259,7 +259,7 @@ CStdString CGUIWindowVideoNav::GetQuickpathName(const CStdString& strPath) const
   else if (path.Equals("special://videoplaylists/"))
     return "Playlists";
   else if (path.Equals("sources://video/"))
-    return "Files";
+    return "Sources";
   else
   {
     CLog::Log(LOGERROR, "  CGUIWindowVideoNav::GetQuickpathName: Unknown parameter (%s)", strPath.c_str());
@@ -560,7 +560,7 @@ void CGUIWindowVideoNav::UpdateButtons()
     URIUtils::Split(m_vecItems->GetPath(), strDummy, strLabel);
   }
   else if (m_vecItems->GetPath().Equals("sources://video/"))
-    strLabel = g_localizeStrings.Get(744);
+    strLabel = g_localizeStrings.Get(752);
   // everything else is from a videodb:// path
   else if (m_vecItems->IsVideoDb())
   {
@@ -1141,6 +1141,8 @@ CStdString CGUIWindowVideoNav::GetStartFolder(const CStdString &dir)
     return "videodb://recentlyaddedepisodes/";
   else if (dir.Equals("RecentlyAddedMusicVideos"))
     return "videodb://recentlyaddedmusicvideos/";
+  else if (dir.Equals("Sources"))
+    return "sources://video/";
   else if (dir.Equals("Files"))
     return "sources://video/";
   return CGUIWindowVideoBase::GetStartFolder(dir);

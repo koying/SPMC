@@ -738,9 +738,9 @@ void CGUIDialogContextMenu::SwitchMedia(const CStdString& strType, const CStdStr
   // create menu
   CContextButtons choices;
   if (!strType.Equals("music"))
-    choices.Add(WINDOW_MUSIC_FILES, 2);
+    choices.Add(WINDOW_MUSIC_SOURCES, 2);
   if (!strType.Equals("video"))
-    choices.Add(WINDOW_VIDEO_FILES, 3);
+    choices.Add(WINDOW_VIDEO_SOURCES, 3);
   if (!strType.Equals("pictures"))
     choices.Add(WINDOW_PICTURES, 1);
   if (!strType.Equals("files"))

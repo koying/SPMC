@@ -270,7 +270,8 @@ static const ActionMapping actions[] =
 };
 
 static const ActionMapping windows[] =
-       {{"home"                     , WINDOW_HOME},
+{
+        {"home"                     , WINDOW_HOME},
         {"programs"                 , WINDOW_PROGRAMS},
         {"pictures"                 , WINDOW_PICTURES},
         {"filemanager"              , WINDOW_FILES},
@@ -310,7 +311,7 @@ static const ActionMapping windows[] =
         {"pvrsettings"              , WINDOW_SETTINGS_MYPVR},
         {"tvsettings"               , WINDOW_SETTINGS_MYPVR},  // backward compat
         {"scripts"                  , WINDOW_PROGRAMS}, // backward compat
-        {"videofiles"               , WINDOW_VIDEO_FILES},
+        {"videosources"             , WINDOW_VIDEO_SOURCES},
         {"videolibrary"             , WINDOW_VIDEO_NAV},
         {"videoplaylist"            , WINDOW_VIDEO_PLAYLIST},
         {"loginscreen"              , WINDOW_LOGIN_SCREEN},
@@ -357,7 +358,7 @@ static const ActionMapping windows[] =
         {"addoninformation"         , WINDOW_DIALOG_ADDON_INFO},
         {"subtitlesearch"           , WINDOW_DIALOG_SUBTITLES},
         {"musicplaylist"            , WINDOW_MUSIC_PLAYLIST},
-        {"musicfiles"               , WINDOW_MUSIC_FILES},
+        {"musicsources"             , WINDOW_MUSIC_SOURCES},
         {"musiclibrary"             , WINDOW_MUSIC_NAV},
         {"musicplaylisteditor"      , WINDOW_MUSIC_PLAYLIST_EDITOR},
         {"teletext"                 , WINDOW_DIALOG_OSD_TELETEXT},
@@ -385,7 +386,8 @@ static const ActionMapping windows[] =
         {"peripheralsettings"       , WINDOW_DIALOG_PERIPHERAL_SETTINGS},
         {"extendedprogressdialog"   , WINDOW_DIALOG_EXT_PROGRESS},
         {"mediafilter"              , WINDOW_DIALOG_MEDIA_FILTER},
-        {"addon"                    , WINDOW_ADDON_START}};
+        {"addon"                    , WINDOW_ADDON_START},
+};
 
 static const ActionMapping mousecommands[] =
 {

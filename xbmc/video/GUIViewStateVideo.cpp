@@ -83,12 +83,12 @@ CGUIViewStateWindowVideoFiles::CGUIViewStateWindowVideoFiles(const CFileItemList
     SetViewAsControl(viewState->m_viewMode);
     SetSortOrder(viewState->m_sortDescription.sortOrder);
   }
-  LoadViewState(items.GetPath(), WINDOW_VIDEO_FILES);
+  LoadViewState(items.GetPath(), WINDOW_VIDEO_SOURCES);
 }
 
 void CGUIViewStateWindowVideoFiles::SaveViewState()
 {
-  SaveViewToDb(m_items.GetPath(), WINDOW_VIDEO_FILES, CViewStateSettings::Get().Get("videofiles"));
+  SaveViewToDb(m_items.GetPath(), WINDOW_VIDEO_SOURCES, CViewStateSettings::Get().Get("videofiles"));
 }
 
 VECSOURCES& CGUIViewStateWindowVideoFiles::GetSources()

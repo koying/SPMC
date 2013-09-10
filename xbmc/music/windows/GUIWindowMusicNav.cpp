@@ -245,6 +245,10 @@ CStdString CGUIWindowMusicNav::GetQuickpathName(const CStdString& strPath) const
     return "Singles";
   else if (path.Equals("special://musicplaylists/"))
     return "Playlists";
+  else if (path.Equals("sources://music/"))
+    return "Sources";
+  else if (path.Equals("locations://music@"))
+    return "Locations";
   else
   {
     CLog::Log(LOGERROR, "  CGUIWindowMusicNav::GetQuickpathName: Unknown parameter (%s)", strPath.c_str());
@@ -883,5 +887,9 @@ CStdString CGUIWindowMusicNav::GetStartFolder(const CStdString &dir)
     return "musicdb://compilations/";
   else if (dir.Equals("Years"))
     return "musicdb://years/";
+  else if (dir.Equals("Sources"))
+    return "sources://music/";
+  else if (dir.Equals("Files"))
+    return "locations://music@";
   return CGUIWindowMusicBase::GetStartFolder(dir);
 }

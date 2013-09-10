@@ -3012,7 +3012,11 @@ msgctxt "#751"
 msgid "Removing source"
 msgstr ""
 
-#empty strings from id 752 to 753
+msgctxt "#752"
+msgid "Sources"
+msgstr ""
+
+#empty strings from id 753 to 753
 
 msgctxt "#754"
 msgid "Add program link"

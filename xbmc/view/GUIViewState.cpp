@@ -113,7 +113,7 @@ CGUIViewState* CGUIViewState::GetViewState(int windowId, const CFileItemList& it
   if (windowId==WINDOW_MUSIC_NAV)
     return new CGUIViewStateWindowMusicNav(items);
 
-  if (windowId==WINDOW_MUSIC_FILES)
+  if (windowId==WINDOW_MUSIC_SOURCES)
     return new CGUIViewStateWindowMusicSongs(items);
 
   if (windowId==WINDOW_MUSIC_PLAYLIST)
@@ -122,7 +122,7 @@ CGUIViewState* CGUIViewState::GetViewState(int windowId, const CFileItemList& it
   if (windowId==WINDOW_MUSIC_PLAYLIST_EDITOR)
     return new CGUIViewStateWindowMusicSongs(items);
 
-  if (windowId==WINDOW_VIDEO_FILES)
+  if (windowId==WINDOW_VIDEO_SOURCES)
     return new CGUIViewStateWindowVideoFiles(items);
 
   if (windowId==WINDOW_VIDEO_NAV)

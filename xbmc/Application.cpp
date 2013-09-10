@@ -3346,11 +3346,11 @@ bool CApplication::Cleanup()
   {
     g_windowManager.Delete(WINDOW_MUSIC_PLAYLIST);
     g_windowManager.Delete(WINDOW_MUSIC_PLAYLIST_EDITOR);
-    g_windowManager.Delete(WINDOW_MUSIC_FILES);
+    g_windowManager.Delete(WINDOW_MUSIC_SOURCES);
     g_windowManager.Delete(WINDOW_MUSIC_NAV);
     g_windowManager.Delete(WINDOW_DIALOG_MUSIC_INFO);
     g_windowManager.Delete(WINDOW_DIALOG_VIDEO_INFO);
-    g_windowManager.Delete(WINDOW_VIDEO_FILES);
+    g_windowManager.Delete(WINDOW_VIDEO_SOURCES);
     g_windowManager.Delete(WINDOW_VIDEO_PLAYLIST);
     g_windowManager.Delete(WINDOW_VIDEO_NAV);
     g_windowManager.Delete(WINDOW_FILES);

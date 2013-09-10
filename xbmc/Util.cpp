@@ -209,7 +209,7 @@ CStdString CUtil::GetTitleFromPath(const CStdString& strFileNameAndPath, bool bI
 
   // Root file views
   else if (url.GetProtocol() == "sources")
-    strFilename = g_localizeStrings.Get(744);
+    strFilename = g_localizeStrings.Get(752);
 
   // Music Playlists
   else if (StringUtils::StartsWithNoCase(path, "special://musicplaylists"))

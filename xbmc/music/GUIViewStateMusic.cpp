@@ -419,12 +419,12 @@ CGUIViewStateMusicPlaylist::CGUIViewStateMusicPlaylist(const CFileItemList& item
   SetViewAsControl(viewState->m_viewMode);
   SetSortOrder(viewState->m_sortDescription.sortOrder);
 
-  LoadViewState(items.GetPath(), WINDOW_MUSIC_FILES);
+  LoadViewState(items.GetPath(), WINDOW_MUSIC_SOURCES);
 }
 
 void CGUIViewStateMusicPlaylist::SaveViewState()
 {
-  SaveViewToDb(m_items.GetPath(), WINDOW_MUSIC_FILES);
+  SaveViewToDb(m_items.GetPath(), WINDOW_MUSIC_SOURCES);
 }
 
 CGUIViewStateWindowMusicNav::CGUIViewStateWindowMusicNav(const CFileItemList& items) : CGUIViewStateWindowMusic(items)
@@ -580,12 +580,12 @@ CGUIViewStateWindowMusicSongs::CGUIViewStateWindowMusicSongs(const CFileItemList
     SetViewAsControl(viewState->m_viewMode);
     SetSortOrder(viewState->m_sortDescription.sortOrder);
   }
-  LoadViewState(items.GetPath(), WINDOW_MUSIC_FILES);
+  LoadViewState(items.GetPath(), WINDOW_MUSIC_SOURCES);
 }
 
 void CGUIViewStateWindowMusicSongs::SaveViewState()
 {
-  SaveViewToDb(m_items.GetPath(), WINDOW_MUSIC_FILES, CViewStateSettings::Get().Get("musicfiles"));
+  SaveViewToDb(m_items.GetPath(), WINDOW_MUSIC_SOURCES, CViewStateSettings::Get().Get("musicfiles"));
 }
 
 VECSOURCES& CGUIViewStateWindowMusicSongs::GetSources()

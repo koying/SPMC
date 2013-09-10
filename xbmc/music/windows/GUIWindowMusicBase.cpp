@@ -169,7 +169,7 @@ bool CGUIWindowMusicBase::OnMessage(CGUIMessage& message)
         CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_BTNTYPE);
         g_windowManager.SendMessage(msg);
 
-        int nWindow = WINDOW_MUSIC_FILES + msg.GetParam1();
+        int nWindow = WINDOW_MUSIC_SOURCES + msg.GetParam1();
 
         if (nWindow == GetID())
           return true;
@@ -205,7 +205,7 @@ bool CGUIWindowMusicBase::OnMessage(CGUIMessage& message)
             OnDeleteItem(iItem);
 
           // or be at the files window and have file deletion enabled
-          else if (GetID() == WINDOW_MUSIC_FILES &&
+          else if (GetID() == WINDOW_MUSIC_SOURCES &&
                    CSettings::Get().GetBool("filelists.allowfiledeletion"))
           {
             OnDeleteItem(iItem);
@@ -683,14 +683,14 @@ void CGUIWindowMusicBase::UpdateButtons()
 
   // Add labels to the window selection
   CGUIMessage msg2(GUI_MSG_LABEL_ADD, GetID(), CONTROL_BTNTYPE);
-  msg2.SetLabel(g_localizeStrings.Get(744)); // Files
+  msg2.SetLabel(g_localizeStrings.Get(752)); // Files
   g_windowManager.SendMessage(msg2);
 
   msg2.SetLabel(g_localizeStrings.Get(15100)); // Library
   g_windowManager.SendMessage(msg2);
 
   // Select the current window as default item
-  CONTROL_SELECT_ITEM(CONTROL_BTNTYPE, CSettings::Get().GetInt("mymusic.startwindow") - WINDOW_MUSIC_FILES);
+  CONTROL_SELECT_ITEM(CONTROL_BTNTYPE, CSettings::Get().GetInt("mymusic.startwindow") - WINDOW_MUSIC_SOURCES);
 
   CGUIMediaWindow::UpdateButtons();
 }

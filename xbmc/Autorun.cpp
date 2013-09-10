@@ -390,7 +390,7 @@ bool CAutorun::RunDisc(IDirectory* pDir, const CStdString& strDrive, int& nAdded
         if (!bypassSettings)
           return false;
 
-        if (g_windowManager.GetActiveWindow() != WINDOW_VIDEO_FILES)
+        if (g_windowManager.GetActiveWindow() != WINDOW_VIDEO_SOURCES)
           if (!g_passwordManager.IsMasterLockUnlocked(true))
             return false;
       }

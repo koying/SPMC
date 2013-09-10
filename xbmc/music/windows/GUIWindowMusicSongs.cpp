@@ -56,7 +56,7 @@
 
 
 CGUIWindowMusicSongs::CGUIWindowMusicSongs(void)
-    : CGUIWindowMusicBase(WINDOW_MUSIC_FILES, "MyMusicSongs.xml")
+    : CGUIWindowMusicBase(WINDOW_MUSIC_SOURCES, "MyMusicSongs.xml")
 {
   m_vecItems->SetPath("?");
 

@@ -695,7 +695,7 @@ bool CGUIMediaWindow::GetDirectory(const CStdString &strDirectory, CFileItemList
   // TODO: Do we want to limit the directories we apply the video ones to?
   if (iWindow == WINDOW_VIDEO_NAV)
     regexps = g_advancedSettings.m_videoExcludeFromListingRegExps;
-  if (iWindow == WINDOW_MUSIC_FILES)
+  if (iWindow == WINDOW_MUSIC_SOURCES)
     regexps = g_advancedSettings.m_audioExcludeFromListingRegExps;
   if (iWindow == WINDOW_PICTURES)
     regexps = g_advancedSettings.m_pictureExcludeFromListingRegExps;
@@ -785,7 +785,7 @@ bool CGUIMediaWindow::Update(const CStdString &strDirectory, bool updateFilterPa
   {
     if (iWindow == WINDOW_PICTURES)
       showLabel = 997;
-    else if (iWindow == WINDOW_MUSIC_FILES)
+    else if (iWindow == WINDOW_MUSIC_SOURCES)
       showLabel = 998;
     else if (iWindow == WINDOW_FILES || iWindow == WINDOW_PROGRAMS)
       showLabel = 1026;

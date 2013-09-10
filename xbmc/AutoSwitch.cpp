@@ -48,14 +48,14 @@ int CAutoSwitch::GetView(const CFileItemList &vecItems)
 
   switch (iCurrentWindow)
   {
-  case WINDOW_MUSIC_FILES:
+  case WINDOW_MUSIC_SOURCES:
     {
       iSortMethod = METHOD_BYFOLDERTHUMBS;
       iPercent = 50;
     }
     break;
 
-  case WINDOW_VIDEO_FILES:
+  case WINDOW_VIDEO_SOURCES:
     {
       iSortMethod = METHOD_BYTHUMBPERCENT;
       iPercent = 50;  // 50% of thumbs -> use thumbs.

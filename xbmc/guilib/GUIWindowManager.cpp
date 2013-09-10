@@ -365,10 +365,10 @@ void CGUIWindowManager::ActivateWindow_Internal(int iWindowID, const vector<CStd
     iWindowID = CSettings::Get().GetInt("mymusic.startwindow");
     // ensure the music virtual window only returns music files and music library windows
     if (iWindowID != WINDOW_MUSIC_NAV)
-      iWindowID = WINDOW_MUSIC_FILES;
+      iWindowID = WINDOW_MUSIC_SOURCES;
   }
   // virtual video window which returns the last open video window (aka the video start window)
-  if (iWindowID == WINDOW_VIDEOS || iWindowID == WINDOW_VIDEO_FILES)
+  if (iWindowID == WINDOW_VIDEOS || iWindowID == WINDOW_VIDEO_SOURCES)
   { // backward compatibility for pre-Eden
     iWindowID = WINDOW_VIDEO_NAV;
   }

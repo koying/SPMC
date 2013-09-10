@@ -49,6 +49,7 @@
 #define WINDOW_VIDEO_FILES                10024
 #define WINDOW_VIDEO_NAV                  10025
 #define WINDOW_VIDEO_PLAYLIST             10028
+#define WINDOW_VIDEO_SOURCES              10030
 
 #define WINDOW_LOGIN_SCREEN               10029
 #define WINDOW_SETTINGS_PROFILES          10034
@@ -109,6 +110,7 @@
 #define WINDOW_MUSIC_FILES                10501
 #define WINDOW_MUSIC_NAV                  10502
 #define WINDOW_MUSIC_PLAYLIST_EDITOR      10503
+#define WINDOW_MUSIC_SOURCES              10504
 
 #define WINDOW_DIALOG_OSD_TELETEXT        10600
 

@@ -169,11 +169,11 @@ bool CGUIWindowVideoBase::OnMessage(CGUIMessage& message)
         g_windowManager.SendMessage(msg);
 
         int nSelected = msg.GetParam1();
-        int nNewWindow = WINDOW_VIDEO_FILES;
+        int nNewWindow = WINDOW_VIDEO_SOURCES;
         switch (nSelected)
         {
         case 0:  // Movies
-          nNewWindow = WINDOW_VIDEO_FILES;
+          nNewWindow = WINDOW_VIDEO_SOURCES;
           break;
         case 1:  // Library
           nNewWindow = WINDOW_VIDEO_NAV;
@@ -221,7 +221,7 @@ bool CGUIWindowVideoBase::OnMessage(CGUIMessage& message)
               OnDeleteItem(iItem);
 
             // or be at the files window and have file deletion enabled
-            else if (GetID() == WINDOW_VIDEO_FILES && CSettings::Get().GetBool("filelists.allowfiledeletion"))
+            else if (GetID() == WINDOW_VIDEO_SOURCES && CSettings::Get().GetBool("filelists.allowfiledeletion"))
               OnDeleteItem(iItem);
 
             // or be at the video playlists location
@@ -250,7 +250,7 @@ void CGUIWindowVideoBase::UpdateButtons()
   g_windowManager.SendMessage(msg);
 
   // Add labels to the window selection
-  CStdString strItem = g_localizeStrings.Get(744); // Files
+  CStdString strItem = g_localizeStrings.Get(752); // Files
   CGUIMessage msg2(GUI_MSG_LABEL_ADD, GetID(), CONTROL_BTNTYPE);
   msg2.SetLabel(strItem);
   g_windowManager.SendMessage(msg2);
@@ -260,7 +260,7 @@ void CGUIWindowVideoBase::UpdateButtons()
   g_windowManager.SendMessage(msg2);
 
   // Select the current window as default item
-  int nWindow = CSettings::Get().GetInt("myvideos.startwindow")-WINDOW_VIDEO_FILES;
+  int nWindow = CSettings::Get().GetInt("myvideos.startwindow")-WINDOW_VIDEO_SOURCES;
   CONTROL_SELECT_ITEM(CONTROL_BTNTYPE, nWindow);
   
   CGUIMediaWindow::UpdateButtons();
@@ -325,7 +325,7 @@ void CGUIWindowVideoBase::OnInfo(CFileItem* pItem, const ADDON::ScraperPtr& scra
 
   bool modified = ShowIMDB(&item, scraper);
   if (modified &&
-     (g_windowManager.GetActiveWindow() == WINDOW_VIDEO_FILES ||
+     (g_windowManager.GetActiveWindow() == WINDOW_VIDEO_SOURCES ||
       g_windowManager.GetActiveWindow() == WINDOW_VIDEO_NAV)) // since we can be called from the music library we need this check
   {
     int itemNumber = m_viewControl.GetSelectedItem();
