@@ -268,7 +268,8 @@ bool URIUtils::ProtocolHasEncodedHostname(const CStdString& prot)
 {
   return ProtocolHasParentInHostname(prot)
       || prot.Equals("musicsearch")
-      || prot.Equals("image");
+      || prot.Equals("image")
+      || prot.Equals("locations");
 }
 
 bool URIUtils::ProtocolHasEncodedFilename(const CStdString& prot)
@@ -750,6 +751,12 @@ bool URIUtils::IsSourcesPath(const CStdString& strPath)
 {
   CURL url(strPath);
   return url.GetProtocol().Equals("sources");
+}
+
+bool URIUtils::IsLocationsPath(const CStdString& strPath)
+{
+  CURL url(strPath);
+  return url.GetProtocol().Equals("locations");
 }
 
 bool URIUtils::IsCDDA(const CStdString& strFile)

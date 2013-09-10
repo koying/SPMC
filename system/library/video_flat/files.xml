@@ -2,5 +2,5 @@
 <node order="20" type="folder">
   <label>744</label>
   <icon>DefaultFolder.png</icon>
-  <path>sources://video</path>
+  <path>locations://video@</path>
 </node>

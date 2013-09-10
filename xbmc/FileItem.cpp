@@ -1083,6 +1083,11 @@ bool CFileItem::IsSourcesPath() const
   return URIUtils::IsSourcesPath(m_strPath);
 }
 
+bool CFileItem::IsLocationsPath() const
+{
+  return URIUtils::IsLocationsPath(m_strPath);
+}
+
 bool CFileItem::IsMultiPath() const
 {
   return URIUtils::IsMultiPath(m_strPath);
@@ -2318,7 +2323,7 @@ void CFileItemList::Stack(bool stackFiles /* = true */)
   CSingleLock lock(m_lock);
 
   // not allowed here
-  if (IsVirtualDirectoryRoot() || IsLiveTV() || IsSourcesPath())
+  if (IsVirtualDirectoryRoot() || IsLiveTV() || IsSourcesPath() || IsLocationsPath())
     return;
 
   SetProperty("isstacked", true);

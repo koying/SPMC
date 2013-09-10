@@ -82,6 +82,7 @@ public:
 
   static bool IsAddonsPath(const CStdString& strFile);
   static bool IsSourcesPath(const CStdString& strFile);
+  static bool IsLocationsPath(const CStdString& strFile);
   static bool IsCDDA(const CStdString& strFile);
   static bool IsDAAP(const CStdString& strFile);
   static bool IsDAV(const CStdString& strFile);

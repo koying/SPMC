@@ -241,6 +241,11 @@ TEST_F(TestURIUtils, IsSourcesPath)
   EXPECT_TRUE(URIUtils::IsSourcesPath("sources://path/to/sources"));
 }
 
+TEST_F(TestURIUtils, IsLocationsPath)
+{
+  EXPECT_TRUE(URIUtils::IsLocationsPath("locations://path/to/sources"));
+}
+
 TEST_F(TestURIUtils, IsCDDA)
 {
   EXPECT_TRUE(URIUtils::IsCDDA("cdda://path/to/cdda"));

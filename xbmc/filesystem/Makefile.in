@@ -40,6 +40,7 @@ SRCS += iso9660.cpp
 SRCS += ISO9660Directory.cpp
 SRCS += ISOFile.cpp
 SRCS += LibraryDirectory.cpp
+SRCS += LocationsDirectory.cpp
 SRCS += MemBufferCache.cpp
 SRCS += MultiPathDirectory.cpp
 SRCS += MultiPathFile.cpp

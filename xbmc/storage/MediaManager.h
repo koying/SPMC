@@ -62,6 +62,7 @@ public:
   void GetLocalDrives(VECSOURCES &localDrives, bool includeQ = true);
   void GetRemovableDrives(VECSOURCES &removableDrives);
   void GetNetworkLocations(VECSOURCES &locations, bool autolocations = true);
+  void GetAutoSources(VECSOURCES &autosources);
 
   bool AddNetworkLocation(const CStdString &path);
   bool HasLocation(const CStdString& path) const;
@@ -100,6 +101,7 @@ public:
   virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job) { }
 protected:
   std::vector<CNetworkLocation> m_locations;
+  VECSOURCES m_autosources;
 
   CCriticalSection m_muAutoSource, m_CritSecStorageProvider;
 #ifdef HAS_DVD_DRIVE

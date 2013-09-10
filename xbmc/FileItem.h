@@ -162,6 +162,7 @@ public:
   bool IsScript() const;
   bool IsAddonsPath() const;
   bool IsSourcesPath() const;
+  bool IsLocationsPath() const;
   bool IsNFO() const;
   bool IsDVDImage() const;
   bool IsOpticalMediaFile() const;

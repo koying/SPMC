@@ -223,6 +223,11 @@ void CMediaManager::GetNetworkLocations(VECSOURCES &locations, bool autolocation
   }
 }
 
+void CMediaManager::GetAutoSources(VECSOURCES &autosources)
+{
+  AddOrReplace(autosources, m_autosources);
+}
+
 bool CMediaManager::AddNetworkLocation(const CStdString &path)
 {
   CNetworkLocation location;
@@ -275,11 +280,7 @@ bool CMediaManager::SetLocationPath(const CStdString& oldPath, const CStdString&
 
 void CMediaManager::AddAutoSource(const CMediaSource &share, bool bAutorun)
 {
-  CMediaSourceSettings::Get().AddShare("files", share);
-  CMediaSourceSettings::Get().AddShare("video", share);
-  CMediaSourceSettings::Get().AddShare("pictures", share);
-  CMediaSourceSettings::Get().AddShare("music", share);
-  CMediaSourceSettings::Get().AddShare("programs", share);
+  m_autosources.push_back(share);
   CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_SOURCES);
   g_windowManager.SendThreadMessage( msg );
 
@@ -291,11 +292,14 @@ void CMediaManager::AddAutoSource(const CMediaSource &share, bool bAutorun)
 
 void CMediaManager::RemoveAutoSource(const CMediaSource &share)
 {
-  CMediaSourceSettings::Get().DeleteSource("files", share.strName, share.strPath, true);
-  CMediaSourceSettings::Get().DeleteSource("video", share.strName, share.strPath, true);
-  CMediaSourceSettings::Get().DeleteSource("pictures", share.strName, share.strPath, true);
-  CMediaSourceSettings::Get().DeleteSource("music", share.strName, share.strPath, true);
-  CMediaSourceSettings::Get().DeleteSource("programs", share.strName, share.strPath, true);
+  for (IVECSOURCES it = m_autosources.begin(); it != m_autosources.end(); it++)
+  {
+    if (it->strName == share.strName && it->strPath == share.strPath)
+    {
+      m_autosources.erase(it);
+      break;
+    }
+  }
   CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_SOURCES);
   g_windowManager.SendThreadMessage( msg );
 

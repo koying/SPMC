@@ -400,6 +400,7 @@
     <ClCompile Include="..\..\xbmc\filesystem\FileReaderFile.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\FTPDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\FTPParse.cpp" />
+    <ClCompile Include="..\..\xbmc\filesystem\LocationsDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\HDDirectory.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\HDFile.cpp" />
     <ClCompile Include="..\..\xbmc\filesystem\HDHomeRunDirectory.cpp" />
@@ -1001,6 +1002,7 @@
     <ClInclude Include="..\..\xbmc\DbUrl.h" />
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogMediaFilter.h" />
     <ClInclude Include="..\..\xbmc\FileItemListModification.h" />
+    <ClInclude Include="..\..\xbmc\filesystem\LocationsDirectory.h" />
     <ClInclude Include="..\..\xbmc\filesystem\HTTPFile.h" />
     <ClInclude Include="..\..\xbmc\filesystem\DAVCommon.h" />
     <ClInclude Include="..\..\xbmc\filesystem\DAVFile.h" />
