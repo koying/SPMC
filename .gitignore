@@ -1250,3 +1250,13 @@ lib/cpluff/stamp-h1
 /addons/library.xbmc.pvr/libXBMC_pvr.lib
 
 /pvr-addons
+
+# mine
+*.dll
+*.exe
+*.lnk
+*.log
+*.diff
+*.patch
+*~
+commit*
