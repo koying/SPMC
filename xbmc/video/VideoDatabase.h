@@ -690,6 +690,7 @@ public:
    */
   void UpdateFileDateAdded(int idFile, const std::string& strFileNameAndPath);
 
+  void ExportSingleVideoToXML(const std::string& inPath, bool images=false, bool overwrite=false, const std::string &outPath="");
   void ExportToXML(const std::string &path, bool singleFiles = false, bool images=false, bool actorThumbs=false, bool overwrite=false);
   bool ExportSkipEntry(const std::string &nfoFile);
   void ExportActorThumbs(const std::string &path, const CVideoInfoTag& tag, bool singleFiles, bool overwrite=false);
