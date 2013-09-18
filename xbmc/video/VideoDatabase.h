@@ -642,6 +642,7 @@ public:
    */
   void UpdateFileDateAdded(int idFile, const CStdString& strFileNameAndPath);
 
+  void ExportSingleVideoToXML(const CStdString& inPath, bool images=false, bool overwrite=false, const CStdString &outPath="");
   void ExportToXML(const CStdString &path, bool singleFiles = false, bool images=false, bool actorThumbs=false, bool overwrite=false);
   bool ExportSkipEntry(const CStdString &nfoFile);
   void ExportActorThumbs(const CStdString &path, const CVideoInfoTag& tag, bool singleFiles, bool overwrite=false);
