@@ -36,6 +36,7 @@
 #include "video/VideoInfoTag.h"
 #include "music/tags/MusicInfoTag.h"
 #include "utils/StringUtils.h"
+#include "video/VideoDatabase.h"
 
 #ifdef HAS_FILESYSTEM_RAR
 #include "filesystem/RarManager.h"
@@ -189,11 +190,11 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
           CVideoInfoTag* tag = pItem->GetVideoInfoTag();
           if (tag->m_type == "movie")
           {
-            strFileName.Format("%s (%d)", tag->m_strTitle, tag->m_iYear);
+            strFileName = StringUtils::Format("%s (%d)", tag->m_strTitle.c_str(), tag->m_iYear);
           }
           else if (tag->m_type == "episode")
           {
-            strFileName.Format("%s - S%dE%d - %s", tag->m_strShowTitle, tag->m_iSeason, tag->m_iEpisode, tag->m_strTitle);
+            strFileName = StringUtils::Format("%s - S%dE%d - %s", tag->m_strShowTitle.c_str(), tag->m_iSeason, tag->m_iEpisode, tag->m_strTitle.c_str());
           }
           else if (tag->m_type == "musicvideo")
           {
@@ -219,7 +220,7 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
         if (pItem->HasMusicInfoTag())
         {
           MUSIC_INFO::CMusicInfoTag* tag = pItem->GetMusicInfoTag();
-          strFileName.Format("%s - %s - %d - %s", StringUtils::Join(tag->m_artist, "+"), tag->m_strAlbum, tag->m_iTrack, tag->m_strTitle);
+          strFileName = StringUtils::Format("%s - %s - %d - %s", StringUtils::Join(tag->m_artist, "+").c_str(), tag->m_strAlbum.c_str(), tag->m_iTrack, tag->m_strTitle.c_str());
         } 
         else
           strFileName = pItem->GetLabel();
@@ -323,6 +324,13 @@ bool CFileOperationJob::CFileOperation::ExecuteOperation(CFileOperationJob *base
       CLog::Log(LOGDEBUG,"FileManager: copy %s -> %s\n", m_strFileA.c_str(), m_strFileB.c_str());
 
       bResult = CFile::Copy(m_strFileA, m_strFileB, this, &data);
+      if (bResult && URIUtils::IsVideoDb(m_strFileA))
+      {
+        // For VideoDb files, also export the metadata
+        CVideoDatabase videoDatabase;
+        if (videoDatabase.Open())
+          videoDatabase.ExportSingleVideoToXML(m_strFileA, true, true, m_strFileB);
+      }
     }
     break;
     case ActionMove:
