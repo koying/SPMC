@@ -28,6 +28,7 @@
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
+#include "filesystem/File.h"
 
 #ifdef TARGET_POSIX
 #include <dirent.h>
@@ -166,6 +167,23 @@ CStdString CSpecialProtocol::TranslatePath(const CURL &url)
       translatedPath = URIUtils::AddFileToFolder(basePath, FileName);
     else
       translatedPath.clear();
+  }
+  else if (RootDir.Equals("overlap"))
+  {
+    translatedPath.clear();
+    CStdString basePath = GetPath("home");
+    if (!basePath.empty())
+    {
+      translatedPath = URIUtils::AddFileToFolder(basePath, FileName);
+      if (!XFILE::CFile::Exists(translatedPath))
+        translatedPath.clear();
+    }
+    if (translatedPath.empty())
+    {
+      basePath = GetPath("xbmc");
+      if (!basePath.empty())
+       translatedPath = URIUtils::AddFileToFolder(basePath, FileName);
+    }
   }
 
   // check if we need to recurse in

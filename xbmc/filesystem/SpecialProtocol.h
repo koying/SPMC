@@ -31,6 +31,7 @@
                              Linux: ~/.xbmc/
                              OS X:  ~/Library/Application Support/XBMC/
                              Win32: ~/Application Data/XBMC/
+ special://overlap/       - special://home/ if the file exists, special://xbmc/ otherwise
  special://userhome/      - a writable version of the user home directory
                              Linux, OS X: ~/.xbmc
                              Win32: home directory of user
