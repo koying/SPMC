@@ -1018,6 +1018,8 @@ int CGUIDialogVideoInfo::ManageVideoItem(const CFileItemPtr &item)
   }
 
   buttons.Add(CONTEXT_BUTTON_DELETE, 646);
+  if (type == "movie" || type == "episode" || type == "musicvideo")
+    buttons.Add(CONTEXT_BUTTON_EXPORT_SINGLE, 37025);
 
   bool result = false;
   int button = CGUIDialogContextMenu::ShowAndGetChoice(buttons);
@@ -1080,6 +1082,10 @@ int CGUIDialogVideoInfo::ManageVideoItem(const CFileItemPtr &item)
 
       case CONTEXT_BUTTON_TAGS_REMOVE_ITEMS:
         result = RemoveItemsFromTag(item);
+        break;
+
+      case CONTEXT_BUTTON_EXPORT_SINGLE:
+        database.ExportSingleVideoToXML(item->GetPath(), true, true);
         break;
 
       default:
