@@ -384,6 +384,12 @@ AC_ARG_ENABLE([ffmpeg_libvorbis],
   [use_ffmpeg_libvorbis=$enableval],
   [use_ffmpeg_libvorbis=no])
 
+AC_ARG_ENABLE([ffmpeg_ac3dts],
+  [AS_HELP_STRING([--disable-ffmpeg_ac3dts],
+  [disable FFmpeg AC3/DTS support (default is no)])],
+  [use_ffmpeg_ac3dts=$enableval],
+  [use_ffmpeg_ac3dts=yes])
+
 AC_ARG_ENABLE([libstagefright],
   [AS_HELP_STRING([--enable-libstagefright],
   [enable libstagefright-based HW accelerated decoding 'Android only' (default is no)])],
@@ -2534,13 +2540,19 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
     else
       ffmpg_config="$ffmpg_config --disable-libvorbis"
     fi
+    if test "$use_ffmpeg_ac3dts" = "no"; then
+      ffmpg_config="$ffmpg_config --disable-parser=ac3 --disable-decoder=ac3 --disable-encoder=ac3"
+      ffmpg_config="$ffmpg_config --disable-parser=dca --disable-decoder=dca --disable-encoder=dca"
+    else
+      ffmpg_config="$ffmpg_config --enable-encoder=ac3"
+    fi
 
     # handle individual enables
     ffmpg_config="$ffmpg_config --enable-gpl"
     ffmpg_config="$ffmpg_config --enable-postproc"
     ffmpg_config="$ffmpg_config --enable-static      --enable-pthreads"
     ffmpg_config="$ffmpg_config --enable-muxer=spdif --enable-muxer=adts"
-    ffmpg_config="$ffmpg_config --enable-encoder=ac3 --enable-encoder=aac"
+    ffmpg_config="$ffmpg_config --enable-encoder=aac"
     ffmpg_config="$ffmpg_config --enable-protocol=http"
     ffmpg_config="$ffmpg_config --enable-runtime-cpudetect"
 
@@ -2587,9 +2599,9 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
       --enable-muxer=spdif \
       --enable-muxer=adts \
       --disable-encoders \
-      --enable-encoder=ac3 \
       --enable-encoder=aac \
       `if test "$use_ffmpeg_libvorbis" = "yes"; then echo --enable-libvorbis --enable-muxer=ogg --enable-encoder=libvorbis; else echo --disable-libvorbis; fi` \
+      `if test "$use_ffmpeg_ac3dts" = "no"; then echo --disable-parser=ac3 --disable-decoder=ac3 --disable-encoder=ac3 --disable-parser=dca --disable-decoder=dca --disable-encoder=dca; else echo --enable-encoder=ac3; fi` \
       --disable-decoder=mpeg_xvmc \
       --disable-devices \
       --disable-ffprobe \
