@@ -1,4 +1,4 @@
-package tv.ouya.xbmc;
+package com.semperpax.spmc;
 
 import android.app.NativeActivity;
 import android.content.Intent;

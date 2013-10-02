@@ -1,4 +1,4 @@
-package tv.ouya.xbmc;
+package com.semperpax.spmc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -233,7 +233,7 @@ public class Splash extends Activity {
 	protected void startXBMC() {
 		// Run XBMC
 		Intent intent = new Intent();
-		intent.setClass(this, tv.ouya.xbmc.Main.class);
+		intent.setClass(this, com.semperpax.spmc.Main.class);
 		startActivity(intent);
 		finish();
 	}
@@ -249,7 +249,7 @@ public class Splash extends Activity {
 				.getRunningTasks(Integer.MAX_VALUE);
 		for (RunningTaskInfo task : tasks)
 			if (task.topActivity.toString().equalsIgnoreCase(
-					"ComponentInfo{tv.ouya.xbmc/tv.ouya.xbmc.Main}")) {
+					"ComponentInfo{com.semperpax.spmc/com.semperpax.spmc.Main}")) {
 				// XBMC already running; just activate it
 				startXBMC();
 				return;
