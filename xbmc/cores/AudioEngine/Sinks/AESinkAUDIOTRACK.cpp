@@ -27,6 +27,12 @@
 #include "cores/amlplayer/AMLUtils.h"
 #endif
 
+#define ANDROID_MAX_CHANNELS 8
+static enum AEChannel AndroidChannelMap[ANDROID_MAX_CHANNELS + 1] = {
+  AE_CH_FL      , AE_CH_FR      , AE_CH_FC      , AE_CH_LFE     , AE_CH_BL      , AE_CH_BR      , AE_CH_SL      , AE_CH_SR      ,
+  AE_CH_NULL
+};
+
 #include <jni.h>
 
 #if defined(__ARM_NEON__)
@@ -100,6 +106,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     }
   }
   m_format.m_sampleRate = sampleRate;
+  m_format.m_channelLayout = GetChannelLayout(format);
 
   // default to AE_FMT_S16LE,
   // then check if we can support the requested format.
@@ -114,7 +121,6 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   }
   m_format.m_dataFormat = dataFormat;
 
-  m_format.m_channelLayout = m_info.m_channels;
   m_format.m_frameSize = m_format.m_channelLayout.Count() * (CAEUtil::DataFormatToBits(m_format.m_dataFormat) >> 3);
 
   m_draining = false;
@@ -179,6 +185,35 @@ double CAESinkAUDIOTRACK::GetCacheTotal()
   // total amount that the audio sink can buffer in units of seconds
 
   return m_sinkbuffer_sec + m_audiotrackbuffer_sec;
+}
+
+CAEChannelInfo CAESinkAUDIOTRACK::GetChannelLayout(AEAudioFormat format)
+{
+  unsigned int count = 0;
+
+       if (format.m_dataFormat == AE_FMT_AC3 ||
+           format.m_dataFormat == AE_FMT_DTS ||
+           format.m_dataFormat == AE_FMT_EAC3)
+           count = 2;
+  else if (format.m_dataFormat == AE_FMT_TRUEHD ||
+           format.m_dataFormat == AE_FMT_DTSHD)
+           count = 8;
+  else
+  {
+    for (unsigned int c = 0; c < 8; ++c)
+      for (unsigned int i = 0; i < format.m_channelLayout.Count(); ++i)
+        if (format.m_channelLayout[i] == AndroidChannelMap[c])
+        {
+          count = c + 1;
+          break;
+        }
+  }
+
+  CAEChannelInfo info;
+  for (unsigned int i = 0; i < count; ++i)
+    info += AndroidChannelMap[i];
+
+  return info;
 }
 
 unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t *data, unsigned int frames, bool hasAudio)
@@ -249,8 +284,8 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_deviceName = "AudioTrack";
   m_info.m_displayName = "android";
   m_info.m_displayNameExtra = "audiotrack";
-  m_info.m_channels += AE_CH_FL;
-  m_info.m_channels += AE_CH_FR;
+  for (int j = 0; j < ANDROID_MAX_CHANNELS; ++j)
+      m_info.m_channels += AndroidChannelMap[j];
   m_info.m_sampleRates.push_back(44100);
   m_info.m_sampleRates.push_back(48000);
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
@@ -283,6 +318,17 @@ void CAESinkAUDIOTRACK::Process()
 
   jint audioFormat    = GetStaticIntField(jenv, "AudioFormat", "ENCODING_PCM_16BIT");
   jint channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_STEREO");
+  switch  (m_format.m_channelLayout.Count())
+  {
+  case 8:
+    channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_7POINT1");
+    break;
+  case 6:
+    channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_5POINT1");
+    break;
+  default:
+    break;
+  }
 
   jint min_buffer_size = jenv->CallStaticIntMethod(jcAudioTrack, jmGetMinBufferSize,
     m_format.m_sampleRate, channelConfig, audioFormat);

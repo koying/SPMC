@@ -39,6 +39,7 @@ public:
   virtual double       GetDelay        ();
   virtual double       GetCacheTime    ();
   virtual double       GetCacheTotal   ();
+  CAEChannelInfo       GetChannelLayout(AEAudioFormat format);
   virtual unsigned int AddPackets      (uint8_t *data, unsigned int frames, bool hasAudio);
   virtual void         Drain           ();
   virtual bool         HasVolume       ();
