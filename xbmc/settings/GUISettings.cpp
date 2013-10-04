@@ -482,17 +482,19 @@ void CGUISettings::Initialize()
   CSettingsCategory* aocat = ao;
 #endif
 
+#if !defined(TARGET_ANDROID)
   AddBool(aocat, "audiooutput.ac3passthrough"   , 364, true);
   AddBool(aocat, "audiooutput.dtspassthrough"   , 254, true);
+#endif
 
 
-#if !defined(TARGET_DARWIN) && !defined(TARGET_RASPBERRY_PI)
+#if !defined(TARGET_DARWIN) && !defined(TARGET_RASPBERRY_PI) && !defined(TARGET_ANDROID)
   AddBool(aocat, "audiooutput.passthroughaac"   , 299, false);
 #endif
 #if !defined(TARGET_DARWIN_IOS) && !defined(TARGET_RASPBERRY_PI)
   AddBool(aocat, "audiooutput.multichannellpcm" , 348, true );
 #endif
-#if !defined(TARGET_DARWIN) && !defined(TARGET_RASPBERRY_PI)
+#if !defined(TARGET_DARWIN) && !defined(TARGET_RASPBERRY_PI) && !defined(TARGET_ANDROID)
   AddBool(aocat, "audiooutput.truehdpassthrough", 349, true );
   AddBool(aocat, "audiooutput.dtshdpassthrough" , 347, true );
 #endif
@@ -510,7 +512,9 @@ void CGUISettings::Initialize()
 #else
   AddSeparator(ao, "audiooutput.sep1");
   AddString   (ao, "audiooutput.audiodevice"      , 545, CStdString(CAEFactory::GetDefaultDevice(false)), SPIN_CONTROL_TEXT);
+#if !defined(TARGET_ANDROID)
   AddString   (ao, "audiooutput.passthroughdevice", 546, CStdString(CAEFactory::GetDefaultDevice(true )), SPIN_CONTROL_TEXT);
+#endif
   AddSeparator(ao, "audiooutput.sep2");
 #endif
 #endif
