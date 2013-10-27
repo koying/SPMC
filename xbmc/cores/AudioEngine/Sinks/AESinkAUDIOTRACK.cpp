@@ -94,6 +94,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
   m_format = format;
 
+  /* if we are raw, correct the data format */
+  if (AE_IS_RAW(format.m_dataFormat))
+    m_passthrough = true;
+  else
+    m_passthrough = false;
+
   // default to 44100, all android devices support it.
   // then check if we can support the requested rate.
   unsigned int sampleRate = 44100;
@@ -318,17 +324,23 @@ void CAESinkAUDIOTRACK::Process()
 
   jint audioFormat    = GetStaticIntField(jenv, "AudioFormat", "ENCODING_PCM_16BIT");
   jint channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_STEREO");
-  switch  (m_format.m_channelLayout.Count())
-  {
-  case 8:
-    channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_7POINT1");
-    break;
-  case 6:
-    channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_5POINT1");
-    break;
-  default:
-    break;
-  }
+  if (!m_passthrough)
+    switch  (m_format.m_channelLayout.Count())
+    {
+    case 8:
+      channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_7POINT1");
+      break;
+    case 6:
+      channelConfig  = GetStaticIntField(jenv, "AudioFormat", "CHANNEL_OUT_5POINT1");
+      break;
+    default:
+      break;
+    }
+  jint stream_type = GetStaticIntField(jenv, "AudioManager", "STREAM_MUSIC");
+#if 1
+  if (m_passthrough)
+    stream_type = GetStaticIntField(jenv, "AudioManager", "STREAM_VOICE_CALL");
+#endif
 
   jint min_buffer_size = jenv->CallStaticIntMethod(jcAudioTrack, jmGetMinBufferSize,
     m_format.m_sampleRate, channelConfig, audioFormat);
@@ -345,7 +357,7 @@ void CAESinkAUDIOTRACK::Process()
   m_sinkbuffer_sec = (double)m_sinkbuffer_sec_per_byte * m_sinkbuffer->GetMaxSize();
 
   jobject joAudioTrack = jenv->NewObject(jcAudioTrack, jmInit,
-    GetStaticIntField(jenv, "AudioManager", "STREAM_MUSIC"),
+    stream_type,
     m_format.m_sampleRate,
     channelConfig,
     audioFormat,
