@@ -100,9 +100,10 @@ bool CAndroidJoystick::onJoystickMoveEvent(AInputEvent* event)
       // CXBMCApp::android_printf(">> axisId: %d; xbmcAxid: %d; val: %f", joy->m_axisIds[i], xbmcAxis, joy->m_state.axes[i]);
     }
   }
+  return true;
   */
 
-  return true;
+  return false;
 }
 
 bool CAndroidJoystick::onJoystickButtonEvent(AInputEvent* event)

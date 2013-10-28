@@ -176,8 +176,7 @@ int32_t CEventLoop::processInput(AInputEvent* event)
 
     case AINPUT_EVENT_TYPE_KEY:
       if (src & AINPUT_SOURCE_GAMEPAD || src & AINPUT_SOURCE_JOYSTICK)
-        if (m_inputHandler->onJoystickButtonEvent(event))
-          return true;
+        return m_inputHandler->onJoystickButtonEvent(event);
       return m_inputHandler->onKeyboardEvent(event);
   }
 
