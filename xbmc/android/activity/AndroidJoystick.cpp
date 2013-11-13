@@ -25,19 +25,11 @@
 #include "windowing/WinEvents.h"
 #include "utils/TimeUtils.h"
 
-#include <dlfcn.h>
-
-extern float AMotionEvent_getAxisValue(const AInputEvent* motion_event, int32_t axis, size_t pointer_index);
-static typeof(AMotionEvent_getAxisValue) *p_AMotionEvent_getAxisValue;
-#define AMotionEvent_getAxisValue (*p_AMotionEvent_getAxisValue)
-
 CAndroidJoystick::CAndroidJoystick()
   : m_prev_holdtime(0)
   , m_prev_device(0)
   , m_prev_button(0)
 {
-  p_AMotionEvent_getAxisValue = (typeof(AMotionEvent_getAxisValue)*) dlsym(RTLD_DEFAULT, "AMotionEvent_getAxisValue");
-  CXBMCApp::android_printf("CAndroidJoystick: AMotionEvent_getAxisValue: %p", p_AMotionEvent_getAxisValue);
 }
 
 CAndroidJoystick::~CAndroidJoystick()

@@ -21,6 +21,11 @@
  
  /*** Extra's not found in the Android NDK ***/
 
+// missing in early NDKs, is present in r9b+
+extern float AMotionEvent_getAxisValue(const AInputEvent* motion_event, int32_t axis, size_t pointer_index);
+extern typeof(AMotionEvent_getAxisValue) *p_AMotionEvent_getAxisValue;
+#define AMotionEvent_getAxisValue (*p_AMotionEvent_getAxisValue)
+
  //Additional defines from android.view.KeyEvent (http://developer.android.com/reference/android/view/KeyEvent.html)
 #define AKEYCODE_ESCAPE 111
 #define AKEYCODE_FORWARD_DEL 112
@@ -37,6 +42,9 @@
 #define AINPUT_SOURCE_GAMEPAD 0x00000400
 #define AINPUT_SOURCE_JOYSTICK 0x01000010
 
+//Additional defines from android.view.MotionEvent (http://developer.android.com/reference/android/view/MotionEvent.html)
+#define AMOTION_EVENT_ACTION_SCROLL 0x08
+
 // Joystick Axes (http://developer.android.com/reference/android/view/MotionEvent.html)
 #define AMOTION_EVENT_AXIS_X 0
 #define AMOTION_EVENT_AXIS_Y 1
@@ -44,3 +52,6 @@
 #define AMOTION_EVENT_AXIS_RTRIGGER 18
 #define AMOTION_EVENT_AXIS_Z 11  //2nd stick X
 #define AMOTION_EVENT_AXIS_RZ 14  //2nd stick Y
+
+// mouse vertical wheel
+#define AMOTION_EVENT_AXIS_VSCROLL 0x09
