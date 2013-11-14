@@ -1,0 +1,1 @@
+./configure --with-toolchain=/home/cbro/android-toolchains/android-14 --with-sdk-path=/home/cbro/android-sdk-linux/ --with-ndk=/home/cbro/android-ndk-r8e --with-sdk=android-14 --with-tarballs=/home/cbro/xbmc-tarballs --prefix=/home/cbro/xbmc-depends --host=arm-linux-androideabi
