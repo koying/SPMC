@@ -124,8 +124,8 @@ public:
       return VC_ERROR;
     }
     
-    std::map<int64_t,Frame*>::iterator it = p->in_queue.begin();
-    frame = it->second;
+    std::list<Frame*>::iterator it = p->in_queue.begin();
+    frame = *it;
     ret = frame->status;
     *buffer = frame->medbuf;
 
@@ -176,10 +176,8 @@ public:
   void Process()
   {
     Frame* frame;
-    int32_t w, h, dw, dh;
+    int32_t w, h;
     int decode_done = 0;
-    int32_t keyframe = 0;
-    int32_t unreadable = 0;
     MediaSource::ReadOptions readopt;
     // GLuint texid;
 
@@ -233,28 +231,7 @@ public:
         outFormat->findInt32(kKeyWidth , &w);
         outFormat->findInt32(kKeyHeight, &h);
 
-        if (!outFormat->findInt32(kKeyDisplayWidth , &dw))
-          dw = w;
-        if (!outFormat->findInt32(kKeyDisplayHeight, &dh))
-          dh = h;
-
-        if (!outFormat->findInt32(kKeyIsSyncFrame, &keyframe))
-          keyframe = 0;
-        if (!outFormat->findInt32(kKeyIsUnreadable, &unreadable))
-          unreadable = 0;
-
         frame->pts = 0;
-
-        // The OMX.SEC decoder doesn't signal the modified width/height
-        if (p->decoder_component && !strncmp(p->decoder_component, "OMX.SEC", 7) &&
-          (w & 15 || h & 15))
-        {
-          if (((w + 15)&~15) * ((h + 15)&~15) * 3/2 == frame->medbuf->range_length())
-          {
-            w = (w + 15)&~15;
-            h = (h + 15)&~15;
-          }
-        }
         frame->width = w;
         frame->height = h;
         frame->medbuf->meta_data()->findInt64(kKeyTime, &(frame->pts));
@@ -314,18 +291,9 @@ public:
         } 
         else if (p->texwidth != frame->width || p->texheight != frame->height)
         {
-          p->UninitializeEGL();
+          p->ReleaseEGL();
           p->InitializeEGL(frame->width, frame->height);
         }
-
-        if (p->free_queue.empty())
-        {
-          CLog::Log(LOGERROR, "%s::%s - Error: No free output buffers\n", CLASSNAME, __func__);
-          if (frame->medbuf) 
-            frame->medbuf->release();
-          free(frame);
-          continue;
-        }  
 
         ANativeWindowBuffer* graphicBuffer = frame->medbuf->graphicBuffer()->getNativeBuffer();
         native_window_set_buffers_timestamp(p->natwin.get(), frame->pts * 1000);
@@ -346,11 +314,15 @@ public:
                                     // eglImgAttrs);
 
           p->free_mutex.lock();
-          while (!p->free_queue.size())
-            usleep(10000);
-          std::list<std::pair<EGLImageKHR, int> >::iterator itfree = p->free_queue.begin();
-          int cur_slot = itfree->second;
-          p->fbo.BindToTexture(GL_TEXTURE_2D, p->slots[cur_slot].texid);
+
+          stSlot* cur_slot = p->getFreeSlot();
+          if (!cur_slot)
+          {
+            CLog::Log(LOGERROR, "STF: No free output buffers\n");
+            continue;
+          }
+
+          p->fbo.BindToTexture(GL_TEXTURE_2D, cur_slot->texid);
           p->fbo.BeginRender();
 
           glDisable(GL_DEPTH_TEST);
@@ -376,34 +348,23 @@ public:
           glBindTexture(GL_TEXTURE_EXTERNAL_OES, g_xbmcapp->GetAndroidTexture());
           
           GLfloat texMatrix[16];
-          // const GLfloat texMatrix[] = {
-            // 1, 0, 0, 0,
-            // 0, -1, 0, 0,
-            // 0, 0, 1, 0,
-            // 0, 1, 0, 1
-          // };
           g_xbmcapp->GetStagefrightTransformMatrix(texMatrix);
-          // g_xbmcapp->GetSurfaceTexture()->getTransformMatrix(texMatrix);
           glUniformMatrix4fv(p->mTexMatrixHandle, 1, GL_FALSE, texMatrix);
 
           glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
           glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
-          // glDeleteTextures(1, &texid);
-          // eglDestroyImageKHR(p->eglDisplay, img);
           p->fbo.EndRender();
 
           glBindTexture(GL_TEXTURE_2D, 0);
 
-          frame->eglimg = p->slots[cur_slot].eglimg;
-          p->busy_queue.push_back(std::pair<EGLImageKHR, int>(*itfree));
-          p->free_queue.erase(itfree);
+          frame->eglimg = cur_slot->eglimg;
           p->free_mutex.unlock();
         }
       }
 
     #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, img:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->eglimg, XbmcThreads::SystemClockMillis() - time);
+      CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, img:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, frame->eglimg, XbmcThreads::SystemClockMillis() - time);
     #endif
 
       p->out_mutex.lock();
@@ -415,7 +376,7 @@ public:
     while (!decode_done && !m_bStop);
     
     if (p->eglInitialized)
-      p->UninitializeEGL();
+      p->ReleaseEGL();
     
   }
 };
@@ -429,6 +390,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
 #endif
 
   CSingleLock lock(g_graphicsContext);
+  sp<MetaData> outFormat;
 
   // stagefright crashes with null size. Trap this...
   if (!hints.width || !hints.height)
@@ -444,10 +406,6 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   if (g_advancedSettings.m_stagefrightConfig.useSwRenderer)
     p->quirks |= QuirkSWRender;
     
-  sp<MetaData> outFormat;
-  int32_t cropLeft, cropTop, cropRight, cropBottom;
-  //Vector<String8> matchingCodecs;
-
   p->meta = new MetaData;
   if (p->meta == NULL)
   {
@@ -569,6 +527,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
     }
   }
 
+  int32_t cropLeft, cropTop, cropRight, cropBottom;
   cropLeft = cropTop = cropRight = cropBottom = 0;
   if (!outFormat->findRect(kKeyCropRect, &cropLeft, &cropTop, &cropRight, &cropBottom))
   {
@@ -615,6 +574,9 @@ fail:
     free(&p->decoder_component);
   if ((p->quirks & QuirkSWRender) == 0)
     g_xbmcapp->UninitStagefrightSurface();
+  p->meta = NULL;
+  p->source = NULL;
+  p->decoder = NULL;
   return false;
 }
 
@@ -653,6 +615,7 @@ int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts
     frame->medbuf = p->getBuffer(demuxer_bytes);
     if (!frame->medbuf)
     {
+      CLog::Log(LOGWARNING, "STF: Cannot get input buffer\n");
       free(frame);
       return VC_ERROR;
     }
@@ -662,8 +625,7 @@ int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts
     frame->medbuf->meta_data()->setInt64(kKeyTime, frame->pts);
     
     p->in_mutex.lock();
-    p->framecount++;
-    p->in_queue.insert(std::pair<int64_t, Frame*>(p->framecount, frame));
+    p->in_queue.push_back(frame);
     p->in_condition.notify();
     p->in_mutex.unlock();
   }
@@ -753,6 +715,10 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   if (pDvdVideoPicture->format == RENDER_FMT_EGLIMG)
   {
     pDvdVideoPicture->eglimg = frame->eglimg;
+    if (pDvdVideoPicture->eglimg == EGL_NO_IMAGE_KHR)
+      pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
+    else
+      LockBuffer(pDvdVideoPicture->eglimg);
   #if defined(DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, ">>> pic dts:%f, pts:%llu, img:%p, tm:%d\n", pDvdVideoPicture->dts, frame->pts, pDvdVideoPicture->eglimg, XbmcThreads::SystemClockMillis() - time);
   #endif
@@ -812,7 +778,7 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   return true;
 }
 
-void CStageFrightVideo::Close()
+void CStageFrightVideo::Dispose()
 {
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::Close\n", CLASSNAME);
@@ -853,17 +819,26 @@ void CStageFrightVideo::Close()
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "Stopping omxcodec\n");
 #endif
-  p->decoder->stop();
-  p->client->disconnect();
+  if (p->decoder != NULL)
+  {
+    p->decoder->stop();
+    p->decoder = NULL;
+  }
+  if (p->client)
+  {
+    p->client->disconnect();
+    delete p->client;
+  }
+  p->meta = NULL;
 
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "Cleaning IN(%d)\n", p->in_queue.size());
 #endif
-  std::map<int64_t,Frame*>::iterator it;
+  std::list<Frame*>::iterator it;
   while (!p->in_queue.empty())
   {
     it = p->in_queue.begin();
-    frame = it->second;
+    frame = *it;
     p->in_queue.erase(it);
     if (frame->medbuf)
       frame->medbuf->release();
@@ -873,16 +848,22 @@ void CStageFrightVideo::Close()
   if (p->decoder_component)
     free(&p->decoder_component);
 
-  delete p->client;
-
   if ((p->quirks & QuirkSWRender) == 0)
+  {
+    native_window_api_disconnect(p->natwin.get(), NATIVE_WINDOW_API_MEDIA);
     g_xbmcapp->UninitStagefrightSurface();
+  }
 
   for (int i=0; i<INBUFCOUNT; ++i)
   {
-    p->inbuf[i]->setObserver(NULL);
-    p->inbuf[i]->release();
+    if (p->inbuf[i])
+    {
+      p->inbuf[i]->setObserver(NULL);
+      p->inbuf[i]->release();
+      p->inbuf[i] = NULL;
+    }
   }
+  p->source = NULL;
 
   delete p;
 }
@@ -894,18 +875,17 @@ void CStageFrightVideo::Reset(void)
 #endif
   Frame* frame;
   p->in_mutex.lock();
-  std::map<int64_t,Frame*>::iterator it;
+  std::list<Frame*>::iterator it;
   while (!p->in_queue.empty())
   {
     it = p->in_queue.begin();
-    frame = it->second;
+    frame = *it;
     p->in_queue.erase(it);
     if (frame->medbuf)
       frame->medbuf->release();
     free(frame);
   }
   p->resetting = true;
-  p->framecount = 0;
 
   p->in_mutex.unlock();
 }
@@ -930,64 +910,48 @@ void CStageFrightVideo::SetSpeed(int iSpeed)
 
 void CStageFrightVideo::LockBuffer(EGLImageKHR eglimg)
 {
- #if defined(DEBUG_VERBOSE)
+#if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
   p->free_mutex.lock();
-  std::list<std::pair<EGLImageKHR, int> >::iterator it = p->free_queue.begin();
-  for(;it != p->free_queue.end(); ++it)
+  stSlot* slot = p->getSlot(eglimg);
+  if (!slot)
   {
-    if ((*it).first == eglimg)
-      break;
-  }
-  if (it == p->free_queue.end())
-  {
-    p->busy_queue.push_back(std::pair<EGLImageKHR, int>(*it));
+    CLog::Log(LOGDEBUG, "STF: LockBuffer: Unknown img(%p)", eglimg);
     p->free_mutex.unlock();
     return;
   }
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "Locking %p: tm:%d\n", eglimg, XbmcThreads::SystemClockMillis() - time);
-#endif
+  slot->use_cnt++;
 
-  p->busy_queue.push_back(std::pair<EGLImageKHR, int>(*it));
-  p->free_queue.erase(it);
+#if defined(DEBUG_VERBOSE)
+  CLog::Log(LOGDEBUG, "STF: LockBuffer: Locking %p: cnt:%d tm:%d\n", eglimg, slot->use_cnt, XbmcThreads::SystemClockMillis() - time);
+#endif
   p->free_mutex.unlock();
 }
 
 void CStageFrightVideo::ReleaseBuffer(EGLImageKHR eglimg)
 {
- #if defined(DEBUG_VERBOSE)
+#if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
   p->free_mutex.lock();
-  int cnt = 0;
-  std::list<std::pair<EGLImageKHR, int> >::iterator it = p->busy_queue.begin();
-  std::list<std::pair<EGLImageKHR, int> >::iterator itfree;
-  for(;it != p->busy_queue.end(); ++it)
+  stSlot* slot = p->getSlot(eglimg);
+  if (!slot)
   {
-    if ((*it).first == eglimg)
-    {
-      cnt++;
-      if (cnt==1)
-        itfree = it;
-      else
-        break;
-    }
-  }
-  if (it == p->busy_queue.end() && !cnt)
-  {
+    CLog::Log(LOGDEBUG, "STF: ReleaseBuffer: Unknown img(%p)", eglimg);
     p->free_mutex.unlock();
     return;
   }
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "Unlocking %p: cnt:%d tm:%d\n", eglimg, cnt, XbmcThreads::SystemClockMillis() - time);
-#endif
-
-  if (cnt==1)
+  if (slot->use_cnt == 0)
   {
-    p->free_queue.push_back(std::pair<EGLImageKHR, int>(*itfree));
-    p->busy_queue.erase(itfree);
+    CLog::Log(LOGDEBUG, "STF: ReleaseBuffer: already unlocked img(%p)", eglimg);
+    p->free_mutex.unlock();
+    return;
   }
+  slot->use_cnt--;
+
+#if defined(DEBUG_VERBOSE)
+  CLog::Log(LOGDEBUG, "STF: ReleaseBuffer: Unlocking %p: cnt:%d tm:%d\n", eglimg, slot->use_cnt, XbmcThreads::SystemClockMillis() - time);
+#endif
   p->free_mutex.unlock();
 }

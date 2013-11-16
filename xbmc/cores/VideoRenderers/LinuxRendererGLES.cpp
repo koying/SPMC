@@ -1984,11 +1984,15 @@ void CLinuxRendererGLES::UploadEGLIMGTexture(int index)
 void CLinuxRendererGLES::DeleteEGLIMGTexture(int index)
 {
 #ifdef HAVE_LIBSTAGEFRIGHT
-  YUVPLANE &plane = m_buffers[index].fields[0][0];
+  YUVBUFFER &buf = m_buffers[index];
+  YUVPLANE &plane = buf.fields[0][0];
 
   if(plane.id && glIsTexture(plane.id))
     glDeleteTextures(1, &plane.id);
   plane.id = 0;
+
+  buf.stf = NULL;
+  buf.eglimg = EGL_NO_IMAGE_KHR;
 #endif
 }
 bool CLinuxRendererGLES::CreateEGLIMGTexture(int index)

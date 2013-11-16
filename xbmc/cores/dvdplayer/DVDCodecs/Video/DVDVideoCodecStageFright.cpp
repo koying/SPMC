@@ -128,7 +128,7 @@ void CDVDVideoCodecStageFright::Dispose()
   }
   if (m_stf_decoder)
   {
-    m_stf_decoder->Close();
+    m_stf_decoder->Dispose();
     delete m_stf_decoder;
     m_stf_decoder = NULL;
   }
