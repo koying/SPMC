@@ -1,4 +1,4 @@
-package org.xbmc.xbmc;
+package com.semperpax.spmc;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

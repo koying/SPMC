@@ -82,7 +82,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   if (vm->GetEnv(reinterpret_cast<void**>(&env), version) != JNI_OK)
     return -1;
 
-  jclass cMain = env->FindClass("org/xbmc/xbmc/Main");
+  jclass cMain = env->FindClass("com/semperpax/spmc/Main");
   if(cMain)
   {
     JNINativeMethod mOnNewIntent = {
@@ -93,7 +93,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     env->RegisterNatives(cMain, &mOnNewIntent, 1);
   }
 
-  jclass cBroadcastReceiver = env->FindClass("org/xbmc/xbmc/XBMCBroadcastReceiver");
+  jclass cBroadcastReceiver = env->FindClass("com/semperpax/spmc/XBMCBroadcastReceiver");
   if(cBroadcastReceiver)
   {
     JNINativeMethod mOnReceive =  {
@@ -104,7 +104,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     env->RegisterNatives(cBroadcastReceiver, &mOnReceive, 1);
   }
 
-  jclass cFrameAvailableListener = env->FindClass("org/xbmc/xbmc/XBMCOnFrameAvailableListener");
+  jclass cFrameAvailableListener = env->FindClass("com/semperpax/spmc/XBMCOnFrameAvailableListener");
   if(cFrameAvailableListener)
   {
     JNINativeMethod mOnFrameAvailable = {

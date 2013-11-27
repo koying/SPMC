@@ -58,7 +58,7 @@ bool CAndroidAppDirectory::GetDirectory(const CStdString& strPath, CFileItemList
     }
     for(std::vector<androidPackage>::iterator i = applications.begin(); i != applications.end(); ++i)
     {
-      if ((*i).packageName == "org.xbmc.xbmc")
+      if ((*i).packageName == "com.semperpax.spmc")
         continue;
       CFileItemPtr pItem(new CFileItem((*i).packageName));
       pItem->m_bIsFolder = false;
