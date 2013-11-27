@@ -18,6 +18,11 @@ SRCS += LinuxRendererGLES.cpp
 SRCS += OverlayRendererGL.cpp
 endif
 
+ifeq (@USE_LIBSTAGEFRIGHT@,1)
+INCLUDES += -I${prefix}/opt/libvpu/common
+INCLUDES += -I${prefix}/opt/libvpu/common/include
+endif
+
 LIB = VideoRenderer.a
 
 include @abs_top_srcdir@/Makefile.include

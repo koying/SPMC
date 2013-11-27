@@ -25,6 +25,8 @@
 #include "utils/fastmemcpy.h"
 #include "DllSwScale.h"
 
+#define DEBUG_VERBOSE
+
 // allocate a new picture (PIX_FMT_YUV420P)
 DVDVideoPicture* CDVDCodecUtils::AllocatePicture(int iWidth, int iHeight)
 {
@@ -280,6 +282,10 @@ DVDVideoPicture* CDVDCodecUtils::ConvertToYUV422PackedPicture(DVDVideoPicture *p
 
 bool CDVDCodecUtils::CopyNV12Picture(YV12Image* pImage, DVDVideoPicture *pSrc)
 {
+#if defined(DEBUG_VERBOSE)
+  unsigned int time = XbmcThreads::SystemClockMillis();
+#endif
+
   BYTE *s = pSrc->data[0];
   BYTE *d = pImage->plane[0];
   int w = pSrc->iWidth;
@@ -317,6 +323,9 @@ bool CDVDCodecUtils::CopyNV12Picture(YV12Image* pImage, DVDVideoPicture *pSrc)
       d += pImage->stride[1];
     }
   }
+#if defined(DEBUG_VERBOSE)
+  CLog::Log(LOGDEBUG, "CopyNV12 tm:%d", XbmcThreads::SystemClockMillis() - time);
+#endif
 
   return true;
 }

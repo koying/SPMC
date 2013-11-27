@@ -1072,14 +1072,14 @@ std::string CXBMCApp::getBuildInfo(const std::string& key)
   jstring jstr = (jstring)env->GetStaticObjectField(jcOsBuild, fid);
 
   const char* cval = env->GetStringUTFChars(jstr, NULL);
+  val = cval;
 
   env->ReleaseStringUTFChars(jstr, cval);
   env->DeleteLocalRef(jstr);
 
   env->DeleteLocalRef(jcOsBuild);
-  CXBMCApp::DetachCurrentThread();
+  DetachCurrentThread();
 
-  val = cval;
   return val;
 }
 

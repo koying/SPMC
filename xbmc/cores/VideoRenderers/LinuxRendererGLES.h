@@ -39,7 +39,8 @@ class CBaseTexture;
 namespace Shaders { class BaseYUV2RGBShader; }
 namespace Shaders { class BaseVideoFilterShader; }
 class COpenMaxVideo;
-class CStageFrightVideo;
+class CDVDVideoCodecStageFright;
+class CDVDVideoCodecStageFrightBuffer;
 typedef std::vector<int>     Features;
 
 #define NUM_BUFFERS 3
@@ -88,7 +89,8 @@ enum RenderMethod
   RENDER_OMXEGL = 0x040,
   RENDER_CVREF  = 0x080,
   RENDER_BYPASS = 0x100,
-  RENDER_EGLIMG = 0x200
+  RENDER_EGLIMG = 0x200,
+  RENDER_STFBUF  = 0x400
 };
 
 enum RenderQuality
@@ -161,7 +163,7 @@ public:
   virtual void         AddProcessor(struct __CVBuffer *cvBufferRef);
 #endif
 #ifdef HAVE_LIBSTAGEFRIGHT
-  virtual void         AddProcessor(CStageFrightVideo* stf, EGLImageKHR eglimg);
+  virtual void         AddProcessor(CDVDVideoCodecStageFright* stf, CDVDVideoCodecStageFrightBuffer* stfbuf);
 #endif
 
 protected:
@@ -186,6 +188,8 @@ protected:
   void UploadNV12Texture(int index);
   void DeleteNV12Texture(int index);
   bool CreateNV12Texture(int index);
+
+  void UploadStfBufTexture(int index);
 
   void UploadCVRefTexture(int index);
   void DeleteCVRefTexture(int index);
@@ -264,8 +268,8 @@ protected:
     struct __CVBuffer *cvBufferRef;
 #endif
 #ifdef HAVE_LIBSTAGEFRIGHT
-    CStageFrightVideo* stf;
-    EGLImageKHR eglimg;
+    CDVDVideoCodecStageFright* stf;
+    CDVDVideoCodecStageFrightBuffer* stfbuf;
 #endif
   };
 

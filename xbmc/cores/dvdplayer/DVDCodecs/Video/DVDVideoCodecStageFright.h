@@ -24,7 +24,32 @@
 #include "DVDVideoCodec.h"
 #include "utils/BitstreamConverter.h"
 
-class CStageFrightVideo;
+class DllLibStageFrightCodec;
+class CDVDVideoCodecStageFright;
+
+class CDVDVideoCodecStageFrightBuffer
+{
+public:
+  CDVDVideoCodecStageFrightBuffer()
+    : stf(NULL)
+    , format(RENDER_FMT_NONE)
+    , subformat(0)
+    , rendered(false)
+    , buffer(NULL)
+    , context(NULL)
+    {}
+
+  CDVDVideoCodecStageFright* stf;
+  ERenderFormat format;
+  int subformat;
+  bool rendered;
+
+  int frameWidth;
+  int frameHeight;
+  void* buffer;
+  void* context;
+};
+
 class CDVDVideoCodecStageFright : public CDVDVideoCodec
 {
 public:
@@ -44,12 +69,16 @@ public:
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
 
+  virtual void LockBuffer(CDVDVideoCodecStageFrightBuffer* buf);
+  virtual void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer* buf);
+
 protected:
   const char        *m_pFormatName;
-  CStageFrightVideo     *m_stf_decoder;
-  
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
+  
+  static DllLibStageFrightCodec*     m_stf_dll;
+  void *            m_stf_handle;  
 };
 
 #endif
