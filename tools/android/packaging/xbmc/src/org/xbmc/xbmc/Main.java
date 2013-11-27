@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package hk.minix.xbmc;
 
 import android.app.NativeActivity;
 import android.content.Intent;

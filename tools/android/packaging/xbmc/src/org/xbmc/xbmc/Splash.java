@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package hk.minix.xbmc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -163,7 +163,7 @@ public class Splash extends Activity
         sendEmptyMessage(CachingDone);
         break;
       case StartingXBMC:
-        mSplash.mTextView.setText("Starting SPMC...");
+        mSplash.mTextView.setText("Starting XBMC for MINIX...");
         mSplash.mProgress.setVisibility(View.INVISIBLE);
         mSplash.startXBMC();
         break;
@@ -620,7 +620,7 @@ public class Splash extends Activity
 
     // Run XBMC
     Intent intent = getIntent();
-    intent.setClass(this, com.semperpax.spmc.Main.class);
+    intent.setClass(this, hk.minix.xbmc.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
     finish();
@@ -638,7 +638,7 @@ public class Splash extends Activity
         .getRunningTasks(Integer.MAX_VALUE);
     for (RunningTaskInfo task : tasks)
       if (task.topActivity.toString().equalsIgnoreCase(
-          "ComponentInfo{com.semperpax.spmc/com.semperpax.spmc.Main}"))
+          "ComponentInfo{hk.minix.xbmc/hk.minix.xbmc.Main}")) 
       {
         // XBMC already running; just activate it
         startXBMC();

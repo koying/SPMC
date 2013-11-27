@@ -28,7 +28,7 @@ DX = $(SDKROOT)/platform-tools/dx
 GCC_VERSION=$(shell $(CC) -dumpversion)
 ZIP=zip
 
-SIGN_STORE=~/.android//spmc.keystore
+SIGN_STORE=~/.android//xbmcminix.keystore
 SIGN_STOREPASS=android
 SIGN_KEY=androiddebugkey
 SIGN_KEYPASS=
@@ -104,9 +104,9 @@ sharedapk: shared | xbmc/assets
 	cp -rfp assets/* ./xbmc/assets
 
 sharedobb: shared
-	rm -f $(XBMCROOT)/main.xbmc.obb
-	$(ZIP) -9 -q -r $(XBMCROOT)/main.xbmc.obb assets
-	@echo "$(XBMCROOT)/main.xbmc.obb created"
+	rm -f $(XBMCROOT)/main.xbmcminix.obb
+	$(ZIP) -9 -q -r $(XBMCROOT)/main.xbmcminix.obb assets
+	@echo "$(XBMCROOT)/main.xbmcminix.obb created"
 
 python: | xbmc/assets
 	mkdir -p xbmc/assets/python2.6/lib/
@@ -158,8 +158,8 @@ package: libs python xbmc/classes.dex
 apk-sign:
 	@echo "Signing..."
 	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/xbmcapp-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
-	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/spmc-$(CPU)-debug.apk
-	@echo "$(XBMCROOT)/spmc-$(CPU)-debug.apk created"
+	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/xbmcminix-$(CPU)-debug.apk
+	@echo "$(XBMCROOT)/xbmcminix-$(CPU)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/libxbmc.so: $(SRCLIBS)
 	$(MAKE) -C ../../depends/target/xbmc

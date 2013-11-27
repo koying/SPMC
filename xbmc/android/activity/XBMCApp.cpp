@@ -96,7 +96,7 @@ std::vector<androidPackage> CXBMCApp::m_applications;
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIXbmcMainActivity(nativeActivity)
-  , CJNIBroadcastReceiver("com.semperpax.spmc/XBMCBroadcastReceiver")
+  , CJNIBroadcastReceiver("hk.minix.xbmc/XBMCBroadcastReceiver")
 {
   m_activity = nativeActivity;
   m_firstrun = true;
@@ -278,7 +278,7 @@ bool CXBMCApp::EnableWakeLock(bool on)
   android_printf("%s: %s", __PRETTY_FUNCTION__, on ? "true" : "false");
   if (!m_wakeLock)
   {
-    m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock("com.semperpax.spmc"));
+    m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock("hk.minix.xbmc"));
     if (m_wakeLock)
       m_wakeLock->setReferenceCounted(false);
     else
@@ -669,7 +669,7 @@ void CXBMCApp::SetupEnv()
   {
     CJNIFile androidPath = getExternalFilesDir("");
     if (!androidPath)
-      androidPath = getDir("com.semperpax.spmc", 1);
+      androidPath = getDir("hk.minix.xbmc", 1);
 
     if (androidPath)
       externalDir = androidPath.getAbsolutePath();
