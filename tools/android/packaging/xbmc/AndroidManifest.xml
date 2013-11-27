@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.semperpax.spmc"
+    package="hk.minix.xbmc"
     android:versionCode="120400"
-    android:versionName="12.4.0 (SPMC)" >
+    android:versionName="12.4.0 (MINIX)" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="9" />
