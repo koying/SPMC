@@ -108,6 +108,7 @@ public:
 
   static int GetDPI();
   
+  std::string getBuildInfo(const std::string &key);
 #ifdef HAVE_LIBSTAGEFRIGHT
   bool InitStagefrightSurface();
   void UninitStagefrightSurface();

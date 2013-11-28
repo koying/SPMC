@@ -1055,6 +1055,34 @@ void CXBMCApp::SetSystemVolume(JNIEnv *env, float percent)
   env->DeleteLocalRef(cAudioManager);
 }
 
+std::string CXBMCApp::getBuildInfo(const std::string& key)
+{
+  JNIEnv *env = NULL;
+  AttachCurrentThread(&env, NULL);
+
+  std::string val;
+  jclass jcOsBuild = env->FindClass("android/os/Build");
+  if (jcOsBuild == NULL)
+  {
+    CLog::Log(LOGERROR, "%s: Error getting class android.os.Build", __PRETTY_FUNCTION__);
+    return val;
+  }
+
+  jfieldID fid = env->GetStaticFieldID(jcOsBuild, key.c_str(), "Ljava/lang/String;");
+  jstring jstr = (jstring)env->GetStaticObjectField(jcOsBuild, fid);
+
+  const char* cval = env->GetStringUTFChars(jstr, NULL);
+
+  env->ReleaseStringUTFChars(jstr, cval);
+  env->DeleteLocalRef(jstr);
+
+  env->DeleteLocalRef(jcOsBuild);
+  CXBMCApp::DetachCurrentThread();
+
+  val = cval;
+  return val;
+}
+
 #ifdef HAVE_LIBSTAGEFRIGHT
 bool CXBMCApp::InitStagefrightSurface()
 {
