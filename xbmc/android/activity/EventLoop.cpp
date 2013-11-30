@@ -169,26 +169,38 @@ void CEventLoop::processActivity(int32_t command)
 
 int32_t CEventLoop::processInput(AInputEvent* event)
 {
-  int32_t type = AInputEvent_getType(event);
-  int32_t src = AInputEvent_getSource(event);
-  switch (type)
-  {
-    case AINPUT_EVENT_TYPE_MOTION:
-      if (src & AINPUT_SOURCE_TOUCHSCREEN)
-        return m_inputHandler->onTouchEvent(event);
-      else if (src & AINPUT_SOURCE_MOUSE)
-        return m_inputHandler->onMouseEvent(event);
-      else if (src & AINPUT_SOURCE_GAMEPAD || src & AINPUT_SOURCE_JOYSTICK)
-        return m_inputHandler->onJoystickMoveEvent(event);
-      break;
+  int32_t rtn    = 0;
+  int32_t type   = AInputEvent_getType(event);
+  int32_t source = AInputEvent_getSource(event);
 
+  switch(type)
+  {
     case AINPUT_EVENT_TYPE_KEY:
-      if (src & AINPUT_SOURCE_GAMEPAD || src & AINPUT_SOURCE_JOYSTICK)
-        return m_inputHandler->onJoystickButtonEvent(event);
-      return m_inputHandler->onKeyboardEvent(event);
+      if (source & AINPUT_SOURCE_GAMEPAD || source & AINPUT_SOURCE_JOYSTICK)
+      {
+        if (m_inputHandler->onJoystickButtonEvent(event))
+          return true;
+      }
+      rtn = m_inputHandler->onKeyboardEvent(event);
+      break;
+    case AINPUT_EVENT_TYPE_MOTION:
+      switch(source)
+      {
+        case AINPUT_SOURCE_TOUCHSCREEN:
+          rtn = m_inputHandler->onTouchEvent(event);
+          break;
+        case AINPUT_SOURCE_MOUSE:
+          rtn = m_inputHandler->onMouseEvent(event);
+          break;
+        case AINPUT_SOURCE_GAMEPAD:
+        case AINPUT_SOURCE_JOYSTICK:
+          rtn = m_inputHandler->onJoystickMoveEvent(event);
+          break;
+      }
+      break;
   }
 
-  return 0;
+  return rtn;
 }
 
 void CEventLoop::activityCallback(android_app* application, int32_t command)
