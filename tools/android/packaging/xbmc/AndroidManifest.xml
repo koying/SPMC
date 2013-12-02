@@ -2,8 +2,8 @@
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="hk.minix.xbmc"
-    android:versionCode="120400"
-    android:versionName="12.4.0 (MINIX)" >
+    android:versionCode="120380"
+    android:versionName="12.3.80 (MINIX)" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="14" />
