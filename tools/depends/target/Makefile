@@ -4,18 +4,18 @@ ifneq ($(shell test -f $(PREFIX)/share/config.site && echo 1),1)
   $(error Error: $(PREFIX)/share/config.site  is missing. Please reconfigure depends to generate it)
 endif
 
-DEPENDS = \
-	pcre expat gettext sqlite3 libgpg-error \
-	libgcrypt bzip2 liblzo2 libzip freetype2 fontconfig \
-	openssl gmp nettle gnutls libssh2 curl \
-	libjpeg-turbo tiff jasper libpng \
-	libogg libvorbis libflac libmad fribidi libmpeg2 \
-	libass libsamplerate \
-	libmodplug librtmp libxml2 yajl libmicrohttpd mysql libffi \
-	python26 afpfs-ng libshairplay \
-	libplist libcec libbluray boost tinyxml dummy-libxbmc \
-	libamplayer libssh taglib xbmc-pvr-addons libusb libnfs libmp3lame \
-	pythonmodule-pil libxslt ffmpeg
+DEPENDS  = pcre expat gettext sqlite3 libgpg-error
+DEPENDS += libgcrypt bzip2 liblzo2 libzip freetype2 fontconfig
+DEPENDS += openssl gmp nettle gnutls libssh2 curl
+DEPENDS += libjpeg-turbo tiff jasper libpng
+DEPENDS += libogg libvorbis libflac libmad fribidi libmpeg2
+DEPENDS += libass libsamplerate
+DEPENDS += libmodplug librtmp libxml2 yajl libmicrohttpd mysql libffi
+DEPENDS += python26 afpfs-ng libshairplay
+DEPENDS += libplist libcec libbluray boost tinyxml dummy-libxbmc
+DEPENDS += libamplayer libssh taglib xbmc-pvr-addons libusb libnfs libmp3lame
+DEPENDS += pythonmodule-pil libxslt
+DEPENDS += ffmpeg
 
 ifeq ($(ENABLE_GPLV3),1)
   DEPENDS+=samba-gplv3 libcdio-gplv3

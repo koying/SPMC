@@ -33,8 +33,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM) install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libmodplug.la $(PREFIX)/lib/libmodplug.so $(PREFIX)/lib/libmodplug.so.0
-	mv -f $(PREFIX)/lib/libmodplug.so.0.0.0 $(PREFIX)/lib/libmodplug.so
-	$(RPL) -e "libmodplug.so.0" "libmodplug.so\x00\x00" $(PREFIX)/lib/libmodplug.so
+	mv -f $(PREFIX)/lib/libmodplug.so.0.0.0 $(PREFIX)/lib/libxbmodplug.so
+	ln -sf $(PREFIX)/lib/libxbmodplug.so $(PREFIX)/lib/libmodplug.so
+	$(RPL) -e "libmodplug.so.0" "libxbmodplug.so" $(PREFIX)/lib/libxbmodplug.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libmodplug.so | grep ibrary
 endif
 	touch $@

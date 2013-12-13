@@ -1,11 +1,22 @@
 include ../../depends/Makefile.include
 
-OBJS = libcurl.so \
-  librtmp.so  libmad.so \
-  libafpclient.so  \
-  libplist.so libshairplay.so \
-  libxbogg.so libxbvorbis.so libxbvorbisfile.so libxbFLAC.so libxbmpeg2.so \
-  libxbmpeg2convert.so libnfs.so libass.so libbluray.so
+OBJS  = libxbmad.so
+OBJS += libxbnfs.so
+OBJS += libxbcurl.so
+OBJS += libxbrtmp.so
+OBJS += libxbplist.so
+OBJS += libxbafpclient.so
+OBJS += libxbshairplay.so
+OBJS += libxbbluray.so
+OBJS += libxbass.so
+OBJS += libxbogg.so
+OBJS += libxbFLAC.so
+OBJS += libxbvorbis.so
+OBJS += libxbvorbisfile.so
+OBJS += libxbmpeg2.so
+OBJS += libxbmpeg2convert.so
+OBJS += libxbmodplug.so
+OBJS += libxbmp3lame.so
 
 PLATFORM_OBJS =
 EXCLUDED_ADDONS = screensaver.rsxs.euphoria visualization.dxspectrum visualization.milkdrop visualization.projectm service.xbmc.versioncheck
