@@ -36,8 +36,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM) install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libmad.la $(PREFIX)/lib/libmad.so $(PREFIX)/lib/libmad.so.0
-	mv -f $(PREFIX)/lib/libmad.so.0.2.1 $(PREFIX)/lib/libmad.so
-	$(RPL) -e "libmad.so.0" "libmad.so\x00\x00" $(PREFIX)/lib/libmad.so
+	mv -f $(PREFIX)/lib/libmad.so.0.2.1 $(PREFIX)/lib/libxbmad.so
+	ln -sf $(PREFIX)/lib/libxbmad.so $(PREFIX)/lib/libmad.so
+	$(RPL) -e "libmad.so.0" "libxbmad.so" $(PREFIX)/lib/libxbmad.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libmad.so | grep ibrary
 endif
 	touch $@

@@ -48,8 +48,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM)/include install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libafpclient.la $(PREFIX)/lib/libafpclient.so $(PREFIX)/lib/libafpclient.so.0
-	mv -f $(PREFIX)/lib/libafpclient.so.0.0.0 $(PREFIX)/lib/libafpclient.so
-	$(RPL) -e "libafpclient.so.0" "libafpclient.so\x00\x00" $(PREFIX)/lib/libafpclient.so
+	mv -f $(PREFIX)/lib/libafpclient.so.0.0.0 $(PREFIX)/lib/libxbafpclient.so
+	ln -sf $(PREFIX)/lib/libxbafpclient.so $(PREFIX)/lib/libafpclient.so
+	$(RPL) -e "libafpclient.so.0" "libxbafpclient.so" $(PREFIX)/lib/libxbafpclient.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libafpclient.so | grep ibrary
 endif
 	touch $@

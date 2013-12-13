@@ -34,14 +34,16 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM)/build install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libplist.la $(PREFIX)/lib/libplist.so $(PREFIX)/lib/libplist.so.1
-	mv -f $(PREFIX)/lib/libplist.so.1.1.6 $(PREFIX)/lib/libplist.so
-	$(RPL) -e "libplist.so.1" "libplist.so\x00\x00" $(PREFIX)/lib/libplist.so
+	mv -f $(PREFIX)/lib/libplist.so.1.1.6 $(PREFIX)/lib/libxbplist.so
+	ln -sf $(PREFIX)/lib/libxbplist.so $(PREFIX)/lib/libplist.so
+	$(RPL) -e "libplist.so.1" "libxbplist.so" $(PREFIX)/lib/libxbplist.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libplist.so | grep ibrary
 
 	rm -f $(PREFIX)/lib/libplist++.la $(PREFIX)/lib/libplist++.so $(PREFIX)/lib/libplist++.so.1
-	mv -f $(PREFIX)/lib/libplist++.so.1.1.6 $(PREFIX)/lib/libplist++.so
-	$(RPL) -e "libplist++.so.1" "libplist++.so\x00\x00" $(PREFIX)/lib/libplist++.so
-	$(RPL) -e "libplist.so.1" "libplist.so\x00\x00" $(PREFIX)/lib/libplist++.so
+	mv -f $(PREFIX)/lib/libplist++.so.1.1.6 $(PREFIX)/lib/libxbplist++.so
+	ln -sf $(PREFIX)/lib/libxbplist++.so $(PREFIX)/lib/libplist++.so
+	$(RPL) -e "libplist++.so.1" "libxbplist++.so" $(PREFIX)/lib/libxbplist++.so
+	$(RPL) -e "libplist.so.1" "libxbplist.so" $(PREFIX)/lib/libxbplist++.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libplist++.so | grep ibrary
 endif
 	touch $@
