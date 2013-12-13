@@ -37,8 +37,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM) install-pkgconfigDATA
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libcurl.la $(PREFIX)/lib/libcurl.so $(PREFIX)/lib/libcurl.so.5
-	mv -f $(PREFIX)/lib/libcurl.so.5.2.0 $(PREFIX)/lib/libcurl.so
-	$(RPL) -e "libcurl.so.5" "libcurl.so\x00\x00" $(PREFIX)/lib/libcurl.so
+	mv -f $(PREFIX)/lib/libcurl.so.5.2.0 $(PREFIX)/lib/libxbcurl.so
+	ln -sf $(PREFIX)/lib/libxbcurl.so $(PREFIX)/lib/libcurl.so
+	$(RPL) -e "libcurl.so.5" "libxbcurl.so" $(PREFIX)/lib/libxbcurl.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libcurl.so | grep ibrary
 endif
 	touch $@

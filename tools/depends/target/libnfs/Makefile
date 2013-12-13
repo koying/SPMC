@@ -33,8 +33,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM) install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libnfs.la $(PREFIX)/lib/libnfs.so $(PREFIX)/lib/libnfs.so.1
-	mv -f $(PREFIX)/lib/libnfs.so.1.0.6 $(PREFIX)/lib/libnfs.so
-	$(RPL) -e "libnfs.so.1" "libnfs.so\x00\x00" $(PREFIX)/lib/libnfs.so
+	mv -f $(PREFIX)/lib/libnfs.so.1.0.6 $(PREFIX)/lib/libxbnfs.so
+	ln -sf $(PREFIX)/lib/libxbnfs.so $(PREFIX)/lib/libnfs.so
+	$(RPL) -e "libnfs.so.1" "libxbnfs.so" $(PREFIX)/lib/libxbnfs.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libnfs.so | grep ibrary
 endif
 	touch $@
