@@ -40,8 +40,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) SYS=$(SYS) prefix=$(PREFIX) -C $(PLATFORM)/librtmp install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/librtmp.la $(PREFIX)/lib/librtmp.so
-	mv -f $(PREFIX)/lib/librtmp.so.0 $(PREFIX)/lib/librtmp.so
-	$(RPL) -e "librtmp.so.0" "librtmp.so\x00\x00" $(PREFIX)/lib/librtmp.so
+	mv -f $(PREFIX)/lib/librtmp.so.0 $(PREFIX)/lib/libxbrtmp.so
+	ln -sf $(PREFIX)/lib/libxbrtmp.so $(PREFIX)/lib/librtmp.so
+	$(RPL) -e "librtmp.so.0" "libxbrtmp.so" $(PREFIX)/lib/libxbrtmp.so
 	-$(READELF) --dynamic $(PREFIX)/lib/librtmp.so | grep ibrary
 endif
 	touch $@

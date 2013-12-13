@@ -34,8 +34,9 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM) install
 ifeq ($(OS),android)
 	rm -f $(PREFIX)/lib/libbluray.la $(PREFIX)/lib/libbluray.so $(PREFIX)/lib/libbluray.so.1
-	mv -f $(PREFIX)/lib/libbluray.so.1.0.0 $(PREFIX)/lib/libbluray.so
-	$(RPL) -e "libbluray.so.1" "libbluray.so\x00\x00" $(PREFIX)/lib/libbluray.so
+	mv -f $(PREFIX)/lib/libbluray.so.1.0.0 $(PREFIX)/lib/libxbbluray.so
+	ln -sf $(PREFIX)/lib/libxbbluray.so $(PREFIX)/lib/libbluray.so
+	$(RPL) -e "libbluray.so.1" "libxbbluray.so" $(PREFIX)/lib/libxbbluray.so
 	-$(READELF) --dynamic $(PREFIX)/lib/libbluray.so | grep ibrary
 endif
 	touch $@
