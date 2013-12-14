@@ -10,7 +10,7 @@ INCLUDES += -I$(PREFIX)/opt/android-source/libhardware/include
 ANDROID_VERSION=ics-mr0
 ANDROID_SOURCE=android-source
 ANDROID_LIBS=android-libs
-ARCHIVE=$(ANDROID_SOURCE)-$(ANDROID_VERSION)-extract.tar.gz
+ARCHIVE=$(ANDROID_SOURCE)-$(ANDROID_VERSION)-extract-2.tar.bz2
 
 all: .installed-$(PLATFORM)
 
@@ -26,7 +26,8 @@ $(ANDROID_SOURCE): $(TARBALLS_LOCATION)/$(ARCHIVE)
 
 $(TARBALLS_LOCATION)/$(ARCHIVE):
 	echo "Fetching Android system headers"
-	cd $(TARBALLS_LOCATION); $(RETRIEVE_TOOL) $(RETRIEVE_TOOL_FLAGS) $(BASE_URL)/$(ARCHIVE)
+	cd $(TARBALLS_LOCATION); $(RETRIEVE_TOOL) -Ls -f "http://www.semperpax.be/owncloud/public.php?service=files&t=70a21675fccd3e0c683d12e4c498a89d&download" -o $(TARBALLS_LOCATION)/$(ARCHIVE)
+	#cd $(TARBALLS_LOCATION); $(RETRIEVE_TOOL) $(RETRIEVE_TOOL_FLAGS) $(BASE_URL)/$(ARCHIVE)
 
 install-sources: $(ANDROID_SOURCE)
 	mkdir -p $(PREFIX)/opt
@@ -38,7 +39,7 @@ $(ANDROID_LIBS): $(PLATFORM)/libstagefright.so $(PLATFORM)/libutils.so $(PLATFOR
 	rm -f $(PREFIX)/opt/$(ANDROID_LIBS)/*
 	cp $(PLATFORM)/libstagefright.so $(PLATFORM)/libutils.so $(PLATFORM)/libbinder.so  $(PLATFORM)/libcutils.so $(PLATFORM)/libui.so $(PLATFORM)/libgui.so $(PREFIX)/opt/$(ANDROID_LIBS)
 
-$(PLATFORM): install-sources
+$(PLATFORM):
 	mkdir -p $(PLATFORM)
 
 $(PLATFORM)/libstagefright.so:  $(PLATFORM) $(DEPS) libstagefright.cpp
