@@ -42,6 +42,6 @@ extern "C"
   void stf_SetDropState(void*, bool bDrop);
   void stf_SetSpeed(void*, int iSpeed);
 
-  void stf_LockBuffer(void*, EGLImageKHR eglimg);
-  void stf_ReleaseBuffer(void*, EGLImageKHR eglimg);
+  void stf_LockBuffer(void*, CDVDVideoCodecStageFrightBuffer* buf);
+  void stf_ReleaseBuffer(void*, CDVDVideoCodecStageFrightBuffer* buf);
 }
