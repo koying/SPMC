@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2013 Team XBMC
- *      http://xbmc.org
+ *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,30 @@
 #include "utils/BitstreamConverter.h"
 
 class DllLibStageFrightCodec;
+class CDVDVideoCodecStageFright;
+
+class CDVDVideoCodecStageFrightBuffer
+{
+public:
+  CDVDVideoCodecStageFrightBuffer()
+    : stf(NULL)
+    , format(RENDER_FMT_NONE)
+    , subformat(0)
+    , rendered(false)
+    , buffer(NULL)
+    , context(NULL)
+    {}
+
+  CDVDVideoCodecStageFright* stf;
+  ERenderFormat format;
+  int subformat;
+  bool rendered;
+
+  int frameWidth;
+  int frameHeight;
+  void* buffer;
+  void* context;
+};
 
 class CDVDVideoCodecStageFright : public CDVDVideoCodec
 {
@@ -46,8 +70,9 @@ public:
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
 
-  virtual void LockBuffer(EGLImageKHR eglimg);
-  virtual void ReleaseBuffer(EGLImageKHR eglimg);
+  static bool IsValid();
+  static void LockBuffer(CDVDVideoCodecStageFrightBuffer* buf);
+  static void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer* buf);
 
 protected:
   const char        *m_pFormatName;
@@ -55,7 +80,8 @@ protected:
   CBitstreamConverter   *m_converter;
   
   static DllLibStageFrightCodec*     m_stf_dll;
-  void *            m_stf_handle;  
+  static bool       m_isvalid;
+  static void *     m_stf_handle;
 };
 
 #endif
