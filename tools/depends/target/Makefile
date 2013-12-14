@@ -38,6 +38,9 @@ endif
 
 ifeq ($(OS),android)
   DEPENDS += mdnsresponder android-sources-ics
+  ifeq ($(findstring arm,$(CPU)),arm)
+    DEPENDS += android-rockchip-vpu
+  endif
 endif
 
 DEPENDS := $(filter-out $(EXCLUDED_DEPENDS),$(DEPENDS))

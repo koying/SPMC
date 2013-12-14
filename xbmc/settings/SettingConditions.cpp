@@ -27,6 +27,7 @@
 #include "addons/Skin.h"
 #if defined(TARGET_ANDROID)
 #include "android/activity/AndroidFeatures.h"
+#include "android/jni/Build.h"
 #endif // defined(TARGET_ANDROID)
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
@@ -241,7 +242,14 @@ void CSettingConditions::Initialize()
     m_simpleConditions.insert("has_mediacodec");
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-  m_simpleConditions.insert("have_libstagefrightdecoder");
+  if (!(
+        (StringUtils::StartsWithNoCase(CJNIBuild::MANUFACTURER, "nvidia") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "shield")))  // Nvidia shield crashing
+      )
+    m_simpleConditions.insert("have_libstagefrightdecoder");
+#endif
+#ifdef HAS_RKSTF
+  if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
+    m_simpleConditions.insert("have_rklibstagefrightdecoder");
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   m_simpleConditions.insert("have_videotoolboxdecoder");
