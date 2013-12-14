@@ -1,7 +1,7 @@
 #pragma once
 /*
- *      Copyright (C) 2010-2013 Team XBMC
- *      http://xbmc.org
+ *      Copyright (C) 2010-2012 Team XBMC
+ *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@
  *
  */
 
-#if defined(HAS_LIBSTAGEFRIGHT)
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include "vpu_global.h"
+#include "vpu_mem.h"
 
 #include "cores/dvdplayer/DVDStreamInfo.h"
 #include "DVDVideoCodec.h"
@@ -28,7 +31,6 @@ class CDVDCodecInterface;
 class CStageFrightVideoPrivate;
 
 namespace android { class MediaBuffer; }
-typedef void* EGLImageKHR;
 
 class CStageFrightVideo
 {
@@ -45,15 +47,17 @@ public:
   void SetDropState(bool bDrop);
   virtual void SetSpeed(int iSpeed);
 
-  void LockBuffer(CDVDVideoCodecStageFrightBuffer *buf);
-  void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer *buf);
+  void LockBuffer(CDVDVideoCodecStageFrightBuffer* buf);
+  void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer* buf);
 
 private:
   CStageFrightVideoPrivate* p;
 
-  void LockBuffer(EGLImageKHR eglimg);
-  bool ReleaseBuffer(EGLImageKHR eglimg);
+  void LockEGLBuffer(EGLImageKHR eglimg);
+  bool ReleaseEGLBuffer(EGLImageKHR eglimg);
+
+  void LockVpuFrame(VPU_FRAME* vpuframe);
+  bool ReleaseVpuFrame(VPU_FRAME* vpuframe);
+
 };
 
-// defined(HAS_LIBSTAGEFRIGHT)
-#endif
