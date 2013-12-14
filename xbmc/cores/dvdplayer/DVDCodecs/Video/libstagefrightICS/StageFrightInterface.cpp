@@ -74,13 +74,13 @@ void stf_SetSpeed(void* stf, int iSpeed)
   ((CStageFrightVideo*)stf)->SetSpeed(iSpeed);
 }
 
-void stf_LockBuffer(void* stf, EGLImageKHR eglimg)
+void stf_LockBuffer(void* stf, CDVDVideoCodecStageFrightBuffer* buf)
 {
-  ((CStageFrightVideo*)stf)->LockBuffer(eglimg);
+  ((CStageFrightVideo*)stf)->LockBuffer(buf);
 }
 
-void stf_ReleaseBuffer(void* stf, EGLImageKHR eglimg)
+void stf_ReleaseBuffer(void* stf, CDVDVideoCodecStageFrightBuffer* buf)
 {
-  ((CStageFrightVideo*)stf)->ReleaseBuffer(eglimg);
+  ((CStageFrightVideo*)stf)->ReleaseBuffer(buf);
 }
 

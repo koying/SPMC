@@ -36,8 +36,14 @@
 #include "ApplicationMessenger.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
+#include "android/jni/Build.h"
+#include "utils/StringUtils.h"
 
 #include "DllLibStageFrightCodec.h"
+
+CCriticalSection            valid_mutex;
+bool                        CDVDVideoCodecStageFright::m_isvalid = false;
+void*                       CDVDVideoCodecStageFright::m_stf_handle = NULL;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,12 +54,17 @@ DllLibStageFrightCodec*     CDVDVideoCodecStageFright::m_stf_dll = NULL;
 CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
   : CDVDVideoCodec()
   , m_convert_bitstream(false),  m_converter(NULL)
-  , m_stf_handle(NULL)
 {
   m_pFormatName = "stf-xxxx";
 
   if (!m_stf_dll)
+  {
     m_stf_dll = new DllLibStageFrightCodec;
+    if (StringUtils::StartsWith(CJNIBuild::HARDWARE, "rk3"))
+      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTVPU);
+    else
+      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
+  }
 }
 
 CDVDVideoCodecStageFright::~CDVDVideoCodecStageFright()
@@ -63,6 +74,8 @@ CDVDVideoCodecStageFright::~CDVDVideoCodecStageFright()
 
 bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
+  CSingleLock lock (valid_mutex);
+
   // we always qualify even if DVDFactoryCodec does this too.
   if (CSettings::Get().GetBool("videoplayer.usestagefright") && !hints.software)
   {
@@ -121,6 +134,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
       return false;
     }
 
+    m_isvalid = true;
     return true;
   }
 
@@ -129,6 +143,8 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
 void CDVDVideoCodecStageFright::Dispose()
 {
+  CSingleLock lock (valid_mutex);
+  m_isvalid = false;
   if (m_converter)
   {
     m_converter->Close();
@@ -208,14 +224,22 @@ double CDVDVideoCodecStageFright::GetTimeSize(void)
   return 0;
 }
 
-void CDVDVideoCodecStageFright::LockBuffer(EGLImageKHR eglimg)
+bool CDVDVideoCodecStageFright::IsValid()
 {
-  m_stf_dll->stf_LockBuffer(m_stf_handle, eglimg);
+  CSingleLock lock (valid_mutex);
+  return m_isvalid;
 }
 
-void CDVDVideoCodecStageFright::ReleaseBuffer(EGLImageKHR eglimg)
+void CDVDVideoCodecStageFright::LockBuffer(CDVDVideoCodecStageFrightBuffer* buf)
 {
-  m_stf_dll->stf_ReleaseBuffer(m_stf_handle, eglimg);
+  if (m_stf_dll && m_stf_handle)
+    m_stf_dll->stf_LockBuffer(m_stf_handle, buf);
+}
+
+void CDVDVideoCodecStageFright::ReleaseBuffer(CDVDVideoCodecStageFrightBuffer* buf)
+{
+  if (m_stf_dll && m_stf_handle)
+    m_stf_dll->stf_ReleaseBuffer(m_stf_handle, buf);
 }
 
 #endif
