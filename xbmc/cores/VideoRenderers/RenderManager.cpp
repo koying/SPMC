@@ -925,8 +925,8 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
     m_pRenderer->AddProcessor(*pic.vaapi, index);
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-  else if(pic.format == RENDER_FMT_EGLIMG)
-    m_pRenderer->AddProcessor(pic.stf, pic.eglimg, index);
+  else if(pic.format == RENDER_FMT_EGLIMG || pic.format == RENDER_FMT_STFBUF)
+    m_pRenderer->AddProcessor(pic.stf, pic.stfbuf, index);
 #endif
 #if defined(TARGET_ANDROID)
   else if(pic.format == RENDER_FMT_MEDIACODEC)
