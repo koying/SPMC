@@ -31,6 +31,7 @@ class CAdvancedSettings;
 class CStageFrightVideoPrivate;
 
 namespace android { class MediaBuffer; }
+typedef void* EGLImageKHR;
 
 class CStageFrightVideo
 {
@@ -47,11 +48,14 @@ public:
   void SetDropState(bool bDrop);
   virtual void SetSpeed(int iSpeed);
 
-  void LockBuffer(EGLImageKHR eglimg);
-  void ReleaseBuffer(EGLImageKHR eglimg);
+  void LockBuffer(CDVDVideoCodecStageFrightBuffer *buf);
+  void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer *buf);
 
 private:
   CStageFrightVideoPrivate* p;
+
+  void LockBuffer(EGLImageKHR eglimg);
+  bool ReleaseBuffer(EGLImageKHR eglimg);
 };
 
 // defined(HAS_LIBSTAGEFRIGHT)
