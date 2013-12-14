@@ -27,17 +27,14 @@
 #include "DynamicDll.h"
 #include "DVDVideoCodec.h"
 
-class CApplication;
-class CApplicationMessenger;
-class CWinSystemEGL;
-class CAdvancedSettings;
+class CDVDCodecInterface;
 
 class DllLibStageFrightCodecInterface
 {
 public:
   virtual ~DllLibStageFrightCodecInterface() {}
 
-  virtual void* create_stf(CApplication* application, CApplicationMessenger* applicationMessenger, CWinSystemEGL* windowing, CAdvancedSettings* advsettings)=0;
+  virtual void* create_stf(CDVDCodecInterface* interface)=0;
   virtual void destroy_stf(void*)=0;
   
   virtual bool stf_Open(void*, CDVDStreamInfo &hints) = 0;
@@ -49,14 +46,14 @@ public:
   virtual void stf_SetDropState(void*, bool bDrop) = 0;
   virtual void stf_SetSpeed(void*, int iSpeed) = 0;
 
-  virtual void stf_LockBuffer(void*, EGLImageKHR eglimg) = 0;
-  virtual void stf_ReleaseBuffer(void*, EGLImageKHR eglimg) = 0;
+  virtual void stf_LockBuffer(void*, CDVDVideoCodecStageFrightBuffer* buf) = 0;
+  virtual void stf_ReleaseBuffer(void*, CDVDVideoCodecStageFrightBuffer* buf) = 0;
 };
 
 class DllLibStageFrightCodec : public DllDynamic, DllLibStageFrightCodecInterface
 {
-  DECLARE_DLL_WRAPPER(DllLibStageFrightCodec, DLL_PATH_LIBSTAGEFRIGHTICS)
-  DEFINE_METHOD4(void*, create_stf, (CApplication* p1, CApplicationMessenger* p2, CWinSystemEGL* p3, CAdvancedSettings* p4))
+  DECLARE_DLL_WRAPPER_TEMPLATE(DllLibStageFrightCodec)
+  DEFINE_METHOD1(void*, create_stf, (CDVDCodecInterface* p1))
   DEFINE_METHOD1(void, destroy_stf, (void* p1))
   DEFINE_METHOD2(bool, stf_Open, (void* p1, CDVDStreamInfo &p2))
   DEFINE_METHOD1(void, stf_Dispose, (void* p1))
@@ -66,8 +63,8 @@ class DllLibStageFrightCodec : public DllDynamic, DllLibStageFrightCodecInterfac
   DEFINE_METHOD2(bool, stf_ClearPicture, (void* p1, DVDVideoPicture * p2))
   DEFINE_METHOD2(void, stf_SetDropState, (void* p1, bool p2))
   DEFINE_METHOD2(void, stf_SetSpeed, (void* p1, int p2))
-  DEFINE_METHOD2(void, stf_LockBuffer, (void* p1, EGLImageKHR p2))
-  DEFINE_METHOD2(void, stf_ReleaseBuffer, (void* p1, EGLImageKHR p2))
+  DEFINE_METHOD2(void, stf_LockBuffer, (void* p1, CDVDVideoCodecStageFrightBuffer* p2))
+  DEFINE_METHOD2(void, stf_ReleaseBuffer, (void* p1, CDVDVideoCodecStageFrightBuffer* p2))
   BEGIN_METHOD_RESOLVE()
     RESOLVE_METHOD(create_stf)
     RESOLVE_METHOD(destroy_stf)
