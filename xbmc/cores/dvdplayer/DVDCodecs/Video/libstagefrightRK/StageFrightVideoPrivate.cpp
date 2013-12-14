@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2013 Team XBMC
- *      http://xbmc.org
+ *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,26 +19,16 @@
  */
 /***************************************************************************/
 
-//#define DEBUG_VERBOSE 1
-
 #include "StageFrightVideoPrivate.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
 #include "windowing/egl/EGLWrapper.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/log.h"
-#include "threads/Thread.h"
-
-#include "android/jni/Surface.h"
-#include "android/jni/SurfaceTexture.h"
-
-#define CLASSNAME "CStageFrightVideoPrivate"
 
 GLint glerror;
 #define CheckEglError(x) while((glerror = eglGetError()) != EGL_SUCCESS) CLog::Log(LOGERROR, "EGL error in %s: %x",x, glerror);
@@ -59,15 +49,14 @@ int NP2( unsigned x ) {
   return ++x;
 }
 
-using namespace android;
-
 CStageFrightVideoPrivate::CStageFrightVideoPrivate()
-    : decode_thread(NULL), source(NULL)
+    : decode_thread(NULL), source(NULL), natwin(NULL)
     , eglDisplay(EGL_NO_DISPLAY), eglSurface(EGL_NO_SURFACE), eglContext(EGL_NO_CONTEXT)
     , eglInitialized(false)
     , framecount(0)
     , quirks(QuirkNone), cur_frame(NULL), prev_frame(NULL)
     , width(-1), height(-1)
+    , extrasize(0), extradata(NULL)
     , texwidth(-1), texheight(-1)
     , client(NULL), decoder(NULL), decoder_component(NULL)
     , drop_state(false), resetting(false)
@@ -107,8 +96,8 @@ MediaBuffer* CStageFrightVideoPrivate::getBuffer(size_t size)
     inbuf[i]->setObserver(this);
   }
 
-  inbuf[i]->reset();
   inbuf[i]->add_ref();
+  inbuf[i]->set_range(0, size);
   return inbuf[i];
 }
 
@@ -117,26 +106,8 @@ bool CStageFrightVideoPrivate::inputBufferAvailable()
   for (int i=0; i<INBUFCOUNT; ++i)
     if (inbuf[i]->refcount() == 0)
       return true;
-
+      
   return false;
-}
-
-stSlot* CStageFrightVideoPrivate::getSlot(EGLImageKHR eglimg)
-{
-  for (int i=0; i<NUMFBOTEX; ++i)
-    if (texslots[i].eglimg == eglimg)
-      return &(texslots[i]);
-
-  return NULL;
-}
-
-stSlot* CStageFrightVideoPrivate::getFreeSlot()
-{
-  for (int i=0; i<NUMFBOTEX; ++i)
-    if (texslots[i].use_cnt == 0)
-      return &(texslots[i]);
-
-  return NULL;
 }
 
 void CStageFrightVideoPrivate::loadOESShader(GLenum shaderType, const char* pSource, GLuint* outShader)
@@ -254,9 +225,6 @@ void CStageFrightVideoPrivate::OES_shader_setUp()
 
 void CStageFrightVideoPrivate::InitializeEGL(int w, int h)
 {
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: >>> InitializeEGL: w:%d; h:%d\n", CLASSNAME, w, h);
-#endif
   texwidth = w;
   texheight = h;
   if (!m_g_Windowing->IsExtSupported("GL_TEXTURE_NPOT"))
@@ -266,8 +234,6 @@ void CStageFrightVideoPrivate::InitializeEGL(int w, int h)
   }
 
   eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  if (eglDisplay == EGL_NO_DISPLAY)
-    CLog::Log(LOGERROR, "%s: InitializeEGL: no display\n", CLASSNAME);
   eglBindAPI(EGL_OPENGL_ES_API);
   EGLint contextAttributes[] = {
     EGL_CONTEXT_CLIENT_VERSION, 2,
@@ -291,9 +257,8 @@ void CStageFrightVideoPrivate::InitializeEGL(int w, int h)
 
   for (int i=0; i<NUMFBOTEX; ++i)
   {
-//    glGenTextures(1, &(texslots[i].texid)); 0xbaad
-    texslots[i].texid = mVideoTextureId + 1 + i;
-    glBindTexture(GL_TEXTURE_2D, texslots[i].texid);
+    glGenTextures(1, &(slots[i].texid));
+    glBindTexture(GL_TEXTURE_2D,  slots[i].texid);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texwidth, texheight, 0,
            GL_RGBA, GL_UNSIGNED_BYTE, 0);
@@ -304,8 +269,9 @@ void CStageFrightVideoPrivate::InitializeEGL(int w, int h)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    texslots[i].eglimg = eglCreateImageKHR(eglDisplay, eglContext, EGL_GL_TEXTURE_2D_KHR, (EGLClientBuffer)(texslots[i].texid),imageAttributes);
-    texslots[i].use_cnt = 0;
+    slots[i].eglimg = eglCreateImageKHR(eglDisplay, eglContext, EGL_GL_TEXTURE_2D_KHR, (EGLClientBuffer)(slots[i].texid),imageAttributes);
+    free_queue.push_back(std::pair<EGLImageKHR, int>(slots[i].eglimg, i));
+
   }
   glBindTexture(GL_TEXTURE_2D,  0);
 
@@ -314,20 +280,17 @@ void CStageFrightVideoPrivate::InitializeEGL(int w, int h)
 
   eglInitialized = true;
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: <<< InitializeEGL: w:%d; h:%d\n", CLASSNAME, texwidth, texheight);
+  CLog::Log(LOGDEBUG, "%s: >>> Initialized EGL: w:%d; h:%d\n", CLASSNAME, texwidth, texheight);
 #endif
 }
 
-void CStageFrightVideoPrivate::ReleaseEGL()
+void CStageFrightVideoPrivate::UninitializeEGL()
 {
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: >>> UninitializeEGL\n", CLASSNAME);
-#endif
   fbo.Cleanup();
   for (int i=0; i<NUMFBOTEX; ++i)
   {
-    //glDeleteTextures(1, &(texslots[i].texid));
-    eglDestroyImageKHR(eglDisplay, texslots[i].eglimg);
+    glDeleteTextures(1, &(slots[i].texid));
+    eglDestroyImageKHR(eglDisplay, slots[i].eglimg);
   }
 
   if (eglContext != EGL_NO_CONTEXT)
@@ -337,81 +300,6 @@ void CStageFrightVideoPrivate::ReleaseEGL()
   if (eglSurface != EGL_NO_SURFACE)
     eglDestroySurface(eglDisplay, eglSurface);
   eglSurface = EGL_NO_SURFACE;
-
+  
   eglInitialized = false;
 }
-
-void CStageFrightVideoPrivate::CallbackInitSurfaceTexture(void *userdata)
-{
-  CStageFrightVideoPrivate *ctx = static_cast<CStageFrightVideoPrivate*>(userdata);
-  ctx->InitSurfaceTexture();
-}
-
-bool CStageFrightVideoPrivate::InitSurfaceTexture()
-{
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: >>> InitSurfaceTexture\n", CLASSNAME);
-#endif
-   if (mVideoNativeWindow != NULL)
-    return false;
-
-   //FIXME: Playing back-to-back vids induces a bug when properly generating textures between runs.
-   //       Symptoms are upside down vid, "updateTexImage: error binding external texture" in log, and crash
-   //       after stopping.
-   //       Workaround is to always use the same, arbitrary chosen, texture ids.
-  mVideoTextureId = 0xbaad;
-
-  glBindTexture(  GL_TEXTURE_EXTERNAL_OES, mVideoTextureId);
-  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glBindTexture(  GL_TEXTURE_EXTERNAL_OES, 0);
-
-  mSurfTexture = new CJNISurfaceTexture(mVideoTextureId);
-  mSurface = new CJNISurface(*mSurfTexture);
-
-  JNIEnv* env = xbmc_jnienv();
-  mVideoNativeWindow = ANativeWindow_fromSurface(env, mSurface->get_raw());
-  native_window_api_connect(mVideoNativeWindow.get(), NATIVE_WINDOW_API_MEDIA);
-
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: <<< InitSurfaceTexture texid(%d) natwin(%p)\n", CLASSNAME, mVideoTextureId, mVideoNativeWindow.get());
-#endif
-
-  return true;
-}
-
-void CStageFrightVideoPrivate::ReleaseSurfaceTexture()
-{
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: >>> ReleaseSurfaceTexture\n", CLASSNAME);
-#endif
-  if (mVideoNativeWindow == NULL)
-    return;
-
-  native_window_api_disconnect(mVideoNativeWindow.get(), NATIVE_WINDOW_API_MEDIA);
-  ANativeWindow_release(mVideoNativeWindow.get());
-  mVideoNativeWindow.clear();
-
-  mSurface->release();
-  mSurfTexture->release();
-
-  delete mSurface;
-  delete mSurfTexture;
-
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s: <<< ReleaseSurfaceTexture\n", CLASSNAME);
-#endif
-}
-
-void CStageFrightVideoPrivate::UpdateSurfaceTexture()
-{
-  mSurfTexture->updateTexImage();
-}
-
-void CStageFrightVideoPrivate::GetSurfaceTextureTransformMatrix(float* transformMatrix)
-{
-  mSurfTexture->getTransformMatrix(transformMatrix);
-}
-
