@@ -72,6 +72,7 @@
 #define DLL_PATH_LIBDVDNAV     "libdvdnav-@ARCH@.so"
 #define DLL_PATH_LIBMPEG2      "@MPEG2_SONAME@"
 #define DLL_PATH_LIBSTAGEFRIGHTICS    "libXBMCvcodec_stagefrightICS-@ARCH@.so"
+#define DLL_PATH_LIBSTAGEFRIGHTRK     "libXBMCvcodec_stagefrightRK-@ARCH@.so"
 
 /* cdrip */
 #define DLL_PATH_OGG           "@OGG_SONAME@"

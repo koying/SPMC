@@ -1,7 +1,5 @@
-#ifndef _RENDER_FORMATS_H_
-#define _RENDER_FORMATS_H_
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2014 Team Kodi
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,27 +18,33 @@
  *
  */
 
-enum ERenderFormat {
-  RENDER_FMT_NONE = 0,
-  RENDER_FMT_YUV420P,
-  RENDER_FMT_YUV420P10,
-  RENDER_FMT_YUV420P16,
-  RENDER_FMT_VDPAU,
-  RENDER_FMT_VDPAU_420,
-  RENDER_FMT_NV12,
-  RENDER_FMT_UYVY422,
-  RENDER_FMT_YUYV422,
-  RENDER_FMT_DXVA,
-  RENDER_FMT_VAAPI,
-  RENDER_FMT_VAAPINV12,
-  RENDER_FMT_OMXEGL,
-  RENDER_FMT_CVBREF,
-  RENDER_FMT_BYPASS,
-  RENDER_FMT_EGLIMG,
-  RENDER_FMT_STFBUF,
-  RENDER_FMT_MEDIACODEC,
-  RENDER_FMT_IMXMAP,
-  RENDER_FMT_MMAL,
-};
+#include "DVDCodecInterface.h"
 
-#endif
+#include "Application.h"
+#include "ApplicationMessenger.h"
+#include "windowing/WindowingFactory.h"
+#include "settings/AdvancedSettings.h"
+
+CDVDCodecInterface::CDVDCodecInterface()
+{
+}
+
+CApplication* CDVDCodecInterface::GetApplication() const
+{
+  return &g_application;
+}
+
+CApplicationMessenger* CDVDCodecInterface::GetApplicationMessenger() const
+{
+  return &CApplicationMessenger::Get();
+}
+
+CWinSystemEGL* CDVDCodecInterface::GetWindowSystem() const
+{
+  return &g_Windowing;
+}
+
+CAdvancedSettings* CDVDCodecInterface::GetAdvancedSettings() const
+{
+  return &g_advancedSettings;
+}
