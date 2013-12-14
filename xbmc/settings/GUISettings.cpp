@@ -460,7 +460,8 @@ void CGUISettings::Initialize()
 #if !defined(TARGET_RASPBERRY_PI)
   audiomode.insert(make_pair(339,AUDIO_IEC958));
 #endif
-  audiomode.insert(make_pair(420,AUDIO_HDMI  ));
+  // Minix hack
+  //audiomode.insert(make_pair(420,AUDIO_HDMI  ));
 #if defined(TARGET_RASPBERRY_PI)
   AddInt(ao, "audiooutput.mode", 337, AUDIO_HDMI, audiomode, SPIN_CONTROL_TEXT);
 #else
