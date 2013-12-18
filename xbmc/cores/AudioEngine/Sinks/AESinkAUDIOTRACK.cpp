@@ -72,6 +72,7 @@ static jint GetStaticIntField(JNIEnv *jenv, std::string class_name, std::string 
 }
 
 CAEDeviceInfo CAESinkAUDIOTRACK::m_info;
+CAEDeviceInfo CAESinkAUDIOTRACK::m_info_passthrough;
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   : CThread("audiotrack")
@@ -94,18 +95,24 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
   m_format = format;
 
-  /* if we are raw, correct the data format */
-  if (AE_IS_RAW(format.m_dataFormat))
+  CAEDeviceInfo info;
+  if (AE_IS_RAW(m_format.m_dataFormat))
+  {
+    info = m_info_passthrough;
     m_passthrough = true;
+  }
   else
+  {
+    info = m_info;
     m_passthrough = false;
+  }
 
   // default to 44100, all android devices support it.
   // then check if we can support the requested rate.
   unsigned int sampleRate = 44100;
-  for (size_t i = 0; i < m_info.m_sampleRates.size(); i++)
+  for (size_t i = 0; i < info.m_sampleRates.size(); i++)
   {
-    if (m_format.m_sampleRate == m_info.m_sampleRates[i])
+    if (m_format.m_sampleRate == info.m_sampleRates[i])
     {
       sampleRate = m_format.m_sampleRate;
       break;
@@ -117,9 +124,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   // default to AE_FMT_S16LE,
   // then check if we can support the requested format.
   AEDataFormat dataFormat = AE_FMT_S16LE;
-  for (size_t i = 0; i < m_info.m_dataFormats.size(); i++)
+  for (size_t i = 0; i < info.m_dataFormats.size(); i++)
   {
-    if (m_format.m_dataFormat == m_info.m_dataFormats[i])
+    if (m_format.m_dataFormat == info.m_dataFormats[i])
     {
       dataFormat = m_format.m_dataFormat;
       break;
@@ -301,6 +308,22 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 #endif
 
   list.push_back(m_info);
+
+  m_info_passthrough.m_channels.Reset();
+  m_info_passthrough.m_dataFormats.clear();
+  m_info_passthrough.m_sampleRates.clear();
+
+  m_info_passthrough.m_deviceType = AE_DEVTYPE_IEC958;
+  m_info_passthrough.m_deviceName = "AudioTrackPT";
+  m_info_passthrough.m_displayName = "android";
+  m_info_passthrough.m_displayNameExtra = "audiotrack(PT)";
+  m_info_passthrough.m_channels += AE_CH_FL;
+  m_info_passthrough.m_channels += AE_CH_FR;
+  m_info_passthrough.m_sampleRates.push_back(44100);
+  m_info_passthrough.m_sampleRates.push_back(48000);
+  m_info_passthrough.m_dataFormats.push_back(AE_FMT_S16LE);
+
+  list.push_back(m_info_passthrough);
 }
 
 void CAESinkAUDIOTRACK::Process()

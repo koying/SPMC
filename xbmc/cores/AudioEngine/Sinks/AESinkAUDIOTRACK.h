@@ -50,6 +50,7 @@ private:
   virtual void Process();
 
   static CAEDeviceInfo m_info;
+  static CAEDeviceInfo m_info_passthrough;
   AEAudioFormat      m_format;
   double             m_volume;
   bool               m_volume_changed;
