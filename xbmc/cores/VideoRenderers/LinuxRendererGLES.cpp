@@ -1923,7 +1923,7 @@ void CLinuxRendererGLES::UploadStfBufTexture(int source)
     return;
   }
 
-  if (!stfbuf->rendered)
+  //if (!stfbuf->rendered)
   {
     bool deinterlacing;
     if (m_currentField == FIELD_FULL)
