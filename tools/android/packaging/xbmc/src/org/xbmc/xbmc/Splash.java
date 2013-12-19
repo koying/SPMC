@@ -257,11 +257,13 @@ public class Splash extends Activity {
 
 		mState = State.Checking;
 
+    /*
     String model = android.os.Build.MODEL;
     if (!model.startsWith("NEO-")) {
       mErrorMsg = "This XBMC package is only compatible with <a href=\"http://www.minix.com.hk/\">Minix</a> devices.";
       mState = State.InError;
     }
+    */
 
 		if (mState != State.InError) {
       boolean ret = ParseCpuFeature();
