@@ -1150,6 +1150,38 @@ std::string CXBMCApp::getBuildInfo(const std::string& key)
   return val;
 }
 
+std::string CXBMCApp::getSystemProperty(const std::string& key)
+{
+  JNIEnv *env = NULL;
+  AttachCurrentThread(&env, NULL);
+
+  std::string val;
+  jclass jcSysProp = env->FindClass("android/os/SystemProperties");
+  if (jcSysProp == NULL)
+  {
+    CLog::Log(LOGERROR, "%s: Error getting sysprop class", __PRETTY_FUNCTION__);
+    return val;
+  }
+
+  jmethodID midGetProperty = env->GetStaticMethodID(jcSysProp, "get", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+  jstring sProperty = env->NewStringUTF(key.c_str());
+  jstring sDef = env->NewStringUTF("");
+  jstring sValue = (jstring)env->CallStaticObjectMethod(jcSysProp, midGetProperty, sProperty,sDef);
+  env->DeleteLocalRef(sProperty);
+  env->DeleteLocalRef(sDef);
+
+  const char* cval = env->GetStringUTFChars(sValue, NULL);
+  val = cval;
+  env->ReleaseStringUTFChars(sValue, cval);
+  env->DeleteLocalRef(sValue);
+
+  env->DeleteLocalRef(jcSysProp);
+  DetachCurrentThread();
+
+  return val;
+}
+
+
 #ifdef HAVE_LIBSTAGEFRIGHT
 bool CXBMCApp::InitStagefrightSurface()
 {
