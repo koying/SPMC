@@ -3,16 +3,19 @@ package com.semperpax.spmc;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
+import java.lang.System;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.Properties;
+import java.util.Enumeration;
 
 import android.os.AsyncTask;
 import android.os.Build;
@@ -63,10 +66,10 @@ public class Splash extends Activity {
   private int mState = Uninitialized;
   public AlertDialog myAlertDialog;
 
-  private String sPackagePath;
-  private String sApkDir;
-  private File fPackagePath;
-  private File fApkDir;
+  private String sPackagePath = "";
+  private String sXbmcHome = "";
+  private File fPackagePath = null;
+  private File fXbmcHome = null;
 
   private BroadcastReceiver mExternalStorageReceiver = null;
   private boolean mExternalStorageChecked = false;
@@ -143,6 +146,45 @@ public class Splash extends Activity {
     // Make links actually clickable
     ((TextView) myAlertDialog.findViewById(android.R.id.message))
         .setMovementMethod(LinkMovementMethod.getInstance());
+  }
+  
+  private void SetupEnvironment() {
+    File fProp = new File("/sdcard/xbmc_env.properties");
+    if (fProp.exists()) {
+      try {
+        Properties sysProp = new Properties(System.getProperties());
+        FileInputStream xbmcenvprop = new FileInputStream(fProp);
+        sysProp.load(xbmcenvprop);
+        System.setProperties(sysProp);
+
+        sXbmcHome = System.getProperty("xbmc.home", "");
+        fXbmcHome = new File(sXbmcHome);
+        fXbmcHome.mkdir();
+        if (!fXbmcHome.exists())
+          sXbmcHome = "";
+
+        String sXbmcdata = System.getProperty("xbmc.data", "");
+        if (!sXbmcdata.isEmpty()) {
+          File fXbmcData = new File(sXbmcdata);
+          fXbmcData.mkdir();
+          if (!fXbmcData.exists())
+            sXbmcdata = "";
+        }
+
+      } catch (NotFoundException e) {
+        Log.e(TAG, "Cannot find xbmc_env properties file");
+      } catch (IOException e) {
+        Log.e(TAG, "Failed to open xbmc_env properties file");
+      }
+    }
+    if (sXbmcHome.isEmpty()) {
+      File fCacheDir = getCacheDir();
+      sXbmcHome = fCacheDir.getAbsolutePath() + "/apk";
+    }
+
+    sPackagePath = getPackageResourcePath();
+    fPackagePath = new File(sPackagePath);
+    fXbmcHome = new File(sXbmcHome);
   }
 
   private boolean ParseCpuFeature() {
@@ -223,16 +265,16 @@ public class Splash extends Activity {
 
     @Override
     protected Integer doInBackground(Void... param) {
-      if (fApkDir.exists()) {
+      if (fXbmcHome.exists()) {
         // Remove existing files
-        Log.d(TAG, "Removing existing " + fApkDir.toString());
         mStateMachine.sendEmptyMessage(Clearing);
-        DeleteRecursive(fApkDir);
+        Log.d(TAG, "Removing existing " + fXbmcHome.toString());
+        DeleteRecursive(fXbmcHome);
       }
-      fApkDir.mkdirs();
+      fXbmcHome.mkdirs();
 
       // Log.d(TAG, "apk: " + sPackagePath);
-      // Log.d(TAG, "output: " + sApkDir);
+      // Log.d(TAG, "output: " + sXbmcHome);
 
       ZipFile zip;
       byte[] buf = new byte[4096];
@@ -256,7 +298,7 @@ public class Splash extends Activity {
           if (e.getName().startsWith("assets/python2.6"))
             continue;
 
-          String sFullPath = sApkDir + "/" + e.getName();
+          String sFullPath = sXbmcHome + "/" + e.getName();
           File fFullPath = new File(sFullPath);
           if (e.isDirectory()) {
             // Log.d(TAG, "creating dir: " + sFullPath);
@@ -282,7 +324,7 @@ public class Splash extends Activity {
 
         zip.close();
 
-        fApkDir.setLastModified(fPackagePath.lastModified());
+        fXbmcHome.setLastModified(fPackagePath.lastModified());
 
       } catch (FileNotFoundException e1) {
         e1.printStackTrace();
@@ -414,14 +456,9 @@ public class Splash extends Activity {
     if (mState != InError) {
       mState = ChecksDone;
       
-      sPackagePath = getPackageResourcePath();
-      fPackagePath = new File(sPackagePath);
-      File fCacheDir = getCacheDir();
-      sApkDir = fCacheDir.getAbsolutePath() + "/apk";
-      fApkDir = new File(sApkDir);
-
-      if (fApkDir.exists()
-          && fApkDir.lastModified() >= fPackagePath.lastModified()) {
+      SetupEnvironment();
+      if (fXbmcHome.exists()
+          && fXbmcHome.lastModified() >= fPackagePath.lastModified()) {
         mState = CachingDone;
         mCachingDone = true;
       }
