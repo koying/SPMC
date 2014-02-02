@@ -74,8 +74,6 @@ CDVDVideoCodecStageFright::~CDVDVideoCodecStageFright()
 
 bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-  CSingleLock lock (valid_mutex);
-
   // we always qualify even if DVDFactoryCodec does this too.
   if (CSettings::Get().GetBool("videoplayer.usestagefright") && !hints.software)
   {
@@ -134,6 +132,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
       return false;
     }
 
+    CSingleLock lock (valid_mutex);
     m_isvalid = true;
     return true;
   }
@@ -143,14 +142,16 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
 void CDVDVideoCodecStageFright::Dispose()
 {
-  CSingleLock lock (valid_mutex);
-  m_isvalid = false;
   if (m_converter)
   {
     m_converter->Close();
     delete m_converter;
     m_converter = NULL;
   }
+
+  CSingleLock lock (valid_mutex);
+  m_isvalid = false;
+
   if (m_stf_handle)
   {
     m_stf_dll->stf_Dispose(m_stf_handle);
