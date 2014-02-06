@@ -407,6 +407,10 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   }
   p->width     = hints.width;
   p->height    = hints.height;
+  if (!hints.forced_aspect)
+    p->aspect_ratio = hints.aspect;
+  else
+    p->aspect_ratio = 1.0;
 
   if (p->m_g_advancedSettings->m_stagefrightConfig.useSwRenderer)
     p->quirks |= QuirkSWRender;
@@ -693,10 +697,19 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   pDvdVideoPicture->format = frame->format;
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
   pDvdVideoPicture->pts = frame->pts;
-  pDvdVideoPicture->iWidth  = frame->width;
-  pDvdVideoPicture->iHeight = frame->height;
-  pDvdVideoPicture->iDisplayWidth = frame->width;
-  pDvdVideoPicture->iDisplayHeight = frame->height;
+  pDvdVideoPicture->iWidth  = p->width;
+  pDvdVideoPicture->iHeight = p->height;
+  pDvdVideoPicture->iDisplayWidth = p->width;
+  pDvdVideoPicture->iDisplayHeight = p->height;
+  if (p->aspect_ratio > 1.0)
+  {
+    pDvdVideoPicture->iDisplayWidth  = ((int)lrint(pDvdVideoPicture->iHeight * p->aspect_ratio)) & -3;
+    if (pDvdVideoPicture->iDisplayWidth > pDvdVideoPicture->iWidth)
+    {
+      pDvdVideoPicture->iDisplayWidth  = pDvdVideoPicture->iWidth;
+      pDvdVideoPicture->iDisplayHeight = ((int)lrint(pDvdVideoPicture->iWidth / p->aspect_ratio)) & -3;
+    }
+  }
   pDvdVideoPicture->iFlags  = DVP_FLAG_ALLOCATED;
   pDvdVideoPicture->stfbuf = NULL;
 
