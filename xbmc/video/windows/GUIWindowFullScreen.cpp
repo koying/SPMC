@@ -538,7 +538,7 @@ EVENT_RESULT CGUIWindowFullScreen::OnMouseEvent(const CPoint &point, const CMous
   }
   if (event.m_id >= ACTION_GESTURE_NOTIFY && event.m_id <= ACTION_GESTURE_END) // gestures
     return EVENT_RESULT_UNHANDLED;
-  if (event.m_id != ACTION_MOUSE_MOVE || event.m_offsetX || event.m_offsetY)
+  if ((event.m_id != ACTION_MOUSE_MOVE || event.m_offsetX || event.m_offsetY) && !g_application.m_pPlayer->IsInMenu())
   { // some other mouse action has occurred - bring up the OSD
     // if it is not already running
     CGUIDialogVideoOSD *pOSD = (CGUIDialogVideoOSD *)g_windowManager.GetWindow(WINDOW_DIALOG_VIDEO_OSD);
