@@ -144,6 +144,7 @@ public:
   bool source_done;
   int x, y;
   int width, height;
+  float aspect_ratio;
   int texwidth, texheight;
 
   OMXClient *client;
