@@ -9546,16 +9546,8 @@ xbmc/ApplicationPlayer.h
 xbmc/ApplicationPlayer.cpp
 xbmc/interfaces/json-rpc/SettingsOperations.h
 xbmc/interfaces/json-rpc/SettingsOperations.cpp
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 7c521b3... fixup creator
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecIMX.h
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecIMX.cpp
 xbmc/windowing/egl/EGLNativeTypeIMX.h
 xbmc/windowing/egl/EGLNativeTypeIMX.cpp
-<<<<<<< HEAD
-=======
->>>>>>> 924b296... [mine] various files
-=======
->>>>>>> 7c521b3... fixup creator
+xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
