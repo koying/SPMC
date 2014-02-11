@@ -9551,3 +9551,4 @@ xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecIMX.cpp
 xbmc/windowing/egl/EGLNativeTypeIMX.h
 xbmc/windowing/egl/EGLNativeTypeIMX.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
+xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecInfo.h
