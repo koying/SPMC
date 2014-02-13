@@ -104,7 +104,6 @@ CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
   cvBufferRef = NULL;
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-  stf = NULL;
   stfbuf = NULL;
 #endif
 #if defined(TARGET_ANDROID)
@@ -2180,7 +2179,6 @@ void CLinuxRendererGLES::UploadStfBufTexture(int source)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
   YUVBUFFER& buf    =  m_buffers[source];
-  CDVDVideoCodecStageFright* stf               = buf.stf;
   CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
   YV12Image* im     = &buf.image;
   YUVFIELDS& fields =  buf.fields;
@@ -2190,10 +2188,10 @@ void CLinuxRendererGLES::UploadStfBufTexture(int source)
   CLog::Log(LOGDEBUG, "UploadRkVpuTexture %d: buf:%p\n", source, stfbuf);
 #endif
 
-  if (!stf || !stfbuf || !(im->flags & IMAGE_FLAG_READY))
+  if (!stfbuf || !(im->flags & IMAGE_FLAG_READY))
     return;
 
-  if (stf->IsValid())
+  if (stfbuf->IsValid())
   {
     bool deinterlacing;
     if (m_currentField == FIELD_FULL)
@@ -2221,8 +2219,6 @@ void CLinuxRendererGLES::UploadStfBufTexture(int source)
     CalculateTextureSourceRects(source, 3);
 
     glDisable(m_textureTarget);
-
-    stfbuf->rendered = true;
   }
 #ifdef DEBUG_VERBOSE
   CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
@@ -2381,6 +2377,10 @@ void CLinuxRendererGLES::DeleteNV12Texture(int index)
       im.plane[p] = NULL;
     }
   }
+#ifdef HAS_LIBSTAGEFRIGHT
+  if (m_format == RENDER_FMT_STFBUF)
+    SAFE_RELEASE(m_buffers[index].stfbuf);
+#endif
 }
 
 //********************************************************************************************************
@@ -2542,9 +2542,8 @@ void CLinuxRendererGLES::UploadEGLIMGTexture(int index)
 #endif
 
   YUVBUFFER& buf    =  m_buffers[index];
-  CDVDVideoCodecStageFright* stf               = buf.stf;
   CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
-  if(stf && stf->IsValid() && stfbuf && stfbuf->buffer != EGL_NO_IMAGE_KHR)
+  if(stfbuf && stfbuf->IsValid() && stfbuf->buffer != EGL_NO_IMAGE_KHR)
   {
     YUVPLANE &plane = m_buffers[index].fields[0][0];
 
@@ -2573,7 +2572,6 @@ void CLinuxRendererGLES::DeleteEGLIMGTexture(int index)
     glDeleteTextures(1, &plane.id);
   plane.id = 0;
 
-  buf.stf = NULL;
   buf.stfbuf = NULL;
 #endif
 }
@@ -3098,17 +3096,17 @@ void CLinuxRendererGLES::AddProcessor(struct __CVBuffer *cvBufferRef, int index)
 }
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecStageFright* stf, CDVDVideoCodecStageFrightBuffer* stfbuf, int index)
+void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecStageFrightBuffer* stfbuf, int index)
 {
 #ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
 
   YUVBUFFER &buf = m_buffers[index];
-  stf->ReleaseBuffer(buf.stfbuf);
-  stf->LockBuffer(stfbuf);
+  SAFE_RELEASE(buf.stfbuf);
+  if (stfbuf)
+    stfbuf->Lock();
 
-  buf.stf = stf;
   buf.stfbuf = stfbuf;
 
 #ifdef DEBUG_VERBOSE

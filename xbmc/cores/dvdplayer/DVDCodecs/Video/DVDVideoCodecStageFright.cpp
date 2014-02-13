@@ -201,7 +201,6 @@ void CDVDVideoCodecStageFright::Reset(void)
 
 bool CDVDVideoCodecStageFright::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
-  pDvdVideoPicture->stf = this;
   return m_stf_dll->stf_GetPicture(m_stf_handle, pDvdVideoPicture);
 }
 
@@ -225,22 +224,27 @@ double CDVDVideoCodecStageFright::GetTimeSize(void)
   return 0;
 }
 
-bool CDVDVideoCodecStageFright::IsValid()
+/********************************************************/
+
+void CDVDVideoCodecStageFrightBuffer::Lock()
+{
+  if (CDVDVideoCodecStageFright::m_stf_dll && CDVDVideoCodecStageFright::m_stf_handle)
+    CDVDVideoCodecStageFright::m_stf_dll->stf_LockBuffer(CDVDVideoCodecStageFright::m_stf_handle, this);
+}
+
+long CDVDVideoCodecStageFrightBuffer::Release()
+{
+  if (CDVDVideoCodecStageFright::m_stf_dll && CDVDVideoCodecStageFright::m_stf_handle)
+    CDVDVideoCodecStageFright::m_stf_dll->stf_ReleaseBuffer(CDVDVideoCodecStageFright::m_stf_handle, this);
+}
+
+bool CDVDVideoCodecStageFrightBuffer::IsValid()
 {
   CSingleLock lock (valid_mutex);
-  return m_isvalid;
-}
+  return CDVDVideoCodecStageFright::m_isvalid;
 
-void CDVDVideoCodecStageFright::LockBuffer(CDVDVideoCodecStageFrightBuffer* buf)
-{
-  if (m_stf_dll && m_stf_handle)
-    m_stf_dll->stf_LockBuffer(m_stf_handle, buf);
-}
-
-void CDVDVideoCodecStageFright::ReleaseBuffer(CDVDVideoCodecStageFrightBuffer* buf)
-{
-  if (m_stf_dll && m_stf_handle)
-    m_stf_dll->stf_ReleaseBuffer(m_stf_handle, buf);
 }
 
 #endif
+
+
