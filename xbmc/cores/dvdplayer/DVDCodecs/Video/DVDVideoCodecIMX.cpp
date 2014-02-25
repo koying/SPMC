@@ -448,6 +448,10 @@ bool CDVDVideoCodecIMX::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
       }
     }
     break;
+  case CODEC_ID_WMV3:
+    m_decOpenParam.CodecFormat = VPU_V_VC1;
+    m_pFormatName = "iMX-wmv3";
+    break;
   case CODEC_ID_VC1:
     m_decOpenParam.CodecFormat = VPU_V_VC1_AP;
     m_pFormatName = "iMX-vc1";
@@ -644,6 +648,7 @@ int CDVDVideoCodecIMX::Decode(BYTE *pData, int iSize, double dts, double pts)
     inData.pVirAddr = demuxer_content;
     // FIXME TODO VP8 & DivX3 require specific sCodecData values
     if ((m_decOpenParam.CodecFormat == VPU_V_MPEG2) ||
+        (m_decOpenParam.CodecFormat == VPU_V_VC1)||
         (m_decOpenParam.CodecFormat == VPU_V_VC1_AP)||
         (m_decOpenParam.CodecFormat == VPU_V_XVID))
     {
