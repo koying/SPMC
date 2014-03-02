@@ -708,8 +708,6 @@ case $host in
      ffmpeg_target_os=linux
      use_neon=yes
      use_gles=yes
-     use_wayland=no
-     use_static_ffmpeg=yes
      ;;
   arm*-*linux-android*)
      target_platform=target_android
