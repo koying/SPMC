@@ -25,12 +25,53 @@
 #include <fcntl.h>
 #include <string>
 
-#include "AMLUtils.h"
+#include "rendering/RenderSystem.h"
+#include "settings/MediaSettings.h"
+#include "utils/AMLUtils.h"
 #include "utils/CPUInfo.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/AMLUtils.h"
 #include "guilib/gui3d.h"
+
+#define MODE_HDMI3D_LR          "3dlr"
+#define MODE_HDMI3D_TB          "3dtb"
+#define MODE_HDMI3D_OFF         "3doff"
+
+static void aml_hdmi_3D_mode(const std::string mode3d)
+{
+  CLog::Log(LOGDEBUG, "aml_hdmi_3D_mode: %s", mode3d.c_str());
+
+  static std::string oldhdmi3dmode = MODE_HDMI3D_OFF;
+  static bool reset_disp_mode = false;
+
+  if (mode3d == oldhdmi3dmode)
+    return;
+
+  aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
+  oldhdmi3dmode = mode3d;
+
+  if (strstr(mode3d.c_str(), MODE_HDMI3D_OFF))
+  {
+    if (reset_disp_mode)
+    {
+      // Some 3D HDTVs will not exit from 3D mode with 3doff
+      char disp_mode[256] = {};
+      if (aml_get_sysfs_str("/sys/class/display/mode", disp_mode, 255) != -1)
+      {
+        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
+        // Setting the same mode does not reset HDMI on M8
+        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", "720p");
+        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", disp_mode);
+        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
+      }
+
+      reset_disp_mode = false;
+    }
+  }
+  else
+    reset_disp_mode = true;
+}
 
 int aml_set_sysfs_str(const char *path, const char *val)
 {
@@ -116,6 +157,82 @@ bool aml_hw3d_present()
       has_hw3d = 0;
   }
   return has_hw3d == 1;
+}
+
+bool aml_supports_stereo(const int mode)
+{
+  static int last_mode = -1;
+  static bool last_rtn = false;
+  if (last_mode == mode)
+    return last_rtn;
+
+  CLog::Log(LOGDEBUG, "aml_supports_stereo:mode(0x%x)", mode);
+  char disp_cap_3d[256] = {};
+  if (aml_get_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_cap_3d", disp_cap_3d, 255) == -1)
+  {
+    last_rtn = false;
+    last_mode = -1;
+    return last_rtn;
+  }
+
+  if (mode == RENDER_STEREO_MODE_INTERLACED && strstr(disp_cap_3d,"FramePacking"))
+    last_rtn = true;
+  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL && strstr(disp_cap_3d,"TopBottom"))
+    last_rtn = true;
+  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL && strstr(disp_cap_3d,"SidebySide"))
+    last_rtn = true;
+
+  last_mode = mode;
+
+  return last_rtn;
+}
+
+void aml_set_stereo_mode(const int mode, const int view)
+{
+  static int last_mode = -1;
+  // do nothing if mode matches last time someone called us.
+  if (last_mode == mode)
+    return;
+
+  CLog::Log(LOGDEBUG, "aml_set_stereo_mode:mode(0x%x)", mode);
+  if (!aml_supports_stereo(mode))
+  {
+    last_mode = mode;
+    return;
+  }
+
+  switch(mode)
+  {
+    default:
+      aml_hdmi_3D_mode("3doff");
+      break;
+    case RENDER_STEREO_MODE_SPLIT_VERTICAL:
+      aml_hdmi_3D_mode("3dlr");
+      break;
+    case RENDER_STEREO_MODE_SPLIT_HORIZONTAL:
+      aml_hdmi_3D_mode("3dtb");
+      break;
+
+    case RENDER_STEREO_MODE_INTERLACED:
+      {
+        std::string  stereo_mode;
+        switch(CMediaSettings::Get().GetCurrentVideoSettings().m_StereoMode)
+        {
+          case RENDER_STEREO_MODE_SPLIT_VERTICAL:
+            aml_hdmi_3D_mode("3dlr");
+            break;
+          case RENDER_STEREO_MODE_SPLIT_HORIZONTAL:
+            aml_hdmi_3D_mode("3dtb");
+            break;
+          default:
+            aml_hdmi_3D_mode("3doff");
+            break;
+        }
+      }
+      break;
+  }
+
+  return;
 }
 
 bool aml_wired_present()
