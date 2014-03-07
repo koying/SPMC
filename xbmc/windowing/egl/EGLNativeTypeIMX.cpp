@@ -192,7 +192,9 @@ bool CEGLNativeTypeIMX::SetNativeResolution(const RESOLUTION_INFO &res)
   DestroyNativeWindow();
   DestroyNativeDisplay();
 
+  set_sysfs_str("/sys/class/graphics/fb0/blank", "1");
   set_sysfs_str("/sys/class/graphics/fb0/mode", res.strId);
+  set_sysfs_str("/sys/class/graphics/fb0/blank", "0");
 
   CreateNativeDisplay();
 
