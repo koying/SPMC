@@ -253,11 +253,6 @@ public:
 #define MODE_3D_TO_2D_T         0x00000202
 #define MODE_3D_TO_2D_B         0x00000a02
 
-#define MODE_HDMI3D_LR          "3dlr"
-#define MODE_HDMI3D_TB          "3dtb"
-#define MODE_HDMI3D_OFF         "3doff"
-
-
 #define PTS_FREQ        90000
 #define UNIT_FREQ       96000
 #define AV_SYNC_THRESH  PTS_FREQ*30
@@ -1749,8 +1744,8 @@ void CAMLCodec::CloseDecoder()
   am_private->extradata = NULL;
   // return tsync to default so external apps work
   aml_set_sysfs_int("/sys/class/tsync/enable", 1);
-  SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
 
+  SetVideo3dMode(MODE_3D_DISABLE);
   ShowMainVideo(false);
 
   // add a little delay after closing in case
@@ -2144,44 +2139,8 @@ void CAMLCodec::SetVideo3dMode(const int mode3d)
     return;
 
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideo3dMode:mode3d(0x%x)", mode3d);
-  aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", MODE_HDMI3D_OFF);
   aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", mode3d);
   old3dmode = mode3d;
-}
-
-void CAMLCodec::SetVideoHdmi3dMode(const std::string mode3d)
-{
-  static std::string oldhdmi3dmode = MODE_HDMI3D_OFF;
-  static bool reset_disp_mode = false;
-
-  if (mode3d == oldhdmi3dmode)
-    return;
-
-  CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoHdmi3dMode:mode3d(%s)", mode3d.c_str());
-  aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", 0);
-  aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
-  oldhdmi3dmode = mode3d;
-
-  if (strstr(mode3d.c_str(), MODE_HDMI3D_OFF))
-  {
-    if (reset_disp_mode)
-    {
-      // Some 3D HDTVs will not exit from 3D mode with 3doff
-      char disp_mode[256] = {};
-      if (aml_get_sysfs_str("/sys/class/display/mode", disp_mode, 255) != -1)
-      {
-        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
-        // Setting the same mode does not reset HDMI on M8
-        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", "720p");
-        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", disp_mode);
-        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
-      }
-
-      reset_disp_mode = false;
-    }
-  }
-  else
-    reset_disp_mode = true;
 }
 
 std::string CAMLCodec::GetStereoMode()
@@ -2195,8 +2154,6 @@ std::string CAMLCodec::GetStereoMode()
     default:                                  stereo_mode = m_hints.stereo_mode; break;
   }
 
-  if(CMediaSettings::Get().GetCurrentVideoSettings().m_StereoInvert)
-    stereo_mode = RenderManager::GetStereoModeInvert(stereo_mode);
   return stereo_mode;
 }
 
@@ -2330,13 +2287,11 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   {
     dst_rect.x2 *= 2.0;
     SetVideo3dMode(MODE_3D_DISABLE);
-    SetVideoHdmi3dMode(MODE_HDMI3D_LR);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
   {
     dst_rect.y2 *= 2.0;
     SetVideo3dMode(MODE_3D_DISABLE);
-    SetVideoHdmi3dMode(MODE_HDMI3D_TB);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_INTERLACED)
   {
@@ -2355,7 +2310,6 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   else
   {
     SetVideo3dMode(MODE_3D_DISABLE);
-    SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
   }
 
 #if 1
