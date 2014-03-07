@@ -60,8 +60,6 @@ private:
   void          SetVideoSaturation(const int saturation);
   void          GetRenderFeatures(Features &renderFeatures);
   void          SetVideo3dMode(const int mode3d);
-  void          SetVideoHdmi3dMode(const std::string mode3d);
-
   std::string   GetStereoMode();
   static void   RenderFeaturesCallBack(const void *ctx, Features &renderFeatures);
   void          SetVideoRect(const CRect &SrcRect, const CRect &DestRect);
