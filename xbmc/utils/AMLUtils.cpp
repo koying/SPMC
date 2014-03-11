@@ -136,11 +136,9 @@ void aml_set_stereo_mode(const int mode, const int view)
   if (last_mode == mode)
     return;
 
+  last_mode = mode;
   if (!aml_supports_stereo(mode))
-  {
-    last_mode = mode;
     return;
-  }
 
   switch(mode)
   {
