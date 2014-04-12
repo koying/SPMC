@@ -407,6 +407,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   }
   p->width     = hints.width;
   p->height    = hints.height;
+  p->ptsinvalid = hints.ptsinvalid;
   if (!hints.forced_aspect)
     p->aspect_ratio = hints.aspect;
   else
@@ -605,6 +606,10 @@ int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts
       return VC_ERROR;
 
     frame->status  = OK;
+
+    if (p->ptsinvalid)
+      pts = DVD_NOPTS_VALUE;
+
     if (p->m_g_advancedSettings->m_stagefrightConfig.useInputDTS)
       frame->pts = (dts != DVD_NOPTS_VALUE) ? pts_dtoi(dts) : ((pts != DVD_NOPTS_VALUE) ? pts_dtoi(pts) : 0);
     else

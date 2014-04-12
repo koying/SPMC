@@ -144,6 +144,7 @@ public:
   bool source_done;
   int x, y;
   int width, height;
+  bool ptsinvalid;
   float aspect_ratio;
   int texwidth, texheight;
 
