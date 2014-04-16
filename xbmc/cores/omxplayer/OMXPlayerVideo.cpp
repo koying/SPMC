@@ -727,39 +727,16 @@ void OMXPlayerVideo::ResolutionUpdateCallBack(uint32_t width, uint32_t height, f
   uint32_t video_width   = CDisplaySettings::GetInstance().GetResolutionInfo(res).iScreenWidth;
   uint32_t video_height  = CDisplaySettings::GetInstance().GetResolutionInfo(res).iScreenHeight;
 
-  unsigned flags = 0;
   ERenderFormat format = RENDER_FMT_BYPASS;
+
+  /* figure out steremode expected based on user settings and hints */
+  unsigned flags = GetStereoModeFlags(GetStereoMode());
 
   if(m_bAllowFullscreen)
   {
     flags |= CONF_FLAGS_FULLSCREEN;
     m_bAllowFullscreen = false; // only allow on first configure
   }
-
-  flags |= GetStereoModeFlags(GetStereoMode());
-
-  if(flags & CONF_FLAGS_STEREO_MODE_SBS)
-  {
-    if(g_Windowing.Support3D(video_width, video_height, D3DPRESENTFLAG_MODE3DSBS))
-      CLog::Log(LOGNOTICE, "3DSBS movie found");
-    else
-    {
-      flags &= ~CONF_FLAGS_STEREO_MODE_MASK(~0);
-      CLog::Log(LOGNOTICE, "3DSBS movie found but not supported");
-    }
-  }
-  else if(flags & CONF_FLAGS_STEREO_MODE_TAB)
-  {
-    if(g_Windowing.Support3D(video_width, video_height, D3DPRESENTFLAG_MODE3DTB))
-      CLog::Log(LOGNOTICE, "3DTB movie found");
-    else
-    {
-      flags &= ~CONF_FLAGS_STEREO_MODE_MASK(~0);
-      CLog::Log(LOGNOTICE, "3DTB movie found but not supported");
-    }
-  }
-  else
-    CLog::Log(LOGNOTICE, "not a 3D movie");
 
   unsigned int iDisplayWidth  = width;
   unsigned int iDisplayHeight = height;
