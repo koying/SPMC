@@ -35,7 +35,9 @@
 #include "utils/BitstreamConverter.h"
 #include "utils/CPUInfo.h"
 #include "utils/log.h"
+#include "utils/EndianSwap.h"
 
+#include "android/jni/Build.h"
 #include "android/jni/ByteBuffer.h"
 #include "android/jni/MediaCodec.h"
 #include "android/jni/MediaCrypto.h"
@@ -337,30 +339,28 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_MPEG2VIDEO:
-      m_mime = "video/mpeg2";
+      m_requestedMimes.push_back("video/mpeg2");
       m_formatname = "amc-mpeg2";
       break;
     case AV_CODEC_ID_MPEG4:
-      m_mime = "video/mp4v-es";
+      m_requestedMimes.push_back("video/mp4v-es");
       m_formatname = "amc-mpeg4";
       break;
     case AV_CODEC_ID_H263:
-      m_mime = "video/3gpp";
+      m_requestedMimes.push_back("video/3gpp");
       m_formatname = "amc-h263";
       break;
     case AV_CODEC_ID_VP3:
     case AV_CODEC_ID_VP6:
     case AV_CODEC_ID_VP6F:
     case AV_CODEC_ID_VP8:
-      //m_mime = "video/x-vp6";
-      //m_mime = "video/x-vp7";
-      m_mime = "video/x-vnd.on2.vp8";
+      m_requestedMimes.push_back("video/x-vnd.on2.vp8");
       m_formatname = "amc-vpX";
       break;
     case AV_CODEC_ID_AVS:
     case AV_CODEC_ID_CAVS:
     case AV_CODEC_ID_H264:
-      m_mime = "video/avc";
+      m_requestedMimes.push_back("video/avc");
       m_formatname = "amc-h264";
       // check for h264-avcC and convert to h264-annex-b
       if (m_hints.extradata && *(uint8_t*)m_hints.extradata == 1)
@@ -373,10 +373,48 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
         }
       }
       break;
-    case AV_CODEC_ID_VC1:
     case AV_CODEC_ID_WMV3:
-      m_mime = "video/wvc1";
-      //m_mime = "video/wmv9";
+      m_requestedMimes.push_back("video/x-ms-wmv");
+      m_formatname = "amc-wmv3";
+
+    {
+      // From VLC
+      int profile;
+      // According to OMX IL 1.2.0 spec (4.3.33.2), the codec config
+      // data for VC-1 Main/Simple (aka WMV3) is according to table 265
+      // in the VC-1 spec. Most of the fields are just set with placeholders
+      // (like framerate, hrd_buffer/rate).
+      static uint8_t wmv3seq[] =
+      {
+        0xff, 0xff, 0xff, 0xc5, // numframes=ffffff, marker byte
+        0x04, 0x00, 0x00, 0x00, // marker byte
+        0x00, 0x00, 0x00, 0x00, // struct C, almost equal to p_extra
+        0x00, 0x00, 0x00, 0x00, // struct A, vert size
+        0x00, 0x00, 0x00, 0x00, // struct A, horiz size
+        0x0c, 0x00, 0x00, 0x00, // marker byte
+        0xff, 0xff, 0x00, 0x80, // struct B, level=4, cbr=0, hrd_buffer=ffff
+        0xff, 0xff, 0x00, 0x00, // struct B, hrd_rate=ffff
+        0xff, 0xff, 0xff, 0xff, // struct B, framerate=ffffffff
+      };
+
+      // Struct C - almost equal to the extradata
+      memcpy(&wmv3seq[8], m_hints.extradata, 4);
+      // Expand profile from the highest 2 bits to the highest 4 bits
+      profile = wmv3seq[8] >> 6;
+      wmv3seq[8] = (wmv3seq[8] & 0x0f) | (profile << 4);
+      // Fill in the height/width for struct A
+      uint32_t leWidth = Endian_SwapLE32(m_hints.width);
+      uint32_t leHeight = Endian_SwapLE32(m_hints.height);
+      memcpy(&wmv3seq[12], &leHeight, sizeof(leHeight));
+      memcpy(&wmv3seq[16], &leWidth, sizeof(leWidth));
+
+      m_hints.extrasize = sizeof(wmv3seq);
+      m_hints.extradata = &wmv3seq;
+    }
+
+      break;
+    case AV_CODEC_ID_VC1:
+      m_requestedMimes.push_back("video/wvc1");
       m_formatname = "amc-vc1";
       break;
     default:
@@ -388,10 +426,12 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   // CJNIMediaCodec::createDecoderByXXX doesn't handle errors nicely,
   // it crashes if the codec isn't found. This is fixed in latest AOSP,
   // but not in current 4.1 devices. So 1st search for a matching codec, then create it.
-  m_colorFormat = -1;
   int num_codecs = CJNIMediaCodecList::getCodecCount();
   for (int i = 0; i < num_codecs; i++)
   {
+    m_colorFormat = -1;
+    m_mime = "";
+
     CJNIMediaCodecInfo codec_info = CJNIMediaCodecList::getCodecInfoAt(i);
     if (codec_info.isEncoder())
       continue;
@@ -399,35 +439,54 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     if (IsBlacklisted(m_codecname))
       continue;
 
-    CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
-    std::vector<int> color_formats = codec_caps.colorFormats();
+    // whitelist of devices that can surface render.
+    m_render_sw = !CanSurfaceRenderWhiteList(m_codecname);
 
     std::vector<std::string> types = codec_info.getSupportedTypes();
     // return the 1st one we find, that one is typically 'the best'
     for (size_t j = 0; j < types.size(); ++j)
     {
-      if (types[j] == m_mime)
+      for (size_t k = 0; k < m_requestedMimes.size(); ++k)
       {
-        m_codec = boost::shared_ptr<CJNIMediaCodec>(new CJNIMediaCodec(CJNIMediaCodec::createByCodecName(m_codecname)));
-
-        // clear any jni exceptions, jni gets upset if we do not.
-        if (xbmc_jnienv()->ExceptionOccurred())
+        if(types[j] == m_requestedMimes[k])
         {
-          CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Open ExceptionOccurred");
+          m_mime = types[j];
+          break;
+        }
+      }
+      if (m_mime.empty())
+        continue;
+
+      m_codec = boost::shared_ptr<CJNIMediaCodec>(new CJNIMediaCodec(CJNIMediaCodec::createByCodecName(m_codecname)));
+
+      // clear any jni exceptions, jni gets upset if we do not.
+      if (xbmc_jnienv()->ExceptionOccurred())
+      {
+        CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Open ExceptionOccurred");
+        xbmc_jnienv()->ExceptionClear();
+        m_codec.reset();
+        continue;
+      }
+
+      if (m_render_sw)
+      {
+        CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
+        std::vector<int> color_formats = codec_caps.colorFormats();
+        for (size_t k = 0; k < color_formats.size(); ++k)
+        {
+          CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open "
+                    "m_codecname(%s), colorFormat(%d)", m_codecname.c_str(), color_formats[k]);
+          if (IsSupportedColorFormat(color_formats[k]))
+            m_colorFormat = color_formats[k]; // Save color format for initial output configuration
+        }
+        if (m_colorFormat == -1)
+        {
           xbmc_jnienv()->ExceptionClear();
           m_codec.reset();
           continue;
         }
-
-        for (size_t k = 0; k < color_formats.size(); ++k)
-        {
-          CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open "
-            "m_codecname(%s), colorFormat(%d)", m_codecname.c_str(), color_formats[k]);
-          if (IsSupportedColorFormat(color_formats[k]))
-            m_colorFormat = color_formats[k]; // Save color format for initial output configuration
-        }
-        break;
       }
+      break;
     }
     if (m_codec)
       break;
@@ -437,19 +496,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec:: Failed to create Android MediaCodec");
     SAFE_DELETE(m_bitstream);
     return false;
-  }
-
-  // whitelist of devices that can surface render.
-  m_render_sw = !CanSurfaceRenderWhiteList(m_codecname);
-  if (m_render_sw)
-  {
-    if (m_colorFormat == -1)
-    {
-      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec:: No supported color format");
-      m_codec.reset();
-      SAFE_DELETE(m_bitstream);
-      return false;
-    }
   }
 
   // setup a YUV420P DVDVideoPicture buffer.

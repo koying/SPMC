@@ -460,6 +460,8 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
     if (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == 0)
       return false;
     mimetype = "video/vc1";
+    if (CJNIBuild::MANUFACTURER == "Amazon" && CJNIBuild::MODEL == "AFTB")  // Amazon FIRE TV
+      mimetype = "video/x-ms-wmv";
     break;
   default:
     return false;
