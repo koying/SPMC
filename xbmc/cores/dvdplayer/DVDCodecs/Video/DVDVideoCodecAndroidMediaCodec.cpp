@@ -187,6 +187,9 @@ CDVDMediaCodecInfo* CDVDMediaCodecInfo::Retain()
 {
   AtomicIncrement(&m_refs);
   m_isReleased = false;
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"Retain: %d, %d", m_index, m_refs);
+#endif
 
   return this;
 }
@@ -194,6 +197,9 @@ CDVDMediaCodecInfo* CDVDMediaCodecInfo::Retain()
 long CDVDMediaCodecInfo::Release()
 {
   long count = AtomicDecrement(&m_refs);
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"Release: %d, %d", m_index, m_refs);
+#endif
   if (count == 1)
     ReleaseOutputBuffer(false);
   if (count == 0)
@@ -212,6 +218,9 @@ void CDVDMediaCodecInfo::Validate(bool state)
 void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
 {
   CSingleLock lock(m_section);
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"ReleaseOutputBuffer: %d, %d", m_index, render);
+#endif
 
   if (!m_valid || m_isReleased)
     return;
@@ -222,6 +231,9 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
   if (render)
     m_frameready->Reset();
 
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"OUT Q: %d, %d", m_index, render);
+#endif
   m_codec->releaseOutputBuffer(m_index, render);
   m_isReleased = true;
 
@@ -550,13 +562,21 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
     // try to fetch an input buffer
     int64_t timeout_us = 5000;
     int index = m_codec->dequeueInputBuffer(timeout_us);
+#ifdef DEBUG_VERBOSE
+    CLog::Log(LOGDEBUG,"IN DEQ: %d", index);
+#endif
     if (index >= 0)
     {
       // docs lie, getInputBuffers should be good after
       // m_codec->start() but the internal refs are not
       // setup until much later on some devices.
       if (m_input.empty())
+      {
         m_input = m_codec->getInputBuffers();
+#ifdef DEBUG_VERBOSE
+        CLog::Log(LOGDEBUG,"IN EMPTY: %d", m_input.size());
+#endif
+      }
 
       // we have an input buffer, fill it.
       int size = m_input[index].capacity();
@@ -593,6 +613,9 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
       int flags = 0;
       int offset = 0;
       m_codec->queueInputBuffer(index, offset, demux_pkt.iSize, presentationTimeUs, flags);
+#ifdef DEBUG_VERBOSE
+      CLog::Log(LOGDEBUG,"IN Q: %d", index);
+#endif
       // clear any jni exceptions, jni gets upset if we do not.
       if (xbmc_jnienv()->ExceptionOccurred())
       {
@@ -645,6 +668,10 @@ bool CDVDVideoCodecAndroidMediaCodec::GetPicture(DVDVideoPicture* pDvdVideoPictu
   if (!m_opened)
     return false;
 
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"OUTPUT: %d", m_videobuffer.mediacodec->GetIndex());
+#endif
+
   *pDvdVideoPicture = m_videobuffer;
 
   // Invalidate our local DVDVideoPicture bits
@@ -658,7 +685,12 @@ bool CDVDVideoCodecAndroidMediaCodec::GetPicture(DVDVideoPicture* pDvdVideoPictu
 bool CDVDVideoCodecAndroidMediaCodec::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   if (pDvdVideoPicture->format == RENDER_FMT_MEDIACODEC)
+  {
+#ifdef DEBUG_VERBOSE
+    CLog::Log(LOGDEBUG,"CLEAR: %d", pDvdVideoPicture->mediacodec->GetIndex());
+#endif
     SAFE_RELEASE(pDvdVideoPicture->mediacodec);
+  }
   memset(pDvdVideoPicture, 0x00, sizeof(DVDVideoPicture));
 
   return true;
@@ -666,6 +698,9 @@ bool CDVDVideoCodecAndroidMediaCodec::ClearPicture(DVDVideoPicture* pDvdVideoPic
 
 void CDVDVideoCodecAndroidMediaCodec::SetDropState(bool bDrop)
 {
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"DROPSTATE: %d", bDrop);
+#endif
   m_drop = bDrop;
   if (m_drop)
     m_videobuffer.iFlags |=  DVP_FLAG_DROPPED;
@@ -694,6 +729,10 @@ void CDVDVideoCodecAndroidMediaCodec::FlushInternal()
 {
   // invalidate any existing inflight buffers and create
   // new ones to match the number of output buffers
+
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"FLUSH");
+#endif
 
   if (m_render_sw)
     return;
@@ -789,10 +828,16 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
   int64_t timeout_us = 5000;
   CJNIMediaCodecBufferInfo bufferInfo;
   int index = m_codec->dequeueOutputBuffer(bufferInfo, timeout_us);
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG,"OUT DEQ: %d", index);
+#endif
   if (index >= 0)
   {
     if (m_drop)
     {
+#ifdef DEBUG_VERBOSE
+      CLog::Log(LOGDEBUG,"OUT Q: %d, false", index);
+#endif
       m_codec->releaseOutputBuffer(index, false);
       if (xbmc_jnienv()->ExceptionOccurred())
         xbmc_jnienv()->ExceptionClear();
@@ -806,6 +851,9 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
     {
       m_output = m_codec->getOutputBuffers();
       FlushInternal();
+#ifdef DEBUG_VERBOSE
+      CLog::Log(LOGDEBUG,"OUT EMPTY: %d", m_output.size());
+#endif
     }
 
     int flags = bufferInfo.flags();
@@ -818,6 +866,9 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
     if (flags & CJNIMediaCodec::BUFFER_FLAG_END_OF_STREAM)
     {
       CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec:: BUFFER_FLAG_END_OF_STREAM");
+#ifdef DEBUG_VERBOSE
+      CLog::Log(LOGDEBUG,"OUT Q: %d, false", index);
+#endif
       m_codec->releaseOutputBuffer(index, false);
       if (xbmc_jnienv()->ExceptionOccurred())
         xbmc_jnienv()->ExceptionClear();
@@ -866,6 +917,9 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
               memcpy(dst, src, dst_stride);
         }
       }
+#ifdef DEBUG_VERBOSE
+      CLog::Log(LOGDEBUG,"OUT Q: %d, false", index);
+#endif
       m_codec->releaseOutputBuffer(index, false);
     }
 
