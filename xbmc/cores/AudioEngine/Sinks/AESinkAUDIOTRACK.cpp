@@ -27,10 +27,12 @@
 #include "utils/AMLUtils.h"
 #endif
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 #include "android/jni/AudioFormat.h"
 #include "android/jni/AudioManager.h"
 #include "android/jni/AudioTrack.h"
+#include "android/jni/Build.h"
 
 using namespace jni;
 
@@ -145,16 +147,16 @@ static int AEChannelMapToAUDIOTRACKChannelMask(CAEChannelInfo info)
   return atMask;
 }
 
-static jni::CJNIAudioTrack *CreateAudioTrack(int sampleRate, int channelMask, int bufferSize)
+static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int channelMask, int encoding, int bufferSize)
 {
   jni::CJNIAudioTrack *jniAt = NULL;
 
   try
   {
-    jniAt = new CJNIAudioTrack(CJNIAudioManager::STREAM_MUSIC,
+    jniAt = new CJNIAudioTrack(stream,
                                sampleRate,
                                channelMask,
-                               CJNIAudioFormat::ENCODING_PCM_16BIT,
+                               encoding,
                                bufferSize,
                                CJNIAudioTrack::MODE_STREAM);
   }
@@ -192,13 +194,20 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
   int stream = CJNIAudioManager::STREAM_MUSIC;
   int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
-  int channelConfig = CJNIAudioFormat::CHANNEL_OUT_STEREO;
 
   if (AE_IS_RAW(m_format.m_dataFormat))
   {
     m_passthrough = true;
     if (CJNIAudioFormat::ENCODING_IEC61937_16BIT != -1)  // OUYA
+    {
+      CLog::Log(LOGNOTICE, "Using OUYA hacked Passthrough");
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
+    }
+    else if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") // Rockchip with "passthrough hack"
+    {
+      CLog::Log(LOGNOTICE, "Using Rockchip hacked Passthrough");
+      stream = CJNIAudioManager::STREAM_VOICE_CALL;
+    }
   }
   else
     m_passthrough = false;
@@ -210,7 +219,18 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
   int atChannelMask = AEChannelMapToAUDIOTRACKChannelMask(m_format.m_channelLayout);
 
-  m_format.m_sampleRate     = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
+  // default to 44100, all android devices support it.
+  // then check if we can support the requested rate.
+  unsigned int sampleRate = 44100;
+  for (size_t i = 0; i < m_info.m_sampleRates.size(); i++)
+  {
+    if (m_format.m_sampleRate == m_info.m_sampleRates[i])
+    {
+      sampleRate = m_format.m_sampleRate;
+      break;
+    }
+  }
+  m_format.m_sampleRate     = sampleRate;
   m_format.m_dataFormat     = AE_FMT_S16LE;
 
   while (!m_at_jni)
@@ -226,8 +246,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     m_min_frames              = min_buffer_size / m_sink_frameSize;
     m_audiotrackbuffer_sec    = (double)m_min_frames / (double)m_format.m_sampleRate;
 
-    m_at_jni                  = CreateAudioTrack(m_format.m_sampleRate,
-                                                 atChannelMask,
+    m_at_jni                  = CreateAudioTrack(stream, m_format.m_sampleRate,
+                                                 atChannelMask, encoding,
                                                  min_buffer_size);
 
     if (!m_at_jni)
@@ -384,6 +404,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_channels = KnownChannels;
 #endif
   m_info.m_sampleRates.push_back(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
+  m_info.m_sampleRates.push_back(48000);  // for passthrough
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
   m_info.m_dataFormats.push_back(AE_FMT_AC3);
   m_info.m_dataFormats.push_back(AE_FMT_DTS);
