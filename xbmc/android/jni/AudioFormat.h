@@ -43,6 +43,9 @@ class CJNIAudioFormat
     static int CHANNEL_OUT_BACK_RIGHT;
 
     static int CHANNEL_INVALID;
+
+    // OUYA-specific
+    static int ENCODING_IEC61937_16BIT;
 };
 
 };

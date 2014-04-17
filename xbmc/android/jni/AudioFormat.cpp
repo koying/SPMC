@@ -41,6 +41,9 @@ int CJNIAudioFormat::CHANNEL_OUT_BACK_RIGHT            = 0x00000080;
 
 int CJNIAudioFormat::CHANNEL_INVALID                   = 0x00000000;
 
+// OUYA-specific
+int CJNIAudioFormat::ENCODING_IEC61937_16BIT = -1;
+
 void CJNIAudioFormat::PopulateStaticFields()
 {
   int sdk = CJNIBase::GetSDKVersion();
@@ -61,6 +64,13 @@ void CJNIAudioFormat::PopulateStaticFields()
       CJNIAudioFormat::CHANNEL_OUT_BACK_CENTER = get_static_field<int>(c, "CHANNEL_OUT_BACK_CENTER");
       CJNIAudioFormat::CHANNEL_OUT_BACK_RIGHT = get_static_field<int>(c, "CHANNEL_OUT_BACK_RIGHT");
       CJNIAudioFormat::CHANNEL_INVALID = get_static_field<int>(c, "CHANNEL_INVALID");
+
+    // OUYA-specific
+    jfieldID id = get_static_field_id<jclass>(c, "ENCODING_IEC61937_16BIT", "I");
+    if (id != NULL)
+      CJNIAudioFormat::ENCODING_IEC61937_16BIT = get_static_field<int>(c, "ENCODING_IEC61937_16BIT");
+    else
+      xbmc_jnienv()->ExceptionClear();
   }
 }
 
