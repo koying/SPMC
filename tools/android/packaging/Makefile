@@ -51,7 +51,7 @@ libs= $(DSTLIBS)
 multi: x86 arm
 	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-multi-unaligned.apk
 	@cd xbmc; zip -r -q ../images/xbmcapp-debug-multi-unaligned.apk lib/ assets
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~Dropbox/Private/xbmc.keystore -storepass android images/xbmcapp-debug-multi-unaligned.apk androiddebugkey
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~Dropbox/Private/spmc.keystore -storepass android images/xbmcapp-debug-multi-unaligned.apk androiddebugkey
 	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-multi-unaligned.apk $(XBMCROOT)/xbmcapp-multi-debug.apk
 	@rm images/xbmcapp-debug-multi-unaligned.apk
 	@echo "$(XBMCROOT)/xbmcapp-multi-debug.apk created"
@@ -62,7 +62,7 @@ package: extras
 	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/xbmc/*.java
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
 	@cd xbmc; zip -r -q ../images/xbmcapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/xbmc.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/spmc.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
 	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/xbmcapp-$(CPU)-debug.apk
 	@rm images/xbmcapp-debug-$(CPU)-unaligned.apk
 	@echo "$(XBMCROOT)/xbmcapp-$(CPU)-debug.apk created"
