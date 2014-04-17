@@ -9553,3 +9553,17 @@ xbmc/windowing/egl/EGLNativeTypeIMX.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile.in
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecInfo.h
 xbmc/windowing/egl/Makefile.in
+xbmc/android/jni/AudioFormat.h
+xbmc/android/jni/AudioFormat.cpp
+xbmc/android/jni/MediaFormat.h
+xbmc/android/jni/MediaCodecList.h
+xbmc/android/jni/MediaCodecInfo.h
+xbmc/android/jni/MediaCodecCryptoInfo.h
+xbmc/android/jni/MediaCodecBufferInfo.h
+xbmc/android/jni/MediaCodec.h
+xbmc/android/jni/MediaFormat.cpp
+xbmc/android/jni/MediaCodecList.cpp
+xbmc/android/jni/MediaCodecInfo.cpp
+xbmc/android/jni/MediaCodecCryptoInfo.cpp
+xbmc/android/jni/MediaCodecBufferInfo.cpp
+xbmc/android/jni/MediaCodec.cpp
