@@ -27,10 +27,12 @@
 #include "utils/AMLUtils.h"
 #endif
 #include "utils/log.h"
+#include "utils/StringUtils.h"
 
 #include "android/jni/AudioFormat.h"
 #include "android/jni/AudioManager.h"
 #include "android/jni/AudioTrack.h"
+#include "android/jni/Build.h"
 
 using namespace jni;
 
@@ -93,6 +95,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     m_passthrough = true;
     if (CJNIAudioFormat::ENCODING_IEC61937_16BIT != -1)  // OUYA
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
+    else if (StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
+      stream = CJNIAudioManager::STREAM_VOICE_CALL;
   }
   else
     m_passthrough = false;

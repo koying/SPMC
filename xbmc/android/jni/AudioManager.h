@@ -34,6 +34,7 @@ public:
 
   static void PopulateStaticFields();
   static int STREAM_MUSIC;
+  static int STREAM_VOICE_CALL;
 
 private:
   CJNIAudioManager();
