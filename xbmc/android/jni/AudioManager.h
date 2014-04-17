@@ -54,6 +54,7 @@ public:
 
   static void PopulateStaticFields();
   static int STREAM_MUSIC;
+  static int STREAM_VOICE_CALL;
 
   static int AUDIOFOCUS_GAIN;
   static int AUDIOFOCUS_LOSS;

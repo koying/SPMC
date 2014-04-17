@@ -29,6 +29,7 @@
 using namespace jni;
 
 int CJNIAudioManager::STREAM_MUSIC(3);
+int CJNIAudioManager::STREAM_VOICE_CALL(0);
 
 int CJNIAudioManager::AUDIOFOCUS_GAIN(0x00000001);
 int CJNIAudioManager::AUDIOFOCUS_LOSS(0xffffffff);
@@ -39,6 +40,7 @@ void CJNIAudioManager::PopulateStaticFields()
 {
   jhclass clazz = find_class("android/media/AudioManager");
   STREAM_MUSIC  = (get_static_field<int>(clazz, "STREAM_MUSIC"));
+  STREAM_VOICE_CALL  = (get_static_field<int>(clazz, "STREAM_VOICE_CALL"));
   AUDIOFOCUS_GAIN  = (get_static_field<int>(clazz, "AUDIOFOCUS_GAIN"));
   AUDIOFOCUS_LOSS  = (get_static_field<int>(clazz, "AUDIOFOCUS_LOSS"));
   AUDIOFOCUS_REQUEST_GRANTED  = (get_static_field<int>(clazz, "AUDIOFOCUS_REQUEST_GRANTED"));
