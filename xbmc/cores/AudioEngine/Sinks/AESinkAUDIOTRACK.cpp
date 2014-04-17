@@ -212,8 +212,16 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   m_format      = format;
   m_volume      = -1;
 
+  int stream = CJNIAudioManager::STREAM_MUSIC;
+  int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
+  int channelConfig = CJNIAudioFormat::CHANNEL_OUT_STEREO;
+
   if (AE_IS_RAW(m_format.m_dataFormat))
+  {
     m_passthrough = true;
+    if (CJNIAudioFormat::ENCODING_IEC61937_16BIT != -1)  // OUYA
+      encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
+  }
   else
     m_passthrough = false;
 
@@ -234,7 +242,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
                                 (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
     int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
                                                                   atChannelMask,
-                                                                  CJNIAudioFormat::ENCODING_PCM_16BIT);
+                                                                  encoding);
     m_sink_frameSize          = m_format.m_channelLayout.Count() *
                                 (CAEUtil::DataFormatToBits(AE_FMT_S16LE) / 8);
     m_min_frames              = min_buffer_size / m_sink_frameSize;
