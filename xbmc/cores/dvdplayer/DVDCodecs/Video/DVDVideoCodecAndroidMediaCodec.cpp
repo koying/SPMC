@@ -35,6 +35,7 @@
 #include "utils/BitstreamConverter.h"
 #include "utils/CPUInfo.h"
 #include "utils/log.h"
+#include "settings/AdvancedSettings.h"
 
 #include "android/jni/ByteBuffer.h"
 #include "android/jni/MediaCodec.h"
@@ -49,20 +50,15 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-static bool CanSurfaceRenderWhiteList(const std::string &name)
+static bool CanSurfaceRenderBlackList(const std::string &name)
 {
   // All devices 'should' be capiable of surface rendering
   // but that seems to be hit or miss as most odd name devices
   // cannot surface render.
-  static const char *cansurfacerender_decoders[] = {
-    "OMX.Nvidia",
-    "OMX.rk",
-    "OMX.qcom",
-    "OMX.Intel",
-    "OMX.Exynos",
+  static const char *cannotsurfacerender_decoders[] = {
     NULL
   };
-  for (const char **ptr = cansurfacerender_decoders; *ptr; ptr++)
+  for (const char **ptr = cannotsurfacerender_decoders; *ptr; ptr++)
   {
     if (!strnicmp(*ptr, name.c_str(), strlen(*ptr)))
       return true;
@@ -390,6 +386,9 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
     std::vector<int> color_formats = codec_caps.colorFormats();
 
+    // blacklist of devices that can surface render.
+    m_render_sw = CanSurfaceRenderBlackList(m_codecname) || g_advancedSettings.m_mediacodecForceSoftwareRendring;
+
     std::vector<std::string> types = codec_info.getSupportedTypes();
     // return the 1st one we find, that one is typically 'the best'
     for (size_t j = 0; j < types.size(); ++j)
@@ -427,8 +426,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     return false;
   }
 
-  // whitelist of devices that can surface render.
-  m_render_sw = !CanSurfaceRenderWhiteList(m_codecname);
   if (m_render_sw)
   {
     if (m_colorFormat == -1)
