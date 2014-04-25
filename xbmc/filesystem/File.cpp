@@ -963,6 +963,12 @@ unsigned int CFile::LoadFile(const std::string &filename, auto_buffer& outputBuf
   return total_read;
 }
 
+bool CFile::Touch(const CStdString& fileName)
+{
+  CFile newfile;
+  return newfile.OpenForWrite(fileName);
+}
+
 //*********************************************************************************************
 //*************** Stream IO for CFile objects *************************************************
 //*********************************************************************************************
