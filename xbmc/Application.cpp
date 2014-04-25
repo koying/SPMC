@@ -1079,6 +1079,9 @@ bool CApplication::InitDirectoriesWin32()
 void CApplication::CreateUserDirs()
 {
   CDirectory::Create("special://home/");
+#ifdef TARGET_ANDROID
+  CFile::Touch("special://home/.nomedia");
+#endif
   CDirectory::Create("special://home/addons");
   CDirectory::Create("special://home/addons/packages");
   CDirectory::Create("special://home/media");
