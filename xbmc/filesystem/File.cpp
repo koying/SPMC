@@ -982,6 +982,12 @@ ssize_t CFile::LoadFile(const CURL& file, auto_buffer& outputBuffer)
   return total_read;
 }
 
+bool CFile::Touch(const std::string& fileName)
+{
+  CFile newfile;
+  return newfile.OpenForWrite(fileName);
+}
+
 //*********************************************************************************************
 //*************** Stream IO for CFile objects *************************************************
 //*********************************************************************************************
