@@ -146,7 +146,7 @@ public:
   Frame *prev_frame;
   bool source_done;
   int x, y;
-  CodecID codec;
+  AVCodecID codec;
   int width, height;
   float aspect_ratio;
   int texwidth, texheight;

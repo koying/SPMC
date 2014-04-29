@@ -21,13 +21,15 @@
  */
 
 #include "system.h"
-#include "DllAvFormat.h"
-#include "DllAvCodec.h"
 
 #include <vector>
 #include <string>
 #include "cores/VideoRenderers/RenderFormats.h"
 #include "DVDVideoCodecInfo.h"
+
+extern "C" {
+#include "libavcodec/avcodec.h"
+}
 
 struct DVDCodecAvailableType 
 {
@@ -110,8 +112,8 @@ struct DVDVideoPicture
   unsigned int extended_format;
   char         stereo_mode[32];
 
-  int8_t* qscale_table; // Quantization parameters, primarily used by filters
-  int qscale_stride;
+  int8_t* qp_table; // Quantization parameters, primarily used by filters
+  int qstride;
   int qscale_type;
 
   unsigned int iWidth;
