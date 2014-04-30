@@ -433,6 +433,12 @@ AC_ARG_ENABLE([ffmpeg_libvorbis],
   [use_ffmpeg_libvorbis=$enableval],
   [use_ffmpeg_libvorbis=no])
 
+AC_ARG_ENABLE([ffmpeg_safe],
+  [AS_HELP_STRING([--enable-ffmpeg_safe],
+  [disable shady licensed codecs (default is no)])],
+  [use_ffmpeg_safe=$enableval],
+  [use_ffmpeg_safe=no])
+
 AC_ARG_ENABLE([dvdcss],
   [AS_HELP_STRING([--enable-dvdcss],
   [enable DVDCSS support (default is yes)])],
@@ -2811,6 +2817,12 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
     else
       ffmpg_config="$ffmpg_config --disable-libvorbis"
     fi
+    if test "$use_ffmpeg_safe" = "yes"; then
+      ffmpg_config="$ffmpg_config --disable-decoder=ac3,eac3,mlp,dca,h264,mpeg4 --disable-encoder=ac3,eac3,mlp,dca,h264,mpeg4"
+    else
+      ffmpg_config="$ffmpg_config --enable-encoder=ac3"
+    fi
+
     if test "$have_gnutls" = "yes"; then
       ffmpg_config="$ffmpg_config --enable-gnutls"
     fi
@@ -2820,7 +2832,7 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
     ffmpg_config="$ffmpg_config --enable-postproc"
     ffmpg_config="$ffmpg_config --enable-static      --enable-pthreads"
     ffmpg_config="$ffmpg_config --enable-muxer=spdif --enable-muxer=adts --enable-muxer=asf --enable-muxer=ipod"
-    ffmpg_config="$ffmpg_config --enable-encoder=ac3 --enable-encoder=aac --enable-encoder=wmav2"
+    ffmpg_config="$ffmpg_config --enable-encoder=aac --enable-encoder=wmav2"
     ffmpg_config="$ffmpg_config --enable-protocol=http"
     ffmpg_config="$ffmpg_config --enable-runtime-cpudetect"
 
@@ -2868,10 +2880,10 @@ XB_CONFIG_MODULE([lib/ffmpeg], [
       --enable-muxer=asf \
       --enable-muxer=ipod \
       --disable-encoders \
-      --enable-encoder=ac3 \
       --enable-encoder=aac \
       --enable-encoder=wmav2 \
       `if test "$use_ffmpeg_libvorbis" = "yes"; then echo --enable-libvorbis --enable-muxer=ogg --enable-encoder=libvorbis; else echo --disable-libvorbis; fi` \
+      `if test "$use_ffmpeg_ac3dts" = "no"; then echo --disable-decoder=ac3,eac3,mlp,dca,h264,mpeg4 --disable-encoder=ac3,eac3,mlp,dca,h264,mpeg4; else echo --enable-encoder=ac3; fi` \
       --disable-decoder=mpeg_xvmc \
       --disable-devices \
       --disable-ffprobe \
