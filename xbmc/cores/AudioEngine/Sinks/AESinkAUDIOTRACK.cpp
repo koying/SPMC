@@ -95,7 +95,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     m_passthrough = true;
     if (CJNIAudioFormat::ENCODING_IEC61937_16BIT != -1)  // OUYA
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
-    else if (StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
+    else if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
   }
   else
