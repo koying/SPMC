@@ -60,7 +60,7 @@ CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
   if (!m_stf_dll)
   {
     m_stf_dll = new DllLibStageFrightCodec;
-    if (StringUtils::StartsWith(CJNIBuild::HARDWARE, "rk3"))
+    if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTVPU);
     else
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
