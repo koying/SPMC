@@ -261,14 +261,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
   }
 #endif
 
-#if defined(TARGET_ANDROID)
-  if (!hint.software && CSettings::Get().GetBool("videoplayer.usemediacodec"))
-  {
-    CLog::Log(LOGINFO, "MediaCodec Video Decoder...");
-    if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(), hint, options)) ) return pCodec;
-  }
-#endif
-
 #if defined(HAVE_LIBOPENMAX)
   if (CSettings::Get().GetBool("videoplayer.useomx") && !hint.software )
   {
@@ -298,6 +290,14 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
       default:
         break;
     }
+  }
+#endif
+
+#if defined(TARGET_ANDROID)
+  if (!hint.software && CSettings::Get().GetBool("videoplayer.usemediacodec"))
+  {
+    CLog::Log(LOGINFO, "MediaCodec Video Decoder...");
+    if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(), hint, options)) ) return pCodec;
   }
 #endif
 
