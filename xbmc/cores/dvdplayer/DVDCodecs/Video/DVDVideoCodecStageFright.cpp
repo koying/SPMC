@@ -44,6 +44,7 @@
 CCriticalSection            valid_mutex;
 bool                        CDVDVideoCodecStageFright::m_isvalid = false;
 void*                       CDVDVideoCodecStageFright::m_stf_handle = NULL;
+std::string                 CDVDVideoCodecStageFright::m_pFormatName;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,15 +56,19 @@ CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
   : CDVDVideoCodec()
   , m_convert_bitstream(false),  m_converter(NULL)
 {
-  m_pFormatName = "stf-xxxx";
-
   if (!m_stf_dll)
   {
     m_stf_dll = new DllLibStageFrightCodec;
     if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
+    {
+      m_pFormatName = "rkstf";
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTVPU);
+    }
     else
+    {
+      m_pFormatName = "stf";
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
+    }
   }
 }
 
@@ -85,7 +90,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
     switch (hints.codec)
     {
       case CODEC_ID_H264:
-        m_pFormatName = "stf-h264";
+        m_pFormatName += "-h264";
         if (hints.extrasize < 7 || hints.extradata == NULL)
         {
           CLog::Log(LOGNOTICE,
@@ -97,20 +102,20 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case CODEC_ID_MPEG2VIDEO:
-        m_pFormatName = "stf-mpeg2";
+        m_pFormatName += "-mpeg2";
         break;
       case CODEC_ID_MPEG4:
-        m_pFormatName = "stf-mpeg4";
+        m_pFormatName += "-mpeg4";
         break;
       case CODEC_ID_VP3:
       case CODEC_ID_VP6:
       case CODEC_ID_VP6F:
       case CODEC_ID_VP8:
-        m_pFormatName = "stf-vpx";
+        m_pFormatName += "-vpx";
         break;
       case CODEC_ID_WMV3:
       case CODEC_ID_VC1:
-        m_pFormatName = "stf-wmv";
+        m_pFormatName += "-wmv";
         break;
       default:
         return false;

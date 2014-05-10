@@ -72,17 +72,17 @@ public:
   virtual bool GetPicture(DVDVideoPicture *pDvdVideoPicture);
   virtual bool ClearPicture(DVDVideoPicture* pDvdVideoPicture);
   virtual void SetDropState(bool bDrop);
-  virtual const char* GetName(void) { return (const char*)m_pFormatName; }
+  virtual const char* GetName(void) { return (const char*)m_pFormatName.c_str(); }
   virtual void SetSpeed(int iSpeed);
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
 
 protected:
 
-  const char        *m_pFormatName;
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
   
+  static std::string       m_pFormatName;
   static DllLibStageFrightCodec*     m_stf_dll;
   static bool       m_isvalid;
   static void *     m_stf_handle;
