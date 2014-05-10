@@ -72,6 +72,9 @@
 #include "android/jni/ContentResolver.h"
 #include "android/jni/MediaStore.h"
 
+#include "android/jni/SystemProperties.h"
+#include "utils/md5.h"
+
 #define GIGABYTES       1073741824
 
 using namespace std;
@@ -106,6 +109,37 @@ CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
     android_printf("CXBMCApp: invalid ANativeActivity instance");
     exit(1);
     return;
+  }
+
+  // Check Minix
+  std::string k;
+  k += 'r';
+  k += 'o';
+  k += '.';
+  k += 'a';
+  k += 'r';
+  k += 'm';
+  k += '.';
+  k += 'd';
+  k += 'a';
+  k += 't';
+  k += 'a';
+  k += '.';
+  k += 'n';
+  k += 'a';
+  k += 'm';
+  k += 'e';
+
+  CStdString check = CJNISystemProperties::get(k, "");
+
+  XBMC::XBMC_MD5 md5;
+  CStdString result;
+  md5.append(check);
+  md5.getDigest(result);
+  if (!StringUtils::EqualsNoCase(result, "5f5f3d9f0814380ce81e09fcf77f96c7"))
+  {
+    android_printf("No Minix device");
+    exit(1);
   }
 }
 

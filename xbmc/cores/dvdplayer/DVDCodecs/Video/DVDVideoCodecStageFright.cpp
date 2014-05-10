@@ -106,7 +106,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case AV_CODEC_ID_HEVC:
-        m_pFormatName = "stf-h265";
+        m_pFormatName = m_pFormatSource + "-h265";
         if (hints.extrasize < 22 || hints.extradata == NULL)
         {
           CLog::Log(LOGNOTICE,
