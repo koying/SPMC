@@ -37,12 +37,9 @@
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
 #include "android/jni/Build.h"
-#include "android/jni/SystemProperties.h"
 #include "utils/StringUtils.h"
 
 #include "DllLibStageFrightCodec.h"
-
-#include "utils/md5.h"
 
 CCriticalSection            valid_mutex;
 bool                        CDVDVideoCodecStageFright::m_isvalid = false;
@@ -66,38 +63,6 @@ CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
     {
       m_pFormatSource = "rkstf";
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTVPU);
-
-      // Check Minix
-      std::string k;
-      k += 'r';
-      k += 'o';
-      k += '.';
-      k += 'a';
-      k += 'r';
-      k += 'm';
-      k += '.';
-      k += 'd';
-      k += 'a';
-      k += 't';
-      k += 'a';
-      k += '.';
-      k += 'n';
-      k += 'a';
-      k += 'm';
-      k += 'e';
-
-      CStdString check = CJNISystemProperties::get(k, "");
-
-      XBMC::XBMC_MD5 md5;
-      CStdString result;
-      md5.append(check);
-      md5.getDigest(result);
-      CLog::Log(LOGDEBUG, "Minix %s:%s=%s\n", k.c_str(), check.c_str(), result.c_str());
-      if (!StringUtils::EqualsNoCase(result, "5f5f3d9f0814380ce81e09fcf77f96c7"))
-      {
-        CLog::Log(LOGERROR, "%s::%s - no Minix device\n", CLASSNAME, __func__);
-        exit(1);
-      }
     }
     else
     {
