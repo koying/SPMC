@@ -2558,7 +2558,7 @@
         </setting>
         <setting id="audiooutput.dtspassthrough" type="boolean" label="254" help="36366">
           <level>2</level>
-          <default>false</default>
+          <default>true</default>
           <dependencies>
             <dependency type="visible" on="property" name="aesettingvisible" setting="audiooutput.config">audiooutput.passthrough</dependency>
             <dependency type="enable" setting="audiooutput.passthrough" operator="is">true</dependency>
