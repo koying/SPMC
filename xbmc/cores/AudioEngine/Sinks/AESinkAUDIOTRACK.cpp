@@ -28,11 +28,17 @@
 #endif
 #include "utils/log.h"
 #include "utils/StringUtils.h"
+#include "settings/AdvancedSettings.h"
 
 #include "android/jni/AudioFormat.h"
 #include "android/jni/AudioManager.h"
 #include "android/jni/AudioTrack.h"
 #include "android/jni/Build.h"
+#define ANDROID_MAX_CHANNELS 8
+static enum AEChannel AndroidChannelMap[ANDROID_MAX_CHANNELS + 1] = {
+  AE_CH_FL      , AE_CH_FR      , AE_CH_FC      , AE_CH_LFE     , AE_CH_BL      , AE_CH_BR      , AE_CH_SL      , AE_CH_SR      ,
+  AE_CH_NULL
+};
 
 using namespace jni;
 
@@ -64,6 +70,7 @@ static void pa_sconv_s16le_from_f32ne_neon(unsigned n, const float32_t *a, int16
 #endif
 
 CAEDeviceInfo CAESinkAUDIOTRACK::m_info;
+CAEDeviceInfo CAESinkAUDIOTRACK::m_infoMC;
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
 {
@@ -86,20 +93,29 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   m_lastFormat  = format;
   m_format      = format;
 
+  CAEDeviceInfo info;
+  if (StringUtils::EqualsNoCase(device, "AudioTrackMC"))
+  {
+    info = m_infoMC;
+    m_passthrough = false;
+  }
+  else
+  {
+    info = m_info;
+    m_passthrough = AE_IS_RAW(m_format.m_dataFormat);
+  }
+
   int stream = CJNIAudioManager::STREAM_MUSIC;
   int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
   int channelConfig = CJNIAudioFormat::CHANNEL_OUT_STEREO;
 
-  if (AE_IS_RAW(m_format.m_dataFormat))
+  if (m_passthrough)
   {
-    m_passthrough = true;
     if (CJNIAudioFormat::ENCODING_IEC61937_16BIT != -1)  // OUYA
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
     else if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
   }
-  else
-    m_passthrough = false;
 
 #if defined(HAS_LIBAMCODEC)
   if (CSettings::Get().GetBool("videoplayer.useamcodec"))
@@ -109,9 +125,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   // default to 44100, all android devices support it.
   // then check if we can support the requested rate.
   unsigned int sampleRate = 44100;
-  for (size_t i = 0; i < m_info.m_sampleRates.size(); i++)
+  for (size_t i = 0; i < info.m_sampleRates.size(); i++)
   {
-    if (m_format.m_sampleRate == m_info.m_sampleRates[i])
+    if (m_format.m_sampleRate == info.m_sampleRates[i])
     {
       sampleRate = m_format.m_sampleRate;
       break;
@@ -119,13 +135,29 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   }
   m_format.m_sampleRate = sampleRate;
 
+  if (!m_passthrough)
+  {
+    switch  (m_format.m_channelLayout.Count())
+    {
+      case 8:
+        channelConfig = CJNIAudioFormat::CHANNEL_OUT_7POINT1;
+        break;
+      case 6:
+        channelConfig = CJNIAudioFormat::CHANNEL_OUT_5POINT1;
+        break;
+      default:
+        break;
+    }
+  }
+
   m_format.m_dataFormat     = AE_FMT_S16LE;
-  m_format.m_channelLayout  = m_info.m_channels;
+  m_format.m_channelLayout  = info.m_channels;
   m_format.m_frameSize      = m_format.m_channelLayout.Count() *
                               (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
   int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
                                                                 channelConfig,
                                                                 encoding);
+
   m_sink_frameSize          = m_format.m_channelLayout.Count() *
                               (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
   m_min_frames              = min_buffer_size / m_sink_frameSize;
@@ -159,7 +191,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_at_jni->stop();
   m_at_jni->flush();
   m_at_jni->release();
-  
+
   m_frames_written = 0;
 
   delete m_at_jni;
@@ -194,6 +226,35 @@ double CAESinkAUDIOTRACK::GetCacheTotal()
 {
   // total amount that the audio sink can buffer in units of seconds
   return m_audiotrackbuffer_sec;
+}
+
+CAEChannelInfo CAESinkAUDIOTRACK::GetChannelLayout(AEAudioFormat format)
+{
+  unsigned int count = 0;
+
+       if (format.m_dataFormat == AE_FMT_AC3 ||
+           format.m_dataFormat == AE_FMT_DTS ||
+           format.m_dataFormat == AE_FMT_EAC3)
+           count = 2;
+  else if (format.m_dataFormat == AE_FMT_TRUEHD ||
+           format.m_dataFormat == AE_FMT_DTSHD)
+           count = 8;
+  else
+  {
+    for (unsigned int c = 0; c < 8; ++c)
+      for (unsigned int i = 0; i < format.m_channelLayout.Count(); ++i)
+        if (format.m_channelLayout[i] == AndroidChannelMap[c])
+        {
+          count = c + 1;
+          break;
+        }
+  }
+
+  CAEChannelInfo info;
+  for (unsigned int i = 0; i < count; ++i)
+    info += AndroidChannelMap[i];
+
+  return info;
 }
 
 // this method is supposed to block until all frames are written to the device buffer
@@ -258,8 +319,8 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_deviceName = "AudioTrack";
   m_info.m_displayName = "android";
   m_info.m_displayNameExtra = "audiotrack";
-  m_info.m_channels += AE_CH_FL;
-  m_info.m_channels += AE_CH_FR;
+  for (int j = 0; j < 2; ++j)
+      m_info.m_channels += AndroidChannelMap[j];
   m_info.m_sampleRates.push_back(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
   m_info.m_sampleRates.push_back(48000);  // for passthrough
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
@@ -271,5 +332,24 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 #endif
 
   list.push_back(m_info);
+
+  if (g_advancedSettings.m_androidfakeaudiodevices)
+  {
+    m_infoMC.m_channels.Reset();
+    m_infoMC.m_dataFormats.clear();
+    m_infoMC.m_sampleRates.clear();
+
+    m_infoMC.m_deviceType = AE_DEVTYPE_PCM;
+    m_infoMC.m_deviceName = "AudioTrackMC";
+    m_infoMC.m_displayName = "android(Multi-channel)";
+    m_infoMC.m_displayNameExtra = "audiotrack";
+    for (int j = 0; j < ANDROID_MAX_CHANNELS; ++j)
+      m_infoMC.m_channels += AndroidChannelMap[j];
+    m_infoMC.m_sampleRates.push_back(44100);
+    m_infoMC.m_sampleRates.push_back(48000);
+    m_infoMC.m_dataFormats.push_back(AE_FMT_S16LE);
+
+    list.push_back(m_infoMC);
+  }
 }
 
