@@ -176,6 +176,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     float m_videoIgnorePercentAtEnd;
     CStdString m_audioHost;
     bool m_audioApplyDrc;
+    bool m_androidfakeaudiodevices;
 
     int   m_videoVDPAUScaling;
     float m_videoNonLinStretchRatio;
