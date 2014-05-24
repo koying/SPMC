@@ -212,10 +212,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   else
     m_passthrough = false;
 
+  /*
 #if defined(HAS_LIBAMCODEC)
   if (CSettings::Get().GetBool("videoplayer.useamcodec"))
     aml_set_audio_passthrough(m_passthrough);
 #endif
+*/
 
   int atChannelMask = AEChannelMapToAUDIOTRACKChannelMask(m_format.m_channelLayout);
 
