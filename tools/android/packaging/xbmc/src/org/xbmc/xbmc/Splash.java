@@ -709,6 +709,15 @@ public class Splash extends Activity
         mState = InError;
       }
     }
+    
+    String model = android.os.Build.MODEL;
+    if (!model.startsWith("NEO-")) 
+    {
+      mErrorMsg = "This XBMC package is only compatible with <a href=\"http://www.minix.com.hk/\">Minix</a> devices.";
+      mState = InError;
+      mStateMachine.sendEmptyMessage(InError);
+      return;
+    }
 
     if (mState != InError)
     {
