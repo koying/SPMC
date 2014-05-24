@@ -341,6 +341,12 @@ public class Splash extends Activity {
       }
     }
     
+    String model = android.os.Build.MODEL;
+    if (!model.startsWith("NEO-")) {
+      mErrorMsg = "This XBMC package is only compatible with <a href=\"http://www.minix.com.hk/\">Minix</a> devices.";
+      mState = State.InError;
+    }
+
     if (mState != State.InError) {
       if (curArch.equalsIgnoreCase("arm")) {
         // arm arch: check if the cpu supports neon
