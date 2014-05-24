@@ -117,10 +117,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
   }
 
+  /*
 #if defined(HAS_LIBAMCODEC)
   if (CSettings::Get().GetBool("videoplayer.useamcodec"))
     aml_set_audio_passthrough(m_passthrough);
 #endif
+*/
 
   // default to 44100, all android devices support it.
   // then check if we can support the requested rate.
