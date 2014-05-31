@@ -46,4 +46,7 @@ public:
   virtual bool  GetPreferredResolution(RESOLUTION_INFO *res) const;
 
   virtual bool  ShowWindow(bool show);
+
+protected:
+  bool SysModeToResolution(std::string mode, RESOLUTION_INFO *res) const;
 };
