@@ -82,7 +82,8 @@ protected:
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
   
-  static std::string       m_pFormatName;
+  static std::string       m_pFormatSource;
+  std::string              m_pFormatName;
   static DllLibStageFrightCodec*     m_stf_dll;
   static bool       m_isvalid;
   static void *     m_stf_handle;

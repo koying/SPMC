@@ -44,7 +44,7 @@
 CCriticalSection            valid_mutex;
 bool                        CDVDVideoCodecStageFright::m_isvalid = false;
 void*                       CDVDVideoCodecStageFright::m_stf_handle = NULL;
-std::string                 CDVDVideoCodecStageFright::m_pFormatName;
+std::string                 CDVDVideoCodecStageFright::m_pFormatSource;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,12 +61,12 @@ CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
     m_stf_dll = new DllLibStageFrightCodec;
     if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
     {
-      m_pFormatName = "rkstf";
+      m_pFormatSource = "rkstf";
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTVPU);
     }
     else
     {
-      m_pFormatName = "stf";
+      m_pFormatSource = "stf";
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
     }
   }
@@ -90,7 +90,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
     switch (hints.codec)
     {
       case CODEC_ID_H264:
-        m_pFormatName += "-h264";
+        m_pFormatName = m_pFormatSource + "-h264";
         if (hints.extrasize < 7 || hints.extradata == NULL)
         {
           CLog::Log(LOGNOTICE,
@@ -102,20 +102,20 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case CODEC_ID_MPEG2VIDEO:
-        m_pFormatName += "-mpeg2";
+        m_pFormatName = m_pFormatSource + "-mpeg2";
         break;
       case CODEC_ID_MPEG4:
-        m_pFormatName += "-mpeg4";
+        m_pFormatName = m_pFormatSource + "-mpeg4";
         break;
       case CODEC_ID_VP3:
       case CODEC_ID_VP6:
       case CODEC_ID_VP6F:
       case CODEC_ID_VP8:
-        m_pFormatName += "-vpx";
+        m_pFormatName = m_pFormatSource + "-vpx";
         break;
       case CODEC_ID_WMV3:
       case CODEC_ID_VC1:
-        m_pFormatName += "-wmv";
+        m_pFormatName = m_pFormatSource + "-wmv";
         break;
       default:
         return false;
