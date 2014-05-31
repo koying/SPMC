@@ -76,4 +76,7 @@ extern typeof(AMotionEvent_getButtonState) *p_AMotionEvent_getButtonState;
 // mouse vertical wheel
 #define AMOTION_EVENT_AXIS_VSCROLL 0x09
 
+#define AMETA_CTRL_LEFT_ON 0x2000
+#define AMETA_CTRL_RIGHT_ON 0x4000
+
 #endif
