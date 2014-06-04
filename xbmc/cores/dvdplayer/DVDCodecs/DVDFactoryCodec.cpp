@@ -206,7 +206,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
   {
     switch(hint.codec)
     {
-      case AV_CODEC_ID_MPEG2VIDEO:
       case AV_CODEC_ID_MPEG4:
       case AV_CODEC_ID_MSMPEG4V2:
       case AV_CODEC_ID_MSMPEG4V3:
@@ -289,7 +288,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
   {
     switch(hint.codec)
     {
-      case AV_CODEC_ID_MPEG2VIDEO:
       case AV_CODEC_ID_MPEG4:
       case AV_CODEC_ID_MSMPEG4V2:
       case AV_CODEC_ID_MSMPEG4V3:
@@ -309,7 +307,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
   {
     switch(hint.codec)
     {
-      case AV_CODEC_ID_MPEG2VIDEO:
       case AV_CODEC_ID_MPEG4:
       case AV_CODEC_ID_MSMPEG4V2:
       case AV_CODEC_ID_MSMPEG4V3:
