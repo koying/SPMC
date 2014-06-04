@@ -1745,7 +1745,7 @@ bool CGUIDialogVideoInfo::ManageVideoItemArtwork(const CFileItemPtr &item, const
       videodb.GetTvShowInfo("", tag, item->GetVideoInfoTag()->m_iIdShow);
       tag.m_strPictureURL.GetThumbURLs(thumbs, artType, item->GetVideoInfoTag()->m_iSeason);
     }
-    else if (type == MediaTypeVideoCollection)
+    else if (type == "set")
     {
       CFileItemList items;
       CStdString baseDir = StringUtils::Format("videodb://movies/sets/%d", item->GetVideoInfoTag()->m_iDbId);
@@ -1987,7 +1987,7 @@ bool CGUIDialogVideoInfo::OnGetFanart(const CFileItemPtr &videoItem)
   }
 
   vector<CStdString> thumbs;
-  if (videoItem->GetVideoInfoTag()->m_type == MediaTypeVideoCollection)
+  if (videoItem->GetVideoInfoTag()->m_type == "set")
   {
     CFileItemList movies;
     CStdString baseDir = StringUtils::Format("videodb://movies/sets/%d", videoItem->GetVideoInfoTag()->m_iDbId);
