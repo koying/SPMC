@@ -19,6 +19,8 @@
  *
  */
 
+#include "guilib/Resolution.h"
+
 int aml_set_sysfs_str(const char *path, const char *val);
 int aml_get_sysfs_str(const char *path, char *valstr, const int size);
 int aml_set_sysfs_int(const char *path, const int val);
@@ -32,3 +34,4 @@ int  aml_get_cputype();
 void aml_cpufreq_min(bool limit);
 void aml_cpufreq_max(bool limit);
 void aml_set_audio_passthrough(bool passthrough);
+bool aml_ModeToResolution(const char *mode, RESOLUTION_INFO *res);
