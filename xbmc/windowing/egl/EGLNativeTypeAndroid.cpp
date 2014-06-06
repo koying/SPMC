@@ -213,7 +213,9 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
   bool gotfromsystem = false;
 
   char valstr[256] = {0};
-  int ret = aml_get_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", valstr, 255);  // amlogic
+  int ret;
+#if 0
+  ret = aml_get_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", valstr, 255);  // amlogic
   if (ret >= 0 && StringUtils::StartsWith(valstr, "VIC:"))
   {
     int vicid = atoi(&valstr[4]);
@@ -230,6 +232,7 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
       }
     }
   }
+#endif
 
   if (!gotfromsystem)
   {
