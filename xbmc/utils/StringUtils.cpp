@@ -320,9 +320,9 @@ wstring StringUtils::FormatV(const wchar_t *fmt, va_list args)
 
 int compareWchar (const void* a, const void* b)
 {
-  if (*(short*)a <  *(short*)b)
+  if (*(wchar_t*)a <  *(wchar_t*)b)
     return -1;
-  else if (*(short*)a >  *(short*)b)
+  else if (*(wchar_t*)a >  *(wchar_t*)b)
     return 1;
   return 0;
 }
