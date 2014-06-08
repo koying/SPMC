@@ -32,12 +32,12 @@
 #include "StringUtils.h"
 #include "utils/RegExp.h"
 #include "utils/fstrcmp.h"
-#include "utils/BSearch.h"
 #include <locale>
 
 #include <math.h>
 #include <sstream>
 #include <time.h>
+#include <stdlib.h>
 
 #define FORMAT_BLOCK_SIZE 2048 // # of bytes to increment per try
 
@@ -51,7 +51,9 @@ const std::string StringUtils::Empty = "";
 CStdString StringUtils::m_lastUUID = "";
 
 //	Copyright (c) Leigh Brasington 2012.  All rights reserved.
-//      http://www.leighb.com/tounicupper.htm
+//  This code may be used and reproduced without written permission.
+//  http://www.leighb.com/tounicupper.htm
+//
 //	The tables were constructed from
 //	http://publib.boulder.ibm.com/infocenter/iseries/v7r1m0/index.jsp?topic=%2Fnls%2Frbagslowtoupmaptable.htm
 
@@ -316,20 +318,29 @@ wstring StringUtils::FormatV(const wchar_t *fmt, va_list args)
   return L"";
 }
 
+int compareWchar (const void* a, const void* b)
+{
+  if (*(short*)a <  *(short*)b)
+    return -1;
+  else if (*(short*)a >  *(short*)b)
+    return 1;
+  return 0;
+}
+
 wchar_t tolowerUnicode(const wchar_t& c)
 {
-  ssize_t i = static_bsearch(unicode_uppers, c);
-  if (i >= 0)
-    return unicode_lowers[i];
+  wchar_t* p = (wchar_t*) bsearch (&c, unicode_uppers, sizeof(unicode_uppers) / sizeof(wchar_t), sizeof(wchar_t), compareWchar);
+  if (p)
+    return *(unicode_lowers + (p - unicode_uppers));
 
   return c;
 }
 
 wchar_t toupperUnicode(const wchar_t& c)
 {
-  ssize_t i = static_bsearch(unicode_lowers, c);
-  if (i >= 0)
-    return unicode_uppers[i];
+  wchar_t* p = (wchar_t*) bsearch (&c, unicode_lowers, sizeof(unicode_lowers) / sizeof(wchar_t), sizeof(wchar_t), compareWchar);
+  if (p)
+    return *(unicode_uppers + (p - unicode_lowers));
 
   return c;
 }
