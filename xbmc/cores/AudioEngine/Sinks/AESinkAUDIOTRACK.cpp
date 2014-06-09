@@ -39,7 +39,6 @@ static enum AEChannel AndroidChannelMap[ANDROID_MAX_CHANNELS + 1] = {
   AE_CH_FL      , AE_CH_FR      , AE_CH_FC      , AE_CH_LFE     , AE_CH_BL      , AE_CH_BR      , AE_CH_SL      , AE_CH_SR      ,
   AE_CH_NULL
 };
-static const unsigned int PassthroughSampleRates[] = { 8000, 11025, 16000, 22050, 24000, 32000, 41400, 48000, 88200, 96000, 176400, 192000 };
 
 using namespace jni;
 
@@ -160,8 +159,6 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
                                                                 channelConfig,
                                                                 encoding);
-  if (min_buffer_size < 0)  // Unsupported sample rate
-    return false;
 
   m_sink_frameSize          = m_format.m_channelLayout.Count() *
                               (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
@@ -326,14 +323,11 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_displayNameExtra = "audiotrack";
   for (int j = 0; j < 2; ++j)
       m_info.m_channels += AndroidChannelMap[j];
-  for (unsigned int i=0; i<sizeof PassthroughSampleRates/sizeof *PassthroughSampleRates; i++)
-    m_info.m_sampleRates.push_back(PassthroughSampleRates[i]);
-  //m_info.m_sampleRates.push_back(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
-  //m_info.m_sampleRates.push_back(48000);  // for passthrough
+  m_info.m_sampleRates.push_back(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
+  m_info.m_sampleRates.push_back(48000);  // for passthrough
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
   m_info.m_dataFormats.push_back(AE_FMT_AC3);
   m_info.m_dataFormats.push_back(AE_FMT_DTS);
-  m_info.m_dataFormats.push_back(AE_FMT_EAC3);
 #if 0 //defined(__ARM_NEON__)
   if (g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_NEON)
     m_info.m_dataFormats.push_back(AE_FMT_FLOAT);
