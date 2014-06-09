@@ -57,5 +57,12 @@
       </setting>
     </group>
     </category>
+    <category id="input">
+      <group id="2">
+        <setting id="input.remoteaskeyboard">
+          <default>true</default>
+        </setting>
+      </group>
+    </category>
   </section>
 </settings>
