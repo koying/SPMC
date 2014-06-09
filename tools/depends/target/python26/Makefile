@@ -28,6 +28,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	cd $(PLATFORM); patch -Np1 -i ../Python-2.6.5-xcompile.patch
 	cd $(PLATFORM); patch -Np1 -i ../Python-2.6.2-android.patch
+	cd $(PLATFORM); patch -p0 < ../Python-2.6.6-android-uuid.patch
 	cd $(PLATFORM); patch -p0 < ../Python-no-modules.patch
 	cd $(PLATFORM); patch -p0 < ../Python-no-export-path.patch
 	cd $(PLATFORM); patch -p1 < ../python-osx-environ-fix.patch
