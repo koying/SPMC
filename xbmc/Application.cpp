@@ -1762,6 +1762,14 @@ bool CApplication::OnSettingUpdate(CSetting* &setting, const char *oldSettingId,
 
       return ret;
     }
+#if defined(TARGET_ANDROID)
+    else
+    {
+      // Do not allow audiooutput.channels > 2.0 unless supported (future)
+      CSettingInt *channels = (CSettingInt*)setting;
+      channels->SetValue(1);
+    }
+#endif
   }
   else if (settingId == "screensaver.mode")
   {
