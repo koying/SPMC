@@ -37,4 +37,25 @@
       </group>
     </category>
   </section>
+  <section id="system">
+    <category id="audiooutput">
+    <group id="1">
+      <setting id="audiooutput.channels">
+        <dependencies>
+          <dependency type="visible" on="property" name="aesettingvisible" setting="audiooutput.audiodevice">audiooutput.channels</dependency>
+          <dependency type="enable" setting="audiooutput.channels">HAS_MULTICHANNEL_AUDIO</dependency>
+        </dependencies>
+        <updates>
+          <update type="change" />
+        </updates>
+      </setting>
+      <setting id="audiooutput.config">
+        <visible>false</visible>
+      </setting>
+      <setting id="audiooutput.samplerate">
+        <visible>false</visible>
+      </setting>
+    </group>
+    </category>
+  </section>
 </settings>
