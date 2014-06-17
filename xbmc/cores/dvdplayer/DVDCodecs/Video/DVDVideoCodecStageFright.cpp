@@ -59,12 +59,14 @@ CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
   if (!m_stf_dll)
   {
     m_stf_dll = new DllLibStageFrightCodec;
-    if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "neo-x"))  // Minix
+#if defined(HAS_RKSTF)
+    if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
     {
       m_pFormatSource = "rkstf";
-      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTVPU);
+      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
     }
     else
+#endif
     {
       m_pFormatSource = "stf";
       m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
