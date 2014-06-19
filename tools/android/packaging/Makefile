@@ -62,7 +62,6 @@ package: extras
 	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/xbmc/*.java
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
 	@cd xbmc; zip -r -q ../images/xbmcapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/.android/debug.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
 	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/xbmc-minix.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
 	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/xbmcminix-$(CPU)-debug.apk
 	@rm images/xbmcapp-debug-$(CPU)-unaligned.apk
