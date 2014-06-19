@@ -2000,8 +2000,10 @@ for codecs in `echo $add_codecs | sed 's/,/ /g'`; do
         XB_ADD_CODEC([LIBSTAGEFRIGHT], [libstagefright], [$codecs])
         ;;
     *rkstf*)
-        XB_ADD_CODEC([LIBSTAGEFRIGHT], [libstagefright], [$codecs])
-        XB_ADD_CODEC([RKSTF], [rkstf], [$codecs])
+        AC_CHECK_HEADER([${prefix}/opt/rkvpu/src/common/vpu_global.h],rkvpu_found=yes,)
+        if test $rkvpu_found = yes; then
+          XB_ADD_CODEC([RKSTF], [rkstf], [$codecs])
+        fi
         ;;
     *)
   esac
