@@ -34,7 +34,10 @@ ifeq ($(OS),osx)
 endif
 
 ifeq ($(OS),android)
-  DEPENDS += mdnsresponder android-sources-ics android-rockchip-vpu
+  DEPENDS += mdnsresponder android-sources-ics
+  ifeq ($(findstring arm,$(CPU)),arm)
+    DEPENDS += android-rockchip-vpu
+  endif
   EXCLUDED_DEPENDS = gmp nettle gnutls
 endif
 
