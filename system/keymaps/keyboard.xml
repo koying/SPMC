@@ -248,7 +248,7 @@
       <r>Rewind</r>
       <period>StepForward</period>
       <comma>StepBack</comma>
-      <backspace>Fullscreen</backspace>
+      <backspace>Stop</backspace>
       <quote>SmallStepBack</quote>
       <opensquarebracket>BigStepForward</opensquarebracket>
       <closesquarebracket>BigStepBack</closesquarebracket>
