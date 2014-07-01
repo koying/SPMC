@@ -16,7 +16,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.ArrayList;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,6 +60,7 @@ public class Splash extends Activity {
   private static final String TAG = "XBMC";
 
   private String mCpuinfo = "";
+  private ArrayList<String> mMounts = new ArrayList<String>();
   private String mErrorMsg = "";
 
   private ProgressBar mProgress = null;
@@ -68,12 +71,14 @@ public class Splash extends Activity {
 
   private String sPackagePath = "";
   private String sXbmcHome = "";
+  private String sXbmcdata = "";
   private File fPackagePath = null;
   private File fXbmcHome = null;
 
   private BroadcastReceiver mExternalStorageReceiver = null;
   private boolean mExternalStorageChecked = false;
   private boolean mCachingDone = false;
+  private boolean mInstallLibs = false;
 
   private class StateMachine extends Handler {
 
@@ -82,6 +87,7 @@ public class Splash extends Activity {
     StateMachine(Splash a) {
       this.mSplash = a;
     }
+    
     
     @Override
     public void handleMessage(Message msg) {
@@ -96,22 +102,34 @@ public class Splash extends Activity {
           mSplash.mTextView.setText("Clearing cache...");
           mSplash.mProgress.setVisibility(View.INVISIBLE);
           break;
+        case Caching:
+          break;
         case CachingDone:
           mSplash.mCachingDone = true;
-          if (mSplash.mExternalStorageChecked)
-            sendEmptyMessage(StartingXBMC);
-          else
-            sendEmptyMessage(WaitingStorageChecked);
+          sendEmptyMessage(StartingXBMC);
           break;
         case WaitingStorageChecked:
           mSplash.mTextView.setText("Waiting for external storage...");
           mSplash.mProgress.setVisibility(View.INVISIBLE);
           break;
         case StorageChecked:
+          mSplash.mTextView.setText("External storage OK...");
           mExternalStorageChecked = true;
           mSplash.stopWatchingExternalStorage();
           if (mSplash.mCachingDone)
             sendEmptyMessage(StartingXBMC);
+          else {
+            SetupEnvironment();
+            if (fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs) {
+              mState = CachingDone;
+              mCachingDone = true;
+
+              sendEmptyMessage(StartingXBMC);
+            } else {
+              new FillCache(mSplash).execute();
+            }
+          }
+
           break;
         case StartingXBMC:
           mSplash.mTextView.setText("Starting SPMC...");
@@ -125,128 +143,7 @@ public class Splash extends Activity {
   }
   private StateMachine mStateMachine = new StateMachine(this);
 
-  public void showErrorDialog(Context context, String title, String message) {
-    if (myAlertDialog != null && myAlertDialog.isShowing())
-      return;
-
-    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle(title);
-    builder.setIcon(android.R.drawable.ic_dialog_alert);
-    builder.setMessage(Html.fromHtml(message));
-    builder.setPositiveButton("Exit",
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int arg1) {
-            dialog.dismiss();
-          }
-        });
-    builder.setCancelable(false);
-    myAlertDialog = builder.create();
-    myAlertDialog.show();
-
-    // Make links actually clickable
-    ((TextView) myAlertDialog.findViewById(android.R.id.message))
-        .setMovementMethod(LinkMovementMethod.getInstance());
-  }
-  
-  private void SetupEnvironment() {
-    File fProp = new File("/sdcard/xbmc_env.properties");
-    if (fProp.exists()) {
-      try {
-        Properties sysProp = new Properties(System.getProperties());
-        FileInputStream xbmcenvprop = new FileInputStream(fProp);
-        sysProp.load(xbmcenvprop);
-        System.setProperties(sysProp);
-
-        sXbmcHome = System.getProperty("xbmc.home", "");
-        fXbmcHome = new File(sXbmcHome);
-        fXbmcHome.mkdir();
-        if (!fXbmcHome.exists())
-          sXbmcHome = "";
-
-        String sXbmcdata = System.getProperty("xbmc.data", "");
-        if (!sXbmcdata.isEmpty()) {
-          File fXbmcData = new File(sXbmcdata);
-          fXbmcData.mkdir();
-          if (!fXbmcData.exists())
-            sXbmcdata = "";
-        }
-
-      } catch (NotFoundException e) {
-        Log.e(TAG, "Cannot find xbmc_env properties file");
-      } catch (IOException e) {
-        Log.e(TAG, "Failed to open xbmc_env properties file");
-      }
-    }
-    if (sXbmcHome.isEmpty()) {
-      File fCacheDir = getCacheDir();
-      sXbmcHome = fCacheDir.getAbsolutePath() + "/apk";
-    }
-
-    sPackagePath = getPackageResourcePath();
-    fPackagePath = new File(sPackagePath);
-    fXbmcHome = new File(sXbmcHome);
-  }
-
-  private boolean ParseCpuFeature() {
-    ProcessBuilder cmd;
-
-    try {
-      String[] args = { "/system/bin/cat", "/proc/cpuinfo" };
-      cmd = new ProcessBuilder(args);
-
-      Process process = cmd.start();
-      InputStream in = process.getInputStream();
-      byte[] re = new byte[1024];
-      while (in.read(re) != -1) {
-        mCpuinfo = mCpuinfo + new String(re);
-      }
-      in.close();
-    } catch (IOException ex) {
-      ex.printStackTrace();
-      return false;
-    }
-    return true;
-  }
-
-  private boolean CheckCpuFeature(String feat) {
-    final Pattern FeaturePattern = Pattern.compile(":.*?\\s" + feat
-        + "(?:\\s|$)");
-    Matcher m = FeaturePattern.matcher(mCpuinfo);
-    return m.find();
-  }
-
-  void updateExternalStorageState() {
-    String state = Environment.getExternalStorageState();
-    if (Environment.MEDIA_CHECKING.equals(state)) {
-        mExternalStorageChecked = false;
-    } else {
-        mStateMachine.sendEmptyMessage(StorageChecked);
-    }
-  }
-
-  void startWatchingExternalStorage() {
-    mExternalStorageReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        Log.i(TAG, "Storage: " + intent.getData());
-        updateExternalStorageState();
-      }
-    };
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-    filter.addAction(Intent.ACTION_MEDIA_REMOVED);
-    filter.addAction(Intent.ACTION_MEDIA_SHARED);
-    filter.addAction(Intent.ACTION_MEDIA_UNMOUNTABLE);
-    filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-    registerReceiver(mExternalStorageReceiver, filter);
-  }
-
-  void stopWatchingExternalStorage() {
-    if (mExternalStorageReceiver != null)
-      unregisterReceiver(mExternalStorageReceiver);
-  }
-
-  class FillCache extends AsyncTask<Void, Integer, Integer> {
+  private class FillCache extends AsyncTask<Void, Integer, Integer> {
 
     private Splash mSplash = null;
     private int mProgressStatus = 0;
@@ -292,22 +189,31 @@ public class Splash extends Activity {
           publishProgress(++mProgressStatus);
 
           ZipEntry e = (ZipEntry) entries.nextElement();
+          String sName = e.getName();
 
-          if (!e.getName().startsWith("assets/"))
+          if (! (sName.startsWith("assets/") || (mInstallLibs && sName.startsWith("lib/"))) )
             continue;
-          if (e.getName().startsWith("assets/python2.6"))
+          if (sName.startsWith("assets/python2.6"))
             continue;
 
-          String sFullPath = sXbmcHome + "/" + e.getName();
-          File fFullPath = new File(sFullPath);
-          if (e.isDirectory()) {
-            // Log.d(TAG, "creating dir: " + sFullPath);
-            fFullPath.mkdirs();
-            continue;
+          String sFullPath = null;
+          if (sName.startsWith("lib/"))
+          {
+            if (e.isDirectory())
+              continue;
+            sFullPath = getApplicationInfo().nativeLibraryDir + "/" + new File(sName).getName();
           }
-
-          fFullPath.getParentFile().mkdirs();
-
+          else 
+          {
+            sFullPath = sXbmcHome + "/" + sName;
+            File fFullPath = new File(sFullPath);
+            if (e.isDirectory()) {
+              fFullPath.mkdirs();
+              continue;
+            }
+            fFullPath.getParentFile().mkdirs();
+         }
+ 
           try {
             InputStream in = zip.getInputStream(e);
             BufferedOutputStream out = new BufferedOutputStream(
@@ -367,7 +273,189 @@ public class Splash extends Activity {
       mStateMachine.sendEmptyMessage(mState);
     }
   }
+
+  public void showErrorDialog(Context context, String title, String message) {
+    if (myAlertDialog != null && myAlertDialog.isShowing())
+      return;
+
+    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    builder.setTitle(title);
+    builder.setIcon(android.R.drawable.ic_dialog_alert);
+    builder.setMessage(Html.fromHtml(message));
+    builder.setPositiveButton("Exit",
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int arg1) {
+            dialog.dismiss();
+          }
+        });
+    builder.setCancelable(false);
+    myAlertDialog = builder.create();
+    myAlertDialog.show();
+
+    // Make links actually clickable
+    ((TextView) myAlertDialog.findViewById(android.R.id.message))
+        .setMovementMethod(LinkMovementMethod.getInstance());
+  }
   
+  private void SetupEnvironment() {
+    File fProp = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/xbmc_env.properties");
+    if (fProp.exists()) {
+      Log.i(TAG, "Loading xbmc_env.properties");
+      try {
+        Properties sysProp = new Properties(System.getProperties());
+        FileInputStream xbmcenvprop = new FileInputStream(fProp);
+        sysProp.load(xbmcenvprop);
+        System.setProperties(sysProp);
+
+        sXbmcHome = System.getProperty("xbmc.home", "");
+        if (!sXbmcHome.isEmpty()) {
+          File fXbmcHome = new File(sXbmcHome);
+          int loop = 20;
+          while (!fXbmcHome.exists() && loop > 0) {
+             // Wait a while in case of non-primary sdcard
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+              continue;
+            }
+            loop--;
+          }
+          if (!fXbmcHome.exists()) {
+            System.setProperty("xbmc.home", "");
+            sXbmcHome = "";
+          }
+        }
+
+        sXbmcdata = System.getProperty("xbmc.data", "");
+        if (!sXbmcdata.isEmpty()) {
+          File fXbmcData = new File(sXbmcdata);
+          int loop = 20;
+          while (!fXbmcData.exists() && loop > 0) {
+             // Wait a while in case of non-primary sdcard
+            try {
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+              continue;
+            }
+            loop--;
+          }
+
+           if (!fXbmcData.exists()) {
+             sXbmcdata = "";
+             System.setProperty("xbmc.data", "");
+           }
+        }
+
+      } catch (NotFoundException e) {
+        Log.e(TAG, "Cannot find xbmc_env properties file");
+      } catch (IOException e) {
+        Log.e(TAG, "Failed to open xbmc_env properties file");
+      }
+    }
+    if (sXbmcHome.isEmpty()) {
+      File fCacheDir = getCacheDir();
+      sXbmcHome = fCacheDir.getAbsolutePath() + "/apk";
+    }
+
+    sPackagePath = getPackageResourcePath();
+    fPackagePath = new File(sPackagePath);
+    fXbmcHome = new File(sXbmcHome);
+  }
+
+  private boolean ParseCpuFeature() {
+    ProcessBuilder cmd;
+
+    try {
+      String[] args = { "/system/bin/cat", "/proc/cpuinfo" };
+      cmd = new ProcessBuilder(args);
+
+      Process process = cmd.start();
+      InputStream in = process.getInputStream();
+      byte[] re = new byte[1024];
+      while (in.read(re) != -1) {
+        mCpuinfo = mCpuinfo + new String(re);
+      }
+      in.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      return false;
+    }
+    return true;
+  }
+
+  private boolean ParseMounts() {
+    ProcessBuilder cmd;
+    final Pattern reMount = Pattern.compile("^(.+?)\\s+(.+?)\\s+(.+?)\\s");
+    String strMounts = "";
+
+    try {
+      String[] args = { "/system/bin/cat", "/proc/mounts" };
+      cmd = new ProcessBuilder(args);
+
+      Process process = cmd.start();
+      InputStream in = process.getInputStream();
+      byte[] re = new byte[1024];
+      while (in.read(re) != -1) {
+        strMounts = strMounts + new String(re);
+      }
+      in.close();
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      return false;
+    }
+
+    String[] Mounts = strMounts.split("\n");
+    for (int i=0; i<Mounts.length; ++i) {
+      Log.d(TAG, "mount: " + Mounts[i]);
+      Matcher m = reMount.matcher(Mounts[i]);
+      if (m.find()) {
+        if (m.group(1).startsWith("/dev/block/vold") && !m.group(2).startsWith("/mnt/secure/asec")) {
+          Log.d(TAG, "addind mount: " + m.group(2));
+          mMounts.add(m.group(2));
+        }
+      }
+    }
+    return true;
+  }
+
+  private boolean CheckCpuFeature(String feat) {
+    final Pattern FeaturePattern = Pattern.compile(":.*?\\s" + feat
+        + "(?:\\s|$)");
+    Matcher m = FeaturePattern.matcher(mCpuinfo);
+    return m.find();
+  }
+
+  void updateExternalStorageState() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+      mStateMachine.sendEmptyMessage(StorageChecked);
+    } else {
+      mExternalStorageChecked = false;
+    }
+  }
+
+  void startWatchingExternalStorage() {
+    mExternalStorageReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        Log.i(TAG, "Storage: " + intent.getData());
+        updateExternalStorageState();
+      }
+    };
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+    filter.addAction(Intent.ACTION_MEDIA_REMOVED);
+    filter.addAction(Intent.ACTION_MEDIA_SHARED);
+    filter.addAction(Intent.ACTION_MEDIA_UNMOUNTABLE);
+    filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+    registerReceiver(mExternalStorageReceiver, filter);
+  }
+
+  void stopWatchingExternalStorage() {
+    if (mExternalStorageReceiver != null)
+      unregisterReceiver(mExternalStorageReceiver);
+  }
+
   protected void startXBMC() {
     // NB: We only preload libxbmc to be able to get info on missing symbols.
     //     This is not normally needed
@@ -453,18 +541,32 @@ public class Splash extends Activity {
       }
     }
     
-    if (mState != InError) {
+    int loop = 5;
+    while (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) && loop > 0)
+    {
+      try
+      {
+        Thread.sleep(1000);
+      } catch (InterruptedException e)
+      {
+        continue;
+      }
+      loop--;
+    }
+
+    Log.d(TAG, "External storage = " + Environment.getExternalStorageDirectory().getAbsolutePath() + "; state = " + Environment.getExternalStorageState());
+    if (!Environment.MEDIA_CHECKING.equals(Environment.getExternalStorageState()))
+      mExternalStorageChecked = true;
+
+    if (mState != InError && mExternalStorageChecked) {
       mState = ChecksDone;
       
       SetupEnvironment();
-      if (fXbmcHome.exists()
-          && fXbmcHome.lastModified() >= fPackagePath.lastModified()) {
+      if (fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs) {
         mState = CachingDone;
         mCachingDone = true;
       }
     }
-    if (!Environment.MEDIA_CHECKING.equals(Environment.getExternalStorageState()))
-      mExternalStorageChecked = true;
 
     if (mCachingDone && mExternalStorageChecked) {
       startXBMC();
@@ -483,10 +585,12 @@ public class Splash extends Activity {
     if (!mExternalStorageChecked) {
       startWatchingExternalStorage();
       mStateMachine.sendEmptyMessage(WaitingStorageChecked);
+    } else {
+      if (!mCachingDone)
+        new FillCache(this).execute();
+      else
+        mStateMachine.sendEmptyMessage(CachingDone);
     }
-
-    if (!mCachingDone)
-      new FillCache(this).execute();
   }
 
 }
