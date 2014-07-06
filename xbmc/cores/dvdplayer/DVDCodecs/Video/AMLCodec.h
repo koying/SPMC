@@ -91,4 +91,5 @@ private:
   float            m_zoom;
   int              m_contrast;
   int              m_brightness;
+  bool             m_freescaled;
 };
