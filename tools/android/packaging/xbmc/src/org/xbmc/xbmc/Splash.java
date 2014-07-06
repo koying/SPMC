@@ -427,6 +427,7 @@ public class Splash extends Activity {
 
   void updateExternalStorageState() {
     String state = Environment.getExternalStorageState();
+    Log.d(TAG, "External storage = " + Environment.getExternalStorageDirectory().getAbsolutePath() + "; state = " + state);
     if (Environment.MEDIA_MOUNTED.equals(state)) {
       mStateMachine.sendEmptyMessage(StorageChecked);
     } else {
@@ -448,6 +449,7 @@ public class Splash extends Activity {
     filter.addAction(Intent.ACTION_MEDIA_SHARED);
     filter.addAction(Intent.ACTION_MEDIA_UNMOUNTABLE);
     filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+    filter.addDataScheme("file");
     registerReceiver(mExternalStorageReceiver, filter);
   }
 
@@ -464,6 +466,7 @@ public class Splash extends Activity {
     // Run XBMC
     Intent intent = getIntent();
     intent.setClass(this, com.semperpax.spmc.Main.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
     finish();
   }
@@ -541,21 +544,8 @@ public class Splash extends Activity {
       }
     }
     
-    int loop = 5;
-    while (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) && loop > 0)
-    {
-      try
-      {
-        Thread.sleep(1000);
-      } catch (InterruptedException e)
-      {
-        continue;
-      }
-      loop--;
-    }
-
     Log.d(TAG, "External storage = " + Environment.getExternalStorageDirectory().getAbsolutePath() + "; state = " + Environment.getExternalStorageState());
-    if (!Environment.MEDIA_CHECKING.equals(Environment.getExternalStorageState()))
+    if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
       mExternalStorageChecked = true;
 
     if (mState != InError && mExternalStorageChecked) {
