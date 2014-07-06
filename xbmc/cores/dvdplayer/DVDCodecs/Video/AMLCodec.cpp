@@ -1404,6 +1404,45 @@ int set_header_info(am_private_t *para)
   return PLAYER_SUCCESS;
 }
 
+void EnableFreeScale()
+{
+  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
+
+  aml_set_sysfs_int("/sys/class/ppmgr/ppscaler", 0);
+
+  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 0);
+  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 0);
+
+  aml_set_sysfs_int("/sys/class/graphics/fb0/request2XScale", 8);
+  aml_set_sysfs_str("/sys/class/graphics/fb1/scale_axis", "1280 720 1920 1080");
+  aml_set_sysfs_int("/sys/class/graphics/fb1/scale", 0x10001);
+
+  aml_set_sysfs_str("/sys/class/video/axis", "0 0 1919 1079");
+
+//  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
+}
+
+void DisableFreeScale()
+{
+  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
+
+  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 0);
+  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 0);
+
+  aml_set_sysfs_str("/sys/class/video/axis", "0 0 1280 720");
+
+  aml_set_sysfs_int("/sys/class/ppmgr/ppscaler", 1);
+  aml_set_sysfs_str("/sys/class/ppmgr/ppscaler_rect", "0 0 1919 1079 0");
+
+  aml_set_sysfs_int("/sys/class/graphics/fb1/scale", 0x0);
+  aml_set_sysfs_int("/sys/class/graphics/fb0/request2XScale", 2);
+
+  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 1);
+  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 1);
+
+//  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
+}
+
 /*************************************************************************/
 CAMLCodec::CAMLCodec() : CThread("CAMLCodec")
 {
@@ -1443,6 +1482,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   m_start_dts = 0;
   m_start_pts = 0;
   m_hints = hints;
+  m_freescaled = false;
 
   ShowMainVideo(false);
 
@@ -1652,13 +1692,26 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   g_renderManager.RegisterRenderUpdateCallBack((const void*)this, RenderUpdateCallBack);
   g_renderManager.RegisterRenderFeaturesCallBack((const void*)this, RenderFeaturesCallBack);
 
+  m_display_rect = CRect();
   char mode[256] = {0};
   aml_get_sysfs_str("/sys/class/display/mode", mode, 255);
   RESOLUTION_INFO res;
   if (aml_ModeToResolution(mode, &res))
-    m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
-  else
-    m_display_rect = g_graphicsContext.GetViewWindow();
+  {
+    if (aml_get_cputype() >= 8)
+    {
+      m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
+    }
+    else
+    {
+      if (res.iHeight > 720 && hints.height > 720)
+      {
+        m_freescaled = true;
+        EnableFreeScale();
+        m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
+      }
+    }
+  }
 
 /*
   // if display is set to 1080xxx, then disable deinterlacer for HD content
@@ -1703,6 +1756,8 @@ void CAMLCodec::CloseDecoder()
   // return tsync to default so external apps work
   aml_set_sysfs_int("/sys/class/tsync/enable", 1);
 
+  if (m_freescaled)
+    DisableFreeScale();
   ShowMainVideo(false);
 }
 
@@ -2203,6 +2258,8 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
 
 #ifdef TARGET_ANDROID
   display = m_display_rect;
+  if (display.IsEmpty())
+    display = g_graphicsContext.GetViewWindow();
 #else
   display = g_graphicsContext.GetViewWindow();
 #endif
