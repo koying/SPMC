@@ -1414,10 +1414,12 @@ void EnableFreeScale()
   aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 0);
 
   aml_set_sysfs_int("/sys/class/graphics/fb0/request2XScale", 8);
+  /*
   aml_set_sysfs_str("/sys/class/graphics/fb1/scale_axis", "1280 720 1920 1080");
   aml_set_sysfs_int("/sys/class/graphics/fb1/scale", 0x10001);
 
   aml_set_sysfs_str("/sys/class/video/axis", "0 0 1919 1079");
+  */
 
 //  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
 }
