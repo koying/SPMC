@@ -4184,7 +4184,7 @@ static int decode_slice(struct AVCodecContext *avctx, void *arg)
     av_assert0(h->block_offset[15] == (4 * ((scan8[15] - scan8[0]) & 7) << h->pixel_shift) + 4 * h->linesize * ((scan8[15] - scan8[0]) >> 3));
 
     h->is_complex = FRAME_MBAFF || h->picture_structure != PICT_FRAME ||
-                    avctx->codec_id != AV_CODEC_ID_H264 ||
+                    (avctx->codec_id != AV_CODEC_ID_H264 && avctx->codec_id != AV_CODEC_ID_H264MVC) ||
                     (CONFIG_GRAY && (h->flags & CODEC_FLAG_GRAY));
 
     if (h->pps.cabac) {
@@ -4689,6 +4689,12 @@ again:
             case NAL_FILLER_DATA:
             case NAL_SPS_EXT:
             case NAL_AUXILIARY_SLICE:
+                break;
+            case NAL_14:
+            case NAL_15:
+            case NAL_20:
+                av_log(avctx, AV_LOG_ERROR, "NAL type: %d for MVC\n", h->nal_unit_type);
+                avctx->codec_id = AV_CODEC_ID_H264MVC;
                 break;
             case NAL_FF_IGNORE:
                 break;
