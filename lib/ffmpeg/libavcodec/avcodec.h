@@ -451,6 +451,9 @@ enum AVCodecID {
     AV_CODEC_ID_EVRC        = MKBETAG('s','e','v','c'),
     AV_CODEC_ID_SMV         = MKBETAG('s','s','m','v'),
 
+    /* H264 MVC type */
+    AV_CODEC_ID_H264MVC,
+
     /* subtitle codecs */
     AV_CODEC_ID_FIRST_SUBTITLE = 0x17000,          ///< A dummy ID pointing at the start of subtitle codecs.
     AV_CODEC_ID_DVD_SUBTITLE = 0x17000,
