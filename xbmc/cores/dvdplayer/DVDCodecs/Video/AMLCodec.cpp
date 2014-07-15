@@ -1627,7 +1627,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
         am_private->gcodec.param = (void*)(EXTERNAL_PTS | SYNC_OUTSIDE);
       break;
     case VFORMAT_H264_4K2K:
-      if (aml_get_cputype() == AML_DEVICE_TYPE_M8) {
+      if (aml_get_device_type() == AML_DEVICE_TYPE_M8) {
         am_private->gcodec.format = VIDEO_DEC_FORMAT_H264_4K2K;
         am_private->gcodec.param  = (void*)EXTERNAL_PTS;
         // h264 in an avi file
@@ -1705,7 +1705,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   RESOLUTION_INFO res;
   if (aml_ModeToResolution(mode, &res))
   {
-    if (aml_get_cputype() >= AML_DEVICE_TYPE_M8)
+    if (aml_get_device_type() >= AML_DEVICE_TYPE_M8)
     {
       m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
     }
