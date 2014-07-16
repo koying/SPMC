@@ -91,7 +91,8 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
     switch (hints.codec)
     {
-      case CODEC_ID_H264:
+      case AV_CODEC_ID_H264:
+      case AV_CODEC_ID_H264MVC:
         m_pFormatName = m_pFormatSource + "-h264";
         if (hints.extrasize < 7 || hints.extradata == NULL)
         {
@@ -103,20 +104,20 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
         m_convert_bitstream = m_converter->Open(hints.codec, (uint8_t *)hints.extradata, hints.extrasize, true);
 
         break;
-      case CODEC_ID_MPEG2VIDEO:
+      case AV_CODEC_ID_MPEG2VIDEO:
         m_pFormatName = m_pFormatSource + "-mpeg2";
         break;
-      case CODEC_ID_MPEG4:
+      case AV_CODEC_ID_MPEG4:
         m_pFormatName = m_pFormatSource + "-mpeg4";
         break;
-      case CODEC_ID_VP3:
-      case CODEC_ID_VP6:
-      case CODEC_ID_VP6F:
-      case CODEC_ID_VP8:
+      case AV_CODEC_ID_VP3:
+      case AV_CODEC_ID_VP6:
+      case AV_CODEC_ID_VP6F:
+      case AV_CODEC_ID_VP8:
         m_pFormatName = m_pFormatSource + "-vpx";
         break;
-      case CODEC_ID_WMV3:
-      case CODEC_ID_VC1:
+      case AV_CODEC_ID_WMV3:
+      case AV_CODEC_ID_VC1:
         m_pFormatName = m_pFormatSource + "-wmv";
         break;
       default:
