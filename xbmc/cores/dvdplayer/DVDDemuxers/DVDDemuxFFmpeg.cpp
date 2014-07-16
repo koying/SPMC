@@ -1100,7 +1100,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
           st->bVFR = false;
 
         // never trust pts in avi files with h264.
-        if (m_bAVI && pStream->codec->codec_id == AV_CODEC_ID_H264)
+        if (m_bAVI && (pStream->codec->codec_id == AV_CODEC_ID_H264 ||  pStream->codec->codec_id == AV_CODEC_ID_H264MVC))
           st->bPTSInvalid = true;
 
 #if defined(AVFORMAT_HAS_STREAM_GET_R_FRAME_RATE)
