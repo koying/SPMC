@@ -252,6 +252,10 @@ public:
 #define MODE_3D_TO_2D_T         0x00000202
 #define MODE_3D_TO_2D_B         0x00000a02
 
+#define MODE_HDMI3D_LR          "3dlr"
+#define MODE_HDMI3D_TB          "3dtb"
+#define MODE_HDMI3D_OFF         "3doff"
+
 #define PTS_FREQ        90000
 #define UNIT_FREQ       96000
 #define AV_SYNC_THRESH  PTS_FREQ*30
@@ -450,12 +454,11 @@ static vformat_t codecid_to_vformat(enum AVCodecID id)
     case AV_CODEC_ID_H264:
       format = VFORMAT_H264;
       break;
-    /*
     case AV_CODEC_ID_H264MVC:
       // H264 Multiview Video Coding (3d blurays)
-      format = VFORMAT_H264MVC;
+      //format = VFORMAT_H264MVC;
+      format = VFORMAT_H264;
       break;
-    */
     case AV_CODEC_ID_MJPEG:
       format = VFORMAT_MJPEG;
       break;
@@ -541,11 +544,9 @@ static vdec_type_t codec_tag_to_vdec_type(unsigned int codec_tag)
       // h264
       dec_type = VIDEO_DEC_FORMAT_H264;
       break;
-    /*
     case AV_CODEC_ID_H264MVC:
       dec_type = VIDEO_DEC_FORMAT_H264;
       break;
-    */
     case AV_CODEC_ID_RV30:
     case CODEC_TAG_RV30:
       // realmedia 3
@@ -1069,7 +1070,7 @@ int pre_header_feeding(am_private_t *para, am_packet_t *pkt)
             }
         }
 
-        if (VFORMAT_H264 == para->video_format || VFORMAT_H264_4K2K == para->video_format) {
+        if (VFORMAT_H264 == para->video_format || VFORMAT_H264MVC == para->video_format || VFORMAT_H264_4K2K == para->video_format) {
             ret = h264_write_header(para, pkt);
             if (ret != PLAYER_SUCCESS) {
                 return ret;
@@ -1760,6 +1761,7 @@ void CAMLCodec::CloseDecoder()
 
   if (m_freescaled)
     DisableFreeScale();
+  SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
   ShowMainVideo(false);
 }
 
@@ -1965,7 +1967,7 @@ void CAMLCodec::SetSpeed(int speed)
       break;
     default:
       m_dll->codec_resume(&am_private->vcodec);
-      if ((am_private->video_format == VFORMAT_H264) || (am_private->video_format == VFORMAT_H264_4K2K))
+      if ((am_private->video_format == VFORMAT_H264) || (am_private->video_format == VFORMAT_H264MVC) || (am_private->video_format == VFORMAT_H264_4K2K))
         m_dll->codec_set_cntl_mode(&am_private->vcodec, TRICKMODE_FFFB);
       else
         m_dll->codec_set_cntl_mode(&am_private->vcodec, TRICKMODE_I);
@@ -2160,7 +2162,17 @@ void CAMLCodec::GetRenderFeatures(Features &renderFeatures)
 void CAMLCodec::SetVideo3dMode(const int mode3d)
 {
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideo3dMode:mode3d(0x%x)", mode3d);
+  aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", MODE_HDMI3D_OFF);
   aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", mode3d);
+}
+
+void CAMLCodec::SetVideoHdmi3dMode(const std::string mode3d)
+{
+  /*
+  CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoHdmi3dMode:mode3d(%s)", mode3d.c_str());
+  aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", 0);
+  aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
+  */
 }
 
 std::string CAMLCodec::GetStereoMode()
@@ -2298,11 +2310,13 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   {
     dst_rect.x2 *= 2.0;
     SetVideo3dMode(MODE_3D_DISABLE);
+    SetVideoHdmi3dMode(MODE_HDMI3D_LR);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
   {
     dst_rect.y2 *= 2.0;
     SetVideo3dMode(MODE_3D_DISABLE);
+    SetVideoHdmi3dMode(MODE_HDMI3D_TB);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_INTERLACED)
   {
@@ -2321,6 +2335,7 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   else
   {
     SetVideo3dMode(MODE_3D_DISABLE);
+    SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
   }
 
 #if 1

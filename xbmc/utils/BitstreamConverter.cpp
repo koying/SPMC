@@ -304,6 +304,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
   switch(m_codec)
   {
     case AV_CODEC_ID_H264:
+    case AV_CODEC_ID_H264MVC:
       if (in_extrasize < 7 || in_extradata == NULL)
       {
         CLog::Log(LOGERROR, "CBitstreamConverter::Open avcC data too small or missing");
@@ -443,7 +444,7 @@ bool CBitstreamConverter::Convert(uint8_t *pData, int iSize)
 
   if (pData)
   {
-    if (m_codec == AV_CODEC_ID_H264)
+    if ((m_codec == AV_CODEC_ID_H264) || (m_codec == AV_CODEC_ID_H264MVC))
     {
       if (m_to_annexb)
       {
