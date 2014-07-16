@@ -514,19 +514,20 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   const char* mimetype;
   switch (hints.codec)
   {
-  case CODEC_ID_H264:
+  case AV_CODEC_ID_H264:
+  case AV_CODEC_ID_H264MVC:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == 0)
       return false;
     mimetype = MEDIA_MIMETYPE_VIDEO_AVC;
     if ( *(char*)hints.extradata == 1 )
       p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
-  case CODEC_ID_MPEG4:
+  case AV_CODEC_ID_MPEG4:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == 0)
       return false;
     mimetype = MEDIA_MIMETYPE_VIDEO_MPEG4;
     break;
-  case CODEC_ID_MPEG2VIDEO:
+  case AV_CODEC_ID_MPEG2VIDEO:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == 0)
       return false;
     mimetype = MEDIA_MIMETYPE_VIDEO_MPEG2;
@@ -552,20 +553,20 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
     }
     */
     break;
-  case CODEC_ID_VP3:
-  case CODEC_ID_VP6:
-  case CODEC_ID_VP6F:
+  case AV_CODEC_ID_VP3:
+  case AV_CODEC_ID_VP6:
+  case AV_CODEC_ID_VP6F:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == 0)
       return false;
     mimetype = MEDIA_MIMETYPE_VIDEO_VP6;
     break;
-    case CODEC_ID_VP8:
+    case AV_CODEC_ID_VP8:
       if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == 0)
         return false;
       mimetype = MEDIA_MIMETYPE_VIDEO_VPX;
       break;
-  case CODEC_ID_VC1:
-  //case CODEC_ID_WMV3:
+  case AV_CODEC_ID_VC1:
+  //case AV_CODEC_ID_WMV3:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == 0)
       return false;
     mimetype = MEDIA_MIMETYPE_VIDEO_VC1;
@@ -755,7 +756,7 @@ int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts
       return ret;
     }
 
-    if (p->codec == CODEC_ID_MPEG2VIDEO)
+    if (p->codec == AV_CODEC_ID_MPEG2VIDEO)
     {
       frame->medbuf = p->getBuffer(demuxer_bytes + sizeof(VPU_BITSTREAM));
       frame->medbuf->set_range(0, demuxer_bytes  + sizeof(VPU_BITSTREAM));
@@ -772,7 +773,7 @@ int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts
       return VC_ERROR;
     }
 
-    if (p->codec == CODEC_ID_MPEG2VIDEO)
+    if (p->codec == AV_CODEC_ID_MPEG2VIDEO)
     {
       VPU_BITSTREAM m2vheader;
       m2vheader.StartCode = XMEDIA_BITSTREAM_START_CODE;
