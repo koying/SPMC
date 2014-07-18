@@ -517,83 +517,40 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   case CODEC_ID_H264:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == 0)
       return false;
-    mimetype = MEDIA_MIMETYPE_VIDEO_AVC;
+    mimetype = "video/avc";
     if ( *(char*)hints.extradata == 1 )
       p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
   case CODEC_ID_MPEG4:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == 0)
       return false;
-    mimetype = MEDIA_MIMETYPE_VIDEO_MPEG4;
+    mimetype = "video/mp4v-es";
     break;
   case CODEC_ID_MPEG2VIDEO:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == 0)
       return false;
-    mimetype = MEDIA_MIMETYPE_VIDEO_MPEG2;
-    /*
-    if (hints.extrasize)
-    {
-      CLog::Log(LOGDEBUG, "MPEG2 extradata (%d)", hints.extrasize);
-      int i=0;
-      char *ea = (char*)hints.extradata;
-      while (i<hints.extrasize)
-      {
-        CStdString line;
-        int j=i;
-        for (; j<i+8 && j < hints.extrasize; ++j)
-        {
-          CStdString tmp;
-          tmp.Format("%.2x ",ea[j] );
-          line += tmp;
-        }
-        CLog::Log(LOGDEBUG, ">> %s", line.c_str());
-        i = j;
-      }
-    }
-    */
+    mimetype = "video/mpeg2";
     break;
   case CODEC_ID_VP3:
   case CODEC_ID_VP6:
   case CODEC_ID_VP6F:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == 0)
       return false;
-    mimetype = MEDIA_MIMETYPE_VIDEO_VP6;
+    mimetype = "video/vp6";
     break;
     case CODEC_ID_VP8:
       if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == 0)
         return false;
-      mimetype = MEDIA_MIMETYPE_VIDEO_VPX;
+      mimetype = "video/x-vnd.on2.vp8";
       break;
   case CODEC_ID_VC1:
   //case CODEC_ID_WMV3:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == 0)
       return false;
-    mimetype = MEDIA_MIMETYPE_VIDEO_VC1;
-    if (hints.extrasize)
-    {
-      /*
-      CLog::Log(LOGDEBUG, "VC1 extradata (%d)", hints.extrasize);
-      int i=0;
-      char *ea = (char*)hints.extradata;
-      while (i<hints.extrasize)
-      {
-        CStdString line;
-        int j=i;
-        for (; j<i+8 && j < hints.extrasize; ++j)
-        {
-          CStdString tmp;
-          tmp.Format("%.2x ",ea[j] );
-          line += tmp;
-        }
-        CLog::Log(LOGDEBUG, ">> %s", line.c_str());
-        i = j;
-      }
-      */
-      p->extrasize = hints.extrasize;
-      p->extradata = hints.extradata;
-      p->meta->setInt32(kKeyVC1ExtraSize, hints.extrasize);
-      //p->meta->setData(kKeyVC1, 0, hints.extradata, hints.extrasize);
-    }
+    mimetype = "video/vc1";
+    p->extrasize = hints.extrasize;
+    p->extradata = hints.extradata;
+    p->meta->setInt32(kKeyVC1ExtraSize, hints.extrasize);
     break;
   default:
     return false;
