@@ -139,6 +139,7 @@ public:
   virtual bool Cleanup();
 
   bool CreateGUI();
+
   bool InitWindow();
   bool DestroyWindow();
   void StartServices();
@@ -337,6 +338,16 @@ public:
     return m_bStandalone;
   }
 
+  void SetHeadless(bool value)
+  {
+    m_headless = value;
+  }
+
+  bool IsHeadless() const
+  {
+    return m_headless;
+  }
+
   void SetEnableLegacyRes(bool value)
   {
     m_bEnableLegacyRes = value;
@@ -449,6 +460,7 @@ protected:
   unsigned int m_lastRenderTime;
 
   bool m_bStandalone;
+  bool m_headless;
   bool m_bEnableLegacyRes;
   bool m_bTestMode;
   bool m_bSystemScreenSaverEnable;

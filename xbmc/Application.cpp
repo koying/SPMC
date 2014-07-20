@@ -423,6 +423,7 @@ CApplication::CApplication(void)
   m_bPlatformDirectories = true;
 
   m_bStandalone = false;
+  m_headless = false;
   m_bEnableLegacyRes = false;
   m_bSystemScreenSaverEnable = false;
   m_pInertialScrollingHandler = new CInertialScrollingHandler();
@@ -884,6 +885,7 @@ bool CApplication::Create()
 bool CApplication::CreateGUI()
 {
   m_renderGUI = true;
+
 #ifdef HAS_SDL
   CLog::Log(LOGNOTICE, "Setup SDL");
 
