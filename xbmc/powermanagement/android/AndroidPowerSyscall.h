@@ -31,12 +31,12 @@ public:
   ~CAndroidPowerSyscall();
 
   virtual bool Powerdown(void);
-  virtual bool Suspend(void) { return false; }
+  virtual bool Suspend(void);
   virtual bool Hibernate(void) { return false; }
   virtual bool Reboot(void);
 
   virtual bool CanPowerdown(void) { return m_isRooted; }
-  virtual bool CanSuspend(void) { return false; }
+  virtual bool CanSuspend(void) { return m_isRooted; }
   virtual bool CanHibernate(void) { return false; }
   virtual bool CanReboot(void) { return m_isRooted; }
   virtual int  BatteryLevel(void);

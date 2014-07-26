@@ -52,6 +52,15 @@ bool CAndroidPowerSyscall::Powerdown()
   return (rc == 0);
 }
 
+bool CAndroidPowerSyscall::Suspend()
+{
+  if (!m_isRooted)
+    return false;
+
+  int rc = system((m_su_path + " -c \"input keyevent KEYCODE_POWER\"").c_str());
+  return (rc == 0);
+}
+
 bool CAndroidPowerSyscall::Reboot()
 {
   if (!m_isRooted)
