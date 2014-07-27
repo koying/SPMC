@@ -15,6 +15,7 @@ COPYDIRS = system addons language media
 AAPT = $(SDKROOT)/platform-tools/aapt
 DX = $(SDKROOT)/platform-tools/dx
 GCC_VERSION=$(shell $(CC) -dumpversion)
+ZIP=zip
 
 X86OVERRIDES=XBMC_OVERRIDE_HOST=i686-android-linux XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_X86_TOOLCHAIN)
 ARMOVERRIDES=XBMC_OVERRIDE_HOST=arm-linux-androideabi XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_ARM_TOOLCHAIN)
@@ -43,10 +44,21 @@ ifneq ($(shell test -f $(GDBPATH) && echo 1),1)
 GDBPATH=$(NDKROOT)/prebuilt/android-$(ARCH)/gdbserver/gdbserver
 endif
 
-all: package
 SRCLIBS = $(addprefix $(PREFIX)/lib/,$(OBJS)) $(addprefix $(PREFIX)/lib/$(SDK_PLATFORM)/,$(PLATFORM_OBJS))
 DSTLIBS = $(CPU)/lib/libxbmc.so $(addprefix $(CPU)/lib/,$(OBJS)) $(addprefix $(CPU)/lib/,$(PLATFORM_OBJS))
 libs= $(DSTLIBS)
+
+all: apk
+
+apk: apk-clean sharedapk package sign
+
+obb: apk-clean sharedobb
+
+apkobb: apk-clean sharedobb package sign
+
+apkobbunsigned: apk-clean sharedobb package
+
+apknoobb: apk-clean package sign
 
 multi: x86 arm
 	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-multi-unaligned.apk
@@ -56,28 +68,33 @@ multi: x86 arm
 	@rm images/xbmcapp-debug-multi-unaligned.apk
 	@echo "$(XBMCROOT)/xbmcapp-multi-debug.apk created"
 
-package: extras
-	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-$(CPU)-unaligned.apk
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/*.java
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/xbmc/*.java
-	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
-	@cd xbmc; zip -r -q ../images/xbmcapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/spmc.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
-	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/spmc-$(CPU)-debug.apk
-	@rm images/xbmcapp-debug-$(CPU)-unaligned.apk
-	@echo "$(XBMCROOT)/spmc-$(CPU)-debug.apk created"
+xbmc/assets:
+	mkdir -p xbmc/assets
 
-extras: libs
-	rm -rf xbmc/assets
-	mkdir -p xbmc/assets xbmc/res xbmc/res/raw xbmc/assets/python2.6/lib/
-	cp -rfp $(PREFIX)/share/xbmc/* ./xbmc/assets
-	find `pwd`/xbmc/assets/ -depth -name ".git" -exec rm -rf {} \;
-	find `pwd`/xbmc/assets/system/ -name "*.so" -exec rm {} \;
-	find `pwd`/xbmc/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
-	find `pwd`/xbmc/assets/system/keymaps/ -depth -name "joystick*.xml" ! -name "joystick.xml" -exec rm {} \;
-	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
-	cd xbmc/assets/addons; rm -rf $(EXCLUDED_ADDONS)
+shared:
+	mkdir -p assets
+	cp -rfp $(PREFIX)/share/xbmc/* ./assets
+	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
+	find `pwd`/assets/system/ -name "*.so" -exec rm {} \;
+	find `pwd`/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
+	find `pwd`/assets/system/keymaps/ -depth -name "joystick*.xml" ! -name "joystick.xml" -exec rm {} \;
+	cd assets; rm -rf $(EXCLUDED_ADDONS)
+
+sharedapk: shared | xbmc/assets
+	cp -rfp assets/* ./xbmc/assets
+
+sharedobb: shared
+	$(ZIP) -9 -q -r $(XBMCROOT)/main.xbmc.obb assets
+	@echo "$(XBMCROOT)/main.xbmc.obb created"
+
+python: | xbmc/assets
+	mkdir -p xbmc/assets/python2.6/lib/
 	cp -rfp $(PREFIX)/lib/python2.6 xbmc/assets/python2.6/lib/
+	cd xbmc/assets/python2.6/lib/python2.6/; rm -rf test config lib-dynload
+
+res:
+	mkdir -p xbmc/res xbmc/res/raw images
+	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(XBMCROOT)/media/Splash.png xbmc/res/drawable/splash.png
 	cp -fp $(XBMCROOT)/media/Splash.png xbmc/res/drawable-xhdpi/ouya_icon.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
@@ -85,14 +102,13 @@ extras: libs
 	cp -fp media/drawable-mdpi/ic_launcher.png xbmc/res/drawable-mdpi/ic_launcher.png
 	cp -fp media/drawable-xhdpi/ic_launcher.png xbmc/res/drawable-xhdpi/ic_launcher.png
 	cp -fp media/drawable-xxhdpi/ic_launcher.png xbmc/res/drawable-xxhdpi/ic_launcher.png
-	cd xbmc/assets/python2.6/lib/python2.6/; rm -rf test config lib-dynload
 	mkdir -p tmp/res; $(AAPT) c -S xbmc/res -C tmp/res; cp -r -n xbmc/res tmp/ || true
 	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/xbmcapp-debug-skeleton.apk -J xbmc/src
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/xbmc/libxbmc.so
 	rm -rf xbmc/lib/$(CPU) xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
-	mkdir -p xbmc/lib/$(CPU) images xbmc/assets/python2.6/lib/ xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
+	mkdir -p xbmc/lib/$(CPU) xbmc/assets/python2.6/lib/ xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
 	cp -fp $(SRCLIBS) xbmc/obj/local/$(CPU)/
 	cp -fp $(PREFIX)/lib/xbmc/libxbmc.so xbmc/obj/local/$(CPU)/
 	find $(PREFIX)/lib/xbmc/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
@@ -105,6 +121,24 @@ libs: $(PREFIX)/lib/xbmc/libxbmc.so
 	echo "directory $(TOOLCHAIN)/sysroot/usr/include $(NDKROOT)/sources/android/native_app_glue" \
 	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/libs/$(CPU)/gdb.setup
 	cp -fp xbmc/libs/$(CPU)/* xbmc/lib/$(CPU)
+
+xbmc/classes.dex: res
+	mkdir -p xbmc/obj
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/xbmc/*.java
+	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
+
+package: libs python xbmc/classes.dex
+	@echo "Creating package..."
+	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-$(CPU)-unaligned.apk
+	@cd xbmc; $(ZIP) -r -q ../images/xbmcapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
+
+sign:
+	@echo "Signing..."
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/spmc.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
+	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/spmc-$(CPU)-debug.apk
+	@rm images/xbmcapp-debug-$(CPU)-unaligned.apk
+	@echo "$(XBMCROOT)/spmc-$(CPU)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/libxbmc.so: $(SRCLIBS)
 	$(MAKE) -C ../../depends/target/xbmc
@@ -119,7 +153,7 @@ armeabi-v7a: $(XBMC_ARM_TOOLCHAIN) force
 x86: $(XBMC_X86_TOOLCHAIN) force
 	XBMC_OVERRIDE_PLATFORM=$@ $(X86OVERRIDES) $(MAKE) package
 
-clean:
+apk-clean:
 	rm -rf images
 	rm -rf xbmc/lib
 	rm -rf xbmc/libs
@@ -130,5 +164,7 @@ clean:
 	rm -f xbmc/res/drawable/splash.png
 	rm -f xbmc/src/R.java
 	rm -f xbmc/classes.dex
+	rm -rf assets
 
-.PHONY: arm armeabi-v7a x86 force extras libs
+.PHONY: arm armeabi-v7a x86 force libs assets python sharedapk sharedobb res package
+
