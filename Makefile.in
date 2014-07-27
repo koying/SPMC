@@ -569,7 +569,19 @@ else
 install: install-binaries install-arch install-datas
 
 apk: apk-clean install
-	make -C tools/android/packaging
+	make -C tools/android/packaging apk
+
+obb: apk-clean install
+	make -C tools/android/packaging obb
+
+apkobb: apk-clean install
+	make -C tools/android/packaging apkobb
+
+apkobbunsigned: apk-clean install
+	make -C tools/android/packaging apkobbunsigned
+
+apknoobb: apk-clean install
+	make -C tools/android/packaging apknoobb
 
 apk-clean:
 	make -C tools/android/packaging clean
