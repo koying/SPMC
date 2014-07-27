@@ -562,11 +562,11 @@ ifeq ($(findstring osx,@ARCH@), osx)
 else
 install: install-binaries install-arch install-datas
 
-apk: apk-clean install
-	make -C tools/android/packaging
+apk obb apkobb apkobbunsigned apknoobb: install
+	make -C tools/android/packaging $@
 
 apk-clean:
-	make -C tools/android/packaging clean
+	make -C tools/android/packaging $@
 
 install-binaries: install-scripts
 	@echo "Copying XBMC binary to $(DESTDIR)$(libdir)/xbmc/"
