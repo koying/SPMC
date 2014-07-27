@@ -94,7 +94,7 @@ public class Splash extends Activity {
       mSplash.mState = msg.what;
       switch(mSplash.mState) {
         case InError:
-          mSplash.finish();
+          showErrorDialog(mSplash, "Error", mErrorMsg);
           break;
         case Checking:
           break;
@@ -120,6 +120,9 @@ public class Splash extends Activity {
             sendEmptyMessage(StartingXBMC);
           else {
             SetupEnvironment();
+            if (mState == InError) {
+              sendEmptyMessage(InError);
+            }
             if (fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs) {
               mState = CachingDone;
               mCachingDone = true;
@@ -266,7 +269,6 @@ public class Splash extends Activity {
     protected void onPostExecute(Integer result) {
       super.onPostExecute(result);
       if (result < 0) {
-        showErrorDialog(mSplash, "Error", mErrorMsg);
         mState = InError;
       }
 
@@ -274,11 +276,11 @@ public class Splash extends Activity {
     }
   }
 
-  public void showErrorDialog(Context context, String title, String message) {
+  public void showErrorDialog(final Activity act, final String title, final String message) {
     if (myAlertDialog != null && myAlertDialog.isShowing())
       return;
 
-    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    AlertDialog.Builder builder = new AlertDialog.Builder(act);
     builder.setTitle(title);
     builder.setIcon(android.R.drawable.ic_dialog_alert);
     builder.setMessage(Html.fromHtml(message));
@@ -286,6 +288,7 @@ public class Splash extends Activity {
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int arg1) {
             dialog.dismiss();
+            act.finish();
           }
         });
     builder.setCancelable(false);
@@ -352,14 +355,38 @@ public class Splash extends Activity {
         Log.e(TAG, "Failed to open xbmc_env properties file");
       }
     }
+
     if (sXbmcHome.isEmpty()) {
       File fCacheDir = getCacheDir();
       sXbmcHome = fCacheDir.getAbsolutePath() + "/apk";
     }
-
-    sPackagePath = getPackageResourcePath();
-    fPackagePath = new File(sPackagePath);
     fXbmcHome = new File(sXbmcHome);
+
+    try {
+      sPackagePath =
+        Environment.getExternalStorageDirectory()
+        + "/Android/obb/"
+        + getPackageName()
+        + "/main."
+        + getPackageManager().getPackageInfo(getPackageName(), 0).versionCode
+        + "."
+        + getPackageName()
+        + ".obb";
+    }
+    catch (Exception e) {}
+    finally {
+      fPackagePath = new File(sPackagePath);
+      if (!fPackagePath.exists()) {
+        sPackagePath = getPackageResourcePath();
+        fPackagePath = new File(sPackagePath);
+        if (fPackagePath.length() < 50*1024*1024) {
+           // No OBB and apk < 50Mb? Nah...
+           mErrorMsg = "OBB not yet present. Please retry later...";
+           Log.e(TAG, mErrorMsg);
+           mState = InError;
+        }
+      }
+    }
   }
 
   private boolean ParseCpuFeature() {
@@ -552,13 +579,14 @@ public class Splash extends Activity {
       mState = ChecksDone;
       
       SetupEnvironment();
-      if (fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs) {
+
+      if (mState != InError && fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs) {
         mState = CachingDone;
         mCachingDone = true;
       }
     }
 
-    if (mCachingDone && mExternalStorageChecked) {
+    if (mState != InError && mCachingDone && mExternalStorageChecked) {
       startXBMC();
       return;
     }
@@ -568,7 +596,7 @@ public class Splash extends Activity {
     mTextView = (TextView) findViewById(R.id.textView1);
 
     if (mState == InError) {
-      showErrorDialog(this, "Error", mErrorMsg);
+      mStateMachine.sendEmptyMessage(InError);
       return;
     }
           
