@@ -46,5 +46,7 @@ public:
 private:
   bool m_isRooted;
   std::string m_su_path;
+  bool m_hasCEC;
+  std::string m_cec_path;
 };
 #endif
