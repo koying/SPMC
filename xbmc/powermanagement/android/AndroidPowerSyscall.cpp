@@ -29,6 +29,8 @@ CAndroidPowerSyscall::CAndroidPowerSyscall()
 {
   m_isRooted = false;
   m_su_path = "/system/bin/su";
+  m_hasCEC = false;
+  m_cec_path = "/sys/devices/virtual/graphics/fb0/cec";
 
   if (XFILE::CFile::Exists(m_su_path))
     m_isRooted = true;
@@ -38,6 +40,9 @@ CAndroidPowerSyscall::CAndroidPowerSyscall()
     if (XFILE::CFile::Exists(m_su_path))
       m_isRooted = true;
   }
+
+  if (XFILE::CFile::Exists(m_cec_path))
+    m_hasCEC = true;
 }
 
 CAndroidPowerSyscall::~CAndroidPowerSyscall()
@@ -57,8 +62,14 @@ bool CAndroidPowerSyscall::Suspend()
   if (!m_isRooted)
     return false;
 
-  int rc = system((m_su_path + " -c \"input keyevent KEYCODE_POWER\"").c_str());
-  return (rc == 0);
+  if (m_hasCEC)
+    int rc = system((m_su_path + " -c \"echo 0 > " + m_cec_path + "\";" + m_su_path + " -c \"input keyevent KEYCODE_POWER\";" + m_su_path + " -c \"echo 1 > "  + m_cec_path + "\"").c_str());
+    return (rc == 0);
+  else
+  {
+    int rc = system((m_su_path + " -c \"input keyevent KEYCODE_POWER\"").c_str());
+    return (rc == 0);
+  }
 }
 
 bool CAndroidPowerSyscall::Reboot()
