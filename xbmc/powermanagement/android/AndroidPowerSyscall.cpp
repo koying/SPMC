@@ -30,6 +30,7 @@ CAndroidPowerSyscall::CAndroidPowerSyscall()
   m_isRooted = false;
   m_su_path = "/system/bin/su";
   m_hasCEC = false;
+  // CEC control path for Amazon FireTV, might apply to other devices
   m_cec_path = "/sys/devices/virtual/graphics/fb0/cec";
 
   if (XFILE::CFile::Exists(m_su_path))
