@@ -211,7 +211,7 @@ void CLinuxTimezone::SetTimezone(CStdString timezoneName)
     static char env_var[255];
     sprintf(env_var, "TZ=:%s", timezoneName.c_str());
     putenv(env_var);
-    tzset();
+    InitTimezone();
   }
 }
 

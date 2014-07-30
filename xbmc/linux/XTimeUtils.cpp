@@ -21,6 +21,7 @@
 #include "system.h"
 #include "XTimeUtils.h"
 #include "LinuxTimezone.h"
+#include "threads/SharedSection.h"
 
 #if defined(TARGET_DARWIN)
 #include "threads/Atomics.h"
@@ -59,8 +60,18 @@ void WINAPI Sleep(DWORD dwMilliSeconds)
   usleep(dwMilliSeconds * 1000);
 }
 
+CSharedSection timelock;
+
+void InitTimezone()
+{
+  CExclusiveLock lock(timelock);
+  tzset();
+}
+
 VOID GetLocalTime(LPSYSTEMTIME sysTime)
 {
+  CSharedLock lock(timelock);
+
   const time_t t = time(NULL);
   struct tm now;
 
