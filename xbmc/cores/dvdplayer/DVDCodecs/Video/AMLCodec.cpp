@@ -2168,11 +2168,25 @@ void CAMLCodec::SetVideo3dMode(const int mode3d)
 
 void CAMLCodec::SetVideoHdmi3dMode(const std::string mode3d)
 {
-  /*
+  static bool reset_disp_mode = false;
+
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoHdmi3dMode:mode3d(%s)", mode3d.c_str());
   aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", 0);
   aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
-  */
+  if (strstr(mode3d.c_str(), "3doff"))
+  {
+    if (reset_disp_mode)
+    {
+      // Some 3D HDTVs will not exit from 3D mode with 3doff
+      char disp_mode[256] = {};
+      if (aml_get_sysfs_str("/sys/class/display/mode", disp_mode, 255) != -1)
+        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", disp_mode);
+
+      reset_disp_mode = false;
+    }
+  }
+  else
+    reset_disp_mode = true;
 }
 
 std::string CAMLCodec::GetStereoMode()
