@@ -23,12 +23,16 @@
 #include "AndroidPowerSyscall.h"
 #include "android/activity/XBMCApp.h"
 #include "filesystem/File.h"
+#include <stdlib.h>
 #include <unistd.h>
 
 CAndroidPowerSyscall::CAndroidPowerSyscall()
 {
   m_isRooted = false;
   m_su_path = "/system/bin/su";
+  m_hasCEC = false;
+  // CEC control path for Amazon FireTV, might apply to other devices
+  m_cec_path = "/sys/devices/virtual/graphics/fb0/cec";
 
   if (XFILE::CFile::Exists(m_su_path))
     m_isRooted = true;
@@ -38,6 +42,9 @@ CAndroidPowerSyscall::CAndroidPowerSyscall()
     if (XFILE::CFile::Exists(m_su_path))
       m_isRooted = true;
   }
+
+  if (XFILE::CFile::Exists(m_cec_path))
+    m_hasCEC = true;
 }
 
 CAndroidPowerSyscall::~CAndroidPowerSyscall()
@@ -50,6 +57,24 @@ bool CAndroidPowerSyscall::Powerdown()
 
   int rc = system((m_su_path + " -c \"reboot -p\"").c_str());
   return (rc == 0);
+}
+
+bool CAndroidPowerSyscall::Suspend()
+{
+  if (!m_isRooted)
+    return false;
+
+  int rc = 0;
+  if (m_hasCEC)
+    rc = system((m_su_path + " -c \"echo 0 > " + m_cec_path + "\";" + m_su_path + " -c \"input keyevent KEYCODE_POWER\";" + m_su_path + " -c \"echo 1 > "  + m_cec_path + "\"").c_str());
+  else
+    rc = system((m_su_path + " -c \"input keyevent KEYCODE_POWER\"").c_str());
+
+  if (rc == 0)
+  {
+    return CPowerSyscallWithoutEvents::Suspend();
+  }
+  return false;
 }
 
 bool CAndroidPowerSyscall::Reboot()
