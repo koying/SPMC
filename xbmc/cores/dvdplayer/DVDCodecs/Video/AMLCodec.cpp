@@ -1759,9 +1759,9 @@ void CAMLCodec::CloseDecoder()
   // return tsync to default so external apps work
   aml_set_sysfs_int("/sys/class/tsync/enable", 1);
 
+  SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
   if (m_freescaled)
     DisableFreeScale();
-  SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
   ShowMainVideo(false);
 }
 
@@ -2180,7 +2180,13 @@ void CAMLCodec::SetVideoHdmi3dMode(const std::string mode3d)
       // Some 3D HDTVs will not exit from 3D mode with 3doff
       char disp_mode[256] = {};
       if (aml_get_sysfs_str("/sys/class/display/mode", disp_mode, 255) != -1)
+      {
+        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
+        // Setting the same mode does not reset HDMI on M8
+        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", "720p");
         aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", disp_mode);
+        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
+      }
 
       reset_disp_mode = false;
     }
