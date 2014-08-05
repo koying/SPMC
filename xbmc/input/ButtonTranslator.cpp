@@ -1023,11 +1023,10 @@ int CButtonTranslator::GetActionCode(int window, const CKey &key, CStdString &st
     return 0;
   buttonMap::const_iterator it2 = (*it).second.find(code);
   int action = 0;
-  while (it2 != (*it).second.end())
+  if (it2 != (*it).second.end())
   {
     action = (*it2).second.id;
     strAction = (*it2).second.strID;
-    it2 = (*it).second.end();
   }
 #ifdef TARGET_POSIX
   // Some buttoncodes changed in Hardy
@@ -1035,12 +1034,11 @@ int CButtonTranslator::GetActionCode(int window, const CKey &key, CStdString &st
   {
     CLog::Log(LOGDEBUG, "%s: Trying Hardy keycode for %#04x", __FUNCTION__, code);
     code &= ~0x0F00;
-    buttonMap::const_iterator it2 = (*it).second.find(code);
-    while (it2 != (*it).second.end())
+    it2 = (*it).second.find(code);
+    if (it2 != (*it).second.end())
     {
       action = (*it2).second.id;
       strAction = (*it2).second.strID;
-      it2 = (*it).second.end();
     }
   }
 #endif
