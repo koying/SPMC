@@ -27,6 +27,7 @@
 #include <vector>
 #include <string>
 #include "cores/VideoRenderers/RenderFormats.h"
+#include "DVDVideoCodecInfo.h"
 
 struct DVDCodecAvailableType 
 {
@@ -89,6 +90,11 @@ struct DVDVideoPicture
     struct {
       CDVDMediaCodecInfo *mediacodec;
     };
+  
+    struct {
+      CDVDVideoCodecBuffer *codecinfo;
+    };
+
   };
 
   unsigned int iFlags;
