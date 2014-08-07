@@ -2,8 +2,8 @@
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.semperpax.spmc"
-    android:versionCode="130300"
-    android:versionName="13.3.0 (SPMC)" >
+    android:versionCode="130301"
+    android:versionName="13.3.1 (SPMC)" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="14" />
