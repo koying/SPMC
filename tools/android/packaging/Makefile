@@ -17,6 +17,15 @@ DX = $(SDKROOT)/platform-tools/dx
 GCC_VERSION=$(shell $(CC) -dumpversion)
 ZIP=zip
 
+SIGN_STORE=~/.android//spmc.keystore
+SIGN_STOREPASS=android
+SIGN_KEY=androiddebugkey
+SIGN_KEYPASS=
+
+ifneq ($(strip $(SIGN_KEYPASS)),)
+SIGN_KEYPASS_OPT=-keypass $(SIGN_KEYPASS)
+endif
+
 X86OVERRIDES=XBMC_OVERRIDE_HOST=i686-android-linux XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_X86_TOOLCHAIN)
 ARMOVERRIDES=XBMC_OVERRIDE_HOST=arm-linux-androideabi XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_ARM_TOOLCHAIN)
 
@@ -50,20 +59,22 @@ libs= $(DSTLIBS)
 
 all: apk
 
-apk: apk-clean sharedapk package sign
+apk: apk-clean sharedapk package apk-sign
 
 obb: apk-clean sharedobb
 
-apkobb: apk-clean sharedobb package sign
+apk-unsigned: apk-clean sharedapk package
 
-apkobbunsigned: apk-clean sharedobb package
+apk-obb: apk-clean sharedobb package apk-sign
 
-apknoobb: apk-clean package sign
+apk-obb-unsigned: apk-clean sharedobb package
+
+apk-noobb: apk-clean package apk-sign
 
 multi: x86 arm
 	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-multi-unaligned.apk
 	@cd xbmc; zip -r -q ../images/xbmcapp-debug-multi-unaligned.apk lib/ assets
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/spmc.keystore -storepass android images/xbmcapp-debug-multi-unaligned.apk androiddebugkey
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/xbmcapp-debug-multi-unaligned.apk $(SIGN_KEY)
 	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-multi-unaligned.apk $(XBMCROOT)/xbmcapp-multi-debug.apk
 	@rm images/xbmcapp-debug-multi-unaligned.apk
 	@echo "$(XBMCROOT)/xbmcapp-multi-debug.apk created"
@@ -133,11 +144,10 @@ package: libs python xbmc/classes.dex
 	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-$(CPU)-unaligned.apk
 	@cd xbmc; $(ZIP) -r -q ../images/xbmcapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
 
-sign:
+apk-sign:
 	@echo "Signing..."
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore ~/Dropbox/Private/spmc.keystore -storepass android images/xbmcapp-debug-$(CPU)-unaligned.apk androiddebugkey
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/xbmcapp-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
 	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/spmc-$(CPU)-debug.apk
-	@rm images/xbmcapp-debug-$(CPU)-unaligned.apk
 	@echo "$(XBMCROOT)/spmc-$(CPU)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/libxbmc.so: $(SRCLIBS)
