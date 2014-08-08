@@ -100,7 +100,7 @@ IAESink *CAESinkFactory::TrySink(std::string &driver, std::string &device, AEAud
 #if defined(TARGET_WINDOWS)
     if (driver == "WASAPI")
       sink = new CAESinkWASAPI();
-    else if (driver == "DIRECTSOUND")
+    if (driver == "DIRECTSOUND")
       sink = new CAESinkDirectSound();
 #elif defined(TARGET_ANDROID)
     sink = new CAESinkAUDIOTRACK();
@@ -111,15 +111,15 @@ IAESink *CAESinkFactory::TrySink(std::string &driver, std::string &device, AEAud
 #elif defined(TARGET_DARWIN_OSX)
     sink = new CAESinkDARWINOSX();
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
-#if defined(HAS_PULSEAUDIO)
-    else if (driver == "PULSE")
+ #if defined(HAS_PULSEAUDIO)
+    if (driver == "PULSE")
       sink = new CAESinkPULSE();
-#endif
-#if defined(HAS_ALSA)
-    else if (driver == "ALSA")
+ #endif
+ #if defined(HAS_ALSA)
+    if (driver == "ALSA")
       sink = new CAESinkALSA();
-#endif
-    else if (driver == "OSS")
+ #endif
+    if (driver == "OSS")
       sink = new CAESinkOSS();
 #endif
   }
