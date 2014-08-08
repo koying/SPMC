@@ -34,10 +34,9 @@
 #include "utils/fastmemcpy.h"
 #include "threads/Thread.h"
 #include "threads/Event.h"
-#include "Application.h"
-#include "ApplicationMessenger.h"
-#include "settings/AdvancedSettings.h"
 #include "android/jni/Build.h"
+#include "settings/AdvancedSettings.h"
+#include "DVDCodecs/DVDCodecInterface.h"
 
 #include "xbmc/guilib/FrameBufferObject.h"
 
@@ -374,16 +373,16 @@ public:
 
 /***********************************************************/
 
-CStageFrightVideo::CStageFrightVideo(CApplication* application, CApplicationMessenger* applicationMessenger, CWinSystemEGL* windowing, CAdvancedSettings* advsettings)
+CStageFrightVideo::CStageFrightVideo(CDVDCodecInterface* interface)
 {
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CStageFrightVideo));
 #endif
   p = new CStageFrightVideoPrivate;
-  p->m_g_application = application;
-  p->m_g_applicationMessenger = applicationMessenger;
-  p->m_g_Windowing = windowing;
-  p->m_g_advancedSettings = advsettings;
+  p->m_g_application = interface->GetApplication();
+  p->m_g_applicationMessenger = interface->GetApplicationMessenger();
+  p->m_g_Windowing = interface->GetWindowSystem();
+  p->m_g_advancedSettings = interface->GetAdvancedSettings();
 }
 
 CStageFrightVideo::~CStageFrightVideo()

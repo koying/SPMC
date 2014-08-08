@@ -38,6 +38,7 @@
 #include "settings/AdvancedSettings.h"
 #include "android/jni/Build.h"
 #include "utils/StringUtils.h"
+#include "DVDCodecs/DVDCodecInterface.h"
 
 #include "DllLibStageFrightCodec.h"
 
@@ -129,7 +130,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
       return false;
     m_stf_dll->EnableDelayedUnload(false);
 
-    m_stf_handle = m_stf_dll->create_stf(&g_application, &CApplicationMessenger::Get(), &g_Windowing, &g_advancedSettings);
+    m_stf_handle = m_stf_dll->create_stf(&g_dvdcodecinterface);
 
     if (!m_stf_dll->stf_Open(m_stf_handle, hints))
     {
