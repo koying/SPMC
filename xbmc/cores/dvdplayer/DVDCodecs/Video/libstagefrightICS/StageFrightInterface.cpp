@@ -21,12 +21,9 @@
 #include "StageFrightInterface.h"
 #include "StageFrightVideo.h"
 
-#include "windowing/WindowingFactory.h"
-#include "settings/AdvancedSettings.h"
-
-void* create_stf(CApplication* application, CApplicationMessenger* applicationMessenger, CWinSystemEGL* windowing, CAdvancedSettings* advsettings)
+void* create_stf(CDVDCodecInterface* interface)
 {
-  return (void*)new CStageFrightVideo(application, applicationMessenger, windowing, advsettings);
+  return (void*)new CStageFrightVideo(interface);
 }
 
 void destroy_stf(void* stf)
