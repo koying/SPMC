@@ -63,16 +63,17 @@ bool CAndroidPowerSyscall::Suspend()
   if (!m_isRooted)
     return false;
 
+  int rc = 0;
   if (m_hasCEC)
-  {
-    int rc = system((m_su_path + " -c \"echo 0 > " + m_cec_path + "\";" + m_su_path + " -c \"input keyevent KEYCODE_POWER\";" + m_su_path + " -c \"echo 1 > "  + m_cec_path + "\"").c_str());
-    return (rc == 0);
-  }
+    rc = system((m_su_path + " -c \"echo 0 > " + m_cec_path + "\";" + m_su_path + " -c \"input keyevent KEYCODE_POWER\";" + m_su_path + " -c \"echo 1 > "  + m_cec_path + "\"").c_str());
   else
+    rc = system((m_su_path + " -c \"input keyevent KEYCODE_POWER\"").c_str());
+
+  if (rc == 0)
   {
-    int rc = system((m_su_path + " -c \"input keyevent KEYCODE_POWER\"").c_str());
-    return (rc == 0);
+    return CPowerSyscallWithoutEvents::Suspend();
   }
+  return false;
 }
 
 bool CAndroidPowerSyscall::Reboot()
