@@ -38,6 +38,7 @@ CPU=x86
 endif
 ifeq ($(findstring arm,$(CPU)),arm)
 ARCH=arm
+CPU=armeabi-v7a
 endif
 
 #older ndk x86
@@ -70,14 +71,6 @@ apk-obb: apk-clean sharedobb package apk-sign
 apk-obb-unsigned: apk-clean sharedobb package
 
 apk-noobb: apk-clean package apk-sign
-
-multi: x86 arm
-	@cp images/xbmcapp-debug-skeleton.apk images/xbmcapp-debug-multi-unaligned.apk
-	@cd xbmc; zip -r -q ../images/xbmcapp-debug-multi-unaligned.apk lib/ assets
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/xbmcapp-debug-multi-unaligned.apk $(SIGN_KEY)
-	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-multi-unaligned.apk $(XBMCROOT)/xbmcapp-multi-debug.apk
-	@rm images/xbmcapp-debug-multi-unaligned.apk
-	@echo "$(XBMCROOT)/xbmcapp-multi-debug.apk created"
 
 xbmc/assets:
 	mkdir -p xbmc/assets
@@ -155,14 +148,6 @@ $(PREFIX)/lib/xbmc/libxbmc.so: $(SRCLIBS)
 
 $(SRCLIBS):
 
-arm: armeabi-v7a
-
-armeabi-v7a: $(XBMC_ARM_TOOLCHAIN) force
-	XBMC_OVERRIDE_PLATFORM=$@ $(ARMOVERRIDES) $(MAKE) package
-
-x86: $(XBMC_X86_TOOLCHAIN) force
-	XBMC_OVERRIDE_PLATFORM=$@ $(X86OVERRIDES) $(MAKE) package
-
 apk-clean:
 	rm -rf images
 	rm -rf xbmc/lib
@@ -176,5 +161,5 @@ apk-clean:
 	rm -f xbmc/classes.dex
 	rm -rf assets
 
-.PHONY: arm armeabi-v7a x86 force libs assets python sharedapk sharedobb res package
+.PHONY: force libs assets python sharedapk sharedobb res package
 
