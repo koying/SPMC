@@ -516,7 +516,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   switch (hints.codec)
   {
   case AV_CODEC_ID_H264:
-  case AV_CODEC_ID_H264MVC:
+//  case AV_CODEC_ID_H264MVC:
     if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == 0)
       return false;
     mimetype = "video/avc";

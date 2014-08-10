@@ -93,7 +93,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
     switch (hints.codec)
     {
       case AV_CODEC_ID_H264:
-      case AV_CODEC_ID_H264MVC:
+//      case AV_CODEC_ID_H264MVC:
         m_pFormatName = m_pFormatSource + "-h264";
         if (hints.extrasize < 7 || hints.extradata == NULL)
         {
