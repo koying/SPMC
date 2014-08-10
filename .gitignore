@@ -501,6 +501,9 @@ lib/cpluff/stamp-h1
 /tools/Changelog/Release
 /tools/Changelog/Debug
 
+# /tools/android/
+/tools/android/packaging/share/
+
 # /tools/EventClients/
 /tools/EventClients/*.pyc
 /tools/EventClients/Clients/OSXRemote/Makefile
