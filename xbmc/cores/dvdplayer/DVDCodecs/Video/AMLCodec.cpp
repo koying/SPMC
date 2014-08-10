@@ -454,11 +454,13 @@ static vformat_t codecid_to_vformat(enum AVCodecID id)
     case AV_CODEC_ID_H264:
       format = VFORMAT_H264;
       break;
+/*
     case AV_CODEC_ID_H264MVC:
       // H264 Multiview Video Coding (3d blurays)
       //format = VFORMAT_H264MVC;
       format = VFORMAT_H264;
       break;
+*/
     case AV_CODEC_ID_MJPEG:
       format = VFORMAT_MJPEG;
       break;
@@ -544,9 +546,11 @@ static vdec_type_t codec_tag_to_vdec_type(unsigned int codec_tag)
       // h264
       dec_type = VIDEO_DEC_FORMAT_H264;
       break;
+/*
     case AV_CODEC_ID_H264MVC:
       dec_type = VIDEO_DEC_FORMAT_H264;
       break;
+*/
     case AV_CODEC_ID_RV30:
     case CODEC_TAG_RV30:
       // realmedia 3
