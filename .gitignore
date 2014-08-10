@@ -470,6 +470,9 @@ lib/cpluff/stamp-h1
 /tools/depends/target/ffmpeg/ffmpeg-2.4-Helix-alpha4/
 /tools/depends/target/ffmpeg/ffmpeg-install/
 
+# /tools/android/
+/tools/android/packaging/share/
+
 # /tools/EventClients/
 /tools/EventClients/*.pyc
 /tools/EventClients/Makefile
