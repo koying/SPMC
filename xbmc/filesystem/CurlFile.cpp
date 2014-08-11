@@ -878,6 +878,13 @@ bool CCurlFile::IsInternet()
 {
   CURL url("http://www.google.com");
   bool found = Exists(url);
+  if (!found)
+  {
+    // fallback
+    Close();
+    url.Parse("http://www.w3.org/");
+    found = Exists(url);
+  }
   Close();
 
   return found;
