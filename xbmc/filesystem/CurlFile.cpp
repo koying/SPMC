@@ -878,6 +878,13 @@ bool CCurlFile::IsInternet()
 {
   CStdString strURL = "http://www.google.com";
   bool found = Exists(strURL);
+  if (!found)
+  {
+    // fallback
+    Close();
+    strURL = "http://www.w3.org/";
+    found = Exists(strURL);
+  }
   Close();
 
   return found;
