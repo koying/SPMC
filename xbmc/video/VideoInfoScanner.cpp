@@ -1482,14 +1482,13 @@ namespace VIDEO
       CNfoFile::NFOResult result=CNfoFile::NO_NFO;
       CScraperUrl scrUrl;
       ScraperPtr info(scraper);
-      item.GetVideoInfoTag()->m_iEpisode = file->iEpisode;
       if (useLocal)
         result = CheckForNFOFile(&item, false, info,scrUrl);
       if (result == CNfoFile::FULL_NFO)
       {
         m_nfoReader.GetDetails(*item.GetVideoInfoTag());
         // override with episode and season number from file if available
-        if (file->iEpisode > -1)
+        if (item.GetVideoInfoTag()->m_iEpisode == -1 && file->iEpisode > -1)
         {
           item.GetVideoInfoTag()->m_iEpisode = file->iEpisode;
           item.GetVideoInfoTag()->m_iSeason = file->iSeason;
