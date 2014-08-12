@@ -20,6 +20,8 @@ import java.util.Properties;
 import java.util.Enumeration;
 import java.util.ArrayList;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -58,6 +60,8 @@ public class Splash extends Activity
   private static final int CachingDone = 6;
   private static final int WaitingStorageChecked = 7;
   private static final int StorageChecked = 8;
+  private static final int WaitingNetwork = 9;
+  private static final int NetworkReady = 10;
   private static final int StartingXBMC = 99;
 
   private static final String TAG = "@APP_NAME@";
@@ -79,9 +83,11 @@ public class Splash extends Activity
   private File fXbmcHome = null;
 
   private BroadcastReceiver mExternalStorageReceiver = null;
+  private BroadcastReceiver mNetworkReceiver = null;
   private boolean mExternalStorageChecked = false;
   private boolean mCachingDone = false;
   private boolean mInstallLibs = false;
+  private boolean mNetworkReady = false;
 
   private class StateMachine extends Handler
   {
@@ -112,7 +118,10 @@ public class Splash extends Activity
         break;
       case CachingDone:
         mSplash.mCachingDone = true;
-        sendEmptyMessage(StartingXBMC);
+        if (!mNetworkReady)
+          sendEmptyMessage(WaitingNetwork);
+        else
+          sendEmptyMessage(StartingXBMC);
         break;
       case WaitingStorageChecked:
         mSplash.mTextView.setText("Waiting for external storage...");
@@ -123,7 +132,7 @@ public class Splash extends Activity
         mExternalStorageChecked = true;
         mSplash.stopWatchingExternalStorage();
         if (mSplash.mCachingDone)
-          sendEmptyMessage(StartingXBMC);
+          sendEmptyMessage(CachingDone);
         else
         {
           SetupEnvironment();
@@ -133,16 +142,23 @@ public class Splash extends Activity
           }
           if (fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs)
           {
-            mState = CachingDone;
-            mCachingDone = true;
-
-            sendEmptyMessage(StartingXBMC);
+            sendEmptyMessage(CachingDone);
           } else
           {
             new FillCache(mSplash).execute();
           }
         }
 
+        break;
+      case WaitingNetwork:
+        mSplash.mTextView.setText("Waiting for network...");
+        mSplash.mProgress.setVisibility(View.INVISIBLE);
+        startWatchingNetwork();
+        break;
+      case NetworkReady:
+        mSplash.mTextView.setText("Network ready...");
+        mSplash.stopWatchingNetwork();
+        sendEmptyMessage(CachingDone);
         break;
       case StartingXBMC:
         mSplash.mTextView.setText("Starting @APP_NAME@...");
@@ -333,81 +349,60 @@ public class Splash extends Activity
 
   private void SetupEnvironment()
   {
-    File fProp = new File(Environment.getExternalStorageDirectory()
-         .getAbsolutePath() + "/xbmc_env.properties");
-    if (fProp.exists())
+    sXbmcHome = System.getProperty("xbmc.home", "");
+    if (!sXbmcHome.isEmpty())
     {
-      Log.i(TAG, "Loading xbmc_env.properties");
-      try
+      fXbmcHome = new File(sXbmcHome);
+      int loop = 20;
+      while (!fXbmcHome.exists() && loop > 0)
       {
-        Properties sysProp = new Properties(System.getProperties());
-        FileInputStream xbmcenvprop = new FileInputStream(fProp);
-        sysProp.load(xbmcenvprop);
-        System.setProperties(sysProp);
-
-        sXbmcHome = System.getProperty("xbmc.home", "");
-        if (!sXbmcHome.isEmpty())
+        // Wait a while in case of non-primary sdcard
+        try
         {
-          File fXbmcHome = new File(sXbmcHome);
-          int loop = 20;
-          while (!fXbmcHome.exists() && loop > 0)
-          {
-             // Wait a while in case of non-primary sdcard
-            try
-            {
-              Thread.sleep(1000);
-            } catch (InterruptedException e)
-            {
-              continue;
-            }
-            loop--;
-          }
-          if (!fXbmcHome.exists())
-          {
-            System.setProperty("xbmc.home", "");
-            sXbmcHome = "";
-          }
-        }
-
-        sXbmcdata = System.getProperty("xbmc.data", "");
-        if (!sXbmcdata.isEmpty())
+          Thread.sleep(1000);
+        } catch (InterruptedException e)
         {
-          File fXbmcData = new File(sXbmcdata);
-          int loop = 20;
-          while (!fXbmcData.exists() && loop > 0)
-          {
-             // Wait a while in case of non-primary sdcard
-            try
-            {
-              Thread.sleep(1000);
-            } catch (InterruptedException e) {
-              continue;
-            }
-            loop--;
-          }
-
-          if (!fXbmcData.exists())
-          {
-            sXbmcdata = "";
-            System.setProperty("xbmc.data", "");
-          }
+          continue;
         }
-
-      } catch (NotFoundException e)
+        loop--;
+      }
+      if (!fXbmcHome.exists())
       {
-        Log.e(TAG, "Cannot find xbmc_env properties file");
-      } catch (IOException e)
-      {
-        Log.e(TAG, "Failed to open xbmc_env properties file");
+        System.setProperty("xbmc.home", "");
+        sXbmcHome = "";
       }
     }
     if (sXbmcHome.isEmpty())
     {
       File fCacheDir = getCacheDir();
       sXbmcHome = fCacheDir.getAbsolutePath() + "/apk";
+      fXbmcHome = new File(sXbmcHome);
     }
 
-    fXbmcHome = new File(sXbmcHome);
+    sXbmcdata = System.getProperty("xbmc.data", "");
+    if (!sXbmcdata.isEmpty())
+    {
+      File fXbmcData = new File(sXbmcdata);
+      int loop = 20;
+      while (!fXbmcData.exists() && loop > 0)
+      {
+        // Wait a while in case of non-primary sdcard
+        try
+        {
+          Thread.sleep(1000);
+        } catch (InterruptedException e)
+        {
+          continue;
+        }
+        loop--;
+      }
+
+      if (!fXbmcData.exists())
+      {
+        sXbmcdata = "";
+        System.setProperty("xbmc.data", "");
+      }
+    }
 
     sPackagePath = getPackageResourcePath();
     fPackagePath = new File(sPackagePath);
@@ -579,6 +574,41 @@ public class Splash extends Activity
     return m.find();
   }
 
+  private boolean IsNetworkReady()
+  {
+    ConnectivityManager connectivityManager = (ConnectivityManager) this
+        .getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo networkInfo = null;
+    if (connectivityManager != null)
+      networkInfo = connectivityManager.getActiveNetworkInfo();
+
+    return networkInfo != null
+        && networkInfo.getState() == NetworkInfo.State.CONNECTED;
+  }
+
+  void startWatchingNetwork()
+  {
+    mNetworkReceiver = new BroadcastReceiver()
+    {
+      @Override
+      public void onReceive(Context context, Intent intent)
+      {
+        mNetworkReady = IsNetworkReady();
+        if (mNetworkReady)
+          mStateMachine.sendEmptyMessage(NetworkReady);
+      }
+    };
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+    registerReceiver(mNetworkReceiver, filter);
+  }
+
+  void stopWatchingNetwork()
+  {
+    if (mNetworkReceiver != null)
+      unregisterReceiver(mNetworkReceiver);
+  }
+
   void updateExternalStorageState()
   {
     String state = Environment.getExternalStorageState();
@@ -653,6 +683,23 @@ public class Splash extends Activity
         startXBMC();
         return;
       }
+
+    File fProp = new File(Environment.getExternalStorageDirectory()
+        .getAbsolutePath() + "/xbmc_env.properties");
+    if (fProp.exists())
+    {
+      Log.i(TAG, "Loading xbmc_env.properties");
+      try
+      {
+        Properties sysProp = new Properties(System.getProperties());
+        FileInputStream xbmcenvprop = new FileInputStream(fProp);
+        sysProp.load(xbmcenvprop);
+        System.setProperties(sysProp);
+      } catch (Exception e)
+      {
+        Log.e(TAG, "Error loading xbmc_env.properties (" + e.getMessage() + ")");
+      }
+    }
 
     mStateMachine.sendEmptyMessage(Checking);
 
@@ -729,6 +776,14 @@ public class Splash extends Activity
     if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
       mExternalStorageChecked = true;
 
+    String sXbmcWaitNetwork = System.getProperty("xbmc.waitnetwork", "");
+    if (sXbmcWaitNetwork.equalsIgnoreCase("yes"))
+    {
+      if (IsNetworkReady())
+        mNetworkReady = true;
+    } else
+      mNetworkReady = true;
+
     if (mState != InError && mExternalStorageChecked)
     {
       mState = ChecksDone;
@@ -745,7 +800,8 @@ public class Splash extends Activity
       }
     }
 
-    if (mState != InError && mCachingDone && mExternalStorageChecked)
+    if (mState != InError && mCachingDone && mExternalStorageChecked
+        && mNetworkReady)
     {
       startXBMC();
       return;
