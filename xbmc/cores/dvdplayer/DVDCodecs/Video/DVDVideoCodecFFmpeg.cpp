@@ -162,8 +162,8 @@ CDVDVideoCodecFFmpeg::CDVDVideoCodecFFmpeg() : CDVDVideoCodec()
   m_iScreenHeight = 0;
   m_iOrientation = 0;
   m_bSoftware = false;
-#ifdef TARGET_ANDROID
-  // If we get here on Android, it's always software
+#if defined(TARGET_ANDROID) || defined(TARGET_DARWIN_IOS)
+  // If we get here on Android or iOS, it's always software
   m_isSWCodec = true;
 #else
   m_isSWCodec = false;
