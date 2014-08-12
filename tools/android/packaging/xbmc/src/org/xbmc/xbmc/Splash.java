@@ -14,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.ArrayList;
@@ -418,20 +420,43 @@ public class Splash extends Activity
           + "." + getPackageName() + ".obb";
     } catch (Exception e)
     {
-    } finally
+    }
+
+    fPackagePath = new File(sPackagePath);
+    if (!fPackagePath.exists())
     {
-      fPackagePath = new File(sPackagePath);
-      if (!fPackagePath.exists())
+      // Check for latest obb
+      String obbdir = Environment.getExternalStorageDirectory()
+          + "/Android/obb/" + getPackageName();
+      File[] obbfiles = new File(obbdir).listFiles();
+      if (obbfiles.length > 0)
       {
-        sPackagePath = getPackageResourcePath();
-        fPackagePath = new File(sPackagePath);
-        if (fPackagePath.length() < 50 * 1024 * 1024)
+        Arrays.sort(obbfiles, new Comparator<File>()
         {
-          // No OBB and apk < 50Mb? Nah...
-          mErrorMsg = "OBB not yet present. Please retry later...";
-          Log.e(TAG, mErrorMsg);
-          mState = InError;
-        }
+          public int compare(File f1, File f2)
+          {
+            // Sort by lastmodified descending
+            return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
+          }
+        });
+        fPackagePath = obbfiles[0];
+      }
+    }
+
+    if (fPackagePath.exists())
+    {
+      sPackagePath = fPackagePath.getAbsolutePath();
+      Log.i(TAG, "Using OBB: " + sPackagePath);
+    } else
+    {
+      sPackagePath = getPackageResourcePath();
+      fPackagePath = new File(sPackagePath);
+      if (fPackagePath.length() < 50 * 1024 * 1024)
+      {
+        // No OBB and apk < 50Mb? Nah...
+        mErrorMsg = "OBB not yet present. Please retry later...";
+        Log.e(TAG, mErrorMsg);
+        mState = InError;
       }
     }
   }
