@@ -1683,6 +1683,8 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   RESOLUTION_INFO res;
   if (aml_ModeToResolution(mode, &res))
   {
+    m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
+/*
     if (aml_get_device_type() >= AML_DEVICE_TYPE_M8)
     {
       m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
@@ -1696,6 +1698,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
         m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
       }
     }
+*/
   }
 
 /*
@@ -2257,9 +2260,6 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
 
   CRect gui, display, dst_rect;
   gui = g_graphicsContext.GetViewWindow();
-  // when display is at 1080p, we have freescale enabled
-  // and that scales all layers into 1080p display including video,
-  // so we have to setup video axis for 720p instead of 1080p... Boooo.
 
 #ifdef TARGET_ANDROID
   display = m_display_rect;
