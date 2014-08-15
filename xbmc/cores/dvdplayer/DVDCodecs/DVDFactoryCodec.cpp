@@ -303,7 +303,7 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 #endif
 
 #if defined(HAS_LIBSTAGEFRIGHT)
-    if (!hint.software && CSettings::Get().GetBool("videoplayer.usestagefright"))
+    if (!hint.software && CSettings::Get().HasCondition("have_libstagefrightdecoder") && CSettings::Get().GetBool("videoplayer.usestagefright"))
     {
       switch(hint.codec)
       {
