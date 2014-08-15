@@ -419,6 +419,46 @@ bool CSettings::LoadSetting(const TiXmlNode *node, const std::string &settingId)
   return m_settingsManager->LoadSetting(node, settingId);
 }
 
+bool CSettings::HasCondition(const std::string &id)
+{
+  return m_settingsManager->GetConditions().Check("isdefined", id);
+}
+
+std::vector<CVariant> CSettings::ListToValues(const CSettingList *setting, const std::vector< boost::shared_ptr<CSetting> > &values)
+{
+  std::vector<CVariant> realValues;
+
+  if (setting == NULL)
+    return realValues;
+
+  for (SettingPtrList::const_iterator it = values.begin(); it != values.end(); ++it)
+  {
+    switch (setting->GetElementType())
+    {
+      case SettingTypeBool:
+        realValues.push_back(static_cast<const CSettingBool*>(it->get())->GetValue());
+        break;
+
+      case SettingTypeInteger:
+        realValues.push_back(static_cast<const CSettingInt*>(it->get())->GetValue());
+        break;
+
+      case SettingTypeNumber:
+        realValues.push_back(static_cast<const CSettingNumber*>(it->get())->GetValue());
+        break;
+
+      case SettingTypeString:
+        realValues.push_back(static_cast<const CSettingString*>(it->get())->GetValue());
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  return realValues;
+}
+
 bool CSettings::Initialize(const std::string &file)
 {
   CXBMCTinyXML xmlDoc;
