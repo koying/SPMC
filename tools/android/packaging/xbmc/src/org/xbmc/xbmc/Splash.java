@@ -423,7 +423,7 @@ public class Splash extends Activity
       String obbdir = Environment.getExternalStorageDirectory()
           + "/Android/obb/" + getPackageName();
       File[] obbfiles = new File(obbdir).listFiles();
-      if (obbfiles.length > 0)
+      if (obbfiles != null && obbfiles.length > 0)
       {
         Arrays.sort(obbfiles, new Comparator<File>()
         {
