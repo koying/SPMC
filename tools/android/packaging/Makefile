@@ -79,7 +79,7 @@ shared:
 	mkdir -p assets
 	cp -rfp $(PREFIX)/share/xbmc/* ./assets
 	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
-	find `pwd`/assets/system/ -name "*.so" -exec rm {} \;
+	find `pwd`/assets/ -name "*.so" -exec rm {} \;
 	find `pwd`/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
 	find `pwd`/assets/system/keymaps/ -depth -name "joystick*.xml" ! -name "joystick.xml" -exec rm {} \;
 	cd assets; rm -rf $(EXCLUDED_ADDONS)
@@ -117,6 +117,7 @@ libs: $(PREFIX)/lib/xbmc/libxbmc.so
 	cp -fp $(SRCLIBS) xbmc/obj/local/$(CPU)/
 	cp -fp $(PREFIX)/lib/xbmc/libxbmc.so xbmc/obj/local/$(CPU)/
 	find $(PREFIX)/lib/xbmc/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
+	find $(PREFIX)/share/xbmc/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
 	find $(PREFIX)/lib/xbmc/system -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
 	cd xbmc/obj/local/$(CPU)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
 	cp -fp xbmc/obj/local/$(CPU)/*.so xbmc/lib/$(CPU)/
