@@ -88,6 +88,7 @@ sharedapk: shared | xbmc/assets
 	cp -rfp assets/* ./xbmc/assets
 
 sharedobb: shared
+	rm -f $(XBMCROOT)/main.xbmc.obb
 	$(ZIP) -9 -q -r $(XBMCROOT)/main.xbmc.obb assets
 	@echo "$(XBMCROOT)/main.xbmc.obb created"
 
