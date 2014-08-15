@@ -36,8 +36,9 @@
 
 <p>Those Gotham builds will contain XBMC patches which were not accepted, or are not acceptable, in the main XBMC tree. </p>
 
-<p>Latest Gotham build is: <strong>13.3.1</strong> <a href="https://github.com/koying/SPMC/releases/tag/13.3.1-spmc">link</a><br>
-APK: <a href="https://github.com/koying/SPMC/releases/download/13.3.1-spmc/spmc-armeabi-v7a_13.3.1.apk">link</a></p>
+<p>Latest Gotham build is: <strong>13.3.2</strong> <a href="https://github.com/koying/SPMC/releases/tag/13.3.2-spmc">link</a><br>
+APK: <a href="https://github.com/koying/SPMC/releases/download/13.3.2-spmc/spmc-armeabi-v7a_13.3.2.apk">link</a>
+Non-launcher APK: <a href="https://github.com/koying/SPMC/releases/download/13.3.2-spmc/spmc-armeabi-v7a_13.3.2_nolauncher.apk">link</a></p>
 
 <p>Google Play: <a href="https://play.google.com/store/apps/details?id=com.semperpax.spmc">link</a><br>
 Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref=sr_1_1?s=mobile-apps&amp;ie=UTF8&amp;qid=1407661207&amp;sr=1-1&amp;keywords=spmc">link</a></p>
@@ -45,6 +46,21 @@ Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref
 <p>Changelog:</p>
 
 <h3>
+<a name="1332-20140815" class="anchor" href="#1332-20140815"><span class="octicon octicon-link"></span></a>13.3.2 (2014/08/15):</h3>
+
+<ul>
+<li>Backport ffmpeg 2.3</li>
+<li>Fix suspend</li>
+<li>Fix SPMC closing when adding/removing a keyboard with touchpad</li>
+<li>Possible fix for hiccups after pausing for a long time on amlogic</li>
+<li>Fix passthrough not working on Rockchip (with media hack): remove minix check </li>
+<li>Do not pause music when going to background</li>
+<li>Allow multi-threaded in fallback s/w decoding</li>
+<li>Add option to wait for network (via xbmc_env.properties)</li>
+<li>Possible fix for crash on startup (previous one didn't solve it)</li>
+<li>disable libstagefright on Nvidia Shield (crash)</li>
+<li>Fix Python PIL</li>
+</ul><h3>
 <a name="1331-20140806" class="anchor" href="#1331-20140806"><span class="octicon octicon-link"></span></a>13.3.1 (2014/08/06):</h3>
 
 <ul>
