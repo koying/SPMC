@@ -84,6 +84,7 @@
 #include "view/ViewStateSettings.h"
 #include "windowing/WindowingFactory.h"
 #if defined(TARGET_ANDROID)
+#include "android/jni/Build.h"
 #include "android/activity/AndroidFeatures.h"
 #endif
 
@@ -920,7 +921,10 @@ void CSettings::InitializeConditions()
     m_settingsManager->AddCondition("has_mediacodec");
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-  m_settingsManager->AddCondition("have_libstagefrightdecoder");
+  if (!(
+        (StringUtils::StartsWithNoCase(CJNIBuild::MANUFACTURER, "nvidia") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "shield")))  // Nvidia shield crashing
+      )
+    m_settingsManager->AddCondition("have_libstagefrightdecoder");
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   m_settingsManager->AddCondition("have_videotoolboxdecoder");
