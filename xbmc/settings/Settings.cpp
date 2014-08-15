@@ -636,6 +636,11 @@ bool CSettings::LoadSetting(const TiXmlNode *node, const std::string &settingId)
   return m_settingsManager->LoadSetting(node, settingId);
 }
 
+bool CSettings::HasCondition(const std::string &id)
+{
+  return m_settingsManager->GetConditions().Check("isdefined", id);
+}
+
 std::vector<CVariant> CSettings::ListToValues(const CSettingList *setting, const std::vector< boost::shared_ptr<CSetting> > &values)
 {
   std::vector<CVariant> realValues;

@@ -262,6 +262,14 @@ public:
    */
   bool LoadSetting(const TiXmlNode *node, const std::string &settingId);
 
+  /*!
+   \brief Check the existence of a condition.
+
+   \param id Condition identifier
+   \return True if the condition has been defined
+   */
+  bool HasCondition(const std::string &id);
+
   static std::vector<CVariant> ListToValues(const CSettingList *setting, const std::vector< boost::shared_ptr<CSetting> > &values);
 private:
   CSettings(const CSettings&);
