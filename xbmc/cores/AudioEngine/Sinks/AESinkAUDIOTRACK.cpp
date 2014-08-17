@@ -34,6 +34,7 @@
 #include "android/jni/AudioManager.h"
 #include "android/jni/AudioTrack.h"
 #include "android/jni/Build.h"
+#include "android/jni/System.h"
 #define ANDROID_MAX_CHANNELS 8
 static enum AEChannel AndroidChannelMap[ANDROID_MAX_CHANNELS + 1] = {
   AE_CH_FL      , AE_CH_FR      , AE_CH_FC      , AE_CH_LFE     , AE_CH_BL      , AE_CH_BR      , AE_CH_SL      , AE_CH_SR      ,
@@ -112,9 +113,15 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   if (m_passthrough)
   {
     if (CJNIAudioFormat::ENCODING_IEC61937_16BIT != -1)  // OUYA
+    {
+      CLog::Log(LOGNOTICE, "Using OUYA Passthrough");
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
+    }
     else if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3")) // Rockchip with "passthrough hack"
+    {
+      CLog::Log(LOGNOTICE, "Using Rockchip hacked Passthrough");
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
+    }
   }
 
   /*
@@ -153,7 +160,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   }
 
   m_format.m_dataFormat     = AE_FMT_S16LE;
-  m_format.m_channelLayout  = info.m_channels;
+  if (m_passthrough)
+    m_format.m_channelLayout  = info.m_channels;
+  else
+    m_format.m_channelLayout  = GetChannelLayout(m_format);
   m_format.m_frameSize      = m_format.m_channelLayout.Count() *
                               (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
   int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
@@ -335,7 +345,8 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 
   list.push_back(m_info);
 
-  if (g_advancedSettings.m_androidfakeaudiodevices)
+  std::string fakeaudiodevices = CJNISystem::getProperty("xbmc.fakeaudiodevices", "");
+  if (fakeaudiodevices == "yes")
   {
     m_infoMC.m_channels.Reset();
     m_infoMC.m_dataFormats.clear();

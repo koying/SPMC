@@ -85,6 +85,7 @@
 #include "windowing/WindowingFactory.h"
 #if defined(TARGET_ANDROID)
 #include "android/jni/Build.h"
+#include "android/jni/System.h"
 #include "android/activity/AndroidFeatures.h"
 #endif
 
@@ -919,6 +920,9 @@ void CSettings::InitializeConditions()
 #ifdef TARGET_ANDROID
   if (CAndroidFeatures::GetVersion() > 15)
     m_settingsManager->AddCondition("has_mediacodec");
+  std::string fakeaudiodevices = CJNISystem::getProperty("xbmc.fakeaudiodevices", "");
+  if (fakeaudiodevices == "yes")
+    m_settingsManager->AddCondition("has_fakeaudiodevices");
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
   if (!(
