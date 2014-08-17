@@ -1538,6 +1538,8 @@ namespace VIDEO
           item.GetVideoInfoTag()->m_strTitle = CURL(file->strPath).GetFileNameWithoutPath();
           CURL::Decode(item.GetVideoInfoTag()->m_strTitle);
           item.GetVideoInfoTag()->m_strSortTitle = item.GetVideoInfoTag()->m_strTitle;
+          item.GetVideoInfoTag()->m_iSeason = file->iSeason;
+          item.GetVideoInfoTag()->m_iEpisode = file->iEpisode;
 
           // Let's try to get the modification datetime
           CDateTime dateAdded;
