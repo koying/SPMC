@@ -1758,9 +1758,9 @@ bool CApplication::OnSettingUpdate(CSetting* &setting, const char *oldSettingId,
       return ret;
     }
 #if defined(TARGET_ANDROID)
-    else
+    else if (!CSettings::Get().GetBool("has_fakeaudiodevices"))
     {
-      // Do not allow audiooutput.channels > 2.0 unless supported (future)
+      // Do not allow audiooutput.channels > 2.0 unless supported
       CSettingInt *channels = (CSettingInt*)setting;
       channels->SetValue(1);
     }
