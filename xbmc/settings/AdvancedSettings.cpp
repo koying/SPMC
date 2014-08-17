@@ -193,8 +193,6 @@ void CAdvancedSettings::Initialize()
   m_musicPercentSeekForwardBig = 10;
   m_musicPercentSeekBackwardBig = -10;
 
-  m_androidfakeaudiodevices = false;
-
   m_slideshowPanAmount = 2.5f;
   m_slideshowZoomAmount = 5.0f;
   m_slideshowBlackBarCompensation = 20.0f;
@@ -520,8 +518,6 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
 
     XMLUtils::GetFloat(pElement, "limiterhold", m_limiterHold, 0.0f, 100.0f);
     XMLUtils::GetFloat(pElement, "limiterrelease", m_limiterRelease, 0.001f, 100.0f);
-
-    XMLUtils::GetBoolean(pElement, "androidfakeaudiodevices", m_androidfakeaudiodevices);
   }
 
   pElement = pRootElement->FirstChildElement("omx");
