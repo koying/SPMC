@@ -406,14 +406,16 @@ public class Splash extends Activity
       }
     }
 
-    try
+    sPackagePath = System.getProperty("xbmc.obb", "");
+    if (sPackagePath.equals(""))
     {
-      sPackagePath = Environment.getExternalStorageDirectory()
-          + "/Android/obb/" + getPackageName() + "/main."
-          + getPackageManager().getPackageInfo(getPackageName(), 0).versionCode
-          + "." + getPackageName() + ".obb";
-    } catch (Exception e)
-    {
+      try
+      {
+        sPackagePath = Environment.getExternalStorageDirectory()
+            + "/Android/obb/" + getPackageName() + "/main."
+            + getPackageManager().getPackageInfo(getPackageName(), 0).versionCode
+            + "." + getPackageName() + ".obb";
+      } catch (Exception e) {}
     }
 
     fPackagePath = new File(sPackagePath);
