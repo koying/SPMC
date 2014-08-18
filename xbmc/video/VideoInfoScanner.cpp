@@ -1375,8 +1375,9 @@ namespace VIDEO
           item.GetVideoInfoTag()->m_iEpisode = file->iEpisode;
           item.GetVideoInfoTag()->m_iSeason = file->iSeason;
         }
-        if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, true, &showInfo) < 0)
-          return INFO_ERROR;
+        if (m_database.GetEpisodeId(file->strPath, item.GetVideoInfoTag()->m_iEpisode, item.GetVideoInfoTag()->m_iSeason) < 0)
+          if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, true, &showInfo) < 0)
+            return INFO_ERROR;
  
         continue;
       }
