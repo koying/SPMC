@@ -81,7 +81,8 @@ shared:
 	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
 	find `pwd`/assets/ -name "*.so" -exec rm {} \;
 	find `pwd`/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
-	find `pwd`/assets/system/keymaps/ -depth -name "joystick*.xml" ! -name "joystick.xml" -exec rm {} \;
+	find `pwd`/assets/system/keymaps/ -depth -name "joystick*.xml" -exec rm {} \;
+	mv -f `pwd`/assets/system/keymaps/joystick.xml.sample `pwd`/assets/system/keymaps/joystick.xml
 	cd assets; rm -rf $(EXCLUDED_ADDONS)
 
 sharedapk: shared | xbmc/assets
