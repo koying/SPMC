@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package nl.hardwareguru.mmc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -163,7 +163,7 @@ public class Splash extends Activity
         sendEmptyMessage(CachingDone);
         break;
       case StartingXBMC:
-        mSplash.mTextView.setText("Starting SPMC...");
+        mSplash.mTextView.setText("Starting MinixMC...");
         mSplash.mProgress.setVisibility(View.INVISIBLE);
         mSplash.startXBMC();
         break;
@@ -423,7 +423,7 @@ public class Splash extends Activity
       String obbdir = Environment.getExternalStorageDirectory()
           + "/Android/obb/" + getPackageName();
       File[] obbfiles = new File(obbdir).listFiles();
-      if (obbfiles.length > 0)
+      if (obbfiles != null && obbfiles.length > 0)
       {
         Arrays.sort(obbfiles, new Comparator<File>()
         {
@@ -618,7 +618,7 @@ public class Splash extends Activity
 
     // Run XBMC
     Intent intent = getIntent();
-    intent.setClass(this, com.semperpax.spmc.Main.class);
+    intent.setClass(this, nl.hardwareguru.mmc.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
     finish();
@@ -636,7 +636,7 @@ public class Splash extends Activity
         .getRunningTasks(Integer.MAX_VALUE);
     for (RunningTaskInfo task : tasks)
       if (task.topActivity.toString().equalsIgnoreCase(
-          "ComponentInfo{com.semperpax.spmc/com.semperpax.spmc.Main}"))
+          "ComponentInfo{nl.hardwareguru.mmc/nl.hardwareguru.mmc.Main}"))
       {
         // XBMC already running; just activate it
         startXBMC();

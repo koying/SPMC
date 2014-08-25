@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package nl.hardwareguru.mmc;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

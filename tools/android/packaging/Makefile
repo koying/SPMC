@@ -17,10 +17,10 @@ DX = $(SDKROOT)/platform-tools/dx
 GCC_VERSION=$(shell $(CC) -dumpversion)
 ZIP=zip
 
-SIGN_STORE=~/.android//spmc.keystore
-SIGN_STOREPASS=android
-SIGN_KEY=androiddebugkey
-SIGN_KEYPASS=
+SIGN_STORE=~/.android/minixmc.keystore
+SIGN_STOREPASS=minixmc
+SIGN_KEY=android
+SIGN_KEYPASS=minixmc
 
 ifneq ($(strip $(SIGN_KEYPASS)),)
 SIGN_KEYPASS_OPT=-keypass $(SIGN_KEYPASS)
@@ -142,8 +142,8 @@ package: libs python xbmc/classes.dex
 apk-sign:
 	@echo "Signing..."
 	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/xbmcapp-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
-	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/spmc-$(CPU)-debug.apk
-	@echo "$(XBMCROOT)/spmc-$(CPU)-debug.apk created"
+	@$(SDKROOT)/tools/zipalign -f 4 images/xbmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/minixmc-$(CPU)-debug.apk
+	@echo "$(XBMCROOT)/minixmc-$(CPU)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/libxbmc.so: $(SRCLIBS)
 	$(MAKE) -C ../../depends/target/xbmc

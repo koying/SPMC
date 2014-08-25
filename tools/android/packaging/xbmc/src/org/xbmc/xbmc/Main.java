@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package nl.hardwareguru.mmc;
 
 import android.app.NativeActivity;
 import android.content.Intent;

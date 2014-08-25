@@ -93,7 +93,7 @@ std::vector<androidPackage> CXBMCApp::m_applications;
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIContext(nativeActivity)
-  , CJNIBroadcastReceiver("com.semperpax.spmc/XBMCBroadcastReceiver")
+  , CJNIBroadcastReceiver("nl/hardwareguru/mmc/XBMCBroadcastReceiver")
   , m_wakeLock(NULL)
 {
   m_activity = nativeActivity;
@@ -251,7 +251,7 @@ bool CXBMCApp::getWakeLock()
   if (m_wakeLock)
     return true;
 
-  m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock("com.semperpax.spmc"));
+  m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock("nl.hardwareguru.mmc"));
 
   return true;
 }
@@ -624,7 +624,7 @@ void CXBMCApp::SetupEnv()
   {
     CJNIFile androidPath = getExternalFilesDir("");
     if (!androidPath)
-      androidPath = getDir("com.semperpax.spmc", 1);
+      androidPath = getDir("nl.hardwareguru.mmc", 1);
 
     if (androidPath)
       externalDir = androidPath.getAbsolutePath();
