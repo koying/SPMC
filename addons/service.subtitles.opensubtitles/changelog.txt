@@ -1,0 +1,29 @@
+5.0.8
+- fix: extension is needed for downloaded files
+
+5.0.7
+- fix: Do not use unsafe file names, thx Cesar Canassa
+
+5.0.6
+- clean temp folder
+- add login details to addon settings
+
+5.0.5
+- [fix] ascii UNICODE.decode
+- [fix] manual search string unquoted
+- cosmetics and code simplification
+
+5.0.4
+- manual search button support
+
+5.0.3
+- fix Portuguese (Brazil) and Greek
+
+5.0.2
+- icon.png and added logo.png for skin to use in window
+
+5.0.1
+- let skin control flag filetype
+
+5.0.0
+- move the service out of XBMC Subtitles

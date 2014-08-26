@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.guruswitch"
+    name="HardwareGuru Afspeler" version="0.0.1" provider-name="Hardwareguru">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.python.script" library="default.py"> 
+     <provides>executable</provides> 
+  </extension> 
+  <extension point="xbmc.addon.metadata">
+        <summary lang="nl">Eenvoudig overschakelen naar een externe afspeler</summary>
+		<description lang="nl">Eenvoudig overschakelen naar een externe afspeler</description>
+
+    <platform>all</platform>
+    <language></language>
+  </extension>
+</addon>

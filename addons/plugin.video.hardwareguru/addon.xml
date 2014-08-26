@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.hardwareguru" name="HardwareGuru Update" version="0.0.3" provider-name="www.hardwareguru.nl">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>executable</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">HardwareGuru Update</summary>
+    <description lang="en">Update uw XBMC addons en instellingen, al uw instellingen gaan verloren !!!! Voor informatie kijk op www.hardwareguru.nl</description>
+    <platform>all</platform>
+  </extension>
+</addon>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Catalan language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/ca/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Voleu pujar "%s"?</string>
+    <string id="30001">Pujat amb ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">No s'enviarà cap correu (Cap correu configurat)</string>
+    <string id="30004">S'enviarà un correu a: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Adreça de correu</string>
+    <string id="31001">Omet sempre xbmc.old.log (registre d'anteriors execucions)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Aquest afegitó puja els vostres registres a xbmclogs.com</string>
+    <string id="32001">Si voleu rebre un correu amb diferents enllaços</string>
+    <string id="32002">als vostres registres pujats heu d'establir una adreça de correu</string>
+    <string id="32004">Els registres de depuració poden contenir usuaris o contrasenyes!</string>
+</strings>

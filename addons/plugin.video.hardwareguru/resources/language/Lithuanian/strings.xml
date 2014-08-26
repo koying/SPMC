@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Lithuanian language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/lt/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Ar norite įkelti "%s"?</string>
+    <string id="30001">Siunčiama į ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">eMail nebus išsiųstas(eMail nesukonfiguruotas)</string>
+    <string id="30004">eMail bus išsiųstas į: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">eMail adresas</string>
+    <string id="31001">Visada praleisti xbmc.old.log (prisijungti iš ankstesnių laikotarpių)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Šis priedas įkels savo žurnalus į xbmclogs.com</string>
+    <string id="32001">Jei jūs norite gauti laišką su tiesioginę nuorodą į nusiųstų failų žurnalus</string>
+    <string id="32002">jūs turite nustatyti savo elektroninio pašto adresą</string>
+    <string id="32004">Derinimo žurnaluose gali būti vardų ir slaptažodžių!</string>
+</strings>

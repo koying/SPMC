@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Greek language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/el/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Επιθυμείτε να ανεβάσετε το "%s";</string>
+    <string id="30001">Ανέβηκε με ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Δε θα αποσταλεί κανένα email (Δεν έχει οριστεί email)</string>
+    <string id="30004">Θα αποσταλεί email στο: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Διεύθυνση email</string>
+    <string id="31001">Πάντα να παραλείπεται το xbmc.old.log (αρχείο καταγραφής από προηγούμενη εκτέλεση)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Αυτό το Πρόσθετο ανεβάζει τα αρχεία καταγραφής σας στο xbmclogs.com</string>
+    <string id="32001">Αν επιθυμείτε να λάβετε ένα email που να περιέχει άμεσους συνδέσμους</string>
+    <string id="32002">στα ανεβασμένα αρχεία καταγραφής σας, πρέπει να ορίσετε τη διεύθυνση email σας</string>
+    <string id="32004">Τα αρχεία καταγραφής μπορεί να περιέχουν ονόματα χρηστών ή κωδικούς!</string>
+</strings>

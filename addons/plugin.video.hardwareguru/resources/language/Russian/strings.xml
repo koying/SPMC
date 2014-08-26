@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Russian language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/ru/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Вы хотите выгрузить "%s"?</string>
+    <string id="30001">Выгружено с ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Email не будет послан (Почта не настроена)</string>
+    <string id="30004">Email будет послан на: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Адрес email</string>
+    <string id="31001">Всегда удалать xbmc.old.log (лог от прошлого запуска)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Этот плагин выгрузит Ваши логи на xbmclogs.com</string>
+    <string id="32001">Если Вы хотите получить почту, содержащую прямые ссылки</string>
+    <string id="32002">на загруженные Вами логи, Вы должны указать адрес email</string>
+    <string id="32004">Отладочные логи могут содержать имена и пароли пользователя!</string>
+</strings>

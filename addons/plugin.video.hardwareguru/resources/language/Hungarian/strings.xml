@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Hungarian language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/hu/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Fel akarja tölteni a "%s" fájlt?</string>
+    <string id="30001">Feltöltve %s azonosítóval.</string>
+    <string id="30002">Webcím: %s</string>
+    <string id="30003">Nem fogunk e-mailt küldeni. (Nem adott meg e-mail címet)</string>
+    <string id="30004">Az e-mailt a %s címre fogjuk küldeni.</string>
+
+    <!-- Settings -->
+    <string id="31000">E-mail cím</string>
+    <string id="31001">Mindig ugorja át az xbmc.old.log-ot (az előző futás naplóját)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Ez a kiegészítő feltölti a naplófájljait az xbmclogs.com-ra</string>
+    <string id="32001">Amennyiben szeretne e-mailt kapni a feltöltött naplóira mutató linkekkel,</string>
+    <string id="32002">be kell állítania egy e-mail címet.</string>
+    <string id="32004">A hibakereső (debug) naplók felhasználóneveket illetve jelszavakat is tartalmazhatnak!</string>
+</strings>

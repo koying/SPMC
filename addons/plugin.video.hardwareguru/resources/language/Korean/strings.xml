@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Korean language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/ko/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">"%s"를 업로드하시겠습니까?</string>
+    <string id="30001">ID: %s 로 업로드되었습니다.</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">이메일이 보내지 않습니다. (이메일이 설정되지 않음)</string>
+    <string id="30004">%s 로 이메일이 보내졌습니다.</string>
+
+    <!-- Settings -->
+    <string id="31000">이메일 주소</string>
+    <string id="31001">항상 xbmc.old.log (이전 실행에서의 로그) 올리지 않음</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">이 애드온은 로그를 xbmclogs.com에 업로드 합니다</string>
+    <string id="32001">올려진 로그의 링크가 포함된 이메일을 받기 원하시면</string>
+    <string id="32002">반드시 이메일 주소를 설정해야합니다.</string>
+    <string id="32004">디버그로그는 사용자이름이나 암호를 포함할수 있습니다!</string>
+</strings>

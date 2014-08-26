@@ -1,0 +1,7 @@
+v1.0.3
+Made it easier for the hub to update all zips
+not hardcoded anymore
+
+
+v1.0
+Initial Release

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- German language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/de/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Möchtest du "%s" hochladen?</string>
+    <string id="30001">Hochgeladen unter der ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Es wird keine Email gesendet - keine Addr. gesetzt</string>
+    <string id="30004">Email wird gesendet an: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Email Adresse</string>
+    <string id="31001">xbmc.old.log immer auslassen (log aus der vorherigen Sitzung)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Dieses Add-on lädt deine Logs auf www.xbmclogs.com hoch.</string>
+    <string id="32001">Wenn du eine Email mit Links zu deinen Logs erhalten</string>
+    <string id="32002">möchtest, musst du deine Email eintragen.</string>
+    <string id="32004">Debug Logs könnten Passwörter enthalten!</string>
+</strings>

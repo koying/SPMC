@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Italian language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/it/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Vuoi caricare "%s%"?</string>
+    <string id="30001">Caricato con ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Nessuna mail verrà spedita (Nessuna mail è configurata)</string>
+    <string id="30004">L'email verrà mandata a: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Indirizzi email</string>
+    <string id="32001">Se vuoi ricevere una mail contenente link diretti</string>
+    <string id="32002">ai tuoi log caricati devi impostare il tuo indirizzo mail</string>
+</strings>

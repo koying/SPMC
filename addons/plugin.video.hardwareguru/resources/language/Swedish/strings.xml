@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Swedish language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/sv/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Vill du ladda upp "%s"?</string>
+    <string id="30001">Uppladdat med ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Ingen epost kommer att skickas (ingen epostadress är konfigurerad)</string>
+    <string id="30004">Epost kommer att skickas till: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Epostadress</string>
+    <string id="31001">Hoppa alltid över xbmc.old.log (logg från föregående körning)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Detta tillägg laddar upp dina loggar till xbmclogs.com</string>
+    <string id="32001">Om du vill få ett epostmeddelande innehållande länkar</string>
+    <string id="32002">till dina uppladdade loggar, behöver du ange din epostadress</string>
+    <string id="32004">Debuggloggar kan innehålla användarnamn och lösenord!</string>
+</strings>

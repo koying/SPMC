@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Spanish language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/es/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">¿Quiere enviar  "%s"?</string>
+    <string id="30001">Enviar con ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">No se enviara ningún email (Ningún email ha sido configurado)</string>
+    <string id="30004">El email se enviara a : %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Dirección email</string>
+    <string id="31001">Omitir siempre xbmc.old.log (Logs de ejecuciones previas)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Este complemento envia tus logs a xbmclogs.com</string>
+    <string id="32001">Si quiere recibir un email con los enlaces directos</string>
+    <string id="32002">a tus logs enviados, tienes que configurar una dirección email</string>
+    <string id="32004">¡"Debug logs" pueden contener nombres de usuarios y contraseñas!</string>
+</strings>

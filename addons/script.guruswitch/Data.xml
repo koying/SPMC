@@ -1,0 +1,27 @@
+
+<playercorefactory>
+	<players>
+		<player name="StephWrapper" type="ExternalPlayer" audio="false" video="true">
+			<filename>com.birdy.smbwrapper</filename>
+			<hidexbmc>true</hidexbmc>
+			<playcountminimumtime>120</playcountminimumtime>
+		</player>
+	</players>
+
+	<rules action="prepend">
+		<rule protocols="smb" name="StephWrapper" />
+
+		<rule dvdimage="true" player="StephWrapper"/>
+		
+		<rule protocols="rtmp" player="StephWrapper"/>
+		
+		<rule protocols="rtsp" player="StephWrapper" />
+		
+        <rule protocols="sop" player="StephWrapper" />
+		
+		<!-- Internet streams -- Disabled for now -->
+		<!--<rule internetstream="true" player="MXPlayerFree" />-->
+
+		<rule video="true" player="StephWrapper"/>
+	</rules>
+</playercorefactory>

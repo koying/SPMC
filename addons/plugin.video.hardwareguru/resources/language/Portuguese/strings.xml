@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Portuguese language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/pt/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Quer enviar "%s"?</string>
+    <string id="30001">Enviado com o ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Não será enviado email (nenhum email introduzido)</string>
+    <string id="30004">O email será enviado para: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Endereço de email</string>
+    <string id="31001">Ignorar sempre xbmc.old.log (logs do acesso anterior)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Este addon envia os seus logs para xbmclogs.com</string>
+    <string id="32001">Se pretende receber um email contendo ligações</string>
+    <string id="32002">para os logs que enviou, tem de introduzir um endereço email.</string>
+    <string id="32004">Logs de depuração podem conter nomes de utilizador e palavras-passe!</string>
+</strings>

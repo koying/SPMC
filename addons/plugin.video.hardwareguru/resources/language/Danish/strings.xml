@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Danish language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/da/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Vil du indsende "%s"?</string>
+    <string id="30001">Indsendt som ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Ingen email sendes (Ingen emailadresse indstillet)</string>
+    <string id="30004">Email sendes til: %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Email-adresse</string>
+    <string id="31001">Indsend aldrig xbmc.old.log (logfil fra tidligere kørsel)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Denne add-on indsender dine logfiler til xbmclogs.com</string>
+    <string id="32001">Hvis du vil have en email med direkte links til dine</string>
+    <string id="32002">indsendte logfiler, skal du vælge din emailadresse.</string>
+    <string id="32004">Logfilerne kan indeholde brugernavne eller adgangskoder!</string>
+</strings>

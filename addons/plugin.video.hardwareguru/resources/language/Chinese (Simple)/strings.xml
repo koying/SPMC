@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Chinese (Simple) language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/zh/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">您想上传"%s"?</string>
+    <string id="30001">上传所用账号：%s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">不会发送邮件 (邮件地址未设置)</string>
+    <string id="30004">邮件将发送至：%s</string>
+
+    <!-- Settings -->
+    <string id="31000">邮件地址</string>
+    <string id="31001">总是跳过xbmc.old.log(上次运行的日志)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">此插件上传您的日志到xbmclogs.com</string>
+    <string id="32001">如果您想收到一份邮件包含有直接链接</string>
+    <string id="32002">到您上传的日志请设置您的邮件地址</string>
+    <string id="32004">调试日志有可能会含有用户名或密码！</string>
+</strings>

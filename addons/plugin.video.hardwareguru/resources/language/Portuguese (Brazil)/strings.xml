@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- Portuguese (Brazil) language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/pt_BR/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+    <!-- Dialog strings -->
+    <string id="30000">Você deseja efetuar o upload "%s"?</string>
+    <string id="30001">Uploaded com ID: %s</string>
+    <string id="30002">URL: %s</string>
+    <string id="30003">Nenhum e-mail será enviado (Nenhum e-mail é configurado)</string>
+    <string id="30004">E-mail será enviado para : %s</string>
+
+    <!-- Settings -->
+    <string id="31000">Endereço Email</string>
+    <string id="31001">Sempre ignorar xbmc.old.log (log de ​​execução anterior)</string>
+
+    <!-- Usage help strings in settings dialog -->
+    <string id="32000">Este  Addon envia seus logs para xbmclogs.com</string>
+    <string id="32001">Se você quiser receber um e-mail contendo links diretos</string>
+    <string id="32002">para seus registros enviados você tem que definir o seu endereço de e-mail</string>
+    <string id="32004">Debug Logs pode conter nome usuário ou senhas!</string>
+</strings>
