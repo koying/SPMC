@@ -100,7 +100,7 @@ python: | xbmc/assets
 res:
 	mkdir -p xbmc/res xbmc/res/raw images
 	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
-	cp -fp $(XBMCROOT)/media/Splash.png xbmc/res/drawable/splash.png
+	cp -fp media/splash.png xbmc/res/drawable/splash.png
 	cp -fp $(XBMCROOT)/media/Splash.png xbmc/res/drawable-xhdpi/ouya_icon.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
 	cp -fp media/drawable-ldpi/ic_launcher.png xbmc/res/drawable-ldpi/ic_launcher.png
