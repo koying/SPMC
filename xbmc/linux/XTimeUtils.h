@@ -23,7 +23,6 @@
 
 #include "PlatformDefs.h"
 
-VOID InitTimezone();
 VOID GetLocalTime(LPSYSTEMTIME);
 
 void WINAPI Sleep(DWORD dwMilliSeconds);
