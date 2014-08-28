@@ -651,7 +651,7 @@ bool CApplication::Create()
   }
 
 #ifdef TARGET_POSIX
-  InitTimezone();   // Initialize timezone information variables
+  tzset();   // Initialize timezone information variables
 #endif
 
   // Grab a handle to our thread to be used later in identifying the render thread.
