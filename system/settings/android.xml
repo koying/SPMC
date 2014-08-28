@@ -63,6 +63,14 @@
     </category>
     <category id="audiooutput">
     <group id="1">
+      <setting id="audiooutput.channels">
+        <dependencies>
+          <dependency type="visible" on="property" name="aesettingvisible" setting="audiooutput.audiodevice">audiooutput.channels</dependency>
+        </dependencies>
+        <updates>
+          <update type="change" />
+        </updates>
+      </setting>
       <setting id="audiooutput.config">
         <visible>false</visible>
       </setting>

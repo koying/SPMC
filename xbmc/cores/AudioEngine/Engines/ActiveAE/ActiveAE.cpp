@@ -2233,8 +2233,8 @@ bool CActiveAE::IsSettingVisible(const std::string &settingId)
   else if (settingId == "audiooutput.channels")
   {
 #ifdef TARGET_ANDROID
-    if (CSettings::Get().HasCondition("has_fakeaudiodevices"))
-      return true;
+    if (!CSettings::Get().HasCondition("has_fakeaudiodevices"))
+      return false;
 #endif
     if (m_sink.GetDeviceType(CSettings::Get().GetString("audiooutput.audiodevice")) != AE_DEVTYPE_IEC958)
       return true;
