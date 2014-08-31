@@ -8,7 +8,7 @@ OBJS = libcurl.so \
   libxbmpeg2convert.so libnfs.so libass.so libbluray.so
 
 PLATFORM_OBJS =
-EXCLUDED_ADDONS = screensaver.rsxs.euphoria visualization.dxspectrum visualization.milkdrop visualization.projectm
+EXCLUDED_ADDONS = screensaver.rsxs.euphoria visualization.dxspectrum visualization.milkdrop visualization.projectm service.xbmc.versioncheck
 
 XBMCROOT = $(shell cd $(CURDIR)/../../..; pwd)
 COPYDIRS = system addons language media
@@ -82,7 +82,7 @@ shared:
 	find `pwd`/assets/ -name "*.so" -exec rm {} \;
 	find `pwd`/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
 	find `pwd`/assets/system/keymaps/ -depth -name "joystick*.xml" ! -name "joystick.xml" -exec rm {} \;
-	cd assets; rm -rf $(EXCLUDED_ADDONS)
+	cd `pwd`/assets/addons; rm -rf $(EXCLUDED_ADDONS)
 
 sharedapk: shared | xbmc/assets
 	cp -rfp assets/* ./xbmc/assets
