@@ -83,6 +83,7 @@ void* thread_run(void* obj)
   return NULL;
 }
 CEvent CXBMCApp::m_windowCreated;
+bool CXBMCApp::m_amlREALVIDEO = false;
 ANativeActivity *CXBMCApp::m_activity = NULL;
 CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
@@ -117,10 +118,14 @@ void CXBMCApp::onStart()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
 
-  // non-aml boxes will ignore this intent broadcast.
-  // setup aml scalers to play video as is, unscaled.
-  CJNIIntent intent_aml_video_on = CJNIIntent("android.intent.action.REALVIDEO_ON");
-  sendBroadcast(intent_aml_video_on);
+  if (!m_amlREALVIDEO)
+  {
+    // non-aml boxes will ignore this intent broadcast.
+    // setup aml scalers to play video as is, unscaled.
+    CJNIIntent intent_aml_video_on = CJNIIntent("android.intent.action.REALVIDEO_ON");
+    sendBroadcast(intent_aml_video_on);
+    m_amlREALVIDEO = true;
+  }
 
   if (!m_firstrun)
   {
@@ -148,6 +153,13 @@ void CXBMCApp::onResume()
   else
     g_application.WakeUpScreenSaverAndDPMS();
 
+  if (!m_amlREALVIDEO)
+  {
+    CJNIIntent intent_aml_video_on = CJNIIntent("android.intent.action.REALVIDEO_ON");
+    sendBroadcast(intent_aml_video_on);
+    m_amlREALVIDEO = true;
+  }
+
   // Clear the applications cache. We could have installed/deinstalled apps
   {
     CSingleLock lock(m_applicationsMutex);
@@ -165,9 +177,13 @@ void CXBMCApp::onPause()
   unregisterReceiver(*this);
   EnableWakeLock(false);
 
-  // non-aml boxes will ignore this intent broadcast.
-  CJNIIntent intent_aml_video_off = CJNIIntent("android.intent.action.REALVIDEO_OFF");
-  sendBroadcast(intent_aml_video_off);
+  if (m_amlREALVIDEO)
+  {
+    // non-aml boxes will ignore this intent broadcast.
+    CJNIIntent intent_aml_video_off = CJNIIntent("android.intent.action.REALVIDEO_OFF");
+    sendBroadcast(intent_aml_video_off);
+    m_amlREALVIDEO = false;
+  }
 }
 
 void CXBMCApp::onStop()
