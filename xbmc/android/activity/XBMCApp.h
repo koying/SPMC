@@ -132,6 +132,7 @@ private:
 
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;
+  static bool m_amlREALVIDEO;
 
   void XBMC_Pause(bool pause);
   void XBMC_Stop();
