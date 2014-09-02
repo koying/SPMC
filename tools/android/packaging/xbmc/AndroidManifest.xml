@@ -2,7 +2,7 @@
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.hardwareguru.mmc"
-    android:versionCode="060000"
+    android:versionCode="060001"
     android:versionName="MinixMC 6.0" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
