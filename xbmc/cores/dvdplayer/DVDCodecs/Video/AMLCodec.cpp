@@ -1752,6 +1752,10 @@ void CAMLCodec::CloseDecoder()
   SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
 
   ShowMainVideo(false);
+
+  // add a little delay after closing in case
+  // we are reopened too fast.
+  usleep(500 * 1000);
 }
 
 void CAMLCodec::Reset()
