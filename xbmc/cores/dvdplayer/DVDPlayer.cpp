@@ -3493,7 +3493,24 @@ int CDVDPlayer::OnDVDNavResult(void* pData, int iMessage)
       CLog::Log(LOGDEBUG, "CDVDPlayer::OnDVDNavResult - libbluray read error (DVDSTATE_NORMAL)");
       CGUIDialogKaiToast::QueueNotification(g_localizeStrings.Get(25008), g_localizeStrings.Get(25009));
     }
-
+    else if (iMessage == 7)
+    {
+      int on = *(int*)pData;
+      if (on && m_dvd.state != DVDSTATE_STILL)
+      {
+        m_dvd.state = DVDSTATE_STILL;
+        m_dvd.iDVDStillStartTime = XbmcThreads::SystemClockMillis();
+        m_dvd.iDVDStillTime = 0;
+        CLog::Log(LOGDEBUG, "CDVDPlayer::OnDVDNavResult - libbluray DVDSTATE_STILL start");
+      }
+      else if (!on && m_dvd.state == DVDSTATE_STILL)
+      {
+        m_dvd.state = DVDSTATE_NORMAL;
+        m_dvd.iDVDStillStartTime = 0;
+        m_dvd.iDVDStillTime = 0;
+        CLog::Log(LOGDEBUG, "CDVDPlayer::OnDVDNavResult - libbluray DVDSTATE_STILL end");
+      }
+    }
     return 0;
   }
 
@@ -3681,7 +3698,7 @@ bool CDVDPlayer::OnAction(const CAction &action)
   CDVDInputStream::IMenus* pMenus = dynamic_cast<CDVDInputStream::IMenus*>(m_pInputStream);
   if (pMenus)
   {
-    if( m_dvd.state == DVDSTATE_STILL && m_dvd.iDVDStillTime != 0 && pMenus->GetTotalButtons() == 0 )
+    if( m_dvd.state == DVDSTATE_STILL && m_dvd.iDVDStillTime != 0 && pMenus->GetTotalButtons() == 0 && m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD))
     {
       switch(action.GetID())
       {
