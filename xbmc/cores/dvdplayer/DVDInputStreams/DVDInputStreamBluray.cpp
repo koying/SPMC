@@ -582,6 +582,8 @@ void CDVDInputStreamBluray::ProcessEvent() {
   case BD_EVENT_SECONDARY_VIDEO:
   case BD_EVENT_SECONDARY_VIDEO_SIZE:
   case BD_EVENT_SECONDARY_VIDEO_STREAM:
+  case BD_EVENT_PLAYMARK:
+    break;
 
   case BD_EVENT_NONE:
     break;
