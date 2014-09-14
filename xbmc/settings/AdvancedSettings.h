@@ -114,11 +114,11 @@ struct StagefrightConfig
 
 struct MediacodecConfig
 {
-  CStdString useAVCcodec;
-  CStdString useVC1codec;
-  CStdString useVPXcodec;
-  CStdString useMP4codec;
-  CStdString useMPEG2codec;
+  std::string useAVCcodec;
+  std::string useVC1codec;
+  std::string useVPXcodec;
+  std::string useMP4codec;
+  std::string useMPEG2codec;
   bool useSwRenderer;
 };
 
