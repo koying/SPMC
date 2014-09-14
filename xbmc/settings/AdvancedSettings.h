@@ -100,6 +100,7 @@ struct RefreshVideoLatency
 struct StagefrightConfig
 {
   CStdString useAVCcodec;
+  CStdString useHEVCcodec;
   CStdString useVC1codec;
   CStdString useVPXcodec;
   CStdString useMP4codec;
