@@ -380,6 +380,21 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
         }
       }
       break;
+    case AV_CODEC_ID_HEVC:
+      m_mime = "video/hevc";
+      m_formatname = "amc-h265";
+      // check for hevc-hvcC and convert to h264-annex-b
+      if (m_hints.extradata && *(uint8_t*)m_hints.extradata == 1)
+      {
+        m_bitstream = new CBitstreamConverter;
+        if (!m_bitstream->Open(m_hints.codec, (uint8_t*)m_hints.extradata, m_hints.extrasize, true))
+        {
+          CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Open CBitstreamConverter Open failed");
+          SAFE_DELETE(m_bitstream);
+          return false;
+        }
+      }
+      break;
     case AV_CODEC_ID_VC1:
     case AV_CODEC_ID_WMV3:
       if (g_advancedSettings.m_MediacodecConfig.useVC1codec == "0"
