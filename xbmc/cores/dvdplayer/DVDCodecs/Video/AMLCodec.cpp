@@ -1409,45 +1409,23 @@ int set_header_info(am_private_t *para)
   return PLAYER_SUCCESS;
 }
 
-void EnableFreeScale()
+void UnscaleMx6Video(bool on)
 {
   aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
-
+  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 0);
+  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 0);
   aml_set_sysfs_int("/sys/class/ppmgr/ppscaler", 0);
 
-  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 0);
-  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 0);
+  if (on)
+  {
+    aml_set_sysfs_str("/sys/class/graphics/fb0/request2XScale", "8");
+    aml_set_sysfs_str("/sys/class/graphics/fb1/scale_axis", "1280 720 1920 1080");
+    aml_set_sysfs_str("/sys/class/graphics/fb1/scale", "0x10001");
+  }
+  else
+    aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
 
-  aml_set_sysfs_int("/sys/class/graphics/fb0/request2XScale", 8);
-  /*
-  aml_set_sysfs_str("/sys/class/graphics/fb1/scale_axis", "1280 720 1920 1080");
-  aml_set_sysfs_int("/sys/class/graphics/fb1/scale", 0x10001);
-
-  aml_set_sysfs_str("/sys/class/video/axis", "0 0 1919 1079");
-  */
-
-//  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
-}
-
-void DisableFreeScale()
-{
-  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
-
-  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 0);
-  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 0);
-
-  aml_set_sysfs_str("/sys/class/video/axis", "0 0 1280 720");
-
-  aml_set_sysfs_int("/sys/class/ppmgr/ppscaler", 1);
-  aml_set_sysfs_str("/sys/class/ppmgr/ppscaler_rect", "0 0 1919 1079 0");
-
-  aml_set_sysfs_int("/sys/class/graphics/fb1/scale", 0x0);
-  aml_set_sysfs_int("/sys/class/graphics/fb0/request2XScale", 2);
-
-  aml_set_sysfs_int("/sys/class/graphics/fb0/free_scale", 1);
-  aml_set_sysfs_int("/sys/class/graphics/fb1/free_scale", 1);
-
-//  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
+  aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
 }
 
 /*************************************************************************/
@@ -1714,7 +1692,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
       if (res.iHeight > 720 && hints.height > 720)
       {
         m_freescaled = true;
-        EnableFreeScale();
+        UnscaleMx6Video(true);
         m_display_rect = CRect(0, 0, res.iScreenWidth, res.iScreenHeight);
       }
     }
@@ -1765,7 +1743,7 @@ void CAMLCodec::CloseDecoder()
 
   SetVideoHdmi3dMode(MODE_HDMI3D_OFF);
   if (m_freescaled)
-    DisableFreeScale();
+    UnscaleMx6Video(false);
   ShowMainVideo(false);
 }
 
