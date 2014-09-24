@@ -6441,7 +6441,19 @@ msgctxt "#13555"
 msgid "%d Minutes"
 msgstr ""
 
-#empty strings from id 13556 to 13599
+#. Label of a setting that allows to select the skip step sizes to use for skipping
+#: system/settings/settings.xml
+msgctxt "#13556"
+msgid "Skip steps"
+msgstr ""
+
+#. Name of a setting to configure the time to wait for subsequent keypresses in order to apply additive skipping
+#: system/settings/settings.xml
+msgctxt "#13557"
+msgid "Skip delay"
+msgstr ""
+
+#empty strings from id 13557 to 13599
 
 #: system/settings/darwin.xml
 msgctxt "#13600"
