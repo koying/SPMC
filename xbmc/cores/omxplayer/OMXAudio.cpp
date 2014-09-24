@@ -633,6 +633,12 @@ bool COMXAudio::Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo
     {
        av_opt_set_double(m_pContext, "rematrix_maxval", 1.0, 0);
     }
+    int boost_center = CSettings::Get().GetInt("audiooutput.boostcenter");
+    if (boost_center)
+    {
+      float gain = pow(10.0f, ((float)(-3 + boost_center))/20.0f);
+      av_opt_set_double(m_pContext, "center_mix_level", gain, 0);
+    }
 
     // stereo upmix
     if (upmix && m_src_channels == 2 && m_dst_channels > 2)
