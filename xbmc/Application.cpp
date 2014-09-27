@@ -4589,6 +4589,10 @@ bool CApplication::WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed /* = false 
     // allow listeners to ignore the deactivation if it preceeds a powerdown/suspend etc
     CVariant data(bPowerOffKeyPressed);
     CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverDeactivated", data);
+#ifdef TARGET_ANDROID
+    // Screensaver deactivated -> acquire wake lock
+    CXBMCApp::EnableWakeLock(true);
+#endif
   }
 
   return result;
@@ -4719,6 +4723,10 @@ void CApplication::ActivateScreenSaver(bool forceType /*= false */)
     m_screenSaver.reset(new CScreenSaver(""));
 
   CAnnouncementManager::Announce(GUI, "xbmc", "OnScreensaverActivated");
+#ifdef TARGET_ANDROID
+  // Screensaver activated -> release wake lock
+  CXBMCApp::EnableWakeLock(false);
+#endif
 
   // disable screensaver lock from the login screen
   m_iScreenSaveLock = g_windowManager.GetActiveWindow() == WINDOW_LOGIN_SCREEN ? 1 : 0;
