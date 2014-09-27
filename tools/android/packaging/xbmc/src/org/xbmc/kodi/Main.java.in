@@ -26,8 +26,6 @@ public class Main extends NativeActivity
     super.onCreate(savedInstanceState);
 
     thisView = getWindow().getDecorView();
-    if (System.getProperty("xbmc.fullscreen", "").equalsIgnoreCase("yes"))
-    {
       thisView
           .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
@@ -42,14 +40,36 @@ public class Main extends NativeActivity
                   public void run()
                   {
                     Log.i("Main", "setSystemUiVisibility");
-                    thisView
-                        .setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                    if (android.os.Build.VERSION.SDK_INT >= 19) {
+                      // Immersive mode
+
+                      // Constants from API > 14
+                      final int API_SYSTEM_UI_FLAG_LAYOUT_STABLE = 0x00000100;
+                      final int API_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 0x00000200;
+                      final int API_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
+                      final int API_SYSTEM_UI_FLAG_FULLSCREEN = 0x00000004;
+                      final int API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 0x00001000;
+
+                      thisView.setSystemUiVisibility(
+                                API_SYSTEM_UI_FLAG_LAYOUT_STABLE
+                              | API_SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                              | API_SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                              | API_SYSTEM_UI_FLAG_FULLSCREEN
+                              | API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                    }
+                    else
+                    {
+                      if (System.getProperty("xbmc.fullscreen", "").equalsIgnoreCase("yes"))
+                      {
+                        thisView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+                      }
+                    }
                   }
                 });
               }
             }
           });
-    }
   }
 
   @Override
