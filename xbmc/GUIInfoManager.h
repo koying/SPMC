@@ -498,7 +498,7 @@ namespace INFO
 
 #define VERSION_MAJOR               13
 #define VERSION_MINOR               3
-#define VERSION_TAG                 "-SPMC(2)"
+#define VERSION_TAG                 "-SPMC(3)"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)

@@ -3,8 +3,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.semperpax.spmc"
     android:installLocation="auto"
-    android:versionCode="130302"
-    android:versionName="13.3.2 (SPMC)" >
+    android:versionCode="130303"
+    android:versionName="13.3.3 (SPMC)" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
     <uses-sdk android:minSdkVersion="14" />
