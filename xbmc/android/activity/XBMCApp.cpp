@@ -95,7 +95,7 @@ std::vector<androidPackage> CXBMCApp::m_applications;
 
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
-  : CJNIContext(nativeActivity)
+  : CJNIXbmcMainActivity(nativeActivity)
   , CJNIBroadcastReceiver("com.semperpax.spmc/XBMCBroadcastReceiver")
 {
   m_activity = nativeActivity;
