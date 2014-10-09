@@ -102,12 +102,12 @@ struct RefreshVideoLatency
 
 struct StagefrightConfig
 {
-  int useAVCcodec;
-  int useHEVCcodec;
-  int useVC1codec;
-  int useVPXcodec;
-  int useMP4codec;
-  int useMPEG2codec;
+  std::string useAVCcodec;
+  std::string useHEVCcodec;
+  std::string useVC1codec;
+  std::string useVPXcodec;
+  std::string useMP4codec;
+  std::string useMPEG2codec;
   bool useSwRenderer;
   bool useInputDTS;
 };
