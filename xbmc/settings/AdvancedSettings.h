@@ -108,6 +108,16 @@ struct StagefrightConfig
   bool useInputDTS;
 };
 
+struct MediacodecConfig
+{
+  CStdString useAVCcodec;
+  CStdString useVC1codec;
+  CStdString useVPXcodec;
+  CStdString useMP4codec;
+  CStdString useMPEG2codec;
+  bool useSwRenderer;
+};
+
 typedef std::vector<TVShowRegexp> SETTINGS_TVSHOWLIST;
 
 class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
@@ -197,7 +207,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     int  m_videoFpsDetect;
     int  m_videoBusyDialogDelay_ms;
     StagefrightConfig m_stagefrightConfig;
-    bool m_mediacodecForceSoftwareRendring;
+    MediacodecConfig m_MediacodecConfig;
 
     CStdString m_videoDefaultPlayer;
     CStdString m_videoDefaultDVDPlayer;
