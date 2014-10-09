@@ -99,11 +99,11 @@ struct RefreshVideoLatency
 
 struct StagefrightConfig
 {
-  int useAVCcodec;
-  int useVC1codec;
-  int useVPXcodec;
-  int useMP4codec;
-  int useMPEG2codec;
+  CStdString useAVCcodec;
+  CStdString useVC1codec;
+  CStdString useVPXcodec;
+  CStdString useMP4codec;
+  CStdString useMPEG2codec;
   bool useSwRenderer;
   bool useInputDTS;
 };
