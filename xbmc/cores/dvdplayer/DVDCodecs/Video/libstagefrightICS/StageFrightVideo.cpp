@@ -419,39 +419,53 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   const char* mimetype;
   switch (hints.codec)
   {
-  case CODEC_ID_H264:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == 0)
+  case AV_CODEC_ID_H264:
+//  case AV_CODEC_ID_H264MVC:
+    if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "0"
+        || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "sd" && hints.width > 800)
+        || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
       return false;
     mimetype = "video/avc";
     if ( *(char*)hints.extradata == 1 )
       p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
-  case CODEC_ID_MPEG4:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == 0)
-      return false;
+  case AV_CODEC_ID_MPEG4:
+      if (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "0"
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "sd" && hints.width > 800)
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "hd" && hints.width <= 800))
+        return false;
     mimetype = "video/mp4v-es";
     break;
-  case CODEC_ID_MPEG2VIDEO:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == 0)
+  case AV_CODEC_ID_MPEG2VIDEO:
+    if (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "0"
+        || (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "sd" && hints.width > 800)
+        || (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "hd" && hints.width <= 800))
       return false;
     mimetype = "video/mpeg2";
     break;
-  case CODEC_ID_VP3:
-  case CODEC_ID_VP6:
-  case CODEC_ID_VP6F:
-      if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == 0)
+  case AV_CODEC_ID_VP3:
+  case AV_CODEC_ID_VP6:
+  case AV_CODEC_ID_VP6F:
+      if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "hd" && hints.width <= 800))
         return false;
       mimetype = "video/vp6";
       break;
-  case CODEC_ID_VP8:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == 0)
+  case AV_CODEC_ID_VP8:
+      if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "hd" && hints.width <= 800))
+        return false;
       return false;
     mimetype = "video/x-vnd.on2.vp8";
     break;
-  case CODEC_ID_VC1:
-  case CODEC_ID_WMV3:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == 0)
-      return false;
+  case AV_CODEC_ID_VC1:
+  case AV_CODEC_ID_WMV3:
+      if (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "0"
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "sd" && hints.width > 800)
+          || (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "hd" && hints.width <= 800))
+        return false;
     mimetype = "video/vc1";
     break;
   default:
@@ -535,7 +549,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       CLog::Log(LOGERROR, "%s::%s - %s\n", CLASSNAME, __func__,"Blacklisted component (software)");
       return false;
     }
-    else if (!strncmp(component, "OMX.Nvidia.mp4.decode", 21) && p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec != 1)
+    else if (!strncmp(component, "OMX.Nvidia.mp4.decode", 21) && p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec != "1")
     {
       // Has issues with some XVID encoded MP4. Only fails after actual decoding starts...
       CLog::Log(LOGERROR, "%s::%s - %s\n", CLASSNAME, __func__,"Blacklisted component (MP4)");
