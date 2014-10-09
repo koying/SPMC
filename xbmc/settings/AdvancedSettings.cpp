@@ -168,11 +168,11 @@ void CAdvancedSettings::Initialize()
   m_DXVAAllowHqScaling = false;
   m_videoFpsDetect = 1;
   m_videoBusyDialogDelay_ms = 500;
-  m_stagefrightConfig.useAVCcodec = -1;
-  m_stagefrightConfig.useVC1codec = -1;
-  m_stagefrightConfig.useVPXcodec = -1;
-  m_stagefrightConfig.useMP4codec = -1;
-  m_stagefrightConfig.useMPEG2codec = -1;
+  m_stagefrightConfig.useAVCcodec = "-1";
+  m_stagefrightConfig.useVC1codec = "-1";
+  m_stagefrightConfig.useVPXcodec = "-1";
+  m_stagefrightConfig.useMP4codec = "-1";
+  m_stagefrightConfig.useMPEG2codec = "-1";
   m_stagefrightConfig.useSwRenderer = false;
   m_stagefrightConfig.useInputDTS = false;
 
@@ -607,11 +607,11 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
     TiXmlElement* pStagefrightElem = pElement->FirstChildElement("stagefright");
     if (pStagefrightElem)
     {
-      XMLUtils::GetInt(pStagefrightElem,"useavccodec",m_stagefrightConfig.useAVCcodec, -1, 1);
-      XMLUtils::GetInt(pStagefrightElem,"usevc1codec",m_stagefrightConfig.useVC1codec, -1, 1);
-      XMLUtils::GetInt(pStagefrightElem,"usevpxcodec",m_stagefrightConfig.useVPXcodec, -1, 1);
-      XMLUtils::GetInt(pStagefrightElem,"usemp4codec",m_stagefrightConfig.useMP4codec, -1, 1);
-      XMLUtils::GetInt(pStagefrightElem,"usempeg2codec",m_stagefrightConfig.useMPEG2codec, -1, 1);
+      XMLUtils::GetString(pStagefrightElem,"useavccodec",m_stagefrightConfig.useAVCcodec);
+      XMLUtils::GetString(pStagefrightElem,"usevc1codec",m_stagefrightConfig.useVC1codec);
+      XMLUtils::GetString(pStagefrightElem,"usevpxcodec",m_stagefrightConfig.useVPXcodec);
+      XMLUtils::GetString(pStagefrightElem,"usemp4codec",m_stagefrightConfig.useMP4codec);
+      XMLUtils::GetString(pStagefrightElem,"usempeg2codec",m_stagefrightConfig.useMPEG2codec);
       XMLUtils::GetBoolean(pStagefrightElem,"useswrenderer",m_stagefrightConfig.useSwRenderer);
       XMLUtils::GetBoolean(pStagefrightElem,"useinputdts",m_stagefrightConfig.useInputDTS);
     }
