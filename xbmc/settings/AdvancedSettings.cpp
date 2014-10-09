@@ -175,8 +175,12 @@ void CAdvancedSettings::Initialize()
   m_stagefrightConfig.useMPEG2codec = "-1";
   m_stagefrightConfig.useSwRenderer = false;
   m_stagefrightConfig.useInputDTS = false;
-
-  m_mediacodecForceSoftwareRendring = false;
+  m_MediacodecConfig.useAVCcodec = "-1";
+  m_MediacodecConfig.useVC1codec = "-1";
+  m_MediacodecConfig.useVPXcodec = "-1";
+  m_MediacodecConfig.useMP4codec = "-1";
+  m_MediacodecConfig.useMPEG2codec = "-1";
+  m_MediacodecConfig.useSwRenderer = false;
 
   m_videoDefaultLatency = 0.0;
 
@@ -616,7 +620,16 @@ void CAdvancedSettings::ParseSettingsFile(const CStdString &file)
       XMLUtils::GetBoolean(pStagefrightElem,"useinputdts",m_stagefrightConfig.useInputDTS);
     }
 
-    XMLUtils::GetBoolean(pElement,"mediacodecforcesoftwarerendering",m_mediacodecForceSoftwareRendring);
+    TiXmlElement* pMediacodecElem = pElement->FirstChildElement("mediacodec");
+    if (pMediacodecElem)
+    {
+      XMLUtils::GetString(pMediacodecElem,"useavccodec",m_MediacodecConfig.useAVCcodec);
+      XMLUtils::GetString(pMediacodecElem,"usevc1codec",m_MediacodecConfig.useVC1codec);
+      XMLUtils::GetString(pMediacodecElem,"usevpxcodec",m_MediacodecConfig.useVPXcodec);
+      XMLUtils::GetString(pMediacodecElem,"usemp4codec",m_MediacodecConfig.useMP4codec);
+      XMLUtils::GetString(pMediacodecElem,"usempeg2codec",m_MediacodecConfig.useMPEG2codec);
+      XMLUtils::GetBoolean(pMediacodecElem,"useswrenderer",m_MediacodecConfig.useSwRenderer);
+    }
 
     TiXmlElement* pAdjustRefreshrate = pElement->FirstChildElement("adjustrefreshrate");
     if (pAdjustRefreshrate)
