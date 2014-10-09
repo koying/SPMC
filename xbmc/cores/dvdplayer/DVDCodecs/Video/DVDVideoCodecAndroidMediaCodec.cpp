@@ -327,10 +327,18 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_MPEG2VIDEO:
+      if (g_advancedSettings.m_MediacodecConfig.useMPEG2codec == "0"
+          || (g_advancedSettings.m_MediacodecConfig.useMPEG2codec == "sd" && m_hints.width > 800)
+          || (g_advancedSettings.m_MediacodecConfig.useMPEG2codec == "hd" && m_hints.width <= 800))
+        return false;
       m_mime = "video/mpeg2";
       m_formatname = "amc-mpeg2";
       break;
     case AV_CODEC_ID_MPEG4:
+      if (g_advancedSettings.m_MediacodecConfig.useMP4codec == "0"
+          || (g_advancedSettings.m_MediacodecConfig.useMP4codec == "sd" && m_hints.width > 800)
+          || (g_advancedSettings.m_MediacodecConfig.useMP4codec == "hd" && m_hints.width <= 800))
+        return false;
       m_mime = "video/mp4v-es";
       m_formatname = "amc-mpeg4";
       break;
@@ -342,6 +350,10 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_VP6:
     case AV_CODEC_ID_VP6F:
     case AV_CODEC_ID_VP8:
+      if (g_advancedSettings.m_MediacodecConfig.useVPXcodec == "0"
+          || (g_advancedSettings.m_MediacodecConfig.useVPXcodec == "sd" && m_hints.width > 800)
+          || (g_advancedSettings.m_MediacodecConfig.useVPXcodec == "hd" && m_hints.width <= 800))
+        return false;
       //m_mime = "video/x-vp6";
       //m_mime = "video/x-vp7";
       m_mime = "video/x-vnd.on2.vp8";
@@ -357,6 +369,10 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
           // No known h/w decoder supporting Hi10P
           return false;
       }
+      if (g_advancedSettings.m_MediacodecConfig.useAVCcodec == "0"
+          || (g_advancedSettings.m_MediacodecConfig.useAVCcodec == "sd" && m_hints.width > 800)
+          || (g_advancedSettings.m_MediacodecConfig.useAVCcodec == "hd" && m_hints.width <= 800))
+        return false;
       m_mime = "video/avc";
       m_formatname = "amc-h264";
       // check for h264-avcC and convert to h264-annex-b
@@ -384,6 +400,10 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       break;
     case AV_CODEC_ID_VC1:
     case AV_CODEC_ID_WMV3:
+      if (g_advancedSettings.m_MediacodecConfig.useVC1codec == "0"
+          || (g_advancedSettings.m_MediacodecConfig.useVC1codec == "sd" && m_hints.width > 800)
+          || (g_advancedSettings.m_MediacodecConfig.useVC1codec == "hd" && m_hints.width <= 800))
+        return false;
       m_mime = "video/wvc1";
       //m_mime = "video/wmv9";
       m_formatname = "amc-vc1";
@@ -456,7 +476,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   }
 
   // blacklist of devices that cannot surface render.
-  m_render_sw = CanSurfaceRenderBlackList(m_codecname) || g_advancedSettings.m_mediacodecForceSoftwareRendring;
+  m_render_sw = CanSurfaceRenderBlackList(m_codecname) || g_advancedSettings.m_MediacodecConfig.useSwRenderer;
   if (m_render_sw)
   {
     if (m_colorFormat == -1)
