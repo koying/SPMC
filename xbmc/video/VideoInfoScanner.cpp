@@ -579,7 +579,7 @@ namespace VIDEO
     {
       if (retVal < 0) 
         return INFO_CANCELLED;
-      else if (retVal == 0 && g_advancedSettings.m_videoIncludeAllVideos)
+      else if (retVal == 0 && CSettings::Get().GetBool("videolibrary.importall"))
       {
         pItem->GetVideoInfoTag()->m_strTitle = CURL(pItem->GetPath()).GetFileNameWithoutPath();
         CURL::Decode(pItem->GetVideoInfoTag()->m_strTitle);
@@ -591,7 +591,7 @@ namespace VIDEO
         return INFO_NOT_FOUND;
     }
 
-    if (GetDetails(pItem, url, info2, result == CNfoFile::COMBINED_NFO ? &m_nfoReader : NULL, pDlgProgress) || g_advancedSettings.m_videoIncludeAllVideos)
+    if (GetDetails(pItem, url, info2, result == CNfoFile::COMBINED_NFO ? &m_nfoReader : NULL, pDlgProgress) || CSettings::Get().GetBool("videolibrary.importall"))
     {
       if (AddVideo(pItem, info2->Content(), bDirNames, useLocal) < 0)
         return INFO_ERROR;
@@ -978,7 +978,7 @@ namespace VIDEO
       return true;
     }
 
-    if (g_advancedSettings.m_videoIncludeAllVideos)
+    if (CSettings::Get().GetBool("videolibrary.importall"))
     {
       EPISODE episode;
       episode.strPath = item->GetPath();
@@ -1406,7 +1406,7 @@ namespace VIDEO
 
       if (episodes.empty())
       {
-        if (!g_advancedSettings.m_videoIncludeAllVideos)
+        if (!CSettings::Get().GetBool("videolibrary.importall"))
         {
           CLog::Log(LOGERROR, "VideoInfoScanner: Asked to lookup episode %s"
                               " online, but we have no episode guide. Check your tvshow.nfo and make"
@@ -1526,7 +1526,7 @@ namespace VIDEO
       }
       else
       {
-        if (!g_advancedSettings.m_videoIncludeAllVideos)
+        if (!CSettings::Get().GetBool("videolibrary.importall"))
         {
           CLog::Log(LOGDEBUG,"%s - no match for show: '%s', season: %d, episode: %d.%d, airdate: '%s', title: '%s'",
                     __FUNCTION__, showInfo.m_strTitle.c_str(), file->iSeason, file->iEpisode, file->iSubepisode,
