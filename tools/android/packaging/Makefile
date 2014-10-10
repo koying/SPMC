@@ -90,8 +90,8 @@ shared:
 	mkdir -p assets
 	cp -rfp $(PREFIX)/share/xbmc/* ./assets
 	# remove osx junk files
-	find `pwd`/xbmc/assets/ -depth -name ".DS_Store" -exec rm {} \;
-	find `pwd`/xbmc/assets/ -depth -name "._*" -exec rm {} \;
+	find `pwd`/assets/ -depth -name ".DS_Store" -exec rm {} \;
+	find `pwd`/assets/ -depth -name "._*" -exec rm {} \;
 	# remove git and any stale *.so files
 	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
 	find `pwd`/assets/ -name "*.so" -exec rm {} \;
