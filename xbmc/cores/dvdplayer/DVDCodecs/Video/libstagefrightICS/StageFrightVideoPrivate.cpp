@@ -290,7 +290,7 @@ void CStageFrightVideoPrivate::InitializeEGL(int w, int h)
   for (int i=0; i<NUMFBOTEX; ++i)
   {
 //    glGenTextures(1, &(texslots[i].texid)); 0xbaad
-    texslots[i].texid = 0xbaad + 1 + i;
+    texslots[i].texid = mVideoTextureId + 1 + i;
     glBindTexture(GL_TEXTURE_2D, texslots[i].texid);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texwidth, texheight, 0,
@@ -324,7 +324,7 @@ void CStageFrightVideoPrivate::ReleaseEGL()
   fbo.Cleanup();
   for (int i=0; i<NUMFBOTEX; ++i)
   {
-    glDeleteTextures(1, &(texslots[i].texid));
+    //glDeleteTextures(1, &(texslots[i].texid));
     eglDestroyImageKHR(eglDisplay, texslots[i].eglimg);
   }
 
