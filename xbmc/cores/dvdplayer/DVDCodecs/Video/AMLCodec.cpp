@@ -2154,19 +2154,31 @@ void CAMLCodec::GetRenderFeatures(Features &renderFeatures)
 
 void CAMLCodec::SetVideo3dMode(const int mode3d)
 {
+  static int old3dmode = MODE_3D_DISABLE;
+
+  if (mode3d == old3dmode)
+    return;
+
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideo3dMode:mode3d(0x%x)", mode3d);
   aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", MODE_HDMI3D_OFF);
   aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", mode3d);
+  old3dmode = mode3d;
 }
 
 void CAMLCodec::SetVideoHdmi3dMode(const std::string mode3d)
 {
+  static std::string oldhdmi3dmode = MODE_HDMI3D_OFF;
   static bool reset_disp_mode = false;
+
+  if (mode3d == oldhdmi3dmode)
+    return;
 
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoHdmi3dMode:mode3d(%s)", mode3d.c_str());
   aml_set_sysfs_int("/sys/class/ppmgr/ppmgr_3d_mode", 0);
   aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
-  if (strstr(mode3d.c_str(), "3doff"))
+  oldhdmi3dmode = mode3d;
+
+  if (strstr(mode3d.c_str(), MODE_HDMI3D_OFF))
   {
     if (reset_disp_mode)
     {
