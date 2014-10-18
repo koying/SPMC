@@ -359,7 +359,6 @@
       <a>AudioDelay</a>
       <a mod="ctrl">AudioNextLanguage</a>
       <escape>Fullscreen</escape>
-      <c>Playlist</c>
       <v>ActivateWindow(Teletext)</v>
       <text>ActivateWindow(Teletext)</text>
       <up mod="ctrl">SubtitleShiftUp</up>
@@ -371,6 +370,8 @@
       <minus mod="ctrl">VolAmpDown</minus>
       <b mod="ctrl">CreateBookmark</b>
       <b mod="alt">CreateEpisodeBookmark</b>
+      <menu>CodecInfo</menu>
+      <c>CodecInfo</c>
     </keyboard>
   </FullscreenVideo>
   <VideoTimeSeek>
