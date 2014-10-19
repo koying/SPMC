@@ -29,12 +29,15 @@
 #include "utils/Variant.h"
 #include "guilib/GUIWindowManager.h"
 #include "Application.h"
+#include "dialogs/GUIDialogKaiToast.h"
+#include "guilib/LocalizeStrings.h"
 
 using namespace ANNOUNCEMENT;
 
 CGUIWindowHome::CGUIWindowHome(void) : CGUIWindow(WINDOW_HOME, "Home.xml"), 
                                        m_recentlyAddedRunning(false),
-                                       m_cumulativeUpdateFlag(0)
+                                       m_cumulativeUpdateFlag(0),
+                                       m_countBackCalled(0)
 {
   m_updateRA = (Audio | Video | Totals);
   m_loadType = KEEP_IN_MEMORY;
@@ -50,13 +53,29 @@ CGUIWindowHome::~CGUIWindowHome(void)
 bool CGUIWindowHome::OnAction(const CAction &action)
 {
   static unsigned int min_hold_time = 1000;
-  if (action.GetID() == ACTION_NAV_BACK &&
-      action.GetHoldTime() < min_hold_time &&
-      g_application.m_pPlayer->IsPlaying())
+  if (action.GetID() == ACTION_NAV_BACK)
   {
-    g_application.SwitchToFullScreen();
-    return true;
+    if (action.GetHoldTime() < min_hold_time && g_application.m_pPlayer->IsPlaying())
+    {
+      g_application.SwitchToFullScreen();
+      return true;
+    }
+    CLog::Log(LOGDEBUG, "CGUIWindowHome::OnBack - %d", m_countBackCalled);
+    if (!m_countBackCalled)
+    {
+      m_countBackCalled++;
+      CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Press again to Minimize", "", 1000, false);
+      return false;
+    }
+    else
+    {
+      m_countBackCalled = 0;
+      g_application.Minimize();
+      return true;
+    }
   }
+
+  m_countBackCalled = 0;
   return CGUIWindow::OnAction(action);
 }
 
