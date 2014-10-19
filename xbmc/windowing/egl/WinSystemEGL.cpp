@@ -33,6 +33,11 @@
 #include "EGLWrapper.h"
 #include "EGLQuirks.h"
 #include <vector>
+
+#ifdef TARGET_ANDROID
+#include "android/activity/XBMCApp.h"
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 CWinSystemEGL::CWinSystemEGL() : CWinSystemBase()
 {
@@ -451,7 +456,11 @@ void CWinSystemEGL::NotifyAppActiveChange(bool bActivated)
 
 bool CWinSystemEGL::Minimize()
 {
+#ifdef TARGET_ANDROID
+  CXBMCApp::moveTaskToBack(true);
+#else
   Hide();
+#endif
   return true;
 }
 
