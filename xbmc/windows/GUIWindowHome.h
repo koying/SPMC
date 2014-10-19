@@ -37,7 +37,6 @@ public:
 
   virtual bool OnMessage(CGUIMessage& message);
   virtual bool OnAction(const CAction &action);
-
   virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job);
 private:
   int m_updateRA; // flag for which recently added items needs to be queried
@@ -46,4 +45,5 @@ private:
   bool m_recentlyAddedRunning;
   int m_cumulativeUpdateFlag;
   bool m_dbUpdating;
+  int m_countBackCalled;
 };
