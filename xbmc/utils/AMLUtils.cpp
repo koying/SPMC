@@ -39,6 +39,7 @@ int aml_set_sysfs_str(const char *path, const char *val)
   {
     write(fd, val, strlen(val));
     close(fd);
+    CLog::Log(LOGNOTICE, "aml_set_sysfs_str k=%s v=%s", path, val);
     return 0;
   }
   return -1;
@@ -52,6 +53,7 @@ int aml_get_sysfs_str(const char *path, char *valstr, const int size)
     read(fd, valstr, size - 1);
     valstr[strlen(valstr)] = '\0';
     close(fd);
+    CLog::Log(LOGNOTICE, "aml_get_sysfs_str k=%s v=%s", path, valstr);
     return 0;
   }
 

@@ -108,8 +108,8 @@ void CBaseRenderer::ChooseBestResolution(float fps)
         FindResolutionFromFpsMatch(fps, weight);//if that fails use automatic refreshrate selection
     }
 
-    CLog::Log(LOGNOTICE, "Display resolution ADJUST : %s (%d) (weight: %.3f)",
-        g_graphicsContext.GetResInfo(m_resolution).strMode.c_str(), m_resolution, weight);
+    CLog::Log(LOGNOTICE, "Display resolution ADJUST : %s (%d) (fps: %.3f; weight: %.3f)",
+        g_graphicsContext.GetResInfo(m_resolution).strMode.c_str(), m_resolution, fps, weight);
   }
   else
 #endif
@@ -241,7 +241,7 @@ RESOLUTION CBaseRenderer::FindClosestResolution(float fps, float multiplier, RES
 
   float fRefreshRate = fps;
 
-  float last_diff = fRefreshRate;
+  float last_diff = fRefreshRate*2;
 
   // Find closest refresh rate
   for (size_t i = (int)RES_DESKTOP; i < CDisplaySettings::Get().ResolutionInfoSize(); i++)
