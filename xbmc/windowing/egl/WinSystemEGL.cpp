@@ -375,6 +375,14 @@ void CWinSystemEGL::UpdateResolutions()
    */
   if (m_egl->GetNativeResolution(&curDisplay))
     resDesktop = curDisplay;
+  CLog::Log(LOGNOTICE, "Desktop resolution %d x %d for display %d with %d x %d%s @ %f Hz\n",
+    resDesktop.iWidth,
+    resDesktop.iHeight,
+    resDesktop.iScreen,
+    resDesktop.iScreenWidth,
+    resDesktop.iScreenHeight,
+    resDesktop.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "",
+    resDesktop.fRefreshRate);
 
 
   RESOLUTION ResDesktop = RES_INVALID;
