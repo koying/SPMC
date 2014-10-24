@@ -47,6 +47,9 @@
     </category>
     <category id="videoscreen">
       <group id="1">
+        <setting id="videoscreen.resolution">
+          <visible>false</visible>
+        </setting>
         <setting id="videoscreen.screen">
           <visible>false</visible>
         </setting>
