@@ -29,7 +29,6 @@
 #include "utils/StringUtils.h"
 #include "utils/AMLUtils.h"
 
-
 bool CEGLNativeTypeAmlAndroid::CheckCompatibility()
 {
 #if defined(TARGET_ANDROID)
@@ -42,7 +41,12 @@ bool CEGLNativeTypeAmlAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 {
   char mode[256] = {0};
   aml_get_sysfs_str("/sys/class/display/mode", mode, 255);
-  return aml_ModeToResolution(mode, res);
+  if (aml_ModeToResolution(mode, res))
+  {
+    m_curResolution = mode;
+    return true;
+  }
+  return false;
 }
 
 bool CEGLNativeTypeAmlAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
@@ -123,9 +127,12 @@ bool CEGLNativeTypeAmlAndroid::GetPreferredResolution(RESOLUTION_INFO *res) cons
 
 bool CEGLNativeTypeAmlAndroid::SetDisplayResolution(const char *resolution)
 {
-  CStdString mode = resolution;
+  if (m_curResolution == resolution)
+    return true;
+
   // switch display resolution
-  aml_set_sysfs_str("/sys/class/display/mode", mode.c_str());
+  aml_set_sysfs_str("/sys/class/display/mode", resolution);
+  m_curResolution = resolution;
 
   return true;
 }

@@ -26,6 +26,7 @@ class CEGLNativeTypeAmlAndroid : public CEGLNativeTypeAndroid
 public:
   virtual std::string GetNativeName() const { return "amlandroid"; }
   virtual bool  CheckCompatibility();
+  virtual int   GetQuirks() { EGL_QUIRK_DESTROY_NATIVE_WINDOW_WITH_SURFACE; };
 
   virtual bool  GetNativeResolution(RESOLUTION_INFO *res) const;
   virtual bool  SetNativeResolution(const RESOLUTION_INFO &res);
@@ -33,5 +34,7 @@ public:
   virtual bool  GetPreferredResolution(RESOLUTION_INFO *res) const;
 
 protected:
+  mutable std::string m_curResolution;
+
   bool SetDisplayResolution(const char *resolution);
 };
