@@ -117,11 +117,14 @@ bool CViewStateSettings::Load(const TiXmlNode *settings)
   pElement = settings->FirstChild(XML_GENERAL);
   if (pElement != NULL)
   {
+    /*
+    // Force setting level to expert
     int settingLevel;
     if (XMLUtils::GetInt(pElement, XML_SETTINGLEVEL, settingLevel, (const int)SettingLevelBasic, (const int)SettingLevelExpert))
       m_settingLevel = (SettingLevel)settingLevel;
     else
-      m_settingLevel = SettingLevelStandard;
+    */
+      m_settingLevel = SettingLevelExpert;
   }
 
   return true;
