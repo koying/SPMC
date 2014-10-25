@@ -452,6 +452,12 @@ bool aml_ModeToResolution(const char *mode, RESOLUTION_INFO *res)
   res->fPixelRatio   = 1.0f;
   res->strMode       = StringUtils::Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
     res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
+#ifdef TARGET_ANDROID
+    // Android is locked at 60fps. Fools XBMC into closest match
+  if (res->fRefreshRate < 50)
+    res->fRefreshRate = res->fRefreshRate*2 - 0.1;
+#endif
+
 
   return res->iWidth > 0 && res->iHeight> 0;
 }
