@@ -83,6 +83,12 @@ apk-obb-unsigned: apk-clean sharedobb package
 
 apk-noobb: apk-clean package apk-sign
 
+launcher:
+	cp -fp xbmc/AndroidManifest.xml.launcher xbmc/AndroidManifest.xml
+
+nolauncher:
+	git checkout xbmc/AndroidManifest.xml
+
 xbmc/assets:
 	mkdir -p xbmc/assets
 
