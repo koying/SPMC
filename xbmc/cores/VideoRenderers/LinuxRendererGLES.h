@@ -203,6 +203,7 @@ protected:
   bool CreateNV12Texture(int index);
 
   void UploadStfBufTexture(int index);
+  bool CreateStfBufTexture(int index);
 
   void UploadCVRefTexture(int index);
   void DeleteCVRefTexture(int index);
