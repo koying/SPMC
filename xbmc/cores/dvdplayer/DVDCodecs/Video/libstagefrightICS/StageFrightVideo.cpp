@@ -436,8 +436,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
         || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
       return false;
     mimetype = "video/avc";
-    if ( *(char*)hints.extradata == 1 )
-      p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
+    p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
   case AV_CODEC_ID_MPEG4:
       if (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "0"
