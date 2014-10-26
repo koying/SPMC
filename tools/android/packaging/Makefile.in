@@ -70,6 +70,12 @@ apk-obb-unsigned: apk-clean sharedobb package
 
 apk-noobb: apk-clean package apk-sign
 
+launcher:
+	cd xbmc; patch -p5 < Manifest_launcher.patch
+
+nolauncher:
+	cd xbmc; patch -R -p5 < Manifest_launcher.patch
+
 xbmc/assets:
 	mkdir -p xbmc/assets
 
