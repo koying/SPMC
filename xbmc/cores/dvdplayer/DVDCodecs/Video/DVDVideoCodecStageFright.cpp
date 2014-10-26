@@ -90,30 +90,33 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
           "%s::%s - trying to open, codec(%d), profile(%d), level(%d)",
           CLASSNAME, __func__, hints.codec, hints.profile, hints.level);
 
-    switch (hints.codec)
+    m_hints = hints;
+    switch (m_hints.codec)
     {
       case CODEC_ID_H264:
         m_pFormatName = m_pFormatSource + "-h264";
-        if (hints.extrasize < 7 || hints.extradata == NULL)
+        if (m_hints.extradata)
         {
-          CLog::Log(LOGNOTICE,
-              "%s::%s - avcC data too small or missing", CLASSNAME, __func__);
-          return false;
+          m_converter     = new CBitstreamConverter();
+          m_convert_bitstream = m_converter->Open(m_hints.codec, (uint8_t *)m_hints.extradata, m_hints.extrasize, true);
+          free(m_hints.extradata);
+          m_hints.extrasize = m_converter->GetExtraSize();
+          m_hints.extradata = malloc(m_hints.extrasize);
+          memcpy(m_hints.extradata, m_converter->GetExtraData(), m_converter->GetExtraSize());
         }
-        m_converter     = new CBitstreamConverter();
-        m_convert_bitstream = m_converter->Open(hints.codec, (uint8_t *)hints.extradata, hints.extrasize, true);
 
         break;
       case AV_CODEC_ID_HEVC:
-        m_pFormatName = "stf-h265";
-        if (hints.extrasize < 22 || hints.extradata == NULL)
+        m_pFormatName = m_pFormatSource + "-h265";
+        if (m_hints.extradata)
         {
-          CLog::Log(LOGNOTICE,
-              "%s::%s - hvcC data too small or missing", CLASSNAME, __func__);
-          return false;
+          m_converter     = new CBitstreamConverter();
+          m_convert_bitstream = m_converter->Open(m_hints.codec, (uint8_t *)m_hints.extradata, m_hints.extrasize, true);
+          free(m_hints.extradata);
+          m_hints.extrasize = m_converter->GetExtraSize();
+          m_hints.extradata = malloc(m_hints.extrasize);
+          memcpy(m_hints.extradata, m_converter->GetExtraData(), m_converter->GetExtraSize());
         }
-        m_converter     = new CBitstreamConverter();
-        m_convert_bitstream = m_converter->Open(hints.codec, (uint8_t *)hints.extradata, hints.extrasize, true);
 
         break;
       case CODEC_ID_MPEG2VIDEO:
@@ -143,11 +146,11 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
     m_stf_handle = m_stf_dll->create_stf(&g_dvdcodecinterface);
 
-    if (!m_stf_dll->stf_Open(m_stf_handle, hints))
+    if (!m_stf_dll->stf_Open(m_stf_handle, m_hints))
     {
       CLog::Log(LOGERROR,
           "%s::%s - failed to open, codec(%d), profile(%d), level(%d)",
-          CLASSNAME, __func__, hints.codec, hints.profile, hints.level);
+          CLASSNAME, __func__, m_hints.codec, m_hints.profile, m_hints.level);
       Dispose();
       return false;
     }
