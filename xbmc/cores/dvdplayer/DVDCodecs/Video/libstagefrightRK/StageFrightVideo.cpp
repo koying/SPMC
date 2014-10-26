@@ -62,6 +62,7 @@ const char *MEDIA_MIMETYPE_VIDEO_VP6  = "video/vp6";
 
 const int kKeyVC1ExtraSize      = 'vc1e';  // vc1 extra data size
 const int kKeyVC1               = 'vc1c';  // vc1 codec config info
+const int kKeyHVCC              = 'hvcc';
 
 #define XMEDIA_BITSTREAM_START_CODE         (0x42564b52)
 
@@ -515,13 +516,18 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   const char* mimetype;
   switch (hints.codec)
   {
+    case AV_CODEC_ID_HEVC:
+      if (p->m_g_advancedSettings->m_stagefrightConfig.useHEVCcodec == 0)
+        return false;
+      mimetype = "video/hevc";
+      p->meta->setData(kKeyHVCC, kTypeAVCC, hints.extradata, hints.extrasize);
+      break;
   case AV_CODEC_ID_H264:
       if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "0"
           || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "sd" && hints.width > 800)
           || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
         return false;
-    mimetype = "video/avc";
-    if ( *(char*)hints.extradata == 1 )
+      mimetype = "video/avc";
       p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
   case AV_CODEC_ID_MPEG4:
@@ -920,15 +926,13 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
       LockBuffer(stfbuf);
 
       pDvdVideoPicture->stfbuf = stfbuf;
-      pDvdVideoPicture->iWidth = stfbuf->frameWidth;
-      //pDvdVideoPicture->iHeight = vpucopy->DisplayHeight;
-#if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, ">>> pic dts:%f, pts:%llu, buf:%p, tm:%d\n", pDvdVideoPicture->dts, pDvdVideoPicture->pts, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
+//#if defined(DEBUG_VERBOSE)
+      //CLog::Log(LOGDEBUG, ">>> pic dts:%f, pts:%llu, buf:%p, tm:%d\n", pDvdVideoPicture->dts, pDvdVideoPicture->pts, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
       CLog::Log(LOGDEBUG, ">>>     va:%p,fa:%p,%p, w:%d, h:%d, dw:%d, dh:%d\n",
                 vpucopy->vpumem.vir_addr, vpucopy->FrameBusAddr[0], vpucopy->FrameBusAddr[1],
           vpucopy->FrameWidth, vpucopy->FrameHeight, vpucopy->DisplayWidth, vpucopy->DisplayHeight);
 
-#endif
+//#endif
     }
     else
       pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
