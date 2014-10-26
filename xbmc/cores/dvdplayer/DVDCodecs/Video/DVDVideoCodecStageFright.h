@@ -23,6 +23,7 @@
 
 #include "DVDVideoCodec.h"
 #include "utils/BitstreamConverter.h"
+#include "DVDStreamInfo.h"
 
 class DllLibStageFrightCodec;
 class CDVDVideoCodecStageFright;
@@ -81,6 +82,7 @@ protected:
 
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
+  CDVDStreamInfo    m_hints;
   
   static std::string       m_pFormatSource;
   std::string              m_pFormatName;
