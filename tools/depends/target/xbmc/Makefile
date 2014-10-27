@@ -7,16 +7,25 @@ export CFLAGS+=-O3
 
 # configuration settings
 CONFIGURE = cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/ ;\
-  ./configure --prefix=$(PREFIX)
+  ./configure --prefix=$(PREFIX) $(DEBUG)
 
 ifeq ($(OS),android)
 CONFIGURE += --enable-codec=libstagefright,amcodec,rkstf
+endif
+
+ifeq ($(Configuration),Release)
+DEBUG = --enable-debug=no
 endif
 
 CONFIGURE += $(CONFIG_EXTRA)
 
 all: $(SOURCE)/libxbmc.so
 
+release: DEBUG=--enable-debug=no
+release: $(SOURCE)/libxbmc.so
+
+debug: DEBUG=--enable-debug=yes
+debug: $(SOURCE)/libxbmc.so
 
 $(SOURCE)/libxbmc.so:
 	cd $(SOURCE); ./bootstrap
