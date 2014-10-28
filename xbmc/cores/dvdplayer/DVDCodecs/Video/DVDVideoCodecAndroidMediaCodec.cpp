@@ -564,7 +564,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
   int rtn = VC_BUFFER;
 
   if (!m_opened)
-    return rtn;
+    return VC_ERROR;
 
   if (m_hints.ptsinvalid)
     pts = DVD_NOPTS_VALUE;
@@ -600,9 +600,9 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode ExceptionCheck");
       xbmc_jnienv()->ExceptionDescribe();
       xbmc_jnienv()->ExceptionClear();
-      return VC_ERROR;
+      rtn = VC_ERROR;
     }
-    if (index >= 0)
+    else if (index >= 0)
     {
       // docs lie, getInputBuffers should be good after
       // m_codec->start() but the internal refs are not
@@ -641,7 +641,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
       // Do not try to pass pts as a unioned double/int64_t,
       // some android devices will diddle with presentationTimeUs
       // and you will get NaN back and DVDPlayerVideo will barf.
-      int64_t presentationTimeUs = AV_NOPTS_VALUE;
+      int64_t presentationTimeUs = 0;
       if (demux_pkt.pts != DVD_NOPTS_VALUE)
         presentationTimeUs = demux_pkt.pts;
       else if (demux_pkt.dts != DVD_NOPTS_VALUE)
@@ -660,6 +660,13 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode ExceptionCheck");
         xbmc_jnienv()->ExceptionClear();
       }
+    }
+
+    if (m_input.size() && m_demux.size() > m_input.size())
+    {
+      // pointless to over-buffer;
+      usleep(5000);
+      rtn &= ~VC_BUFFER;
     }
   }
 
@@ -849,7 +856,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
 {
   int rtn = 0;
 
-  int64_t timeout_us = 50000;
+  int64_t timeout_us = 1000;
   CJNIMediaCodecBufferInfo bufferInfo;
   int index = m_codec->dequeueOutputBuffer(bufferInfo, timeout_us);
   if (xbmc_jnienv()->ExceptionCheck())
