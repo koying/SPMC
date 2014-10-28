@@ -552,7 +552,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
   int rtn = VC_BUFFER;
 
   if (!m_opened)
-    return rtn;
+    return VC_ERROR;
 
   if (m_hints.ptsinvalid)
     pts = DVD_NOPTS_VALUE;
