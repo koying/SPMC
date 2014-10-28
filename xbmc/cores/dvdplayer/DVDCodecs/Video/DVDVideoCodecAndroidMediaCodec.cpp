@@ -588,9 +588,9 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode ExceptionOccurred");
       xbmc_jnienv()->ExceptionDescribe();
       xbmc_jnienv()->ExceptionClear();
-      return VC_ERROR;
+      rtn = VC_ERROR;
     }
-    if (index >= 0)
+    else if (index >= 0)
     {
       // docs lie, getInputBuffers should be good after
       // m_codec->start() but the internal refs are not
@@ -639,6 +639,14 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode ExceptionOccurred");
         xbmc_jnienv()->ExceptionClear();
       }
+    }
+
+    if (m_input.size() && m_demux.size() > m_input.size())
+    {
+      // pointless to over-buffer; just drop
+      amc_demux &demux_pkt = m_demux.front();
+      free(demux_pkt.pData);
+      m_demux.pop();
     }
   }
 
