@@ -84,10 +84,10 @@ apk-obb-unsigned: apk-clean sharedobb package
 apk-noobb: apk-clean package apk-sign
 
 launcher:
-	cp -fp xbmc/AndroidManifest.xml.launcher xbmc/AndroidManifest.xml
+	cd xbmc; patch -p5 < Manifest_launcher.patch
 
 nolauncher:
-	git checkout xbmc/AndroidManifest.xml
+	cd xbmc; patch -R -p5 < Manifest_launcher.patch
 
 xbmc/assets:
 	mkdir -p xbmc/assets

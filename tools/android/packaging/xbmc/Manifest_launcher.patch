@@ -1,0 +1,14 @@
+diff --git a/tools/android/packaging/xbmc/AndroidManifest.xml b/tools/android/packaging/xbmc/AndroidManifest.xml
+index 30b9bbd..f59bd8d 100644
+--- a/tools/android/packaging/xbmc/AndroidManifest.xml
++++ b/tools/android/packaging/xbmc/AndroidManifest.xml
+@@ -29,6 +29,9 @@
+                 <action android:name="android.intent.action.MAIN" />
+                 <category android:name="android.intent.category.LAUNCHER" />
+                 <category android:name="tv.ouya.intent.category.APP"/>
++                <category android:name="android.intent.category.HOME" />
++                <category android:name="android.intent.category.DEFAULT" />
++                <category android:name="android.intent.category.MONKEY" />
+                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+             </intent-filter>
+             <intent-filter>
