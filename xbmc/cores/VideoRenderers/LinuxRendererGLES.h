@@ -197,6 +197,7 @@ protected:
   bool CreateNV12Texture(int index);
 
   void UploadStfBufTexture(int index);
+  void DeleteStfBufTexture(int index);
   bool CreateStfBufTexture(int index);
 
   void UploadCVRefTexture(int index);
@@ -251,6 +252,7 @@ protected:
   // Raw data used by renderer
   int m_currentField;
   int m_reloadShaders;
+  int m_fb1_fd;
 
   struct YUVPLANE
   {
