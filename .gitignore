@@ -472,6 +472,7 @@ lib/cpluff/stamp-h1
 
 # /tools/android/
 /tools/android/packaging/share/
+/tools/android/packaging/xbmc/res/
 
 # /tools/EventClients/
 /tools/EventClients/*.pyc
