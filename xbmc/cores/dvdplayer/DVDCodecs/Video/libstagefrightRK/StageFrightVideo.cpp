@@ -922,6 +922,8 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
       stfbuf->subformat = 'rkvp';
       stfbuf->frameWidth = vpucopy->FrameWidth;
       stfbuf->frameHeight = vpucopy->FrameHeight;
+      stfbuf->displayWidth = vpucopy->DisplayWidth;
+      stfbuf->displayHeight = vpucopy->DisplayHeight;
       stfbuf->buffer = (void*)vpucopy->vpumem.vir_addr;
       stfbuf->context = (void*)vpucopy;
       LockBuffer(stfbuf);

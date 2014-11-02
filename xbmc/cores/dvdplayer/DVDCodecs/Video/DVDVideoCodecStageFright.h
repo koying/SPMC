@@ -52,6 +52,8 @@ public:
 
   int frameWidth;
   int frameHeight;
+  int displayWidth;
+  int displayHeight;
   void* buffer;
   void* context;
 };

@@ -532,6 +532,8 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 
     g_graphicsContext.SetScissors(old);
     g_graphicsContext.EndPaint();
+
+    (this->*m_textureUpload)(m_iYV12RenderBuffer);
     return;
   }
 
@@ -736,6 +738,7 @@ void CLinuxRendererGLES::LoadShaders(int field)
       {
         CLog::Log(LOGNOTICE, "GL: Using STF buffer render method");
         m_renderMethod = RENDER_BYPASS;
+        break;
       }
       else if (m_format == RENDER_FMT_MEDIACODEC)
       {
@@ -2195,62 +2198,35 @@ void CLinuxRendererGLES::UploadStfBufTexture(int source)
   info.activate |= FB_ACTIVATE_FORCE;
   info.nonstd &= 0xFFFFFF00;
 
-  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
   info.xoffset = 0;
   info.yoffset = 0;
-  info.xres = ((stfbuf->frameWidth + 15)&(~15));
-  info.yres = ((stfbuf->frameHeight + 15)&(~15));
+  info.xres = stfbuf->displayWidth;
+  info.yres = stfbuf->displayHeight;
   info.xres_virtual = stfbuf->frameWidth;
   info.yres_virtual = stfbuf->frameHeight;
+
+  int nonstd = ((int)m_destRect.x1<<8) + ((int)m_destRect.y1<<20);
+  int grayscale = ((int)m_destRect.Width() << 8) + ((int)m_destRect.Height() << 20);
+
+  info.nonstd &= 0x00;
+  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
+  info.nonstd |= nonstd;
+  info.grayscale &= 0xff;
+  info.grayscale |= grayscale;
 
 /* Check yuv format. */
 
   if (ioctl(m_fb1_fd, FBIOSET_YUV_ADDR, (int *)stfbuf->context) == -1)
   {
-    CLog::Log(LOGDEBUG, "%s(%d):  fd[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    CLog::Log(LOGDEBUG, "%s(%d):  FBIOSET_YUV_ADDR[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
     return;
   }
 
   if (ioctl(m_fb1_fd, FBIOPUT_VSCREENINFO, &info) == -1)
   {
-    CLog::Log(LOGDEBUG, "%s(%d):  fd[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    CLog::Log(LOGDEBUG, "%s(%d):  FBIOPUT_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
     return;
   }
-
-  /*
-  if (im->width != stfbuf->frameWidth || im->height != stfbuf->frameHeight)
-    CreateStfBufTexture(source);
-
-  if (!(im->flags & IMAGE_FLAG_READY))
-    return;
-
-  bool deinterlacing;
-  if (m_currentField == FIELD_FULL)
-    deinterlacing = false;
-  else
-    deinterlacing = true;
-
-  glEnable(m_textureTarget);
-  VerifyGLState();
-
-  glPixelStorei(GL_UNPACK_ALIGNMENT, im->bpp);
-
-  // Load Y plane
-  LoadPlane( fields[FIELD_FULL][0], GL_LUMINANCE, buf.flipindex
-      , im->width, im->height
-      , stfbuf->frameWidth, im->bpp, (void *)stfbuf->buffer );
-
-  // Load UV plane
-  LoadPlane( fields[FIELD_FULL][1], GL_LUMINANCE_ALPHA, buf.flipindex
-      , im->width >> im->cshift_x, im->height >> im->cshift_y
-                                                 , stfbuf->frameWidth, im->bpp, (void*)((long)stfbuf->buffer + (stfbuf->frameWidth * stfbuf->frameHeight)) );
-
-  VerifyGLState();
-
-  CalculateTextureSourceRects(source, 3);
-
-  glDisable(m_textureTarget);
-  */
 
 #ifdef DEBUG_VERBOSE
   CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
@@ -2281,11 +2257,15 @@ bool CLinuxRendererGLES::CreateStfBufTexture(int index)
 void CLinuxRendererGLES::DeleteStfBufTexture(int index)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
+  // TODO: black out fb1
+
   if(m_fb1_fd > 0)
   {
     close(m_fb1_fd);
     m_fb1_fd = -1;
   }
+  if (m_format == RENDER_FMT_STFBUF)
+    SAFE_RELEASE(m_buffers[index].stfbuf);
 #endif
 }
 
@@ -2441,10 +2421,6 @@ void CLinuxRendererGLES::DeleteNV12Texture(int index)
       im.plane[p] = NULL;
     }
   }
-#ifdef HAS_LIBSTAGEFRIGHT
-  if (m_format == RENDER_FMT_STFBUF)
-    SAFE_RELEASE(m_buffers[index].stfbuf);
-#endif
 }
 
 //********************************************************************************************************
