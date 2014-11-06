@@ -39,14 +39,22 @@ bool CEGLNativeTypeAmlAndroid::CheckCompatibility()
 
 bool CEGLNativeTypeAmlAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 {
+  CEGLNativeTypeAndroid::GetNativeResolution(&m_fb_res);
+
   char mode[256] = {0};
+  RESOLUTION_INFO hdmi_res;
   aml_get_sysfs_str("/sys/class/display/mode", mode, 255);
-  if (aml_ModeToResolution(mode, res))
+  if (aml_ModeToResolution(mode, &hdmi_res))
   {
-    m_curResolution = mode;
-    return true;
+    m_curHdmiResolution = mode;
+    *res = hdmi_res;
+    res->iWidth = m_fb_res.iWidth;
+    res->iHeight = m_fb_res.iHeight;
   }
-  return false;
+  else
+    *res = m_fb_res;
+
+  return true;
 }
 
 bool CEGLNativeTypeAmlAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
@@ -127,6 +135,8 @@ bool CEGLNativeTypeAmlAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
 
 bool CEGLNativeTypeAmlAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &resolutions)
 {
+  CEGLNativeTypeAndroid::GetNativeResolution(&m_fb_res);
+
   char valstr[256] = {0};
   aml_get_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_cap", valstr, 255);
   std::vector<CStdString> probe_str;
@@ -137,7 +147,11 @@ bool CEGLNativeTypeAmlAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &re
   for (size_t i = 0; i < probe_str.size(); i++)
   {
     if(aml_ModeToResolution(probe_str[i].c_str(), &res))
+    {
+      res.iWidth = m_fb_res.iWidth;
+      res.iHeight = m_fb_res.iHeight;
       resolutions.push_back(res);
+    }
   }
   return resolutions.size() > 0;
 
@@ -145,24 +159,17 @@ bool CEGLNativeTypeAmlAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &re
 
 bool CEGLNativeTypeAmlAndroid::GetPreferredResolution(RESOLUTION_INFO *res) const
 {
-  // check display/mode, it gets defaulted at boot
-  if (!GetNativeResolution(res))
-  {
-    // punt to 720p if we get nothing
-    aml_ModeToResolution("720p", res);
-  }
-
-  return true;
+  return GetNativeResolution(res);
 }
 
 bool CEGLNativeTypeAmlAndroid::SetDisplayResolution(const char *resolution)
 {
-  if (m_curResolution == resolution)
+  if (m_curHdmiResolution == resolution)
     return true;
 
   // switch display resolution
   aml_set_sysfs_str("/sys/class/display/mode", resolution);
-  m_curResolution = resolution;
+  m_curHdmiResolution = resolution;
 
   return true;
 }
