@@ -196,9 +196,9 @@ protected:
   void DeleteNV12Texture(int index);
   bool CreateNV12Texture(int index);
 
-  void UploadStfBufTexture(int index);
-  void DeleteStfBufTexture(int index);
-  bool CreateStfBufTexture(int index);
+  void UploadRkBufTexture(int index);
+  void DeleteRkBufTexture(int index);
+  bool CreateRkBufTexture(int index);
 
   void UploadCVRefTexture(int index);
   void DeleteCVRefTexture(int index);

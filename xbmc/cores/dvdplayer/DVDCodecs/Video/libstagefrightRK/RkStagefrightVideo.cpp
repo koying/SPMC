@@ -62,11 +62,6 @@ static int64_t pts_dtoi(double pts)
   return (int64_t)(pts);
 }
 
-static double pts_itod(int64_t pts)
-{
-  return (double)pts;
-}
-
 /***********************************************************/
 
 class CStageFrightMediaSource : public MediaSource
@@ -218,7 +213,7 @@ public:
         if (!frame->medbuf->graphicBuffer().get())  // hw buffers
         {
           if (frame->medbuf->range_length() == sizeof(VPU_FRAME))
-            frame->format = RENDER_FMT_STFBUF;
+            frame->format = RENDER_FMT_RKBUF;
           else
             frame->status = BAD_TYPE;
         }
@@ -296,7 +291,7 @@ public:
         continue;
       }
 
-      if (frame->format == RENDER_FMT_STFBUF)
+      if (frame->format == RENDER_FMT_RKBUF)
       {
         p->out_mutex.lock();
         p->outbuf_queue.push_back(frame);
@@ -327,13 +322,13 @@ public:
 /***********************************************************/
 
 CRkStageFrightVideo::CRkStageFrightVideo(CDVDCodecInterface* interface)
-  : decode_thread(NULL), m_mediasource(NULL)
+  : decode_thread(NULL)
+  , m_omxclient(NULL), m_mediasource(NULL), m_stfdecoder(NULL)
   , m_framecount(0)
-  , m_omxclient(NULL), m_stfdecoder(NULL)
-  , drop_state(false), resetting(false)
-  , cur_frame(NULL), prev_frame(NULL)
   , width(-1), height(-1)
   , extrasize(0), extradata(NULL)
+  , drop_state(false), resetting(false)
+  , cur_frame(NULL), prev_frame(NULL)
 {
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CStageFrightVideo));
@@ -648,7 +643,7 @@ bool CRkStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
  #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
-  if (pDvdVideoPicture->format == RENDER_FMT_EGLIMG || pDvdVideoPicture->format == RENDER_FMT_STFBUF)
+  if (pDvdVideoPicture->format == RENDER_FMT_EGLIMG || pDvdVideoPicture->format == RENDER_FMT_RKBUF)
   {
     ReleaseBuffer(pDvdVideoPicture->stfbuf);
 #if defined(DEBUG_VERBOSE)
@@ -761,7 +756,7 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
     if (vpucopy)
     {
       CDVDVideoCodecStageFrightBuffer* stfbuf = new CDVDVideoCodecStageFrightBuffer;
-      stfbuf->format = RENDER_FMT_STFBUF;
+      stfbuf->format = RENDER_FMT_RKBUF;
       stfbuf->subformat = 'rkvp';
       stfbuf->frameWidth = vpucopy->FrameWidth;
       stfbuf->frameHeight = vpucopy->FrameHeight;
@@ -773,9 +768,8 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 
       pDvdVideoPicture->stfbuf = stfbuf;
 //#if defined(DEBUG_VERBOSE)
-      //CLog::Log(LOGDEBUG, ">>> pic dts:%f, pts:%llu, buf:%p, tm:%d\n", pDvdVideoPicture->dts, pDvdVideoPicture->pts, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
       CLog::Log(LOGDEBUG, ">>>     va:%p,fa:%p,%p, w:%d, h:%d, dw:%d, dh:%d\n",
-                vpucopy->vpumem.vir_addr, vpucopy->FrameBusAddr[0], vpucopy->FrameBusAddr[1],
+                (void*)vpucopy->vpumem.vir_addr, (void*)vpucopy->FrameBusAddr[0], (void*)vpucopy->FrameBusAddr[1],
           vpucopy->FrameWidth, vpucopy->FrameHeight, vpucopy->DisplayWidth, vpucopy->DisplayHeight);
 
 //#endif

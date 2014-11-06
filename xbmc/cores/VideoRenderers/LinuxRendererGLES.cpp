@@ -530,10 +530,11 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    (this->*m_textureUpload)(m_iYV12RenderBuffer);
+
     g_graphicsContext.SetScissors(old);
     g_graphicsContext.EndPaint();
 
-    (this->*m_textureUpload)(m_iYV12RenderBuffer);
     return;
   }
 
@@ -625,7 +626,7 @@ unsigned int CLinuxRendererGLES::PreInit()
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
   m_formats.push_back(RENDER_FMT_EGLIMG);
-  m_formats.push_back(RENDER_FMT_STFBUF);
+  m_formats.push_back(RENDER_FMT_RKBUF);
 #endif
 #if defined(TARGET_ANDROID)
   m_formats.push_back(RENDER_FMT_MEDIACODEC);
@@ -734,7 +735,7 @@ void CLinuxRendererGLES::LoadShaders(int field)
         m_renderMethod = RENDER_EGLIMG;
         break;
       }
-      else if (m_format == RENDER_FMT_STFBUF)
+      else if (m_format == RENDER_FMT_RKBUF)
       {
         CLog::Log(LOGNOTICE, "GL: Using STF buffer render method");
         m_renderMethod = RENDER_BYPASS;
@@ -832,11 +833,11 @@ void CLinuxRendererGLES::LoadShaders(int field)
     m_textureCreate = &CLinuxRendererGLES::CreateEGLIMGTexture;
     m_textureDelete = &CLinuxRendererGLES::DeleteEGLIMGTexture;
   }
-  else if (m_format == RENDER_FMT_STFBUF)
+  else if (m_format == RENDER_FMT_RKBUF)
   {
-    m_textureUpload = &CLinuxRendererGLES::UploadStfBufTexture;
-    m_textureCreate = &CLinuxRendererGLES::CreateStfBufTexture;
-    m_textureDelete = &CLinuxRendererGLES::DeleteStfBufTexture;
+    m_textureUpload = &CLinuxRendererGLES::UploadRkBufTexture;
+    m_textureCreate = &CLinuxRendererGLES::CreateRkBufTexture;
+    m_textureDelete = &CLinuxRendererGLES::DeleteRkBufTexture;
   }
   else if (m_format == RENDER_FMT_MEDIACODEC)
   {
@@ -2163,7 +2164,7 @@ void CLinuxRendererGLES::UploadNV12Texture(int source)
   return;
 }
 
-void CLinuxRendererGLES::UploadStfBufTexture(int source)
+void CLinuxRendererGLES::UploadRkBufTexture(int source)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
 
@@ -2235,7 +2236,7 @@ void CLinuxRendererGLES::UploadStfBufTexture(int source)
 #endif
 }
 
-bool CLinuxRendererGLES::CreateStfBufTexture(int index)
+bool CLinuxRendererGLES::CreateRkBufTexture(int index)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
   if(m_fb1_fd < 0)
@@ -2254,7 +2255,7 @@ bool CLinuxRendererGLES::CreateStfBufTexture(int index)
   return true;
 }
 
-void CLinuxRendererGLES::DeleteStfBufTexture(int index)
+void CLinuxRendererGLES::DeleteRkBufTexture(int index)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
   // TODO: black out fb1
@@ -2264,7 +2265,7 @@ void CLinuxRendererGLES::DeleteStfBufTexture(int index)
     close(m_fb1_fd);
     m_fb1_fd = -1;
   }
-  if (m_format == RENDER_FMT_STFBUF)
+  if (m_format == RENDER_FMT_RKBUF)
     SAFE_RELEASE(m_buffers[index].stfbuf);
 #endif
 }

@@ -38,6 +38,7 @@ public:
     , buffer(NULL)
     , context(NULL)
     {}
+  virtual ~CDVDVideoCodecStageFrightBuffer() {}
 
   // reference counting
   virtual void Lock();
