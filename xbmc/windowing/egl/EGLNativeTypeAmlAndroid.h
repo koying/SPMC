@@ -34,7 +34,8 @@ public:
   virtual bool  GetPreferredResolution(RESOLUTION_INFO *res) const;
 
 protected:
-  mutable std::string m_curResolution;
+  mutable std::string m_curHdmiResolution;
+  mutable RESOLUTION_INFO m_fb_res;
 
   bool SetDisplayResolution(const char *resolution);
 };
