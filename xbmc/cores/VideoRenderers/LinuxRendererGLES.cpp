@@ -2168,7 +2168,7 @@ void CLinuxRendererGLES::UploadRkBufTexture(int source)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
 
-#define FBIOSET_YUV_ADDR	0x5002
+#define RK_FBIOSET_YUV_ADDR	0x5002
 #define HAL_PIXEL_FORMAT_YCrCb_NV12  0x20
 
   YUVBUFFER& buf    =  m_buffers[source];
@@ -2189,7 +2189,7 @@ void CLinuxRendererGLES::UploadRkBufTexture(int source)
 
   if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
   {
-      CLog::Log(LOGDEBUG, "%s(%d):  fd[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+      CLog::Log(LOGDEBUG, "%s(%d):  FBIOGET_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
       return;
   }
 
@@ -2217,7 +2217,7 @@ void CLinuxRendererGLES::UploadRkBufTexture(int source)
 
 /* Check yuv format. */
 
-  if (ioctl(m_fb1_fd, FBIOSET_YUV_ADDR, (int *)stfbuf->context) == -1)
+  if (ioctl(m_fb1_fd, RK_FBIOSET_YUV_ADDR, (int *)stfbuf->context) == -1)
   {
     CLog::Log(LOGDEBUG, "%s(%d):  FBIOSET_YUV_ADDR[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
     return;
@@ -2258,7 +2258,61 @@ bool CLinuxRendererGLES::CreateRkBufTexture(int index)
 void CLinuxRendererGLES::DeleteRkBufTexture(int index)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
-  // TODO: black out fb1
+#define RK_FBIOSET_CLEAR_FB				0x4633
+#define RK_FBIOSET_ENABLE               0x5019
+
+  /*
+  if (ioctl(m_fb1_fd, RK_FBIOSET_CLEAR_FB, NULL) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_CLEAR_FB[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+  */
+
+  /*
+  if (ioctl(m_fb1_fd, RK_FBIOSET_ENABLE, 0) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+  */
+
+  // Workaround: Blank fb1
+  struct fb_var_screeninfo info;
+
+  if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
+  {
+      CLog::Log(LOGDEBUG, "%s(%d):  FBIOGET_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+      return;
+  }
+
+  //ALOGE("nonstd %x grayscale %x", info.nonstd, info.grayscale);
+
+  info.activate = FB_ACTIVATE_NOW;
+  info.activate |= FB_ACTIVATE_FORCE;
+  info.nonstd &= 0xFFFFFF00;
+
+  info.xoffset = 0;
+  info.yoffset = 0;
+  info.xres = 16;
+  info.yres = 16;
+  info.xres_virtual = 16;
+  info.yres_virtual = 16;
+
+  int nonstd = ((int)m_destRect.x1<<8) + ((int)m_destRect.y1<<20);
+  int grayscale = ((int)m_destRect.Width() << 8) + ((int)m_destRect.Height() << 20);
+
+  info.nonstd &= 0x00;
+  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
+  info.nonstd |= nonstd;
+  info.grayscale &= 0xff;
+  info.grayscale |= grayscale;
+
+  if (ioctl(m_fb1_fd, FBIOPUT_VSCREENINFO, &info) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  FBIOPUT_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
 
   if(m_fb1_fd > 0)
   {
