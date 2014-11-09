@@ -35,6 +35,8 @@
 #include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
 #include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecInfo.h"
 
+#include <queue>
+
 class CRenderCapture;
 
 class CBaseTexture;
@@ -253,6 +255,7 @@ protected:
   int m_currentField;
   int m_reloadShaders;
   int m_fb1_fd;
+  std::queue<CDVDVideoCodecStageFrightBuffer*> m_prev_stfbuf;
 
   struct YUVPLANE
   {

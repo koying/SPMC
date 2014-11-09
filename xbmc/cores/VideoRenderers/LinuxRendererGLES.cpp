@@ -947,6 +947,11 @@ void CLinuxRendererGLES::ReleaseBuffer(int idx)
     }
   }
 #endif
+#if defined(HAS_LIBSTAGEFRIGHT)
+  if (m_format == RENDER_FMT_RKBUF)
+    if (buf.stfbuf)
+      SAFE_RELEASE(buf.stfbuf);
+#endif
 }
 
 void CLinuxRendererGLES::Render(DWORD flags, int index)
@@ -2229,6 +2234,16 @@ void CLinuxRendererGLES::UploadRkBufTexture(int source)
     return;
   }
 
+  // There's double-buffering, visibly, so keep 2 buffers alive
+  if (m_prev_stfbuf.size() > 1)
+  {
+    CDVDVideoCodecStageFrightBuffer* prev_buf = m_prev_stfbuf.front();
+    SAFE_RELEASE(prev_buf);
+    m_prev_stfbuf.pop();
+  }
+  stfbuf->Lock();
+  m_prev_stfbuf.push(stfbuf);
+
 #ifdef DEBUG_VERBOSE
   CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
 #endif
@@ -2239,6 +2254,8 @@ void CLinuxRendererGLES::UploadRkBufTexture(int source)
 bool CLinuxRendererGLES::CreateRkBufTexture(int index)
 {
 #ifdef HAS_LIBSTAGEFRIGHT
+#define RK_FBIOSET_VSYNC_ENABLE     0x4629
+
   if(m_fb1_fd < 0)
   {
     m_fb1_fd = open("/dev/graphics/fb1", O_RDWR,0);
@@ -2249,6 +2266,11 @@ bool CLinuxRendererGLES::CreateRkBufTexture(int index)
       return false;
     }
     CLog::Log(LOGDEBUG, "GLES: open FB1 successful");
+  }
+
+  if (ioctl(m_fb1_fd, RK_FBIOSET_VSYNC_ENABLE, 1) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_VSYNC_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
   }
 
 #endif
@@ -2319,8 +2341,14 @@ void CLinuxRendererGLES::DeleteRkBufTexture(int index)
     close(m_fb1_fd);
     m_fb1_fd = -1;
   }
-  if (m_format == RENDER_FMT_RKBUF)
-    SAFE_RELEASE(m_buffers[index].stfbuf);
+
+  while(!m_prev_stfbuf.empty())
+  {
+    CDVDVideoCodecStageFrightBuffer* prev_buf = m_prev_stfbuf.front();
+    SAFE_RELEASE(prev_buf);
+    m_prev_stfbuf.pop();
+  }
+  SAFE_RELEASE(m_buffers[index].stfbuf);
 #endif
 }
 
