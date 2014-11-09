@@ -37,7 +37,7 @@
 #include <map>
 
 #define INBUFCOUNT 16
-#define OUTBUFCOUNT 4
+#define OUTBUFCOUNT 2
 
 using namespace android;
 
@@ -47,7 +47,6 @@ struct Frame
   int32_t width, height;
   int64_t pts;
   ERenderFormat format;
-  EGLImageKHR eglimg;
   MediaBuffer* medbuf;
 };
 

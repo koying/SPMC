@@ -96,7 +96,7 @@ protected:
   sp<MediaSource> m_stfdecoder;
   sp<MetaData> m_metadata;
 
-  std::map<int64_t, Frame*> m_in_queue;
+  std::queue<Frame*> m_in_queue;
   std::map<int64_t, Frame*> m_out_queue;
   CCriticalSection in_mutex;
   CCriticalSection out_mutex;
@@ -106,21 +106,15 @@ protected:
   std::list <Frame*> outbuf_queue;
   std::list< VPU_FRAME* > m_busy_vpu_queue;
 
-  int64_t m_framecount;
   AVCodecID codec;
   int videoColorFormat;
   int videoStride;
   int videoSliceHeight;
   int x, y;
   int width, height;
-  int extrasize;
-  void* extradata;
 
   bool drop_state;
   bool resetting;
-
-  Frame *cur_frame;
-  Frame *prev_frame;
 
 };
 
