@@ -151,6 +151,10 @@ bool CEGLNativeTypeAmlAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &re
     {
       res.iWidth = m_fb_res.iWidth;
       res.iHeight = m_fb_res.iHeight;
+
+      // Android is locked at 60fps. Fools XBMC into closest match
+      if (res.fRefreshRate < 50)
+        res.fRefreshRate = res.fRefreshRate*2 - 0.1;
       resolutions.push_back(res);
     }
   }
