@@ -46,7 +46,6 @@ struct Frame
   status_t status;
   int32_t width, height;
   int64_t pts;
-  ERenderFormat format;
   MediaBuffer* medbuf;
 };
 

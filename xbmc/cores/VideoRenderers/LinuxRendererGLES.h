@@ -175,6 +175,7 @@ public:
   virtual void         AddProcessor(CDVDMediaCodecInfo *mediacodec, int index);
 #endif
   virtual void         AddProcessor(CDVDVideoCodecBuffer *codecinfo, int index);
+  virtual void         AddProcessor(void *render_ctx, int index);
 
 protected:
   virtual void Render(DWORD flags, int index);
@@ -197,10 +198,6 @@ protected:
   void UploadNV12Texture(int index);
   void DeleteNV12Texture(int index);
   bool CreateNV12Texture(int index);
-
-  void UploadRkBufTexture(int index);
-  void DeleteRkBufTexture(int index);
-  bool CreateRkBufTexture(int index);
 
   void UploadCVRefTexture(int index);
   void DeleteCVRefTexture(int index);
@@ -254,8 +251,6 @@ protected:
   // Raw data used by renderer
   int m_currentField;
   int m_reloadShaders;
-  int m_fb1_fd;
-  std::queue<CDVDVideoCodecStageFrightBuffer*> m_prev_stfbuf;
 
   struct YUVPLANE
   {
@@ -287,6 +282,7 @@ protected:
     YV12Image image;
     unsigned  flipindex; /* used to decide if this has been uploaded */
 
+    void* render_ctx;
 #ifdef HAVE_LIBOPENMAX
     OpenMaxVideoBuffer *openMaxBuffer;
 #endif

@@ -72,7 +72,6 @@ extern "C" {
 #include "windowing/egl/EGLWrapper.h"
 #include "android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecStageFright.h"
-#include <linux/fb.h>
 
 // EGL extension functions
 static PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR;
@@ -102,6 +101,7 @@ CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
   memset(&fields, 0, sizeof(fields));
   memset(&image , 0, sizeof(image));
   flipindex = 0;
+  render_ctx = NULL;
 #ifdef HAVE_LIBOPENMAX
   openMaxBuffer = NULL;
 #endif
@@ -156,7 +156,6 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   m_bImageReady = false;
   m_StrictBinding = false;
   m_clearColour = 0.0f;
-  m_fb1_fd = -1;
 
 #ifdef HAS_LIBSTAGEFRIGHT
   if (!eglCreateImageKHR)
@@ -510,13 +509,16 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
   if (ValidateRenderTarget())
     return;
 
+  int index = m_iYV12RenderBuffer;
+  YUVBUFFER& buf =  m_buffers[index];
+
   if (m_renderMethod & RENDER_BYPASS)
   {
     ManageDisplay();
     // if running bypass, then the player might need the src/dst rects
     // for sizing video playback on a layer other than the gles layer.
     if (m_RenderUpdateCallBackFn)
-      (*m_RenderUpdateCallBackFn)(m_RenderUpdateCallBackCtx, m_sourceRect, m_destRect);
+      (*m_RenderUpdateCallBackFn)(m_RenderUpdateCallBackCtx, m_sourceRect, m_destRect, buf.render_ctx);
 
     CRect old = g_graphicsContext.GetScissors();
 
@@ -528,8 +530,6 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    (this->*m_textureUpload)(m_iYV12RenderBuffer);
-
     g_graphicsContext.SetScissors(old);
     g_graphicsContext.EndPaint();
 
@@ -538,9 +538,6 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 
   // this needs to be checked after texture validation
   if (!m_bImageReady) return;
-
-  int index = m_iYV12RenderBuffer;
-  YUVBUFFER& buf =  m_buffers[index];
 
   if (m_format != RENDER_FMT_OMXEGL && m_format != RENDER_FMT_EGLIMG && m_format != RENDER_FMT_MEDIACODEC)
   {
@@ -624,7 +621,6 @@ unsigned int CLinuxRendererGLES::PreInit()
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
   m_formats.push_back(RENDER_FMT_EGLIMG);
-  m_formats.push_back(RENDER_FMT_RKBUF);
 #endif
 #if defined(TARGET_ANDROID)
   m_formats.push_back(RENDER_FMT_MEDIACODEC);
@@ -733,12 +729,6 @@ void CLinuxRendererGLES::LoadShaders(int field)
         m_renderMethod = RENDER_EGLIMG;
         break;
       }
-      else if (m_format == RENDER_FMT_RKBUF)
-      {
-        CLog::Log(LOGNOTICE, "GL: Using STF buffer render method");
-        m_renderMethod = RENDER_BYPASS;
-        break;
-      }
       else if (m_format == RENDER_FMT_MEDIACODEC)
       {
         CLog::Log(LOGNOTICE, "GL: Using MediaCodec render method");
@@ -830,12 +820,6 @@ void CLinuxRendererGLES::LoadShaders(int field)
     m_textureUpload = &CLinuxRendererGLES::UploadEGLIMGTexture;
     m_textureCreate = &CLinuxRendererGLES::CreateEGLIMGTexture;
     m_textureDelete = &CLinuxRendererGLES::DeleteEGLIMGTexture;
-  }
-  else if (m_format == RENDER_FMT_RKBUF)
-  {
-    m_textureUpload = &CLinuxRendererGLES::UploadRkBufTexture;
-    m_textureCreate = &CLinuxRendererGLES::CreateRkBufTexture;
-    m_textureDelete = &CLinuxRendererGLES::DeleteRkBufTexture;
   }
   else if (m_format == RENDER_FMT_MEDIACODEC)
   {
@@ -945,11 +929,9 @@ void CLinuxRendererGLES::ReleaseBuffer(int idx)
     }
   }
 #endif
-#if defined(HAS_LIBSTAGEFRIGHT)
-  if (m_format == RENDER_FMT_RKBUF)
-    if (buf.stfbuf)
-      SAFE_RELEASE(buf.stfbuf);
-#endif
+  if (m_RenderReleaseCallBackFn)
+    (*m_RenderReleaseCallBackFn)(m_RenderReleaseCallBackCtx, buf.render_ctx);
+  buf.render_ctx = NULL;
 }
 
 void CLinuxRendererGLES::Render(DWORD flags, int index)
@@ -2167,201 +2149,6 @@ void CLinuxRendererGLES::UploadNV12Texture(int source)
   return;
 }
 
-void CLinuxRendererGLES::UploadRkBufTexture(int source)
-{
-#ifdef HAS_LIBSTAGEFRIGHT
-
-#define RK_FBIOSET_YUV_ADDR	0x5002
-#define HAL_PIXEL_FORMAT_YCrCb_NV12  0x20
-
-  YUVBUFFER& buf    =  m_buffers[source];
-  CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
-
-#ifdef DEBUG_VERBOSE
-  unsigned int time = XbmcThreads::SystemClockMillis();
-  CLog::Log(LOGDEBUG, "UploadRkVpuTexture %d: buf:%p\n", source, stfbuf);
-#endif
-
-  if (!stfbuf || !stfbuf->IsValid())
-    return;
-
-  if (m_fb1_fd < 0)
-    return;
-
-  struct fb_var_screeninfo info;
-
-  if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
-  {
-      CLog::Log(LOGDEBUG, "%s(%d):  FBIOGET_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-      return;
-  }
-
-  //ALOGE("nonstd %x grayscale %x", info.nonstd, info.grayscale);
-
-  info.activate = FB_ACTIVATE_NOW;
-  info.activate |= FB_ACTIVATE_FORCE;
-  info.nonstd &= 0xFFFFFF00;
-
-  info.xoffset = 0;
-  info.yoffset = 0;
-  info.xres = stfbuf->displayWidth;
-  info.yres = stfbuf->displayHeight;
-  info.xres_virtual = stfbuf->frameWidth;
-  info.yres_virtual = stfbuf->frameHeight;
-
-  CRect dst_rect = m_destRect;
-  RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
-   if (stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
-  {
-    dst_rect.x2 *= 2.0;
-  }
-  else if (stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
-  {
-    dst_rect.y2 *= 2.0;
-  }
-
-  int nonstd = ((int)dst_rect.x1<<8) + ((int)dst_rect.y1<<20);
-  int grayscale = ((int)dst_rect.Width() << 8) + ((int)dst_rect.Height() << 20);
-
-  info.nonstd &= 0x00;
-  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
-  info.nonstd |= nonstd;
-  info.grayscale &= 0xff;
-  info.grayscale |= grayscale;
-
-/* Check yuv format. */
-
-  if (ioctl(m_fb1_fd, RK_FBIOSET_YUV_ADDR, (int *)stfbuf->context) == -1)
-  {
-    CLog::Log(LOGDEBUG, "%s(%d):  FBIOSET_YUV_ADDR[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-    return;
-  }
-
-  if (ioctl(m_fb1_fd, FBIOPUT_VSCREENINFO, &info) == -1)
-  {
-    CLog::Log(LOGDEBUG, "%s(%d):  FBIOPUT_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-    return;
-  }
-
-  // There's double-buffering, visibly, so keep 2 buffers alive
-  if (m_prev_stfbuf.size() > 1)
-  {
-    CDVDVideoCodecStageFrightBuffer* prev_buf = m_prev_stfbuf.front();
-    SAFE_RELEASE(prev_buf);
-    m_prev_stfbuf.pop();
-  }
-  stfbuf->Lock();
-  m_prev_stfbuf.push(stfbuf);
-
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
-#endif
-  return;
-#endif
-}
-
-bool CLinuxRendererGLES::CreateRkBufTexture(int index)
-{
-#ifdef HAS_LIBSTAGEFRIGHT
-#define RK_FBIOSET_VSYNC_ENABLE     0x4629
-
-  if(m_fb1_fd < 0)
-  {
-    m_fb1_fd = open("/dev/graphics/fb1", O_RDWR,0);
-
-    if(m_fb1_fd < 0)
-    {
-      CLog::Log(LOGERROR, "GLES: Cannot open FB1");
-      return false;
-    }
-    CLog::Log(LOGDEBUG, "GLES: open FB1 successful");
-  }
-
-  if (ioctl(m_fb1_fd, RK_FBIOSET_VSYNC_ENABLE, 1) == -1)
-  {
-    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_VSYNC_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-  }
-
-#endif
-  return true;
-}
-
-void CLinuxRendererGLES::DeleteRkBufTexture(int index)
-{
-#ifdef HAS_LIBSTAGEFRIGHT
-#define RK_FBIOSET_CLEAR_FB				0x4633
-#define RK_FBIOSET_ENABLE               0x5019
-
-  /*
-  if (ioctl(m_fb1_fd, RK_FBIOSET_CLEAR_FB, NULL) == -1)
-  {
-    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_CLEAR_FB[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-    return;
-  }
-  */
-
-  /*
-  if (ioctl(m_fb1_fd, RK_FBIOSET_ENABLE, 0) == -1)
-  {
-    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-    return;
-  }
-  */
-
-  // Workaround: Blank fb1
-  struct fb_var_screeninfo info;
-
-  if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
-  {
-      CLog::Log(LOGDEBUG, "%s(%d):  FBIOGET_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-      return;
-  }
-
-  //ALOGE("nonstd %x grayscale %x", info.nonstd, info.grayscale);
-
-  info.activate = FB_ACTIVATE_NOW;
-  info.activate |= FB_ACTIVATE_FORCE;
-  info.nonstd &= 0xFFFFFF00;
-
-  info.xoffset = 0;
-  info.yoffset = 0;
-  info.xres = 16;
-  info.yres = 16;
-  info.xres_virtual = 16;
-  info.yres_virtual = 16;
-
-  int nonstd = ((int)m_destRect.x1<<8) + ((int)m_destRect.y1<<20);
-  int grayscale = ((int)m_destRect.Width() << 8) + ((int)m_destRect.Height() << 20);
-
-  info.nonstd &= 0x00;
-  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
-  info.nonstd |= nonstd;
-  info.grayscale &= 0xff;
-  info.grayscale |= grayscale;
-
-  if (ioctl(m_fb1_fd, FBIOPUT_VSCREENINFO, &info) == -1)
-  {
-    CLog::Log(LOGDEBUG, "%s(%d):  FBIOPUT_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
-    return;
-  }
-
-  if(m_fb1_fd > 0)
-  {
-    close(m_fb1_fd);
-    m_fb1_fd = -1;
-  }
-
-  while(!m_prev_stfbuf.empty())
-  {
-    CDVDVideoCodecStageFrightBuffer* prev_buf = m_prev_stfbuf.front();
-    SAFE_RELEASE(prev_buf);
-    m_prev_stfbuf.pop();
-  }
-  SAFE_RELEASE(m_buffers[index].stfbuf);
-#endif
-}
-
-
 bool CLinuxRendererGLES::CreateNV12Texture(int index)
 {
   // since we also want the field textures, pitch must be texture aligned
@@ -3205,6 +2992,18 @@ void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecBuffer *codecinfo, int index
 
   if (codecinfo)
     codecinfo->Lock();
+}
+
+void CLinuxRendererGLES::AddProcessor(void* render_ctx, int index)
+{
+  YUVBUFFER &buf = m_buffers[index];
+
+  if (m_RenderReleaseCallBackFn && buf.render_ctx)
+    (*m_RenderReleaseCallBackFn)(m_RenderReleaseCallBackCtx, buf.render_ctx);
+  if (m_RenderLockCallBackFn && render_ctx)
+    (*m_RenderLockCallBackFn)(m_RenderLockCallBackCtx, render_ctx);
+
+  buf.render_ctx = render_ctx;
 }
 
 #endif

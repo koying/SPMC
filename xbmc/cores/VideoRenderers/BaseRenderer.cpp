@@ -59,6 +59,10 @@ CBaseRenderer::CBaseRenderer()
   m_RenderUpdateCallBackCtx = NULL;
   m_RenderFeaturesCallBackFn = NULL;
   m_RenderFeaturesCallBackCtx = NULL;
+  m_RenderLockCallBackFn = NULL;
+  m_RenderLockCallBackCtx = NULL;
+  m_RenderReleaseCallBackFn = NULL;
+  m_RenderReleaseCallBackCtx = NULL;
 }
 
 CBaseRenderer::~CBaseRenderer()
@@ -75,6 +79,18 @@ void CBaseRenderer::RegisterRenderFeaturesCallBack(const void *ctx, RenderFeatur
 {
   m_RenderFeaturesCallBackFn = fn;
   m_RenderFeaturesCallBackCtx = ctx;
+}
+
+void CBaseRenderer::RegisterRenderLockCallBack(const void *ctx, RenderLockCallBackFn fn)
+{
+  m_RenderLockCallBackFn = fn;
+  m_RenderLockCallBackCtx = ctx;
+}
+
+void CBaseRenderer::RegisterRenderReleaseCallBack(const void *ctx, RenderReleaseCallBackFn fn)
+{
+  m_RenderReleaseCallBackFn = fn;
+  m_RenderReleaseCallBackCtx = ctx;
 }
 
 void CBaseRenderer::ChooseBestResolution(float fps)

@@ -39,6 +39,7 @@
 #include "DVDCodecs/DVDCodecInterface.h"
 #include "DVDVideoCodecRKStageFright.h"
 
+#include <linux/fb.h>
 #include <new>
 
 #define RINT(x) ((x) >= 0 ? ((int)((x) + 0.5)) : ((int)((x) - 0.5)))
@@ -54,6 +55,8 @@ const int kKeyVC1               = 'vc1c';  // vc1 codec config info
 const int kKeyHVCC              = 'hvcc';
 
 #define XMEDIA_BITSTREAM_START_CODE         (0x42564b52)
+#define RK_FBIOSET_YUV_ADDR	0x5002
+#define HAL_PIXEL_FORMAT_YCrCb_NV12  0x20
 
 using namespace android;
 
@@ -226,7 +229,6 @@ public:
       else
         CLog::Log(LOGERROR, "%s - decoding error (%d)\n", CLASSNAME,frame->status);
 
-      frame->format = RENDER_FMT_RKBUF;
       if (frame->status == OK)
       {
         frame->width = p->width;
@@ -295,21 +297,18 @@ public:
         continue;
       }
 
-      if (frame->format == RENDER_FMT_RKBUF)
-      {
-        p->out_mutex.lock();
-        p->outbuf_queue.push_back(frame);
+      p->out_mutex.lock();
+      p->outbuf_queue.push_back(frame);
 
 #if defined(DEBUG_VERBOSE)
-        CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, buf:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->medbuf, XbmcThreads::SystemClockMillis() - time);
+      CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, buf:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->medbuf, XbmcThreads::SystemClockMillis() - time);
 #endif
 
-        while (p->outbuf_queue.size() >= OUTBUFCOUNT)
-          p->out_condition.wait(p->out_mutex);
-        p->out_mutex.unlock();
-        continue;
-      }
-    #if defined(DEBUG_VERBOSE)
+      while (p->outbuf_queue.size() >= OUTBUFCOUNT)
+        p->out_condition.wait(p->out_mutex);
+      p->out_mutex.unlock();
+      continue;
+#if defined(DEBUG_VERBOSE)
       CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, img:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->eglimg, XbmcThreads::SystemClockMillis() - time);
     #endif
     }
@@ -329,10 +328,9 @@ CRkStageFrightVideo::CRkStageFrightVideo(CDVDCodecInterface* interface)
   CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CStageFrightVideo));
 #endif
   p = new CStageFrightVideoPrivate;
-  m_g_application = interface->GetApplication();
-  m_g_applicationMessenger = interface->GetApplicationMessenger();
-  m_g_Windowing = interface->GetWindowSystem();
   m_g_advancedSettings = interface->GetAdvancedSettings();
+  m_g_renderManager = interface->GetRenderManager();
+  m_g_graphicsContext = interface->GetGraphicsContext();
 }
 
 CRkStageFrightVideo::~CRkStageFrightVideo()
@@ -342,9 +340,22 @@ CRkStageFrightVideo::~CRkStageFrightVideo()
 
 bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
 {
+#define RK_FBIOSET_VSYNC_ENABLE     0x4629
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::Open: ed:%d as:%f fa:%d\n", CLASSNAME, hints.extrasize, hints.aspect, hints.forced_aspect);
 #endif
+
+  m_fb1_fd = open("/dev/graphics/fb1", O_RDWR,0);
+  if(m_fb1_fd < 0)
+  {
+    CLog::Log(LOGERROR, "GLES: Cannot open FB1");
+    return false;
+  }
+
+  if (ioctl(m_fb1_fd, RK_FBIOSET_VSYNC_ENABLE, 1) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_VSYNC_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+  }
 
   CSingleLock lock(g_graphicsContext);
 
@@ -525,7 +536,12 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
     p->inbuf[i] = new MediaBuffer(100000);
     p->inbuf[i]->setObserver(p);
   }
-  
+
+  m_g_renderManager->RegisterRenderUpdateCallBack((const void*)this, RenderUpdateCallBack);
+  m_g_renderManager->RegisterRenderFeaturesCallBack((const void*)this, RenderFeaturesCallBack);
+  m_g_renderManager->RegisterRenderLockCallBack((const void*)this, RenderLockCallBack);
+  m_g_renderManager->RegisterRenderReleaseCallBack((const void*)this, RenderReleaseCallBack);
+
   decode_thread = new CStageFrightDecodeThread(this);
   decode_thread->Create(true /*autodelete*/);
 
@@ -640,14 +656,10 @@ bool CRkStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
  #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
-  if (pDvdVideoPicture->format == RENDER_FMT_RKBUF)
-  {
-    ReleaseBuffer(pDvdVideoPicture->stfbuf);
+  ReleaseBuffer((CDVDVideoCodecStageFrightBuffer*)pDvdVideoPicture->render_ctx);
 #if defined(DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, "%s::ClearPicture buf:%p (%d)\n", CLASSNAME, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
 #endif
-    return true;
-  }
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::ClearPicture img:%p (%d)\n", CLASSNAME, pDvdVideoPicture, XbmcThreads::SystemClockMillis() - time);
 #endif
@@ -684,7 +696,7 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 
   status  = frame->status;
 
-  pDvdVideoPicture->format = frame->format;
+  pDvdVideoPicture->format = RENDER_FMT_BYPASS;
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
   pDvdVideoPicture->pts = frame->pts;
   pDvdVideoPicture->iWidth  = width;
@@ -742,7 +754,6 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
     if (vpucopy)
     {
       CDVDVideoCodecRkStageFrightBufferImpl* stfbuf = new CDVDVideoCodecRkStageFrightBufferImpl;
-      stfbuf->format = RENDER_FMT_RKBUF;
       stfbuf->subformat = 'rkvp';
       stfbuf->frameWidth = vpucopy->FrameWidth;
       stfbuf->frameHeight = vpucopy->FrameHeight;
@@ -752,13 +763,13 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
       stfbuf->context = (void*)vpucopy;
       LockBuffer(stfbuf);
 
-      pDvdVideoPicture->stfbuf = stfbuf;
-//#if defined(DEBUG_VERBOSE)
+      pDvdVideoPicture->render_ctx = (void*)stfbuf;
+#if defined(DEBUG_VERBOSE)
       CLog::Log(LOGDEBUG, ">>>     va:%p,fa:%p,%p, w:%d, h:%d, dw:%d, dh:%d\n",
                 (void*)vpucopy->vpumem.vir_addr, (void*)vpucopy->FrameBusAddr[0], (void*)vpucopy->FrameBusAddr[1],
           vpucopy->FrameWidth, vpucopy->FrameHeight, vpucopy->DisplayWidth, vpucopy->DisplayHeight);
 
-//#endif
+#endif
     }
     else
       pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
@@ -778,6 +789,11 @@ void CRkStageFrightVideo::Dispose()
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::Close\n", CLASSNAME);
 #endif
+
+  m_g_renderManager->RegisterRenderUpdateCallBack((const void*)NULL, NULL);
+  m_g_renderManager->RegisterRenderFeaturesCallBack((const void*)NULL, NULL);
+  m_g_renderManager->RegisterRenderLockCallBack((const void*)NULL, NULL);
+  m_g_renderManager->RegisterRenderReleaseCallBack((const void*)NULL, NULL);
 
   Frame *frame;
 
@@ -851,6 +867,62 @@ void CRkStageFrightVideo::Dispose()
       p->inbuf[i] = NULL;
     }
   }
+
+#define RK_FBIOSET_CLEAR_FB				0x4633
+#define RK_FBIOSET_ENABLE               0x5019
+
+  /*
+  if (ioctl(m_fb1_fd, RK_FBIOSET_CLEAR_FB, NULL) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_CLEAR_FB[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+  */
+
+  /*
+  if (ioctl(m_fb1_fd, RK_FBIOSET_ENABLE, 0) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+  */
+
+  // Workaround: Blank fb1
+  struct fb_var_screeninfo info;
+
+  if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
+  {
+      CLog::Log(LOGDEBUG, "%s(%d):  FBIOGET_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+      return;
+  }
+
+  info.activate = FB_ACTIVATE_NOW;
+  info.activate |= FB_ACTIVATE_FORCE;
+  info.nonstd &= 0xFFFFFF00;
+
+  info.xoffset = 0;
+  info.yoffset = 0;
+  info.xres = 16;
+  info.yres = 16;
+  info.xres_virtual = 16;
+  info.yres_virtual = 16;
+
+  int nonstd = ((int)0<<8) + ((int)0<<20);
+  int grayscale = ((int)16 << 8) + ((int)16 << 20);
+
+  info.nonstd &= 0x00;
+  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
+  info.nonstd |= nonstd;
+  info.grayscale &= 0xff;
+  info.grayscale |= grayscale;
+
+  if (ioctl(m_fb1_fd, FBIOPUT_VSCREENINFO, &info) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  FBIOPUT_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+
+  close(m_fb1_fd);
 }
 
 void CRkStageFrightVideo::Reset(void)
@@ -950,7 +1022,7 @@ bool CRkStageFrightVideo::ReleaseVpuFrame(VPU_FRAME *vpuframe)
 }
 
 
-void CRkStageFrightVideo::LockBuffer(CDVDVideoCodecStageFrightBuffer *buf)
+void CRkStageFrightVideo::LockBuffer(const CDVDVideoCodecStageFrightBuffer *buf)
 {
   if (!buf)
     return;
@@ -958,11 +1030,120 @@ void CRkStageFrightVideo::LockBuffer(CDVDVideoCodecStageFrightBuffer *buf)
   LockVpuFrame((VPU_FRAME*)buf->context);
 }
 
-void CRkStageFrightVideo::ReleaseBuffer(CDVDVideoCodecStageFrightBuffer *buf)
+void CRkStageFrightVideo::ReleaseBuffer(const CDVDVideoCodecStageFrightBuffer *buf)
 {
   if (!buf)
     return;
 
   if (ReleaseVpuFrame((VPU_FRAME*)buf->context))
     delete buf;
+}
+
+void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, const CDVDVideoCodecStageFrightBuffer *render_ctx)
+{
+  CDVDVideoCodecRkStageFrightBufferImpl* stfbuf = (CDVDVideoCodecRkStageFrightBufferImpl*)render_ctx;
+//#ifdef DEBUG_VERBOSE
+  unsigned int time = XbmcThreads::SystemClockMillis();
+  CLog::Log(LOGDEBUG, "RenderUpdateCallBack buf:%p\n", stfbuf);
+//#endif
+
+  if (!render_ctx)
+    return;
+
+  struct fb_var_screeninfo info;
+
+  if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
+  {
+      CLog::Log(LOGDEBUG, "%s(%d):  FBIOGET_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+      return;
+  }
+
+  //ALOGE("nonstd %x grayscale %x", info.nonstd, info.grayscale);
+
+  info.activate = FB_ACTIVATE_NOW;
+  info.activate |= FB_ACTIVATE_FORCE;
+  info.nonstd &= 0xFFFFFF00;
+
+  info.xoffset = 0;
+  info.yoffset = 0;
+  info.xres = stfbuf->displayWidth;
+  info.yres = stfbuf->displayHeight;
+  info.xres_virtual = stfbuf->frameWidth;
+  info.yres_virtual = stfbuf->frameHeight;
+
+  CRect dst_rect = DestRect;
+  RENDER_STEREO_MODE stereo_mode = m_g_graphicsContext->GetStereoMode();
+   if (stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
+  {
+    dst_rect.x2 *= 2.0;
+  }
+  else if (stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
+  {
+    dst_rect.y2 *= 2.0;
+  }
+
+  int nonstd = ((int)dst_rect.x1<<8) + ((int)dst_rect.y1<<20);
+  int grayscale = ((int)dst_rect.Width() << 8) + ((int)dst_rect.Height() << 20);
+
+  info.nonstd &= 0x00;
+  info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
+  info.nonstd |= nonstd;
+  info.grayscale &= 0xff;
+  info.grayscale |= grayscale;
+
+/* Check yuv format. */
+
+  if (ioctl(m_fb1_fd, RK_FBIOSET_YUV_ADDR, (int *)stfbuf->context) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  FBIOSET_YUV_ADDR[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+
+  if (ioctl(m_fb1_fd, FBIOPUT_VSCREENINFO, &info) == -1)
+  {
+    CLog::Log(LOGDEBUG, "%s(%d):  FBIOPUT_VSCREENINFO[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
+    return;
+  }
+
+  // There's double-buffering, visibly, so keep 2 buffers alive
+  if (m_prev_stfbuf.size() > 1)
+  {
+    CDVDVideoCodecStageFrightBuffer* prev_buf = m_prev_stfbuf.front();
+    ReleaseBuffer(prev_buf);
+    m_prev_stfbuf.pop();
+  }
+  LockBuffer(stfbuf);
+  m_prev_stfbuf.push(stfbuf);
+
+//#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
+//#endif
+  return;
+}
+
+/**********************************/
+
+void CRkStageFrightVideo::RenderFeaturesCallBack(const void *ctx, Features &renderFeatures)
+{
+}
+
+void CRkStageFrightVideo::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, const void* render_ctx)
+{
+  CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
+  if (codec)
+    codec->Render(SrcRect, DestRect, (CDVDVideoCodecStageFrightBuffer *)render_ctx);
+}
+
+void CRkStageFrightVideo::RenderLockCallBack(const void *ctx, const void* render_ctx)
+{
+  CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
+  if (codec)
+    codec->LockBuffer((CDVDVideoCodecStageFrightBuffer *)render_ctx);
+}
+
+void CRkStageFrightVideo::RenderReleaseCallBack(const void *ctx, const void* render_ctx)
+{
+  CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
+  if (codec)
+    codec->ReleaseBuffer((CDVDVideoCodecStageFrightBuffer *)render_ctx);
 }

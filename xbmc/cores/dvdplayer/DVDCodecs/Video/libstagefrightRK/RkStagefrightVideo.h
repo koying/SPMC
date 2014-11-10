@@ -29,6 +29,8 @@
 #include "ApplicationMessenger.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
+#include "cores/VideoRenderers/RenderManager.h"
+#include "guilib/GraphicContext.h"
 
 #include <utils/RefBase.h>
 #include <binder/ProcessState.h>
@@ -75,8 +77,9 @@ public:
   void SetDropState(bool bDrop);
   virtual void SetSpeed(int iSpeed);
 
-  void LockBuffer(CDVDVideoCodecStageFrightBuffer* buf);
-  void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer* buf);
+  void LockBuffer(const CDVDVideoCodecStageFrightBuffer* buf);
+  void ReleaseBuffer(const CDVDVideoCodecStageFrightBuffer* buf);
+  void Render(const CRect &SrcRect, const CRect &DestRect, const CDVDVideoCodecStageFrightBuffer* buf);
 
 protected:
   void LockVpuFrame(VPU_FRAME *vpuframe);
@@ -86,10 +89,9 @@ protected:
   CStageFrightVideoPrivate* p;
   CStageFrightDecodeThread* decode_thread;
 
-  CApplication* m_g_application;
-  CApplicationMessenger* m_g_applicationMessenger;
-  CWinSystemEGL* m_g_Windowing;
   CAdvancedSettings* m_g_advancedSettings;
+  CXBMCRenderManager* m_g_renderManager;
+  CGraphicContext* m_g_graphicsContext;
 
   OMXClient *m_omxclient;
   sp<MediaSource> m_mediasource;
@@ -116,5 +118,13 @@ protected:
   bool drop_state;
   bool resetting;
 
+  int m_fb1_fd;
+  std::queue<CDVDVideoCodecStageFrightBuffer*> m_prev_stfbuf;
+
+private:
+  static void RenderFeaturesCallBack(const void *ctx, Features &renderFeatures);
+  static void RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, const void* render_ctx);
+  static void RenderLockCallBack(const void *ctx, const void *render_ctx);
+  static void RenderReleaseCallBack(const void *ctx, const void *render_ctx);
 };
 
