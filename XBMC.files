@@ -9618,3 +9618,5 @@ xbmc/windowing/egl/EGLNativeTypeAmlAndroid.h
 xbmc/windowing/egl/EGLNativeTypeAmlAndroid.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/RkStagefrightVideo.h
 xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/RkStagefrightVideo.cpp
+xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRKStageFright.cpp
+xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRKStageFright.h

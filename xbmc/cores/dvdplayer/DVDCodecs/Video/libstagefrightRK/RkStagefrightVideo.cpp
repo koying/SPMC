@@ -24,7 +24,6 @@
 #include "system.h"
 #include "system_gl.h"
 
-#include "DVDVideoCodecStageFright.h"
 #include "RkStagefrightVideo.h"
 #include "StageFrightVideoPrivate.h"
 
@@ -38,6 +37,7 @@
 #include "threads/Event.h"
 #include "settings/AdvancedSettings.h"
 #include "DVDCodecs/DVDCodecInterface.h"
+#include "DVDVideoCodecRKStageFright.h"
 
 #include <new>
 
@@ -741,7 +741,7 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 
     if (vpucopy)
     {
-      CDVDVideoCodecStageFrightBuffer* stfbuf = new CDVDVideoCodecStageFrightBuffer;
+      CDVDVideoCodecRkStageFrightBufferImpl* stfbuf = new CDVDVideoCodecRkStageFrightBufferImpl;
       stfbuf->format = RENDER_FMT_RKBUF;
       stfbuf->subformat = 'rkvp';
       stfbuf->frameWidth = vpucopy->FrameWidth;

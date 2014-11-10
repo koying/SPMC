@@ -39,13 +39,13 @@
 #include "android/jni/Build.h"
 #include "utils/StringUtils.h"
 #include "DVDCodecs/DVDCodecInterface.h"
+#include "utils/BitstreamConverter.h"
 
 #include "DllLibStageFrightCodec.h"
 
-CCriticalSection            valid_mutex;
+CCriticalSection            RKSTF_valid_mutex;
 bool                        CDVDVideoCodecRKStageFright::m_isvalid = false;
 void*                       CDVDVideoCodecRKStageFright::m_stf_handle = NULL;
-std::string                 CDVDVideoCodecRKStageFright::m_pFormatSource;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +62,7 @@ CDVDVideoCodecRKStageFright::CDVDVideoCodecRKStageFright()
     m_stf_dll = new DllLibStageFrightCodec;
     m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
   }
+  m_pFormatName = "rkstf";
 }
 
 CDVDVideoCodecRKStageFright::~CDVDVideoCodecRKStageFright()
@@ -72,13 +73,8 @@ CDVDVideoCodecRKStageFright::~CDVDVideoCodecRKStageFright()
 bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
 #if defined(HAS_RKSTF)
-    if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
-    {
-      m_pFormatSource = "rkstf";
-      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
-    }
-    else
-      return false;
+  if (!StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
+    return false;
 #else
   return false;
 #endif
@@ -157,7 +153,7 @@ bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &
       return false;
     }
 
-    CSingleLock lock (valid_mutex);
+    CSingleLock lock (RKSTF_valid_mutex);
     m_isvalid = true;
     return true;
   }
@@ -174,7 +170,7 @@ void CDVDVideoCodecRKStageFright::Dispose()
     m_converter = NULL;
   }
 
-  CSingleLock lock (valid_mutex);
+  CSingleLock lock (RKSTF_valid_mutex);
   m_isvalid = false;
 
   if (m_stf_handle)
@@ -251,23 +247,22 @@ double CDVDVideoCodecRKStageFright::GetTimeSize(void)
 
 /********************************************************/
 
-void CDVDVideoCodecStageFrightBuffer::Lock()
+void CDVDVideoCodecRkStageFrightBufferImpl::Lock()
 {
   if (CDVDVideoCodecRKStageFright::m_stf_dll && CDVDVideoCodecRKStageFright::m_stf_handle)
     CDVDVideoCodecRKStageFright::m_stf_dll->stf_LockBuffer(CDVDVideoCodecRKStageFright::m_stf_handle, this);
 }
 
-long CDVDVideoCodecStageFrightBuffer::Release()
+long CDVDVideoCodecRkStageFrightBufferImpl::Release()
 {
   if (CDVDVideoCodecRKStageFright::m_stf_dll && CDVDVideoCodecRKStageFright::m_stf_handle)
     CDVDVideoCodecRKStageFright::m_stf_dll->stf_ReleaseBuffer(CDVDVideoCodecRKStageFright::m_stf_handle, this);
 }
 
-bool CDVDVideoCodecStageFrightBuffer::IsValid()
+bool CDVDVideoCodecRkStageFrightBufferImpl::IsValid()
 {
-  CSingleLock lock (valid_mutex);
+  CSingleLock lock (RKSTF_valid_mutex);
   return CDVDVideoCodecRKStageFright::m_isvalid;
-
 }
 
 #endif

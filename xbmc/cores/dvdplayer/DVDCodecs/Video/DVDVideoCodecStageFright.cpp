@@ -39,13 +39,13 @@
 #include "android/jni/Build.h"
 #include "utils/StringUtils.h"
 #include "DVDCodecs/DVDCodecInterface.h"
+#include "utils/BitstreamConverter.h"
 
 #include "DllLibStageFrightCodec.h"
 
-CCriticalSection            valid_mutex;
+CCriticalSection            STF_valid_mutex;
 bool                        CDVDVideoCodecStageFright::m_isvalid = false;
 void*                       CDVDVideoCodecStageFright::m_stf_handle = NULL;
-std::string                 CDVDVideoCodecStageFright::m_pFormatSource;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -60,19 +60,9 @@ CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
   if (!m_stf_dll)
   {
     m_stf_dll = new DllLibStageFrightCodec;
-#if defined(HAS_RKSTF)
-    if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
-    {
-      m_pFormatSource = "rkstf";
-      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
-    }
-    else
-#endif
-    {
-      m_pFormatSource = "stf";
-      m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
-    }
+    m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
   }
+  m_pFormatName = "stf";
 }
 
 CDVDVideoCodecStageFright::~CDVDVideoCodecStageFright()
@@ -95,7 +85,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
     {
       case AV_CODEC_ID_H264:
 //      case AV_CODEC_ID_H264MVC:
-        m_pFormatName = m_pFormatSource + "-h264";
+        m_pFormatName = "stf-h264";
         if (m_hints.extradata)
         {
           m_converter     = new CBitstreamConverter();
@@ -108,7 +98,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case AV_CODEC_ID_HEVC:
-        m_pFormatName = m_pFormatSource + "-h265";
+        m_pFormatName = "stf-h265";
         if (m_hints.extradata)
         {
           m_converter     = new CBitstreamConverter();
@@ -121,20 +111,20 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case AV_CODEC_ID_MPEG2VIDEO:
-        m_pFormatName = m_pFormatSource + "-mpeg2";
+        m_pFormatName = "stf-mpeg2";
         break;
       case AV_CODEC_ID_MPEG4:
-        m_pFormatName = m_pFormatSource + "-mpeg4";
+        m_pFormatName = "stf-mpeg4";
         break;
       case AV_CODEC_ID_VP3:
       case AV_CODEC_ID_VP6:
       case AV_CODEC_ID_VP6F:
       case AV_CODEC_ID_VP8:
-        m_pFormatName = m_pFormatSource + "-vpx";
+        m_pFormatName = "stf-vpx";
         break;
       case AV_CODEC_ID_WMV3:
       case AV_CODEC_ID_VC1:
-        m_pFormatName = m_pFormatSource + "-wmv";
+        m_pFormatName = "stf-wmv";
         break;
       default:
         return false;
@@ -156,7 +146,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
       return false;
     }
 
-    CSingleLock lock (valid_mutex);
+    CSingleLock lock (STF_valid_mutex);
     m_isvalid = true;
     return true;
   }
@@ -173,7 +163,7 @@ void CDVDVideoCodecStageFright::Dispose()
     m_converter = NULL;
   }
 
-  CSingleLock lock (valid_mutex);
+  CSingleLock lock (STF_valid_mutex);
   m_isvalid = false;
 
   if (m_stf_handle)
@@ -250,22 +240,22 @@ double CDVDVideoCodecStageFright::GetTimeSize(void)
 
 /********************************************************/
 
-void CDVDVideoCodecStageFrightBuffer::Lock()
+void CDVDVideoCodecStageFrightBufferImpl::Lock()
 {
   if (CDVDVideoCodecStageFright::m_stf_dll && CDVDVideoCodecStageFright::m_stf_handle)
     CDVDVideoCodecStageFright::m_stf_dll->stf_LockBuffer(CDVDVideoCodecStageFright::m_stf_handle, this);
 }
 
-long CDVDVideoCodecStageFrightBuffer::Release()
+long CDVDVideoCodecStageFrightBufferImpl::Release()
 {
   if (CDVDVideoCodecStageFright::m_stf_dll && CDVDVideoCodecStageFright::m_stf_handle)
     CDVDVideoCodecStageFright::m_stf_dll->stf_ReleaseBuffer(CDVDVideoCodecStageFright::m_stf_handle, this);
   return true;
 }
 
-bool CDVDVideoCodecStageFrightBuffer::IsValid()
+bool CDVDVideoCodecStageFrightBufferImpl::IsValid()
 {
-  CSingleLock lock (valid_mutex);
+  CSingleLock lock (STF_valid_mutex);
   return CDVDVideoCodecStageFright::m_isvalid;
 
 }

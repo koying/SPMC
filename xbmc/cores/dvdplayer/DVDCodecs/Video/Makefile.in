@@ -39,6 +39,7 @@ SRCS += DVDVideoCodecAndroidMediaCodec.cpp
 endif
 ifeq (@USE_LIBSTAGEFRIGHT@,1)
 SRCS += DVDVideoCodecStageFright.cpp
+SRCS += DVDVideoCodecRKStageFright.cpp
 endif
 
 LIB=Video.a

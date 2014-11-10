@@ -22,45 +22,25 @@
 #if defined(HAS_LIBSTAGEFRIGHT)
 
 #include "DVDVideoCodec.h"
-#include "utils/BitstreamConverter.h"
 #include "DVDStreamInfo.h"
 
 class DllLibStageFrightCodec;
 class CDVDVideoCodecRKStageFright;
+class CBitstreamConverter;
 
-class CDVDVideoCodecStageFrightBuffer
+class CDVDVideoCodecRkStageFrightBufferImpl : public CDVDVideoCodecStageFrightBuffer
 {
 public:
-  CDVDVideoCodecStageFrightBuffer()
-    : stf(NULL)
-    , format(RENDER_FMT_NONE)
-    , subformat(0)
-    , buffer(NULL)
-    , context(NULL)
-    {}
-
   // reference counting
   virtual void Lock();
   virtual long Release();
 
   virtual bool IsValid();
-
-public:
-  CDVDVideoCodecRKStageFright* stf;
-  ERenderFormat format;
-  int subformat;
-
-  int frameWidth;
-  int frameHeight;
-  int displayWidth;
-  int displayHeight;
-  void* buffer;
-  void* context;
 };
 
 class CDVDVideoCodecRKStageFright : public CDVDVideoCodec
 {
-  friend class CDVDVideoCodecStageFrightBuffer;
+  friend class CDVDVideoCodecRkStageFrightBufferImpl;
 
 public:
   CDVDVideoCodecRKStageFright();

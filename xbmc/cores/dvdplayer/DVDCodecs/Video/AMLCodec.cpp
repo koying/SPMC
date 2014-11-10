@@ -2188,6 +2188,8 @@ void CAMLCodec::SetVideo3dMode(const int mode3d)
 
 void CAMLCodec::SetVideoHdmi3dMode(const std::string mode3d)
 {
+  return;
+
   static std::string oldhdmi3dmode = MODE_HDMI3D_OFF;
   static bool reset_disp_mode = false;
 

@@ -51,8 +51,36 @@ class COpenMax;
 class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
 class CDVDVideoCodecStageFright;
-class CDVDVideoCodecStageFrightBuffer;
 class CDVDMediaCodecInfo;
+
+class CDVDVideoCodecStageFrightBuffer
+{
+public:
+  CDVDVideoCodecStageFrightBuffer()
+    : format(RENDER_FMT_NONE)
+    , subformat(0)
+    , buffer(NULL)
+    , context(NULL)
+    {}
+  virtual ~CDVDVideoCodecStageFrightBuffer() {}
+
+  // reference counting
+  virtual void Lock() = 0;
+  virtual long Release() = 0;
+
+  virtual bool IsValid() = 0;
+
+public:
+  ERenderFormat format;
+  int subformat;
+
+  int frameWidth;
+  int frameHeight;
+  int displayWidth;
+  int displayHeight;
+  void* buffer;
+  void* context;
+};
 
 // should be entirely filled by all codecs
 struct DVDVideoPicture

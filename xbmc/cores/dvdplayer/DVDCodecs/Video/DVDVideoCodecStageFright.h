@@ -22,46 +22,25 @@
 #if defined(HAS_LIBSTAGEFRIGHT)
 
 #include "DVDVideoCodec.h"
-#include "utils/BitstreamConverter.h"
 #include "DVDStreamInfo.h"
 
 class DllLibStageFrightCodec;
 class CDVDVideoCodecStageFright;
+class CBitstreamConverter;
 
-class CDVDVideoCodecStageFrightBuffer
+class CDVDVideoCodecStageFrightBufferImpl : public CDVDVideoCodecStageFrightBuffer
 {
 public:
-  CDVDVideoCodecStageFrightBuffer()
-    : stf(NULL)
-    , format(RENDER_FMT_NONE)
-    , subformat(0)
-    , buffer(NULL)
-    , context(NULL)
-    {}
-  virtual ~CDVDVideoCodecStageFrightBuffer() {}
-
   // reference counting
   virtual void Lock();
   virtual long Release();
 
   virtual bool IsValid();
-
-public:
-  CDVDVideoCodecStageFright* stf;
-  ERenderFormat format;
-  int subformat;
-
-  int frameWidth;
-  int frameHeight;
-  int displayWidth;
-  int displayHeight;
-  void* buffer;
-  void* context;
 };
 
 class CDVDVideoCodecStageFright : public CDVDVideoCodec
 {
-  friend class CDVDVideoCodecStageFrightBuffer;
+  friend class CDVDVideoCodecStageFrightBufferImpl;
 
 public:
   CDVDVideoCodecStageFright();
@@ -81,13 +60,16 @@ public:
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
 
+  void Lock();
+  long Release();
+  bool IsValid();
+
 protected:
 
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
   CDVDStreamInfo    m_hints;
   
-  static std::string       m_pFormatSource;
   std::string              m_pFormatName;
   static DllLibStageFrightCodec*     m_stf_dll;
   static bool       m_isvalid;

@@ -747,7 +747,7 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   {
     if (frame->eglimg != EGL_NO_IMAGE_KHR)
     {
-      CDVDVideoCodecStageFrightBuffer* stfbuf = new CDVDVideoCodecStageFrightBuffer;
+      CDVDVideoCodecStageFrightBufferImpl* stfbuf = new CDVDVideoCodecStageFrightBufferImpl;
       stfbuf->format = RENDER_FMT_EGLIMG;
       stfbuf->subformat = 0;
       stfbuf->buffer = (void*)frame->eglimg;
