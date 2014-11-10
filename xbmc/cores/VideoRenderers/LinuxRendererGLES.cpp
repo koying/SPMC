@@ -2211,8 +2211,19 @@ void CLinuxRendererGLES::UploadRkBufTexture(int source)
   info.xres_virtual = stfbuf->frameWidth;
   info.yres_virtual = stfbuf->frameHeight;
 
-  int nonstd = ((int)m_destRect.x1<<8) + ((int)m_destRect.y1<<20);
-  int grayscale = ((int)m_destRect.Width() << 8) + ((int)m_destRect.Height() << 20);
+  CRect dst_rect = m_destRect;
+  RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
+   if (stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
+  {
+    dst_rect.x2 *= 2.0;
+  }
+  else if (stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
+  {
+    dst_rect.y2 *= 2.0;
+  }
+
+  int nonstd = ((int)dst_rect.x1<<8) + ((int)dst_rect.y1<<20);
+  int grayscale = ((int)dst_rect.Width() << 8) + ((int)dst_rect.Height() << 20);
 
   info.nonstd &= 0x00;
   info.nonstd |= HAL_PIXEL_FORMAT_YCrCb_NV12;
