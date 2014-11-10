@@ -77,13 +77,9 @@ public:
   void SetDropState(bool bDrop);
   virtual void SetSpeed(int iSpeed);
 
-  void LockBuffer(const CDVDVideoCodecStageFrightBuffer* buf);
-  void ReleaseBuffer(const CDVDVideoCodecStageFrightBuffer* buf);
-  void Render(const CRect &SrcRect, const CRect &DestRect, const CDVDVideoCodecStageFrightBuffer* buf);
-
-protected:
   void LockVpuFrame(VPU_FRAME *vpuframe);
   bool ReleaseVpuFrame(VPU_FRAME *vpuframe);
+  void Render(const CRect &SrcRect, const CRect &DestRect, const VPU_FRAME* buf);
 
 protected:
   CStageFrightVideoPrivate* p;
@@ -119,7 +115,7 @@ protected:
   bool resetting;
 
   int m_fb1_fd;
-  std::queue<CDVDVideoCodecStageFrightBuffer*> m_prev_stfbuf;
+  std::queue<VPU_FRAME*> m_prev_stfbuf;
 
 private:
   static void RenderFeaturesCallBack(const void *ctx, Features &renderFeatures);

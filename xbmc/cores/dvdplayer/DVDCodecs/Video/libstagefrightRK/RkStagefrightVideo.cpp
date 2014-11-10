@@ -357,8 +357,6 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
     CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_VSYNC_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
   }
 
-  CSingleLock lock(g_graphicsContext);
-
   // stagefright crashes with null size. Trap this...
   if (!hints.width || !hints.height)
   {
@@ -403,7 +401,8 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
           || (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
         return false;
       mimetype = "video/avc";
-      m_metadata->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
+      if (hints.extradata && *(uint8_t*)hints.extradata == 1)
+        m_metadata->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
   case AV_CODEC_ID_MPEG4:
       if (m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "0"
@@ -656,7 +655,7 @@ bool CRkStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
  #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
-  ReleaseBuffer((CDVDVideoCodecStageFrightBuffer*)pDvdVideoPicture->render_ctx);
+  ReleaseVpuFrame((VPU_FRAME*)pDvdVideoPicture->render_ctx);
 #if defined(DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, "%s::ClearPicture buf:%p (%d)\n", CLASSNAME, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
 #endif
@@ -718,7 +717,7 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   }
 
   pDvdVideoPicture->iFlags  = DVP_FLAG_ALLOCATED;
-  pDvdVideoPicture->stfbuf = NULL;
+  pDvdVideoPicture->render_ctx = NULL;
 
   if (status != OK)
   {
@@ -753,17 +752,8 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 
     if (vpucopy)
     {
-      CDVDVideoCodecRkStageFrightBufferImpl* stfbuf = new CDVDVideoCodecRkStageFrightBufferImpl;
-      stfbuf->subformat = 'rkvp';
-      stfbuf->frameWidth = vpucopy->FrameWidth;
-      stfbuf->frameHeight = vpucopy->FrameHeight;
-      stfbuf->displayWidth = vpucopy->DisplayWidth;
-      stfbuf->displayHeight = vpucopy->DisplayHeight;
-      stfbuf->buffer = (void*)vpucopy->vpumem.vir_addr;
-      stfbuf->context = (void*)vpucopy;
-      LockBuffer(stfbuf);
-
-      pDvdVideoPicture->render_ctx = (void*)stfbuf;
+      LockVpuFrame(vpucopy);
+      pDvdVideoPicture->render_ctx = (void*)vpucopy;
 #if defined(DEBUG_VERBOSE)
       CLog::Log(LOGDEBUG, ">>>     va:%p,fa:%p,%p, w:%d, h:%d, dw:%d, dh:%d\n",
                 (void*)vpucopy->vpumem.vir_addr, (void*)vpucopy->FrameBusAddr[0], (void*)vpucopy->FrameBusAddr[1],
@@ -1022,33 +1012,16 @@ bool CRkStageFrightVideo::ReleaseVpuFrame(VPU_FRAME *vpuframe)
 }
 
 
-void CRkStageFrightVideo::LockBuffer(const CDVDVideoCodecStageFrightBuffer *buf)
+void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, const VPU_FRAME *render_ctx)
 {
-  if (!buf)
-    return;
-
-  LockVpuFrame((VPU_FRAME*)buf->context);
-}
-
-void CRkStageFrightVideo::ReleaseBuffer(const CDVDVideoCodecStageFrightBuffer *buf)
-{
-  if (!buf)
-    return;
-
-  if (ReleaseVpuFrame((VPU_FRAME*)buf->context))
-    delete buf;
-}
-
-void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, const CDVDVideoCodecStageFrightBuffer *render_ctx)
-{
-  CDVDVideoCodecRkStageFrightBufferImpl* stfbuf = (CDVDVideoCodecRkStageFrightBufferImpl*)render_ctx;
-//#ifdef DEBUG_VERBOSE
+#ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();
   CLog::Log(LOGDEBUG, "RenderUpdateCallBack buf:%p\n", stfbuf);
-//#endif
+#endif
 
   if (!render_ctx)
     return;
+  VPU_FRAME* vpubuf = (VPU_FRAME*)render_ctx;
 
   struct fb_var_screeninfo info;
 
@@ -1066,10 +1039,10 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
 
   info.xoffset = 0;
   info.yoffset = 0;
-  info.xres = stfbuf->displayWidth;
-  info.yres = stfbuf->displayHeight;
-  info.xres_virtual = stfbuf->frameWidth;
-  info.yres_virtual = stfbuf->frameHeight;
+  info.xres = vpubuf->DisplayWidth;
+  info.yres = vpubuf->DisplayHeight;
+  info.xres_virtual = vpubuf->FrameWidth;
+  info.yres_virtual = vpubuf->FrameHeight;
 
   CRect dst_rect = DestRect;
   RENDER_STEREO_MODE stereo_mode = m_g_graphicsContext->GetStereoMode();
@@ -1093,7 +1066,7 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
 
 /* Check yuv format. */
 
-  if (ioctl(m_fb1_fd, RK_FBIOSET_YUV_ADDR, (int *)stfbuf->context) == -1)
+  if (ioctl(m_fb1_fd, RK_FBIOSET_YUV_ADDR, (int *)vpubuf) == -1)
   {
     CLog::Log(LOGDEBUG, "%s(%d):  FBIOSET_YUV_ADDR[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
     return;
@@ -1108,16 +1081,16 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
   // There's double-buffering, visibly, so keep 2 buffers alive
   if (m_prev_stfbuf.size() > 1)
   {
-    CDVDVideoCodecStageFrightBuffer* prev_buf = m_prev_stfbuf.front();
-    ReleaseBuffer(prev_buf);
+    VPU_FRAME* prev_buf = m_prev_stfbuf.front();
+    ReleaseVpuFrame(prev_buf);
     m_prev_stfbuf.pop();
   }
-  LockBuffer(stfbuf);
-  m_prev_stfbuf.push(stfbuf);
+  LockVpuFrame(vpubuf);
+  m_prev_stfbuf.push(vpubuf);
 
-//#ifdef DEBUG_VERBOSE
+#ifdef DEBUG_VERBOSE
   CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
-//#endif
+#endif
   return;
 }
 
@@ -1131,19 +1104,19 @@ void CRkStageFrightVideo::RenderUpdateCallBack(const void *ctx, const CRect &Src
 {
   CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
   if (codec)
-    codec->Render(SrcRect, DestRect, (CDVDVideoCodecStageFrightBuffer *)render_ctx);
+    codec->Render(SrcRect, DestRect, (VPU_FRAME *)render_ctx);
 }
 
 void CRkStageFrightVideo::RenderLockCallBack(const void *ctx, const void* render_ctx)
 {
   CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
   if (codec)
-    codec->LockBuffer((CDVDVideoCodecStageFrightBuffer *)render_ctx);
+    codec->LockVpuFrame((VPU_FRAME *)render_ctx);
 }
 
 void CRkStageFrightVideo::RenderReleaseCallBack(const void *ctx, const void* render_ctx)
 {
   CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
   if (codec)
-    codec->ReleaseBuffer((CDVDVideoCodecStageFrightBuffer *)render_ctx);
+    codec->ReleaseVpuFrame((VPU_FRAME *)render_ctx);
 }
