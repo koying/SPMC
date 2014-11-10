@@ -245,26 +245,6 @@ double CDVDVideoCodecRKStageFright::GetTimeSize(void)
   return 0;
 }
 
-/********************************************************/
-
-void CDVDVideoCodecRkStageFrightBufferImpl::Lock()
-{
-  if (CDVDVideoCodecRKStageFright::m_stf_dll && CDVDVideoCodecRKStageFright::m_stf_handle)
-    CDVDVideoCodecRKStageFright::m_stf_dll->stf_LockBuffer(CDVDVideoCodecRKStageFright::m_stf_handle, this);
-}
-
-long CDVDVideoCodecRkStageFrightBufferImpl::Release()
-{
-  if (CDVDVideoCodecRKStageFright::m_stf_dll && CDVDVideoCodecRKStageFright::m_stf_handle)
-    CDVDVideoCodecRKStageFright::m_stf_dll->stf_ReleaseBuffer(CDVDVideoCodecRKStageFright::m_stf_handle, this);
-}
-
-bool CDVDVideoCodecRkStageFrightBufferImpl::IsValid()
-{
-  CSingleLock lock (RKSTF_valid_mutex);
-  return CDVDVideoCodecRKStageFright::m_isvalid;
-}
-
 #endif
 
 

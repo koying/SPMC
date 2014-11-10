@@ -70,14 +70,3 @@ void stf_SetSpeed(void* stf, int iSpeed)
 {
   ((CRkStageFrightVideo*)stf)->SetSpeed(iSpeed);
 }
-
-void stf_LockBuffer(void* stf, CDVDVideoCodecStageFrightBuffer* buf)
-{
-  ((CRkStageFrightVideo*)stf)->LockBuffer(buf);
-}
-
-void stf_ReleaseBuffer(void* stf, CDVDVideoCodecStageFrightBuffer* buf)
-{
-  ((CRkStageFrightVideo*)stf)->ReleaseBuffer(buf);
-}
-

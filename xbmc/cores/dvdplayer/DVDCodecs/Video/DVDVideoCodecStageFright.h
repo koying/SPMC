@@ -28,20 +28,8 @@ class DllLibStageFrightCodec;
 class CDVDVideoCodecStageFright;
 class CBitstreamConverter;
 
-class CDVDVideoCodecStageFrightBufferImpl : public CDVDVideoCodecStageFrightBuffer
-{
-public:
-  // reference counting
-  virtual void Lock();
-  virtual long Release();
-
-  virtual bool IsValid();
-};
-
 class CDVDVideoCodecStageFright : public CDVDVideoCodec
 {
-  friend class CDVDVideoCodecStageFrightBufferImpl;
-
 public:
   CDVDVideoCodecStageFright();
   virtual ~CDVDVideoCodecStageFright();

@@ -237,29 +237,6 @@ double CDVDVideoCodecStageFright::GetTimeSize(void)
 {
   return 0;
 }
-
-/********************************************************/
-
-void CDVDVideoCodecStageFrightBufferImpl::Lock()
-{
-  if (CDVDVideoCodecStageFright::m_stf_dll && CDVDVideoCodecStageFright::m_stf_handle)
-    CDVDVideoCodecStageFright::m_stf_dll->stf_LockBuffer(CDVDVideoCodecStageFright::m_stf_handle, this);
-}
-
-long CDVDVideoCodecStageFrightBufferImpl::Release()
-{
-  if (CDVDVideoCodecStageFright::m_stf_dll && CDVDVideoCodecStageFright::m_stf_handle)
-    CDVDVideoCodecStageFright::m_stf_dll->stf_ReleaseBuffer(CDVDVideoCodecStageFright::m_stf_handle, this);
-  return true;
-}
-
-bool CDVDVideoCodecStageFrightBufferImpl::IsValid()
-{
-  CSingleLock lock (STF_valid_mutex);
-  return CDVDVideoCodecStageFright::m_isvalid;
-
-}
-
 #endif
 
 

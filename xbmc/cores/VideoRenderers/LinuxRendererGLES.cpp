@@ -108,9 +108,6 @@ CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   cvBufferRef = NULL;
 #endif
-#ifdef HAS_LIBSTAGEFRIGHT
-  stfbuf = NULL;
-#endif
 #if defined(TARGET_ANDROID)
   mediacodec = NULL;
 #endif
@@ -2461,14 +2458,14 @@ void CLinuxRendererGLES::UploadEGLIMGTexture(int index)
 #endif
 
   YUVBUFFER& buf    =  m_buffers[index];
-  CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
-  if(stfbuf && stfbuf->IsValid() && stfbuf->buffer != EGL_NO_IMAGE_KHR)
+  EGLImageKHR img   = (EGLImageKHR)buf.render_ctx;
+  if(img != EGL_NO_IMAGE_KHR)
   {
     YUVPLANE &plane = m_buffers[index].fields[0][0];
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(m_textureTarget, plane.id);
-    glEGLImageTargetTexture2DOES(m_textureTarget, (EGLImageKHR)m_buffers[index].stfbuf->buffer);
+    glEGLImageTargetTexture2DOES(m_textureTarget, img);
     glBindTexture(m_textureTarget, 0);
 
     plane.flipindex = m_buffers[index].flipindex;
@@ -2490,8 +2487,6 @@ void CLinuxRendererGLES::DeleteEGLIMGTexture(int index)
   if(plane.id && glIsTexture(plane.id))
     glDeleteTextures(1, &plane.id);
   plane.id = 0;
-
-  buf.stfbuf = NULL;
 #endif
 }
 bool CLinuxRendererGLES::CreateEGLIMGTexture(int index)
@@ -2936,26 +2931,6 @@ void CLinuxRendererGLES::AddProcessor(struct __CVBuffer *cvBufferRef, int index)
   CVBufferRetain(buf.cvBufferRef);
 }
 #endif
-#ifdef HAS_LIBSTAGEFRIGHT
-void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecStageFrightBuffer* stfbuf, int index)
-{
-#ifdef DEBUG_VERBOSE
-  unsigned int time = XbmcThreads::SystemClockMillis();
-#endif
-
-  YUVBUFFER &buf = m_buffers[index];
-  SAFE_RELEASE(buf.stfbuf);
-  if (stfbuf)
-    stfbuf->Lock();
-
-  buf.stfbuf = stfbuf;
-
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "AddProcessor %d: img:%p: tm:%d\n", index, eglimg, XbmcThreads::SystemClockMillis() - time);
-#endif
-}
-#endif
-
 #if defined(TARGET_ANDROID)
 void CLinuxRendererGLES::AddProcessor(CDVDMediaCodecInfo *mediacodec, int index)
 {

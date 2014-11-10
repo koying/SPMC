@@ -58,6 +58,7 @@ class CWinSystemEGL;
 class CAdvancedSettings;
 class CApplication;
 class CApplicationMessenger;
+class CXBMCRenderManager;
 
 using namespace android;
 
@@ -119,6 +120,7 @@ public:
   CApplicationMessenger* m_g_applicationMessenger;
   CWinSystemEGL* m_g_Windowing;
   CAdvancedSettings* m_g_advancedSettings;
+  CXBMCRenderManager* m_g_renderManager;
 
   CFrameBufferObject fbo;
   EGLDisplay eglDisplay;
