@@ -969,10 +969,6 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
     CDVDCodecUtils::CopyNV12Picture(&image, &pic.vaapi->DVDPic);
   }
 #endif
-#ifdef HAS_LIBSTAGEFRIGHT
-  else if(pic.format == RENDER_FMT_EGLIMG || pic.format == RENDER_FMT_STFBUF)
-    m_pRenderer->AddProcessor(pic.stfbuf, index);
-#endif
 #if defined(TARGET_ANDROID)
   else if(pic.format == RENDER_FMT_MEDIACODEC)
     m_pRenderer->AddProcessor(pic.mediacodec, index);
@@ -985,6 +981,8 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   else if(pic.format == RENDER_FMT_MMAL)
     m_pRenderer->AddProcessor(pic.MMALBuffer, index);
 #endif
+  else if(pic.format == RENDER_FMT_BYPASS || pic.format == RENDER_FMT_EGLIMG)
+    m_pRenderer->AddProcessor(pic.render_ctx, index);
 
   m_pRenderer->ReleaseImage(index, false);
 
