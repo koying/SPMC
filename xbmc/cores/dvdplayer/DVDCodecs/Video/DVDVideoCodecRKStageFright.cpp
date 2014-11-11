@@ -30,7 +30,7 @@
 #include "DVDClock.h"
 #include "settings/Settings.h"
 #include "DVDStreamInfo.h"
-#include "DVDVideoCodecStageFright.h"
+#include "DVDVideoCodecRKStageFright.h"
 #include "utils/log.h"
 #include "Application.h"
 #include "ApplicationMessenger.h"
@@ -43,37 +43,44 @@
 
 #include "DllLibStageFrightCodec.h"
 
-CCriticalSection            STF_valid_mutex;
-bool                        CDVDVideoCodecStageFright::m_isvalid = false;
-void*                       CDVDVideoCodecStageFright::m_stf_handle = NULL;
+CCriticalSection            RKSTF_valid_mutex;
+bool                        CDVDVideoCodecRKStageFright::m_isvalid = false;
+void*                       CDVDVideoCodecRKStageFright::m_stf_handle = NULL;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-DllLibStageFrightCodec*     CDVDVideoCodecStageFright::m_stf_dll = NULL;
+DllLibStageFrightCodec*     CDVDVideoCodecRKStageFright::m_stf_dll = NULL;
 
-CDVDVideoCodecStageFright::CDVDVideoCodecStageFright()
+CDVDVideoCodecRKStageFright::CDVDVideoCodecRKStageFright()
   : CDVDVideoCodec()
   , m_convert_bitstream(false),  m_converter(NULL)
 {
   if (!m_stf_dll)
   {
     m_stf_dll = new DllLibStageFrightCodec;
-    m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTICS);
+    m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
   }
-  m_pFormatName = "stf";
+  m_pFormatName = "rkstf";
 }
 
-CDVDVideoCodecStageFright::~CDVDVideoCodecStageFright()
+CDVDVideoCodecRKStageFright::~CDVDVideoCodecRKStageFright()
 {
   Dispose();
 }
 
-bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
+bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-  // we always qualify even if DVDFactoryCodec does this too.
-  if (CSettings::Get().GetBool("videoplayer.usestagefright") && !hints.software)
+#if defined(HAS_RKSTF)
+  if (!StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
+    return false;
+#else
+  return false;
+#endif
+
+// we always qualify even if DVDFactoryCodec does this too.
+  if (CSettings::Get().GetBool("videoplayer.userkstagefright") && !hints.software)
   {
     m_convert_bitstream = false;
     CLog::Log(LOGDEBUG,
@@ -84,7 +91,8 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
     switch (m_hints.codec)
     {
       case AV_CODEC_ID_H264:
-        m_pFormatName = "stf-h264";
+//      case AV_CODEC_ID_H264MVC:
+        m_pFormatName = "rkstf-h264";
         if (m_hints.extradata)
         {
           m_converter     = new CBitstreamConverter();
@@ -97,7 +105,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case AV_CODEC_ID_HEVC:
-        m_pFormatName = "stf-h265";
+        m_pFormatName = "rkstf-h265";
         if (m_hints.extradata)
         {
           m_converter     = new CBitstreamConverter();
@@ -110,20 +118,20 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
 
         break;
       case AV_CODEC_ID_MPEG2VIDEO:
-        m_pFormatName = "stf-mpeg2";
+        m_pFormatName = "rkstf-mpeg2";
         break;
       case AV_CODEC_ID_MPEG4:
-        m_pFormatName = "stf-mpeg4";
+        m_pFormatName = "rkstf-mpeg4";
         break;
       case AV_CODEC_ID_VP3:
       case AV_CODEC_ID_VP6:
       case AV_CODEC_ID_VP6F:
       case AV_CODEC_ID_VP8:
-        m_pFormatName = "stf-vpx";
+        m_pFormatName = "rkstf-vpx";
         break;
       case AV_CODEC_ID_WMV3:
       case AV_CODEC_ID_VC1:
-        m_pFormatName = "stf-wmv";
+        m_pFormatName = "rkstf-wmv";
         break;
       default:
         return false;
@@ -145,7 +153,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
       return false;
     }
 
-    CSingleLock lock (STF_valid_mutex);
+    CSingleLock lock (RKSTF_valid_mutex);
     m_isvalid = true;
     return true;
   }
@@ -153,7 +161,7 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
   return false;
 }
 
-void CDVDVideoCodecStageFright::Dispose()
+void CDVDVideoCodecRKStageFright::Dispose()
 {
   if (m_converter)
   {
@@ -162,7 +170,7 @@ void CDVDVideoCodecStageFright::Dispose()
     m_converter = NULL;
   }
 
-  CSingleLock lock (STF_valid_mutex);
+  CSingleLock lock (RKSTF_valid_mutex);
   m_isvalid = false;
 
   if (m_stf_handle)
@@ -173,12 +181,12 @@ void CDVDVideoCodecStageFright::Dispose()
   }
 }
 
-void CDVDVideoCodecStageFright::SetDropState(bool bDrop)
+void CDVDVideoCodecRKStageFright::SetDropState(bool bDrop)
 {
   m_stf_dll->stf_SetDropState(m_stf_handle, bDrop);
 }
 
-int CDVDVideoCodecStageFright::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecRKStageFright::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
 #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
@@ -207,35 +215,36 @@ int CDVDVideoCodecStageFright::Decode(uint8_t *pData, int iSize, double dts, dou
   return rtn;
 }
 
-void CDVDVideoCodecStageFright::Reset(void)
+void CDVDVideoCodecRKStageFright::Reset(void)
 {
   m_stf_dll->stf_Reset(m_stf_handle);
 }
 
-bool CDVDVideoCodecStageFright::GetPicture(DVDVideoPicture* pDvdVideoPicture)
+bool CDVDVideoCodecRKStageFright::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   return m_stf_dll->stf_GetPicture(m_stf_handle, pDvdVideoPicture);
 }
 
-bool CDVDVideoCodecStageFright::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
+bool CDVDVideoCodecRKStageFright::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   return m_stf_dll->stf_ClearPicture(m_stf_handle, pDvdVideoPicture);
 }
 
-void CDVDVideoCodecStageFright::SetSpeed(int iSpeed)
+void CDVDVideoCodecRKStageFright::SetSpeed(int iSpeed)
 {
   m_stf_dll->stf_SetSpeed(m_stf_handle, iSpeed);
 }
 
-int CDVDVideoCodecStageFright::GetDataSize(void)
+int CDVDVideoCodecRKStageFright::GetDataSize(void)
 {
   return 0;
 }
 
-double CDVDVideoCodecStageFright::GetTimeSize(void)
+double CDVDVideoCodecRKStageFright::GetTimeSize(void)
 {
   return 0;
 }
+
 #endif
 
 

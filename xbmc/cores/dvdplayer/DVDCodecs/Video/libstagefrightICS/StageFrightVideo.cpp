@@ -28,7 +28,6 @@
 #include "StageFrightVideo.h"
 #include "StageFrightVideoPrivate.h"
 
-#include "guilib/GraphicContext.h"
 #include "DVDClock.h"
 #include "utils/log.h"
 #include "utils/fastmemcpy.h"
@@ -37,6 +36,7 @@
 #include "android/jni/Build.h"
 #include "settings/AdvancedSettings.h"
 #include "DVDCodecs/DVDCodecInterface.h"
+#include "cores/VideoRenderers/RenderManager.h"
 
 #include "xbmc/guilib/FrameBufferObject.h"
 
@@ -378,6 +378,7 @@ CStageFrightVideo::CStageFrightVideo(CDVDCodecInterface* interface)
   p->m_g_applicationMessenger = interface->GetApplicationMessenger();
   p->m_g_Windowing = interface->GetWindowSystem();
   p->m_g_advancedSettings = interface->GetAdvancedSettings();
+  p->m_g_renderManager = interface->GetRenderManager();
 }
 
 CStageFrightVideo::~CStageFrightVideo()
@@ -390,8 +391,6 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::Open\n", CLASSNAME);
 #endif
-
-  CSingleLock lock(g_graphicsContext);
 
   // stagefright crashes with null size. Trap this...
   if (!hints.width || !hints.height)
@@ -584,9 +583,12 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
 
   for (int i=0; i<INBUFCOUNT; ++i)
   {
-    p->inbuf[i] = new MediaBuffer(300000);
+    p->inbuf[i] = new MediaBuffer(100000);
     p->inbuf[i]->setObserver(p);
   }
+
+  p->m_g_renderManager->RegisterRenderLockCallBack((const void*)this, RenderLockCallBack);
+  p->m_g_renderManager->RegisterRenderReleaseCallBack((const void*)this, RenderReleaseCallBack);
 
   p->decode_thread = new CStageFrightDecodeThread(p);
   p->decode_thread->Create(true /*autodelete*/);
@@ -668,7 +670,7 @@ bool CStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
   if (pDvdVideoPicture->format == RENDER_FMT_EGLIMG)
-    ReleaseBuffer(pDvdVideoPicture->stfbuf);
+    ReleaseBuffer((EGLImageKHR)pDvdVideoPicture->render_ctx);
 
   if (p->prev_frame) {
     if (p->prev_frame->medbuf)
@@ -724,7 +726,7 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
     }
   }
   pDvdVideoPicture->iFlags  = DVP_FLAG_ALLOCATED;
-  pDvdVideoPicture->stfbuf = NULL;
+  pDvdVideoPicture->render_ctx = NULL;
 
   if (status != OK)
   {
@@ -743,12 +745,8 @@ bool CStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   {
     if (frame->eglimg != EGL_NO_IMAGE_KHR)
     {
-      CDVDVideoCodecStageFrightBuffer* stfbuf = new CDVDVideoCodecStageFrightBuffer;
-      stfbuf->format = RENDER_FMT_EGLIMG;
-      stfbuf->subformat = 0;
-      stfbuf->buffer = (void*)frame->eglimg;
-      pDvdVideoPicture->stfbuf = stfbuf;
-      LockBuffer(stfbuf);
+      pDvdVideoPicture->render_ctx = (void*)frame->eglimg;
+      LockBuffer(frame->eglimg);
     } else
       pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
 #if defined(DEBUG_VERBOSE)
@@ -815,6 +813,9 @@ void CStageFrightVideo::Dispose()
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::Close\n", CLASSNAME);
 #endif
+
+  p->m_g_renderManager->RegisterRenderLockCallBack((const void*)NULL, NULL);
+  p->m_g_renderManager->RegisterRenderReleaseCallBack((const void*)NULL, NULL);
 
   Frame *frame;
 
@@ -938,28 +939,6 @@ void CStageFrightVideo::SetSpeed(int iSpeed)
 {
 }
 
-/***************/
-void CStageFrightVideo::LockBuffer(CDVDVideoCodecStageFrightBuffer *buf)
-{
-  if (buf)
-  {
-    if (buf->format == RENDER_FMT_EGLIMG)
-      LockBuffer((EGLImageKHR) buf->buffer);
-  }
-}
-
-void CStageFrightVideo::ReleaseBuffer(CDVDVideoCodecStageFrightBuffer *buf)
-{
-  if (buf)
-  {
-    bool ret = false;
-    if (buf->format == RENDER_FMT_EGLIMG)
-      ret = ReleaseBuffer((EGLImageKHR) buf->buffer);
-    if (ret)
-      delete buf;
-  }
-}
-
 void CStageFrightVideo::LockBuffer(EGLImageKHR eglimg)
 {
 #if defined(DEBUG_VERBOSE)
@@ -1007,4 +986,20 @@ bool CStageFrightVideo::ReleaseBuffer(EGLImageKHR eglimg)
 #endif
   p->free_mutex.unlock();
   return (slot->use_cnt == 0);
+}
+
+/**********************************/
+
+void CStageFrightVideo::RenderLockCallBack(const void *ctx, const void* render_ctx)
+{
+  CStageFrightVideo *codec = (CStageFrightVideo*)ctx;
+  if (codec)
+    codec->LockBuffer((EGLImageKHR)render_ctx);
+}
+
+void CStageFrightVideo::RenderReleaseCallBack(const void *ctx, const void* render_ctx)
+{
+  CStageFrightVideo *codec = (CStageFrightVideo*)ctx;
+  if (codec)
+    codec->ReleaseBuffer((EGLImageKHR)render_ctx);
 }
