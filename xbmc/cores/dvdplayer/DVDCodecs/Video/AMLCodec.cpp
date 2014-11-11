@@ -2302,11 +2302,12 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   gui = g_graphicsContext.GetViewWindow();
 
 #ifdef TARGET_ANDROID
-  display = m_display_rect;
-  if (display.IsEmpty())
-    display = g_graphicsContext.GetViewWindow();
+  if (g_graphicsContext.IsFullScreenVideo())
+    display = m_display_rect;
+  else
+    display = gui;
 #else
-  display = g_graphicsContext.GetViewWindow();
+  display = gui;
 #endif
   dst_rect = m_dst_rect;
   if (gui != display)
