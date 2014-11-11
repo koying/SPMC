@@ -65,6 +65,7 @@ void CDemuxStreamVideoPVRClient::GetStreamInfo(std::string& strInfo)
       strInfo = "mpeg2video";
       break;
     case AV_CODEC_ID_H264:
+    case AV_CODEC_ID_H264MVC:
       strInfo = "h264";
       break;
     default:
@@ -485,7 +486,7 @@ void CDVDDemuxPVRClient::GetStreamCodecName(int iStreamId, CStdString &strName)
       strName = "dca";
     else if (stream->codec == AV_CODEC_ID_MPEG2VIDEO)
       strName = "mpeg2video";
-    else if (stream->codec == AV_CODEC_ID_H264)
+    else if (stream->codec == AV_CODEC_ID_H264 || stream->codec == AV_CODEC_ID_H264MVC)
       strName = "h264";
     else if (stream->codec == AV_CODEC_ID_EAC3)
       strName = "eac3";

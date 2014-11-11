@@ -1,7 +1,7 @@
 #pragma once
 /*
  *      Copyright (C) 2013 Team XBMC
- *      http://xbmc.org
+ *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,40 @@
 #include "utils/BitstreamConverter.h"
 
 class DllLibStageFrightCodec;
+class CDVDVideoCodecStageFright;
+
+class CDVDVideoCodecStageFrightBuffer
+{
+public:
+  CDVDVideoCodecStageFrightBuffer()
+    : stf(NULL)
+    , format(RENDER_FMT_NONE)
+    , subformat(0)
+    , buffer(NULL)
+    , context(NULL)
+    {}
+
+  // reference counting
+  virtual void Lock();
+  virtual long Release();
+
+  virtual bool IsValid();
+
+public:
+  CDVDVideoCodecStageFright* stf;
+  ERenderFormat format;
+  int subformat;
+
+  int frameWidth;
+  int frameHeight;
+  void* buffer;
+  void* context;
+};
 
 class CDVDVideoCodecStageFright : public CDVDVideoCodec
 {
+  friend class CDVDVideoCodecStageFrightBuffer;
+
 public:
   CDVDVideoCodecStageFright();
   virtual ~CDVDVideoCodecStageFright();
@@ -41,21 +72,21 @@ public:
   virtual bool GetPicture(DVDVideoPicture *pDvdVideoPicture);
   virtual bool ClearPicture(DVDVideoPicture* pDvdVideoPicture);
   virtual void SetDropState(bool bDrop);
-  virtual const char* GetName(void) { return (const char*)m_pFormatName; }
+  virtual const char* GetName(void) { return (const char*)m_pFormatName.c_str(); }
   virtual void SetSpeed(int iSpeed);
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
 
-  virtual void LockBuffer(EGLImageKHR eglimg);
-  virtual void ReleaseBuffer(EGLImageKHR eglimg);
-
 protected:
-  const char        *m_pFormatName;
+
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
   
+  static std::string       m_pFormatSource;
+  std::string              m_pFormatName;
   static DllLibStageFrightCodec*     m_stf_dll;
-  void *            m_stf_handle;  
+  static bool       m_isvalid;
+  static void *     m_stf_handle;
 };
 
 #endif
