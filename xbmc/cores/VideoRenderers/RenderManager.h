@@ -168,6 +168,8 @@ public:
 
   void RegisterRenderUpdateCallBack(const void *ctx, RenderUpdateCallBackFn fn);
   void RegisterRenderFeaturesCallBack(const void *ctx, RenderFeaturesCallBackFn fn);
+  void RegisterRenderLockCallBack(const void *ctx, RenderLockCallBackFn fn);
+  void RegisterRenderReleaseCallBack(const void *ctx, RenderReleaseCallBackFn fn);
 
   /**
    * If player uses buffering it has to wait for a buffer before it calls
