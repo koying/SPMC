@@ -6288,7 +6288,10 @@ msgctxt "#13452"
 msgid "Enable this option to use hardware acceleration for VC-1 based codecs. If disabled the CPU will be used instead. Especially VC-1 Interlaced fails hard on Intel hardware."
 msgstr ""
 
-#empty string with id 13453
+msgctxt "#13453"
+msgid "Allow hardware acceleration (RKlibstagefright)"
+msgstr ""
+
 
 #. Label for a setting to configure the video decoding method
 #: system/settings/settings.xml
