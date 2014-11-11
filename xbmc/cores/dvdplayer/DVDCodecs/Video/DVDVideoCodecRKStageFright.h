@@ -25,14 +25,14 @@
 #include "DVDStreamInfo.h"
 
 class DllLibStageFrightCodec;
-class CDVDVideoCodecStageFright;
+class CDVDVideoCodecRKStageFright;
 class CBitstreamConverter;
 
-class CDVDVideoCodecStageFright : public CDVDVideoCodec
+class CDVDVideoCodecRKStageFright : public CDVDVideoCodec
 {
 public:
-  CDVDVideoCodecStageFright();
-  virtual ~CDVDVideoCodecStageFright();
+  CDVDVideoCodecRKStageFright();
+  virtual ~CDVDVideoCodecRKStageFright();
 
   // Required overrides
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
@@ -47,10 +47,6 @@ public:
   virtual void SetSpeed(int iSpeed);
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
-
-  void Lock();
-  long Release();
-  bool IsValid();
 
 protected:
 

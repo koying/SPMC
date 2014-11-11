@@ -41,6 +41,12 @@
 #endif
 #include "Video/DVDVideoCodecMMAL.h"
 #include "Video/DVDVideoCodecStageFright.h"
+#if defined(HAS_LIBSTAGEFRIGHT)
+#include "Video/DVDVideoCodecStageFright.h"
+#endif
+#if defined(HAS_RKSTF)
+#include "Video/DVDVideoCodecRKStageFright.h"
+#endif
 #if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
 #include "Video/DVDVideoCodecAmlogic.h"
@@ -169,8 +175,13 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 #endif
 #if defined(HAS_LIBSTAGEFRIGHT)
   hwSupport += "libstagefright:yes ";
-#elif defined(_LINUX)
+#elif defined(TARGET_ANDROID)
   hwSupport += "libstagefright:no ";
+#endif
+#if defined(HAS_RKSTF)
+  hwSupport += "RKlibstagefright:yes ";
+#elif defined(TARGET_ANDROID)
+  hwSupport += "RKlibstagefright:no ";
 #endif
 #if defined(HAVE_LIBVDPAU) && defined(TARGET_POSIX)
   hwSupport += "VDPAU:yes ";
@@ -259,25 +270,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
     }
 #endif
 
-#if defined(TARGET_ANDROID)
-    if (!hint.software && CSettings::Get().GetBool("videoplayer.usemediacodec"))
-    {
-      switch(hint.codec)
-      {
-        case AV_CODEC_ID_MPEG4:
-        case AV_CODEC_ID_MSMPEG4V2:
-        case AV_CODEC_ID_MSMPEG4V3:
-          // Avoid h/w decoder for SD; Those files might use features
-          // not supported and can easily be soft-decoded
-          if (hint.width <= 800)
-            break;
-        default:
-          CLog::Log(LOGINFO, "MediaCodec Video Decoder...");
-          if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(), hint, options)) ) return pCodec;
-      }
-    }
-#endif
-
 #if defined(HAVE_LIBOPENMAX)
     if (CSettings::Get().GetBool("videoplayer.useomx") && !hint.software )
     {
@@ -297,6 +289,44 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
           hint.codec == AV_CODEC_ID_THEORA || hint.codec == AV_CODEC_ID_MJPEG || hint.codec == AV_CODEC_ID_MJPEGB || hint.codec == AV_CODEC_ID_VC1 || hint.codec == AV_CODEC_ID_WMV3)
       {
         if ( (pCodec = OpenCodec(new CDVDVideoCodecMMAL(), hint, options)) ) return pCodec;
+      }
+    }
+#endif
+
+#if defined(HAS_RKSTF)
+    if (!hint.software && CSettings::Get().HasCondition("have_rklibstagefrightdecoder") && CSettings::Get().GetBool("videoplayer.userkstagefright"))
+    {
+      switch(hint.codec)
+      {
+        case AV_CODEC_ID_MPEG4:
+        case AV_CODEC_ID_MSMPEG4V2:
+        case AV_CODEC_ID_MSMPEG4V3:
+          // Avoid h/w decoder for SD; Those files might use features
+          // not supported and can easily be soft-decoded
+          if (hint.width <= 800)
+            break;
+        default:
+          if ( (pCodec = OpenCodec(new CDVDVideoCodecRKStageFright(), hint, options)) ) return pCodec;
+          break;
+      }
+    }
+#endif
+
+#if defined(TARGET_ANDROID)
+    if (!hint.software && CSettings::Get().GetBool("videoplayer.usemediacodec"))
+    {
+      switch(hint.codec)
+      {
+        case AV_CODEC_ID_MPEG4:
+        case AV_CODEC_ID_MSMPEG4V2:
+        case AV_CODEC_ID_MSMPEG4V3:
+          // Avoid h/w decoder for SD; Those files might use features
+          // not supported and can easily be soft-decoded
+          if (hint.width <= 800)
+            break;
+        default:
+          CLog::Log(LOGINFO, "MediaCodec Video Decoder...");
+          if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(), hint, options)) ) return pCodec;
       }
     }
 #endif
