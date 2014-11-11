@@ -26,6 +26,8 @@ public class Main extends NativeActivity
     super.onCreate(savedInstanceState);
 
     thisView = getWindow().getDecorView();
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
+
       thisView
           .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
