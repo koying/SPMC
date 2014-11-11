@@ -26,6 +26,8 @@ class CApplication;
 class CApplicationMessenger;
 class CWinSystemEGL;
 class CAdvancedSettings;
+class CXBMCRenderManager;
+class CGraphicContext;
 
 class CDVDCodecInterface
 {
@@ -37,6 +39,8 @@ public:
   CApplicationMessenger *GetApplicationMessenger() const;
   CWinSystemEGL *GetWindowSystem() const;
   CAdvancedSettings *GetAdvancedSettings() const;
+  CXBMCRenderManager *GetRenderManager() const;
+  CGraphicContext* GetGraphicsContext() const;
 };
 
 XBMC_GLOBAL_REF(CDVDCodecInterface,g_dvdcodecinterface);
