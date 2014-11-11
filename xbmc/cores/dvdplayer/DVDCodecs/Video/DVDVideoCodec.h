@@ -50,8 +50,6 @@ namespace VDPAU { class CVdpauRenderPicture; }
 class COpenMax;
 class COpenMaxVideo;
 struct OpenMaxVideoBuffer;
-class CDVDVideoCodecStageFright;
-class CDVDVideoCodecStageFrightBuffer;
 class CDVDMediaCodecInfo;
 
 // should be entirely filled by all codecs
@@ -65,6 +63,9 @@ struct DVDVideoPicture
     struct {
       uint8_t* data[4];      // [4] = alpha channel, currently not used
       int iLineSize[4];   // [4] = alpha channel, currently not used
+    };
+    struct {
+      void* render_ctx;
     };
     struct {
       DXVA::CSurfaceContext* context;
@@ -83,10 +84,6 @@ struct DVDVideoPicture
 
     struct {
       struct __CVBuffer *cvBufferRef;
-    };
-
-    struct {
-      CDVDVideoCodecStageFrightBuffer* stfbuf;
     };
 
     struct {

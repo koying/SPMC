@@ -35,13 +35,14 @@
 #include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
 #include "xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecInfo.h"
 
+#include <queue>
+
 class CRenderCapture;
 
 class CBaseTexture;
 namespace Shaders { class BaseYUV2RGBShader; }
 namespace Shaders { class BaseVideoFilterShader; }
 class COpenMaxVideo;
-class CDVDVideoCodecStageFrightBuffer;
 class CDVDMediaCodecInfo;
 typedef std::vector<int>     Features;
 
@@ -165,14 +166,12 @@ public:
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   virtual void         AddProcessor(struct __CVBuffer *cvBufferRef, int index);
 #endif
-#ifdef HAS_LIBSTAGEFRIGHT
-  virtual void         AddProcessor(CDVDVideoCodecStageFrightBuffer* stfbuf, int index);
-#endif
 #if defined(TARGET_ANDROID)
   // mediaCodec
   virtual void         AddProcessor(CDVDMediaCodecInfo *mediacodec, int index);
 #endif
   virtual void         AddProcessor(CDVDVideoCodecBuffer *codecinfo, int index);
+  virtual void         AddProcessor(void *render_ctx, int index);
 
 protected:
   virtual void Render(DWORD flags, int index);
@@ -195,9 +194,6 @@ protected:
   void UploadNV12Texture(int index);
   void DeleteNV12Texture(int index);
   bool CreateNV12Texture(int index);
-
-  void UploadStfBufTexture(int index);
-  bool CreateStfBufTexture(int index);
 
   void UploadCVRefTexture(int index);
   void DeleteCVRefTexture(int index);
@@ -282,14 +278,12 @@ protected:
     YV12Image image;
     unsigned  flipindex; /* used to decide if this has been uploaded */
 
+    void* render_ctx;
 #ifdef HAVE_LIBOPENMAX
     OpenMaxVideoBuffer *openMaxBuffer;
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
     struct __CVBuffer *cvBufferRef;
-#endif
-#ifdef HAS_LIBSTAGEFRIGHT
-    CDVDVideoCodecStageFrightBuffer* stfbuf;
 #endif
 #if defined(TARGET_ANDROID)
     // mediacodec

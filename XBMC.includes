@@ -1,4 +1,13 @@
 /home/cbro/android-toolchains/android-14/sysroot/usr/include
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/android-source/frameworks/base/include
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/android-source/frameworks/base/native/include
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/android-source/frameworks/base/include/media/stagefright
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/android-source/frameworks/base/include/media/stagefright/openmax
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/android-source/system/core/include
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/android-source/libhardware/include
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/rkvpu/src/common
+/home/cbro/xbmc-depends/arm-linux-androideabi-android-14/opt/rkvpu/src/common/include
+
 addons/library.xbmc.addon
 addons/library.xbmc.codec
 addons/library.xbmc.gui

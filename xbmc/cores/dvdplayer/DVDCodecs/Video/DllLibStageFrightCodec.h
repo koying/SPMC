@@ -45,9 +45,6 @@ public:
   virtual bool stf_ClearPicture(void*, DVDVideoPicture* pDvdVideoPicture) = 0;
   virtual void stf_SetDropState(void*, bool bDrop) = 0;
   virtual void stf_SetSpeed(void*, int iSpeed) = 0;
-
-  virtual void stf_LockBuffer(void*, CDVDVideoCodecStageFrightBuffer* buf) = 0;
-  virtual void stf_ReleaseBuffer(void*, CDVDVideoCodecStageFrightBuffer* buf) = 0;
 };
 
 class DllLibStageFrightCodec : public DllDynamic, DllLibStageFrightCodecInterface
@@ -63,8 +60,6 @@ class DllLibStageFrightCodec : public DllDynamic, DllLibStageFrightCodecInterfac
   DEFINE_METHOD2(bool, stf_ClearPicture, (void* p1, DVDVideoPicture * p2))
   DEFINE_METHOD2(void, stf_SetDropState, (void* p1, bool p2))
   DEFINE_METHOD2(void, stf_SetSpeed, (void* p1, int p2))
-  DEFINE_METHOD2(void, stf_LockBuffer, (void* p1, CDVDVideoCodecStageFrightBuffer* p2))
-  DEFINE_METHOD2(void, stf_ReleaseBuffer, (void* p1, CDVDVideoCodecStageFrightBuffer* p2))
   BEGIN_METHOD_RESOLVE()
     RESOLVE_METHOD(create_stf)
     RESOLVE_METHOD(destroy_stf)
@@ -76,7 +71,5 @@ class DllLibStageFrightCodec : public DllDynamic, DllLibStageFrightCodecInterfac
     RESOLVE_METHOD(stf_ClearPicture)
     RESOLVE_METHOD(stf_SetDropState)
     RESOLVE_METHOD(stf_SetSpeed)
-    RESOLVE_METHOD(stf_LockBuffer)
-    RESOLVE_METHOD(stf_ReleaseBuffer)
   END_METHOD_RESOLVE()
 };

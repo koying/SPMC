@@ -930,6 +930,10 @@ void CSettings::InitializeConditions()
       )
     m_settingsManager->AddCondition("have_libstagefrightdecoder");
 #endif
+#ifdef HAS_RKSTF
+  if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
+    m_settingsManager->AddCondition("have_rklibstagefrightdecoder");
+#endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   m_settingsManager->AddCondition("have_videotoolboxdecoder");
   if (g_sysinfo.HasVideoToolBoxDecoder())

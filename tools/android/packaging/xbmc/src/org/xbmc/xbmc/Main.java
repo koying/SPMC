@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.graphics.PixelFormat;
 
 public class Main extends NativeActivity
 {
@@ -25,6 +26,8 @@ public class Main extends NativeActivity
     super.onCreate(savedInstanceState);
 
     thisView = getWindow().getDecorView();
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
+
       thisView
           .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
