@@ -118,6 +118,9 @@ public:
   bool HasVideoToolBoxDecoder();
   bool IsAeroDisabled();
   bool HasHW3DInterlaced();
+  bool HWSupportsStereo(const int mode);
+  void HWSetStereoMode(const int mode, const int view);
+
   static bool IsWindowsVersion(WindowsVersion ver);
   static bool IsWindowsVersionAtLeast(WindowsVersion ver);
   static WindowsVersion GetWindowsVersion();
