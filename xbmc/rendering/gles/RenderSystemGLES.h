@@ -79,6 +79,7 @@ public:
   void ApplyHardwareTransform(const TransformMatrix &matrix) override;
   void RestoreHardwareTransform() override;
   bool SupportsStereo(RENDER_STEREO_MODE mode) const override;
+  void SetStereoMode(RENDER_STEREO_MODE mode, RENDER_STEREO_VIEW view) override;
 
   bool TestRender() override;
 
