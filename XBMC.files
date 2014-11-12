@@ -9620,3 +9620,12 @@ xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/RkStagefrightVideo.h
 xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/RkStagefrightVideo.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRKStageFright.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRKStageFright.h
+xbmc/windowing/egl/EGLNativeTypeRKAndroid.h
+xbmc/windowing/egl/EGLNativeTypeRKAndroid.cpp
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/Makefile.in
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/StageFrightVideoPrivate.h
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/StageFrightInterface.h
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/RkStagefrightVideo.h
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/StageFrightVideoPrivate.cpp
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/StageFrightInterface.cpp
+xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/RkStagefrightVideo.cpp
