@@ -1945,10 +1945,7 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->iDuration = (double)(am_private->video_rate * DVD_TIME_BASE) / UNIT_FREQ;
 
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
-  if (m_cur_pts == 0)
-    pDvdVideoPicture->pts = (double)m_1st_pts / PTS_FREQ * DVD_TIME_BASE;
-  else
-    pDvdVideoPicture->pts = (double)m_cur_pts / PTS_FREQ * DVD_TIME_BASE;
+  pDvdVideoPicture->pts = (double)get_pts_video() / PTS_FREQ * DVD_TIME_BASE;
 
   return true;
 }
