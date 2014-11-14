@@ -9,7 +9,6 @@ all: .installed-$(PLATFORM)
 	cd $(PLATFORM); patch -p1 < ../android-4.0-to-4.1.patch
 	cd $(PLATFORM); patch -p1 < ../android-4.1-to-4.2.patch
 	cd $(PLATFORM); patch -p1 < ../android-4.2-to-4.4.patch
-	cd $(PLATFORM); patch -p1 < ../android-4.4-to-4.4-r2.patch
 	touch $@
 
 .installed-$(PLATFORM): .patched-$(PLATFORM)
