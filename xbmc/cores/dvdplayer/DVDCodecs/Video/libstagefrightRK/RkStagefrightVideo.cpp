@@ -51,6 +51,7 @@ const char *MEDIA_MIMETYPE_VIDEO_VC1  = "video/vc1";
 const char *MEDIA_MIMETYPE_VIDEO_VP6  = "video/vp6";
 
 const int kKeyVC1ExtraSize      = 'vc1e';  // vc1 extra data size
+const int kKeyExtraData         = 'extr';  // vc1 extra data size
 const int kKeyVC1               = 'vc1c';  // vc1 codec config info
 const int kKeyHVCC              = 'hvcc';
 
@@ -444,6 +445,7 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
     dec_extrasize = hints.extrasize;
     dec_extradata = hints.extradata;
     m_metadata->setInt32(kKeyVC1ExtraSize, dec_extrasize);
+    m_metadata->setData(kKeyExtraData, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
   default:
     return false;
