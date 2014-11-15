@@ -541,6 +541,13 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
     CRect old = g_graphicsContext.GetScissors();
 
     g_graphicsContext.BeginPaint();
+
+    if (clear)
+    {
+      glClearColor(m_clearColour, m_clearColour, m_clearColour, 0);
+      glClear(GL_COLOR_BUFFER_BIT);
+    }
+
     g_graphicsContext.SetScissors(m_destRect);
 
     glEnable(GL_BLEND);
