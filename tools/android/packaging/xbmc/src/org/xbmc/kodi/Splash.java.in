@@ -712,6 +712,7 @@ public class Splash extends Activity
       mErrorMsg = "Error! Unexpected architecture: " + Build.CPU_ABI;
       Log.e(TAG, mErrorMsg);
       mState = InError;
+    }
 
 
     if (mState != InError)
