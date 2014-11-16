@@ -96,6 +96,7 @@ bool CEGLNativeTypeRKAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
     *res = hdmi_res;
     res->iWidth = m_fb_res.iWidth;
     res->iHeight = m_fb_res.iHeight;
+    res->iSubtitles = (int)(0.965 * res->iHeight);
   }
   else
     *res = m_fb_res;
