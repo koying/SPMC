@@ -74,7 +74,6 @@
       <setting id="audiooutput.channels">
         <dependencies>
           <dependency type="visible" on="property" name="aesettingvisible" setting="audiooutput.audiodevice">audiooutput.channels</dependency>
-          <dependency type="enable" setting="audiooutput.channels">HAS_MULTICHANNEL_AUDIO</dependency>
         </dependencies>
         <updates>
           <update type="change" />
