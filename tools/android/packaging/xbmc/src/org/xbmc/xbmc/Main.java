@@ -89,6 +89,7 @@ public class Main extends NativeActivity
   public void onResume()
   {
     super.onResume();
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
 
     if (android.os.Build.VERSION.SDK_INT >= 19) {
       // Immersive mode
