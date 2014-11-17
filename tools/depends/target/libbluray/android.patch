@@ -1,0 +1,39 @@
+--- src/libbluray/bluray.c	2014-11-17 12:22:31.470370819 +0100
++++ src/libbluray/bluray.c	2014-11-17 13:33:16.093008686 +0100
+@@ -1357,6 +1357,7 @@
+     if (S_ISDIR(st.st_mode))
+         return;
+ 
++#ifndef ANDROID
+     FILE *f = setmntent ("/proc/self/mounts", "r");
+     if (!f)
+         return;
+@@ -1376,6 +1377,7 @@
+         }
+     }
+     endmntent (f);
++#endif
+ }
+ #endif
+ #ifdef __APPLE__
+@@ -2965,6 +2967,7 @@
+ 
+ static int _play_bdj(BLURAY *bd, unsigned title)
+ {
++#ifdef USING_BDJAVA
+     int result;
+ 
+     bd->title_type = title_bdj;
+@@ -2978,6 +2981,12 @@
+     }
+ 
+     return result;
++#else
++    BD_DEBUG(DBG_BLURAY | DBG_CRIT, "Can't play BD-J title %d\n", title);
++    bd->title_type = title_undef;
++    _queue_event(bd, BD_EVENT_ERROR, BD_ERROR_BDJ);
++    return -1;
++#endif
+ }
+ 
+ static int _play_hdmv(BLURAY *bd, unsigned id_ref)
