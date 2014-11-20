@@ -529,8 +529,7 @@ public class Splash extends Activity
 
   private boolean CheckCpuFeature(String feat)
   {
-    final Pattern FeaturePattern = Pattern.compile(":.*?\\s" + feat
-        + "(?:\\s|$)");
+    final Pattern FeaturePattern = Pattern.compile("(?i):.*?\\s" + feat + "(?:\\s|$)");
     Matcher m = FeaturePattern.matcher(mCpuinfo);
     return m.find();
   }
@@ -723,7 +722,7 @@ public class Splash extends Activity
           mState = InError;
         } else
         {
-          ret = CheckCpuFeature("neon");
+          ret = CheckCpuFeature("neon") || CheckCpuFeature("aarch64");  //aarch64 is always neon
           if (!ret)
           {
             mErrorMsg = "This XBMC package is not compatible with your device (NEON).\nPlease check the <a href=\"http://wiki.xbmc.org/index.php?title=XBMC_for_Android_specific_FAQ\">XBMC Android wiki</a> for more information.";
