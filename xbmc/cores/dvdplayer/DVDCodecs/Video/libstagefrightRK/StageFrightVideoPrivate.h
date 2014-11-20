@@ -58,6 +58,7 @@ public:
 
   MediaBuffer* getBuffer(size_t size);
   bool inputBufferAvailable();
+  int freeInputBuffers();
 
 public: 
   MediaBuffer* inbuf[INBUFCOUNT];

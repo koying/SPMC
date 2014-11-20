@@ -66,3 +66,12 @@ bool CStageFrightVideoPrivate::inputBufferAvailable()
   return false;
 }
 
+int CStageFrightVideoPrivate::freeInputBuffers()
+{
+  int ret = 0;
+  for (int i=0; i<INBUFCOUNT; ++i)
+    if (inbuf[i]->refcount() == 0)
+      ret++;
+
+  return ret;
+}

@@ -19,7 +19,7 @@
  */
 /***************************************************************************/
 
-//#define DEBUG_VERBOSE 1
+#define DEBUG_VERBOSE 1
 
 #include "system.h"
 #include "system_gl.h"
@@ -54,6 +54,8 @@ const int kKeyVC1ExtraSize      = 'vc1e';  // vc1 extra data size
 const int kKeyExtraData         = 'extr';  // vc1 extra data size
 const int kKeyVC1               = 'vc1c';  // vc1 codec config info
 const int kKeyHVCC              = 'hvcc';
+const int kKeyAvcSendDts        = 'avvc';  // int32_t
+const int kKeyThumbnailDec      = 'thbD';  // int32_t (bool)
 
 #define XMEDIA_BITSTREAM_START_CODE         (0x42564b52)
 #define RK_FBIOSET_YUV_ADDR	0x5002
@@ -104,13 +106,13 @@ public:
     if (options && options->getSeekTo(&time_us, &mode))
     {
 #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: reading source(%d): seek:%llu\n", CLASSNAME,in_queue.size(), time_us);
+      CLog::Log(LOGDEBUG, "%s: reading source(%d): seek:%llu\n", CLASSNAME,p->m_in_queue.size(), time_us);
 #endif
     }
     else
     {
 #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: reading source(%d)\n", CLASSNAME,in_queue.size());
+      CLog::Log(LOGDEBUG, "%s: reading source(%d)\n", CLASSNAME,p->m_in_queue.size());
 #endif
     }
 
@@ -132,7 +134,7 @@ public:
     p->in_mutex.unlock();
 
 #if defined(DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, ">>> exiting reading source(%d); pts:%llu\n", in_queue.size(),frame->pts);
+    CLog::Log(LOGDEBUG, ">>> exiting reading source(%d); pts:%llu\n", p->m_in_queue.size(),frame->pts);
 #endif
 
     free(frame);
@@ -180,13 +182,15 @@ public:
     int32_t keyframe = 0;
     int32_t unreadable = 0;
     MediaSource::ReadOptions readopt;
+    unsigned int time;
     // GLuint texid;
 
     //SetPriority(THREAD_PRIORITY_ABOVE_NORMAL);
     do
     {
       #if defined(DEBUG_VERBOSE)
-      unsigned int time = XbmcThreads::SystemClockMillis();
+      if (!time)
+        time = XbmcThreads::SystemClockMillis();
       CLog::Log(LOGDEBUG, "%s: >>> Handling frame\n", CLASSNAME);
       #endif
       frame = (Frame*)malloc(sizeof(Frame));
@@ -214,7 +218,10 @@ public:
         if (!frame->medbuf->graphicBuffer().get())  // hw buffers
         {
           if (frame->medbuf->range_length() == 0)
+          {
             frame->status = BAD_VALUE;  // Empty buffer, ignore
+            usleep(3000);
+          }
           else if (frame->medbuf->range_length() != sizeof(VPU_FRAME))
           {
             CLog::Log(LOGERROR, "%s - Not a VPU buffer (%d)", CLASSNAME, frame->medbuf->range_length());
@@ -298,20 +305,16 @@ public:
         continue;
       }
 
-      p->out_mutex.lock();
-      p->outbuf_queue.push_back(frame);
-
 #if defined(DEBUG_VERBOSE)
       CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, buf:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->medbuf, XbmcThreads::SystemClockMillis() - time);
+      time = 0;
 #endif
 
+      p->out_mutex.lock();
+      p->outbuf_queue.push_back(frame);
       while (p->outbuf_queue.size() >= OUTBUFCOUNT)
         p->out_condition.wait(p->out_mutex);
       p->out_mutex.unlock();
-      continue;
-#if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, img:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->eglimg, XbmcThreads::SystemClockMillis() - time);
-    #endif
     }
     while (!decode_done && !m_bStop);
   }
@@ -326,7 +329,7 @@ CRkStageFrightVideo::CRkStageFrightVideo(CDVDCodecInterface* interface)
   , drop_state(false), resetting(false)
 {
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CStageFrightVideo));
+  CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CRkStageFrightVideo));
 #endif
   p = new CStageFrightVideoPrivate;
   m_g_advancedSettings = interface->GetAdvancedSettings();
@@ -404,6 +407,7 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
       mimetype = "video/avc";
       if (hints.extradata && *(uint8_t*)hints.extradata == 1)
         m_metadata->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
+      m_metadata->setInt32(kKeyAvcSendDts, 1);
     break;
   case AV_CODEC_ID_MPEG4:
       if (m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "0"
@@ -455,6 +459,7 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
   m_metadata->setCString(kKeyMIMEType, mimetype);
   m_metadata->setInt32(kKeyWidth, width);
   m_metadata->setInt32(kKeyHeight, height);
+  m_metadata->setInt32(kKeyThumbnailDec, 1);
 
   android::ProcessState::self()->startThreadPool();
 
@@ -549,10 +554,6 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
   if (dec_extrasize)
     Decode((uint8_t*)dec_extradata, dec_extrasize, 0, 0);
 
-#if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, ">>> format col:%d, w:%d, h:%d, sw:%d, sh:%d, ctl:%d,%d; cbr:%d,%d\n", p->videoColorFormat, p->width, p->height, p->videoStride, p->videoSliceHeight, cropTop, cropLeft, cropBottom, cropRight);
-#endif
-
   return true;
 
 fail:
@@ -586,7 +587,7 @@ int  CRkStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double p
       return VC_ERROR;
 
     frame->status  = OK;
-    if (m_g_advancedSettings->m_stagefrightConfig.useInputDTS)
+    if (/*m_g_advancedSettings->m_stagefrightConfig.useInputDTS*/ false)
       frame->pts = (dts != DVD_NOPTS_VALUE) ? pts_dtoi(dts) : ((pts != DVD_NOPTS_VALUE) ? pts_dtoi(pts) : 0);
     else
       frame->pts = (pts != DVD_NOPTS_VALUE) ? pts_dtoi(pts) : ((dts != DVD_NOPTS_VALUE) ? pts_dtoi(dts) : 0);
@@ -637,17 +638,22 @@ int  CRkStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double p
     m_in_queue.push(frame);
     in_condition.notify();
     in_mutex.unlock();
+#if defined(DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "%s::Decode: pushed IN frame (%d); tm:%d\n", CLASSNAME,m_in_queue.size(), XbmcThreads::SystemClockMillis() - time);
+#endif
   }
 
+  if (outbuf_queue.size())
+    ret |= VC_PICTURE;
   if (p->inputBufferAvailable() && m_in_queue.size() < INBUFCOUNT)
     ret |= VC_BUFFER;
   else
-    usleep(1000);
-  if (outbuf_queue.size())
-    ret |= VC_PICTURE;
+  {
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::Decode: pushed IN frame (%d); tm:%d\n", CLASSNAME,in_queue.size(), XbmcThreads::SystemClockMillis() - time);
+    CLog::Log(LOGDEBUG, "%s::Decode: no buffers: input(%d); queued(%d)\n", CLASSNAME,m_in_queue.size(), p->freeInputBuffers() );
 #endif
+    usleep(10000);
+  }
 
   return ret;
 }
@@ -658,9 +664,6 @@ bool CRkStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
   ReleaseVpuFrame((VPU_FRAME*)pDvdVideoPicture->render_ctx);
-#if defined(DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "%s::ClearPicture buf:%p (%d)\n", CLASSNAME, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
-#endif
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::ClearPicture img:%p (%d)\n", CLASSNAME, pDvdVideoPicture, XbmcThreads::SystemClockMillis() - time);
 #endif
@@ -737,38 +740,41 @@ bool CRkStageFrightVideo::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   VPU_FRAME *vpucopy = NULL;
   if (vpuframe->vpumem.phy_addr)
   {
-    vpucopy = (VPU_FRAME *)malloc(sizeof(VPU_FRAME));
-    memcpy(vpucopy,vpuframe,sizeof(VPU_FRAME));
     VPUMemLink(&vpuframe->vpumem);
-    VPUMemDuplicate(&vpucopy->vpumem,&vpuframe->vpumem);
-    VPUFreeLinear(&vpuframe->vpumem);
-    //      vpucopy = vpuframe;
-
-    if (vpucopy->FrameWidth == 0)
-      vpucopy->FrameWidth = vpucopy->DisplayWidth;
-    if (vpucopy->FrameHeight == 0)
-      vpucopy->FrameHeight = vpucopy->DisplayHeight;
-
-    frame->medbuf->release();
-    SAFE_DELETE(frame);
-
-    if (vpucopy)
+    if (!drop_state)
     {
-      LockVpuFrame(vpucopy);
-      pDvdVideoPicture->render_ctx = (void*)vpucopy;
+      vpucopy = (VPU_FRAME *)malloc(sizeof(VPU_FRAME));
+      memcpy(vpucopy,vpuframe,sizeof(VPU_FRAME));
+      VPUMemDuplicate(&vpucopy->vpumem,&vpuframe->vpumem);
+      //      vpucopy = vpuframe;
+
+      if (vpucopy->FrameWidth == 0)
+        vpucopy->FrameWidth = vpucopy->DisplayWidth;
+      if (vpucopy->FrameHeight == 0)
+        vpucopy->FrameHeight = vpucopy->DisplayHeight;
+
+      if (vpucopy)
+      {
+        LockVpuFrame(vpucopy);
+        pDvdVideoPicture->render_ctx = (void*)vpucopy;
 #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, ">>>     va:%p,fa:%p,%p, w:%d, h:%d, dw:%d, dh:%d\n",
-                (void*)vpucopy->vpumem.vir_addr, (void*)vpucopy->FrameBusAddr[0], (void*)vpucopy->FrameBusAddr[1],
-          vpucopy->FrameWidth, vpucopy->FrameHeight, vpucopy->DisplayWidth, vpucopy->DisplayHeight);
+        CLog::Log(LOGDEBUG, ">>>     va:%p,fa:%p,%p, w:%d, h:%d, dw:%d, dh:%d\n",
+                  (void*)vpucopy->vpumem.vir_addr, (void*)vpucopy->FrameBusAddr[0], (void*)vpucopy->FrameBusAddr[1],
+            vpucopy->FrameWidth, vpucopy->FrameHeight, vpucopy->DisplayWidth, vpucopy->DisplayHeight);
+        CLog::Log(LOGDEBUG, ">>>     tm:%d", XbmcThreads::SystemClockMillis() - time);
 
 #endif
+      }
     }
     else
       pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
+    VPUFreeLinear(&vpuframe->vpumem);
   }
-
-  if (drop_state)
+  else
     pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
+
+  frame->medbuf->release();
+  SAFE_DELETE(frame);
 
   out_condition.notify();
   out_mutex.unlock();
@@ -832,7 +838,7 @@ void CRkStageFrightVideo::Dispose()
     m_omxclient->disconnect();
 
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "Cleaning IN(%d)\n", in_queue.size());
+  CLog::Log(LOGDEBUG, "Cleaning IN(%d)\n", m_in_queue.size());
 #endif
   while (!m_in_queue.empty())
   {
@@ -943,7 +949,7 @@ void CRkStageFrightVideo::SetDropState(bool bDrop)
     return;
 
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::SetDropState (%d->%d)\n", CLASSNAME,p->drop_state,bDrop);
+  CLog::Log(LOGDEBUG, "%s::SetDropState (%d->%d)\n", CLASSNAME,drop_state,bDrop);
 #endif
 
   drop_state = bDrop;
@@ -1018,7 +1024,7 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
 {
 #ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();
-  CLog::Log(LOGDEBUG, "RenderUpdateCallBack buf:%p\n", stfbuf);
+  CLog::Log(LOGDEBUG, "RenderUpdateCallBack buf:%p\n", render_ctx);
 #endif
 
   if (!render_ctx)
@@ -1091,7 +1097,7 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
   m_prev_stfbuf.push(vpubuf);
 
 #ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
+  CLog::Log(LOGDEBUG, ">>>> RenderUpdateCallBack: tm:%d\n", XbmcThreads::SystemClockMillis() - time);
 #endif
   return;
 }
