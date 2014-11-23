@@ -428,6 +428,10 @@ void CAdvancedSettings::Initialize()
     m_logFolder = "special://home/";              // log file location
   #endif
 
+#if defined(TARGET_ANDROID)
+    m_libMediaPassThroughHack = false; // Enables pass through with patched libmedia.so
+#endif
+
   m_userAgent = g_sysinfo.GetUserAgent();
 
   m_initialized = true;
@@ -1206,6 +1210,10 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     XMLUtils::GetInt(pElement, "algorithmdirtyregions",     m_guiAlgorithmDirtyRegions);
     XMLUtils::GetInt(pElement, "nofliptimeout",             m_guiDirtyRegionNoFlipTimeout);
   }
+
+#if defined(TARGET_ANDROID)
+  XMLUtils::GetBoolean(pRootElement, "libMediaPassThroughHack", m_libMediaPassThroughHack);
+#endif
 
   // load in the settings overrides
   CSettings::Get().Load(pRootElement, true);  // true to hide the settings we read in
