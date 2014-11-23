@@ -23,6 +23,7 @@
 #include "cores/AudioEngine/Utils/AERingBuffer.h"
 #include "android/activity/XBMCApp.h"
 #include "settings/Settings.h"
+#include "settings/AdvancedSettings.h"
 #if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
 #endif
@@ -203,7 +204,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       CLog::Log(LOGNOTICE, "Using OUYA hacked Passthrough");
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
     }
-    else if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") // Rockchip with "passthrough hack"
+    else if (g_advancedSettings.m_libMediaPassThroughHack) // Rockchip with "passthrough hack"
     {
       CLog::Log(LOGNOTICE, "Using Rockchip hacked Passthrough");
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
