@@ -420,6 +420,13 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       continue;
 
     CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
+    if (xbmc_jnienv()->ExceptionOccurred())
+    {
+      // Unsupported type?
+      xbmc_jnienv()->ExceptionClear();
+      continue;
+    }
+
     std::vector<int> color_formats = codec_caps.colorFormats();
 
     // blacklist of devices that can surface render.
