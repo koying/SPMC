@@ -84,6 +84,17 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
       m_pFormatName = "am-mpeg2";
       break;
     case AV_CODEC_ID_H264:
+      if ((aml_get_device_type() != AML_DEVICE_TYPE_M8 && aml_get_device_type() != AML_DEVICE_TYPE_M8M2) && ((m_hints.width > 1920) || (m_hints.height > 1088)))
+      {
+        // 4K is supported only on Amlogic S802/S812 chip
+        return false;
+      }
+/*
+    case AV_CODEC_ID_H264MVC:
+      if (m_hints.codec == AV_CODEC_ID_H264MVC)
+        m_pFormatName = "am-h264mvc";
+      else
+*/
       m_pFormatName = "am-h264";
       // convert h264-avcC to h264-annex-b as h264-avcC
       // under streamers can have issues when seeking.
