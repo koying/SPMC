@@ -39,7 +39,7 @@ ifeq ($(OS),android)
   ifeq ($(findstring arm,$(CPU)),arm)
     DEPENDS += android-rockchip-vpu
   endif
-  EXCLUDED_DEPENDS = gmp nettle gnutls
+  FFMPEG_DEPENDS = gnutls
 endif
 
 DEPENDS := $(filter-out $(EXCLUDED_DEPENDS),$(DEPENDS))
