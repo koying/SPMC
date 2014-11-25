@@ -76,6 +76,7 @@
 #endif
 #if defined(TARGET_ANDROID)
 #include "AndroidAppFile.h"
+#include "AndroidSettingFile.h"
 #endif
 #ifdef HAS_UPNP
 #include "UPnPFile.h"
@@ -149,6 +150,7 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
   else if(strProtocol == "udf") return new CUDFFile();
 #if defined(TARGET_ANDROID)
   else if (strProtocol == "androidapp") return new CFileAndroidApp();
+  else if (strProtocol == "androidsetting") return new CFileAndroidSetting();
 #endif
 
   if( g_application.getNetwork().IsAvailable() )

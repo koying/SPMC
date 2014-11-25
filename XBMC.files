@@ -9622,3 +9622,9 @@ xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRKStageFright.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRKStageFright.h
 xbmc/windowing/egl/EGLNativeTypeRKAndroid.h
 xbmc/windowing/egl/EGLNativeTypeRKAndroid.cpp
+xbmc/filesystem/AndroidSettingFile.h
+xbmc/filesystem/AndroidSettingDirectory.h
+xbmc/filesystem/AndroidSettingFile.cpp
+xbmc/filesystem/AndroidSettingDirectory.cpp
+xbmc/android/jni/Settings.h
+xbmc/android/jni/Settings.cpp

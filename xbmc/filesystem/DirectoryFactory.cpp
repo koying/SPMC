@@ -112,6 +112,7 @@
 #endif
 #if defined(TARGET_ANDROID)
 #include "AndroidAppDirectory.h"
+#include "AndroidSettingDirectory.h"
 #endif
 
 using namespace XFILE;
@@ -172,6 +173,7 @@ IDirectory* CDirectoryFactory::Create(const CStdString& strPath)
     return CDirectoryFactory::Create(url.GetFileName());
 #if defined(TARGET_ANDROID)
   if (strProtocol == "androidapp") return new CAndroidAppDirectory();
+  if (strProtocol == "androidsetting") return new CAndroidSettingDirectory();
 #endif
 
   if( g_application.getNetwork().IsAvailable(true) )  // true to wait for the network (if possible)

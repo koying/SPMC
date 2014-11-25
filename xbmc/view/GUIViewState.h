@@ -72,7 +72,8 @@ protected:
    */
   void AddAddonsSource(const CStdString &content, const CStdString &label, const CStdString& thumb);
 #if defined(TARGET_ANDROID)
-  void AddAndroidSource(const CStdString &content, const CStdString &label, const CStdString& thumb);
+  void AddAndroidAppSource(const CStdString &content, const CStdString &label, const CStdString& thumb);
+  void AddAndroidSettingSource(const CStdString &content, const CStdString &label, const CStdString& thumb);
 #endif
   void AddLiveTVSources();
 

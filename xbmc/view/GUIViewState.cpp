@@ -47,6 +47,7 @@
 
 #if defined(TARGET_ANDROID)
 #include "filesystem/AndroidAppDirectory.h"
+#include "filesystem/AndroidSettingDirectory.h"
 #endif
 
 #define PROPERTY_SORT_ORDER         "sort.order"
@@ -107,7 +108,7 @@ CGUIViewState* CGUIViewState::GetViewState(int windowId, const CFileItemList& it
   if (items.GetPath() == "special://musicplaylists/")
     return new CGUIViewStateWindowMusicSongs(items);
 
-  if (url.GetProtocol() == "androidapp")
+  if (url.GetProtocol() == "androidapp" || url.GetProtocol() == "androidsetting")
     return new CGUIViewStateWindowPrograms(items);
 
   if (windowId==WINDOW_MUSIC_NAV)
@@ -406,7 +407,7 @@ void CGUIViewState::AddAddonsSource(const CStdString &content, const CStdString 
 }
 
 #if defined(TARGET_ANDROID)
-void CGUIViewState::AddAndroidSource(const CStdString &content, const CStdString &label, const CStdString &thumb)
+void CGUIViewState::AddAndroidAppSource(const CStdString &content, const CStdString &label, const CStdString &thumb)
 {
   CFileItemList items;
   XFILE::CAndroidAppDirectory apps;
@@ -414,6 +415,23 @@ void CGUIViewState::AddAndroidSource(const CStdString &content, const CStdString
   {
     CMediaSource source;
     source.strPath = "androidapp://sources/" + content + "/";
+    source.strName = label;
+    if (!thumb.empty() && g_TextureManager.HasTexture(thumb))
+      source.m_strThumbnailImage = thumb;
+    source.m_iDriveType = CMediaSource::SOURCE_TYPE_LOCAL;
+    source.m_ignore = true;
+    m_sources.push_back(source);
+  }
+}
+
+void CGUIViewState::AddAndroidSettingSource(const CStdString &content, const CStdString &label, const CStdString &thumb)
+{
+  CFileItemList items;
+  XFILE::CAndroidSettingDirectory settings;
+  if (settings.GetDirectory(content, items))
+  {
+    CMediaSource source;
+    source.strPath = "androidsetting://sources/" + content + "/";
     source.strName = label;
     if (!thumb.empty() && g_TextureManager.HasTexture(thumb))
       source.m_strThumbnailImage = thumb;

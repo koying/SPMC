@@ -196,7 +196,9 @@ CStdString CGUIWindowPrograms::GetStartFolder(const CStdString &dir)
     return "addons://sources/executable/";
   else if (dir.Equals("AndroidApps"))
     return "androidapp://sources/apps/";
-    
+  else if (dir.Equals("AndroidSettings"))
+    return "androidsetting://sources/settings/";
+
   SetupShares();
   VECSOURCES shares;
   m_rootDir.GetSources(shares);
