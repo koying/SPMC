@@ -160,6 +160,7 @@ public:
   static bool IsArchive(const CStdString& strFile);
   static bool IsBluray(const CStdString& strFile);
   static bool IsAndroidApp(const CStdString& strFile);
+  static bool IsAndroidSetting(const CStdString& strFile);
   static bool IsLibraryFolder(const CStdString& strFile);
   static bool IsLibraryContent(const std::string& strFile);
   static bool IsPVRChannel(const CStdString& strFile);
