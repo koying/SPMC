@@ -1018,6 +1018,12 @@ bool CGUIMediaWindow::OnClick(int iItem)
     CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s",appName.c_str());
     return CXBMCApp::StartActivity(appName);
   }
+  else if (pItem->IsAndroidSetting())
+  {
+    CStdString intent = URIUtils::GetFileName(pItem->GetPath());
+    CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to launch: %s",intent.c_str());
+    return CXBMCApp::StartActivity("", intent);
+  }
 #endif
   else
   {
