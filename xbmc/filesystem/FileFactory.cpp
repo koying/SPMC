@@ -69,6 +69,7 @@
 #endif
 #if defined(TARGET_ANDROID)
 #include "AndroidAppFile.h"
+#include "AndroidSettingFile.h"
 #endif
 #ifdef HAS_UPNP
 #include "UPnPFile.h"
@@ -143,6 +144,7 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
   else if(url.IsProtocol("udf")) return new CUDFFile();
 #if defined(TARGET_ANDROID)
   else if (url.IsProtocol("androidapp")) return new CFileAndroidApp();
+  else if (url.IsProtocol("androidsetting")) return new CFileAndroidSetting();
 #endif
   else if (url.IsProtocol("pipe")) return new CPipeFile();
 #ifdef HAVE_LIBBLURAY
