@@ -1001,6 +1001,11 @@ bool URIUtils::IsAndroidApp(const CStdString &path)
   return IsProtocol(path, "androidapp");
 }
 
+bool URIUtils::IsAndroidSetting(const CStdString &path)
+{
+  return IsProtocol(path, "androidsetting");
+}
+
 bool URIUtils::IsLibraryFolder(const CStdString& strFile)
 {
   CURL url(strFile);
