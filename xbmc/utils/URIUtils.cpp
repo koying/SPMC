@@ -1010,6 +1010,11 @@ bool URIUtils::IsAndroidApp(const std::string &path)
   return IsProtocol(path, "androidapp");
 }
 
+bool URIUtils::IsAndroidSetting(const std::string &path)
+{
+  return IsProtocol(path, "androidsetting");
+}
+
 bool URIUtils::IsLibraryFolder(const std::string& strFile)
 {
   CURL url(strFile);
