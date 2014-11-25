@@ -63,6 +63,7 @@ SRCS      += KeyEvent.cpp
 SRCS      += InputManager.cpp
 SRCS      += Os.cpp
 SRCS      += Notification.cpp
+SRCS      += Settings.cpp
 
 LIB        = jni.a
 

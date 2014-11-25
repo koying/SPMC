@@ -96,6 +96,7 @@
 #endif
 #if defined(TARGET_ANDROID)
 #include "AndroidAppDirectory.h"
+#include "AndroidSettingDirectory.h"
 #endif
 #include "ResourceDirectory.h"
 
@@ -159,6 +160,7 @@ IDirectory* CDirectoryFactory::Create(const CURL& url)
   if (url.IsProtocol("favourites")) return new CFavouritesDirectory();
 #if defined(TARGET_ANDROID)
   if (url.IsProtocol("androidapp")) return new CAndroidAppDirectory();
+  if (url.IsProtocol("androidsetting")) return new CAndroidSettingDirectory();
 #endif
 #ifdef HAVE_LIBBLURAY
   if (url.IsProtocol("bluray")) return new CBlurayDirectory();

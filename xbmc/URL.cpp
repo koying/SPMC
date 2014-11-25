@@ -181,6 +181,7 @@ void CURL::Parse(const std::string& strURL1)
      IsProtocol("videodb") ||
      IsProtocol("musicdb") ||
      IsProtocol("androidapp") ||
+     IsProtocol("androidsetting") ||
      IsProtocol("pvr"))
     sep = "?";
   else
