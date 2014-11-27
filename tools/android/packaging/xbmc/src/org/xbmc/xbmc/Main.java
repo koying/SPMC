@@ -26,9 +26,7 @@ public class Main extends NativeActivity
     super.onCreate(savedInstanceState);
 
     thisView = getWindow().getDecorView();
-    getWindow().setFormat(PixelFormat.TRANSPARENT);
-
-      thisView
+    thisView
           .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
             @Override
@@ -83,6 +81,13 @@ public class Main extends NativeActivity
     } catch (UnsatisfiedLinkError e) {
       Log.e("Main", "Native not registered");
     }
+  }
+
+  @Override
+  public void onStart()
+  {
+    super.onStart();
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
   }
 
   @Override
