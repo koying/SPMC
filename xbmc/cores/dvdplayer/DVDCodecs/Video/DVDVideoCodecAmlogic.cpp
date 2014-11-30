@@ -112,8 +112,6 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
       //m_bitparser->Open();
       break;
     case AV_CODEC_ID_MPEG4:
-    case AV_CODEC_ID_MSMPEG4V2:
-    case AV_CODEC_ID_MSMPEG4V3:
       if (m_hints.width <= 800)
       {
         // mpeg4 playback is ugly; avoid for SD
