@@ -98,46 +98,47 @@ void CSMB::Init()
     // http://us1.samba.org/samba/docs/man/manpages-3/smb.conf.5.html
     char smb_conf[MAX_PATH];
     snprintf(smb_conf, sizeof(smb_conf), "%s/.smb", getenv("HOME"));
-    if (mkdir(smb_conf, 0755) == 0)
+    mkdir(smb_conf, 0755);
+
+    snprintf(smb_conf, sizeof(smb_conf), "%s/.smb/smb.conf", getenv("HOME"));
+    FILE* f = fopen(smb_conf, "w");
+    if (f != NULL)
     {
-      snprintf(smb_conf, sizeof(smb_conf), "%s/.smb/smb.conf", getenv("HOME"));
-      FILE* f = fopen(smb_conf, "w");
-      if (f != NULL)
+      fprintf(f, "[global]\n");
+
+      // make sure we're not acting like a server
+      fprintf(f, "\tpreferred master = no\n");
+      fprintf(f, "\tlocal master = no\n");
+      fprintf(f, "\tdomain master = no\n");
+
+      // use the weaker LANMAN password hash in order to be compatible with older servers
+      fprintf(f, "\tclient lanman auth = yes\n");
+      fprintf(f, "\tlanman auth = yes\n");
+
+      fprintf(f, "\tsocket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536\n");
+#ifndef TARGET_ANDROID
+      fprintf(f, "\tlock directory = %s/.smb/\n", getenv("HOME"));
+#endif
+
+      // set wins server if there's one. name resolve order defaults to 'lmhosts host wins bcast'.
+      // if no WINS server has been specified the wins method will be ignored.
+      if (CSettings::Get().GetString("smb.winsserver").length() > 0 && !StringUtils::EqualsNoCase(CSettings::Get().GetString("smb.winsserver"), "0.0.0.0") )
       {
-        fprintf(f, "[global]\n");
-
-        // make sure we're not acting like a server
-        fprintf(f, "\tpreferred master = no\n");
-        fprintf(f, "\tlocal master = no\n");
-        fprintf(f, "\tdomain master = no\n");
-
-        // use the weaker LANMAN password hash in order to be compatible with older servers
-        fprintf(f, "\tclient lanman auth = yes\n");
-        fprintf(f, "\tlanman auth = yes\n");
-
-        fprintf(f, "\tsocket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536\n");      
-        fprintf(f, "\tlock directory = %s/.smb/\n", getenv("HOME"));
-
-        // set wins server if there's one. name resolve order defaults to 'lmhosts host wins bcast'.
-        // if no WINS server has been specified the wins method will be ignored.
-        if (CSettings::Get().GetString("smb.winsserver").length() > 0 && !StringUtils::EqualsNoCase(CSettings::Get().GetString("smb.winsserver"), "0.0.0.0") )
-        {
-          fprintf(f, "\twins server = %s\n", CSettings::Get().GetString("smb.winsserver").c_str());
-          fprintf(f, "\tname resolve order = bcast wins host\n");
-        }
-        else
-          fprintf(f, "\tname resolve order = bcast host\n");
-
-        // use user-configured charset. if no charset is specified,
-        // samba tries to use charset 850 but falls back to ASCII in case it is not available
-        if (g_advancedSettings.m_sambadoscodepage.length() > 0)
-          fprintf(f, "\tdos charset = %s\n", g_advancedSettings.m_sambadoscodepage.c_str());
-
-        // if no workgroup string is specified, samba will use the default value 'WORKGROUP'
-        if ( CSettings::Get().GetString("smb.workgroup").length() > 0 )
-          fprintf(f, "\tworkgroup = %s\n", CSettings::Get().GetString("smb.workgroup").c_str());
-        fclose(f);
+        fprintf(f, "\twins server = %s\n", CSettings::Get().GetString("smb.winsserver").c_str());
+        fprintf(f, "\tname resolve order = bcast wins host\n");
       }
+      else
+        fprintf(f, "\tname resolve order = bcast host\n");
+
+      // use user-configured charset. if no charset is specified,
+      // samba tries to use charset 850 but falls back to ASCII in case it is not available
+      if (g_advancedSettings.m_sambadoscodepage.length() > 0)
+        fprintf(f, "\tdos charset = %s\n", g_advancedSettings.m_sambadoscodepage.c_str());
+
+      // if no workgroup string is specified, samba will use the default value 'WORKGROUP'
+      if ( CSettings::Get().GetString("smb.workgroup").length() > 0 )
+        fprintf(f, "\tworkgroup = %s\n", CSettings::Get().GetString("smb.workgroup").c_str());
+      fclose(f);
     }
 
     // reads smb.conf so this MUST be after we create smb.conf
