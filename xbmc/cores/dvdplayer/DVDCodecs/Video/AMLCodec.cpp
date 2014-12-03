@@ -27,6 +27,7 @@
 #include "cores/VideoRenderers/RenderFlags.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "guilib/GraphicContext.h"
+#include "settings/DisplaySettings.h"
 #include "settings/MediaSettings.h"
 #include "settings/Settings.h"
 #include "utils/AMLUtils.h"
@@ -1692,7 +1693,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   g_renderManager.RegisterRenderUpdateCallBack((const void*)this, RenderUpdateCallBack);
   g_renderManager.RegisterRenderFeaturesCallBack((const void*)this, RenderFeaturesCallBack);
 
-  m_display_rect = g_graphicsContext.GetViewWindow();
+  m_display_rect = CRect(0, 0, CDisplaySettings::Get().GetCurrentResolutionInfo().iWidth, CDisplaySettings::Get().GetCurrentResolutionInfo().iHeight);
   char mode[256] = {0};
   aml_get_sysfs_str("/sys/class/display/mode", mode, 255);
   RESOLUTION_INFO res;
@@ -2262,20 +2263,17 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   }
 
   CRect gui, display, dst_rect;
-  gui = g_graphicsContext.GetViewWindow();
+  gui = CRect(0, 0, CDisplaySettings::Get().GetCurrentResolutionInfo().iWidth, CDisplaySettings::Get().GetCurrentResolutionInfo().iHeight);
 
 #ifdef TARGET_ANDROID
-  if (g_graphicsContext.IsFullScreenVideo())
-    display = m_display_rect;
-  else
-    display = gui;
+  display = m_display_rect;
 #else
   display = gui;
 #endif
   dst_rect = m_dst_rect;
   if (gui != display)
   {
-    float xscale = display.Width()  / gui.Width();
+    float xscale = display.Width() / gui.Width();
     float yscale = display.Height() / gui.Height();
     if (m_stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
       xscale /= 2.0;
@@ -2337,6 +2335,9 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   std::string s_dst_rect = StringUtils::Format("%i,%i,%i,%i",
     (int)dst_rect.x1, (int)dst_rect.y1,
     (int)dst_rect.Width(), (int)dst_rect.Height());
+  std::string s_m_dst_rect = StringUtils::Format("%i,%i,%i,%i",
+    (int)m_dst_rect.x1, (int)m_dst_rect.y1,
+    (int)m_dst_rect.Width(), (int)m_dst_rect.Height());
   std::string s_display = StringUtils::Format("%i,%i,%i,%i",
     (int)display.x1, (int)display.y1,
     (int)display.Width(), (int)display.Height());
@@ -2345,6 +2346,7 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
     (int)gui.Width(), (int)gui.Height());
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoRect:display(%s)", s_display.c_str());
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoRect:gui(%s)", s_gui.c_str());
+  CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoRect:m_dst_rect(%s)", s_m_dst_rect.c_str());
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoRect:dst_rect(%s)", s_dst_rect.c_str());
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoRect:m_stereo_mode(%d)", m_stereo_mode);
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideoRect:m_stereo_view(%d)", m_stereo_view);
