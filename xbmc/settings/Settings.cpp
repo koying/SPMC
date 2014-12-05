@@ -86,6 +86,7 @@
 #if defined(TARGET_ANDROID)
 #include "android/jni/Build.h"
 #include "android/jni/System.h"
+#include "android/jni/SystemProperties.h"
 #include "android/activity/AndroidFeatures.h"
 #endif
 
@@ -931,7 +932,8 @@ void CSettings::InitializeConditions()
     m_settingsManager->AddCondition("have_libstagefrightdecoder");
 #endif
 #ifdef HAS_RKSTF
-  if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
+  std::string hasoverlay = CJNISystemProperties::get("video.use.overlay", "");
+  if(StringUtils::IsInteger(hasoverlay) && atoi(hasoverlay.c_str()) > 0)
     m_settingsManager->AddCondition("have_rklibstagefrightdecoder");
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER

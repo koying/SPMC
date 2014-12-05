@@ -72,15 +72,7 @@ CDVDVideoCodecRKStageFright::~CDVDVideoCodecRKStageFright()
 
 bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-#if defined(HAS_RKSTF)
-  if (!StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
-    return false;
-#else
-  return false;
-#endif
-
-// we always qualify even if DVDFactoryCodec does this too.
-  if (CSettings::Get().GetBool("videoplayer.userkstagefright") && !hints.software)
+  if (!hints.software && CSettings::Get().HasCondition("have_rklibstagefrightdecoder") && CSettings::Get().GetBool("videoplayer.userkstagefright"))
   {
     m_convert_bitstream = false;
     CLog::Log(LOGDEBUG,
