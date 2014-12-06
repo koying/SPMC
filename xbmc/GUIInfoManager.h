@@ -497,8 +497,8 @@ namespace INFO
 #define CONTROL_HAS_FOCUS           30000
 
 #define VERSION_MAJOR               13
-#define VERSION_MINOR               3
-#define VERSION_TAG                 "-SPMC(4)"
+#define VERSION_MINOR               4
+#define VERSION_TAG                 "-SPMC(0)"
 
 #define LISTITEM_START              35000
 #define LISTITEM_THUMB              (LISTITEM_START)
