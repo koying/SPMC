@@ -909,6 +909,9 @@ void StringUtils::RemoveCRLF(std::string& strLine)
 
 CStdString StringUtils::SizeToString(int64_t size)
 {
+  if (!size)
+    return "";
+
   CStdString strLabel;
   const char prefixes[] = {' ','k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'};
   unsigned int i = 0;
