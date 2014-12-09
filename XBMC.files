@@ -9635,3 +9635,9 @@ xbmc/filesystem/AndroidSettingFile.cpp
 xbmc/filesystem/AndroidSettingDirectory.cpp
 xbmc/android/jni/Settings.h
 xbmc/android/jni/Settings.cpp
+xbmc/android/jni/Resources.h
+xbmc/android/jni/Resources.cpp
+xbmc/android/jni/PackageItemInfo.h
+xbmc/android/jni/PackageItemInfo.cpp
+xbmc/android/jni/DisplayMetrics.h
+xbmc/android/jni/DisplayMetrics.cpp
