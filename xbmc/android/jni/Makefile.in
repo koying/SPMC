@@ -55,6 +55,9 @@ SRCS      += SystemProperties.cpp
 SRCS      += Display.cpp
 SRCS      += WindowManager.cpp
 SRCS      += Settings.cpp
+SRCS      += Resources.cpp
+SRCS      += PackageItemInfo.cpp
+SRCS      += DisplayMetrics.cpp
 
 LIB        = jni.a
 
