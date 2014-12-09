@@ -204,7 +204,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       CLog::Log(LOGNOTICE, "Using OUYA hacked Passthrough");
       encoding = CJNIAudioFormat::ENCODING_IEC61937_16BIT;
     }
-    else if (g_advancedSettings.m_libMediaPassThroughHack) // Rockchip with "passthrough hack"
+    else if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3") || g_advancedSettings.m_libMediaPassThroughHack) // Rockchip with "passthrough hack"
     {
       CLog::Log(LOGNOTICE, "Using Rockchip hacked Passthrough");
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
