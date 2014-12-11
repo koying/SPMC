@@ -55,9 +55,11 @@ const int kKeyExtraData         = 'extr';  // vc1 extra data size
 const int kKeyVC1               = 'vc1c';  // vc1 codec config info
 const int kKeyHVCC              = 'hvcc';
 
-#define XMEDIA_BITSTREAM_START_CODE         (0x42564b52)
-#define RK_FBIOSET_YUV_ADDR	0x5002
-#define HAL_PIXEL_FORMAT_YCrCb_NV12  0x20
+#define XMEDIA_BITSTREAM_START_CODE      (0x42564b52)
+#define RK_FBIOSET_YUV_ADDR	         0x5002
+#define HAL_PIXEL_FORMAT_RGB_565         0x04
+#define HAL_PIXEL_FORMAT_YCrCb_NV12      0x20
+#define HAL_PIXEL_FORMAT_YCrCb_NV12_10   0x22
 
 using namespace android;
 
@@ -346,6 +348,13 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
   CLog::Log(LOGDEBUG, "%s::Open: ed:%d as:%f fa:%d\n", CLASSNAME, hints.extrasize, hints.aspect, hints.forced_aspect);
 #endif
 
+  // stagefright crashes with null size. Trap this...
+  if (!hints.width || !hints.height)
+  {
+    CLog::Log(LOGERROR, "%s::%s - %s\n", CLASSNAME, __func__,"null size, cannot handle");
+    return false;
+  }
+
   m_fb1_fd = open("/dev/graphics/fb1", O_RDWR,0);
   if(m_fb1_fd < 0)
   {
@@ -358,12 +367,6 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
     CLog::Log(LOGDEBUG, "%s(%d):  RK_FBIOSET_VSYNC_ENABLE[%d] Failed", __FUNCTION__, __LINE__, m_fb1_fd);
   }
 
-  // stagefright crashes with null size. Trap this...
-  if (!hints.width || !hints.height)
-  {
-    CLog::Log(LOGERROR, "%s::%s - %s\n", CLASSNAME, __func__,"null size, cannot handle");
-    return false;
-  }
   codec     = hints.codec;
   width     = hints.width;
   height    = hints.height;
@@ -860,7 +863,7 @@ void CRkStageFrightVideo::Dispose()
     }
   }
 
-#define RK_FBIOSET_CLEAR_FB				0x4633
+#define RK_FBIOSET_CLEAR_FB             0x4633
 #define RK_FBIOSET_ENABLE               0x5019
 
   /*
@@ -879,7 +882,7 @@ void CRkStageFrightVideo::Dispose()
   }
   */
 
-  // Workaround: Blank fb1
+  // Workaround: resize fb1 and move offscreen; no solution for plain erasing
   struct fb_var_screeninfo info;
 
   if (ioctl(m_fb1_fd, FBIOGET_VSCREENINFO, &info) == -1)
@@ -894,12 +897,12 @@ void CRkStageFrightVideo::Dispose()
 
   info.xoffset = 0;
   info.yoffset = 0;
-  info.xres = 16;
-  info.yres = 16;
-  info.xres_virtual = 16;
-  info.yres_virtual = 16;
+  info.xres = 4096;
+  info.yres = 4096;
+  info.xres_virtual = 4096;
+  info.yres_virtual = 4096;
 
-  int nonstd = ((int)0<<8) + ((int)0<<20);
+  int nonstd = ((int)0xf00<<8) + ((int)0xf00<<20);
   int grayscale = ((int)16 << 8) + ((int)16 << 20);
 
   info.nonstd &= 0x00;
