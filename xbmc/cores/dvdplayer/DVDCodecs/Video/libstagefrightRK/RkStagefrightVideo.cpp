@@ -400,6 +400,19 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
       break;
   case AV_CODEC_ID_H264:
 //  case AV_CODEC_ID_H264MVC:
+      switch(hints.profile)
+      {
+        case FF_PROFILE_H264_HIGH_10:
+        case FF_PROFILE_H264_HIGH_10_INTRA:
+        case FF_PROFILE_H264_HIGH_422:
+        case FF_PROFILE_H264_HIGH_422_INTRA:
+        case FF_PROFILE_H264_HIGH_444_PREDICTIVE:
+        case FF_PROFILE_H264_HIGH_444_INTRA:
+        case FF_PROFILE_H264_CAVLC_444:
+          // Hi10P not supported
+          return false;
+      }
+
       if (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "0"
           || (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "sd" && hints.width > 800)
           || (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
