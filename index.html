@@ -32,15 +32,15 @@
 
         <section id="main_content">
           <h1>
-<a name="gotham" class="anchor" href="#gotham"><span class="octicon octicon-link"></span></a>Gotham</h1>
+<a id="gotham" class="anchor" href="#gotham" aria-hidden="true"><span class="octicon octicon-link"></span></a>Gotham</h1>
 
 <p>Those Gotham builds will contain XBMC patches which were not accepted, or are not acceptable, in the main XBMC tree. </p>
 
 <p><strong>Warning: as of 13.3.3, the non-launcher version is default, including in stores</strong></p>
 
-<p>Latest Gotham build is: <strong>13.3.3</strong> <a href="https://github.com/koying/SPMC/releases/tag/13.3.3-spmc">link</a><br>
-APK: <a href="https://github.com/koying/SPMC/releases/download/13.3.3-spmc/spmc-armeabi-v7a_13.3.3.apk">link</a><br>
-launcher APK: <a href="https://github.com/koying/SPMC/releases/download/13.3.3-spmc/spmc-armeabi-v7a_13.3.3_launcher.apk">link</a></p>
+<p>Latest Gotham build is: <strong>13.4.0</strong> <a href="https://github.com/koying/SPMC/releases/tag/13.4.0-spmc">link</a><br>
+APK: <a href="https://github.com/koying/SPMC/releases/download/13.4.0-spmc/spmc-armeabi-v7a_13.4.0.apk">link</a><br>
+launcher APK: <a href="https://github.com/koying/SPMC/releases/download/13.4.0-spmc/spmc-armeabi-v7a_13.4.0_launcher.apk">link</a></p>
 
 <p>Google Play: <a href="https://play.google.com/store/apps/details?id=com.semperpax.spmc">link</a><br>
 Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref=sr_1_1?s=mobile-apps&amp;ie=UTF8&amp;qid=1407661207&amp;sr=1-1&amp;keywords=spmc">link</a></p>
@@ -48,7 +48,39 @@ Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref
 <p>Changelog:</p>
 
 <h3>
-<a name="1333-20141026" class="anchor" href="#1333-20141026"><span class="octicon octicon-link"></span></a>13.3.3 (2014/10/26):</h3>
+<a id="1340-20141214" class="anchor" href="#1340-20141214" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.4.0 (2014/12/14):</h3>
+
+<ul>
+<li>Improved Rockchip support
+
+<ul>
+<li>overlay, hevc + true 4K on rk3288</li>
+</ul>
+</li>
+<li>Auto-framerate switching for Amlogic
+
+<ul>
+<li>(Needs 666 on /sys/class/display/mode)</li>
+</ul>
+</li>
+<li>Auto-framerate switching for Rockchip
+
+<ul>
+<li>(Needs 666 on /sys/class/display/display0.HDMI/mode)</li>
+</ul>
+</li>
+<li>Allow forcing passthrough hack on Rockchip via AS ()</li>
+<li>Better Android apps icons</li>
+<li>Add direct access to common Android settings</li>
+<li>Android TV banner</li>
+<li>Fix Nexus 9</li>
+<li>Bump libbluray &amp; ffmpeg</li>
+<li>Fix amlogic black screen on recent SDK</li>
+<li>... and the usual bunch of bugfixes ;)</li>
+</ul>
+
+<h3>
+<a id="1333-20141026" class="anchor" href="#1333-20141026" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.3.3 (2014/10/26):</h3>
 
 <ul>
 <li>Preliminary support for h265 (including RK3288)</li>
@@ -63,7 +95,7 @@ Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref
 </ul>
 
 <h3>
-<a name="1332-20140815" class="anchor" href="#1332-20140815"><span class="octicon octicon-link"></span></a>13.3.2 (2014/08/15):</h3>
+<a id="1332-20140815" class="anchor" href="#1332-20140815" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.3.2 (2014/08/15):</h3>
 
 <ul>
 <li>Backport ffmpeg 2.3</li>
@@ -80,7 +112,7 @@ Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref
 </ul>
 
 <h3>
-<a name="1331-20140806" class="anchor" href="#1331-20140806"><span class="octicon octicon-link"></span></a>13.3.1 (2014/08/06):</h3>
+<a id="1331-20140806" class="anchor" href="#1331-20140806" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.3.1 (2014/08/06):</h3>
 
 <ul>
 <li>Rebased to latest XBMC 13.2</li>
@@ -91,7 +123,7 @@ Amazon Appstore: <a href="http://www.amazon.com/Semperpax-SPMC/dp/B00MK49LL8/ref
 </ul>
 
 <h3>
-<a name="1330-20140726" class="anchor" href="#1330-20140726"><span class="octicon octicon-link"></span></a>13.3.0 (2014/07/26):</h3>
+<a id="1330-20140726" class="anchor" href="#1330-20140726" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.3.0 (2014/07/26):</h3>
 
 <ul>
 <li>Rebased to latest XBMC 13.2</li>
@@ -104,7 +136,7 @@ Probably also fixes crash issue with "amber"-like skins which do not have a dedi
 </ul>
 
 <h3>
-<a name="1321-20140716" class="anchor" href="#1321-20140716"><span class="octicon octicon-link"></span></a>13.2.1 (2014/07/16):</h3>
+<a id="1321-20140716" class="anchor" href="#1321-20140716" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.2.1 (2014/07/16):</h3>
 
 <ul>
 <li>New graphics (thanks to <a href="https://github.com/Tinwarble" class="user-mention">@Tinwarble</a> from OuyaForum)</li>
@@ -113,7 +145,7 @@ Probably also fixes crash issue with "amber"-like skins which do not have a dedi
 </ul>
 
 <h3>
-<a name="1320-20140710" class="anchor" href="#1320-20140710"><span class="octicon octicon-link"></span></a>13.2.0 (2014/07/10):</h3>
+<a id="1320-20140710" class="anchor" href="#1320-20140710" aria-hidden="true"><span class="octicon octicon-link"></span></a>13.2.0 (2014/07/10):</h3>
 
 <ul>
 <li>Initial Gotham release</li>
@@ -144,7 +176,7 @@ Probably also fixes crash issue with "amber"-like skins which do not have a dedi
 <p>See <a href="https://github.com/koying/SPMC/commits/gotham">https://github.com/koying/SPMC/commits/gotham</a> for the full list.</p>
 
 <h1>
-<a name="frodo" class="anchor" href="#frodo"><span class="octicon octicon-link"></span></a>Frodo</h1>
+<a id="frodo" class="anchor" href="#frodo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Frodo</h1>
 
 <p>Last Frodo build is: <strong>12.4.2</strong><br>
 Torrent: <a href="http://filez.semperpax.com/ykyk6hye">http://filez.semperpax.com/ykyk6hye</a><br>
@@ -154,7 +186,7 @@ Sources: <a href="https://github.com/koying/SPMC">https://github.com/koying/SPMC
 <p>Changelog:  </p>
 
 <h3>
-<a name="1242" class="anchor" href="#1242"><span class="octicon octicon-link"></span></a>12.4.2:</h3>
+<a id="1242" class="anchor" href="#1242" aria-hidden="true"><span class="octicon octicon-link"></span></a>12.4.2:</h3>
 
 <ul>
 <li>Pack bluray library</li>
@@ -163,7 +195,7 @@ Sources: <a href="https://github.com/koying/SPMC">https://github.com/koying/SPMC
 </ul>
 
 <h3>
-<a name="1241" class="anchor" href="#1241"><span class="octicon octicon-link"></span></a>12.4.1:</h3>
+<a id="1241" class="anchor" href="#1241" aria-hidden="true"><span class="octicon octicon-link"></span></a>12.4.1:</h3>
 
 <ul>
 <li>Added mouse wheel and proper button support</li>
