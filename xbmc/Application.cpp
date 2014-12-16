@@ -4380,8 +4380,9 @@ void CApplication::UpdateFileState()
   if (m_progressTrackingItem->GetPath() != "" && m_progressTrackingItem->GetPath() != CurrentFile())
   {
     // Ignore for PVR channels, PerformChannelSwitch takes care of this.
-    // Also ignore playlists as correct video settings have already been saved in PlayFile() - we're causing off-by-1 errors here.
-    if (!m_progressTrackingItem->IsPVRChannel() && g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_NONE)
+    // Also ignore playlists containing multiple items: video settings have already been saved in PlayFile()
+    // and we'd overwrite them with settings for the *previous* item.
+    if (!m_progressTrackingItem->IsPVRChannel() && (g_playlistPlayer.GetCurrentPlaylist() == PLAYLIST_NONE || g_playlistPlayer.IsSingleItemNonRepeatPlaylist()))
       SaveFileState();
 
     // Reset tracking item
@@ -4410,7 +4411,7 @@ void CApplication::UpdateFileState()
       if (m_pPlayer->IsPlayingVideo())
       {
         /* Always update streamdetails, except for DVDs where we only update
-           streamdetails if title length > 15m (Should yield more correct info) */
+           streamdetails if total duration > 15m (Should yield more correct info) */
         if (!(m_progressTrackingItem->IsDiscImage() || m_progressTrackingItem->IsDVDFile()) || m_pPlayer->GetTotalTime() > 15*60*1000)
         {
           CStreamDetails details;
