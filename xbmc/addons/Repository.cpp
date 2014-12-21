@@ -251,7 +251,7 @@ bool CRepositoryUpdateJob::DoWork()
   {
     if (ShouldCancel(0, 0))
       return false;
-    RepositoryPtr repo = boost::dynamic_pointer_cast<CRepository>(*i);
+    RepositoryPtr repo = std::dynamic_pointer_cast<CRepository>(*i);
     VECADDONS newAddons = GrabAddons(repo);
     MergeAddons(addons, newAddons);
   }

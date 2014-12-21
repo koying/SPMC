@@ -25,7 +25,7 @@
 #include "WebServer.h"
 
 #ifdef HAS_WEB_SERVER
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include "URL.h"
 #include "Util.h"
@@ -70,7 +70,7 @@ typedef struct ConnectionHandler
 } ConnectionHandler;
 
 typedef struct {
-  boost::shared_ptr<CFile> file;
+  std::shared_ptr<CFile> file;
   HttpRanges ranges;
   size_t rangeCount;
   int64_t rangesLength;
@@ -396,7 +396,7 @@ int CWebServer::CreateRedirect(struct MHD_Connection *connection, const string &
 
 int CWebServer::CreateFileDownloadResponse(struct MHD_Connection *connection, const string &strURL, HTTPMethod methodType, struct MHD_Response *&response, int &responseCode)
 {
-  boost::shared_ptr<CFile> file = boost::make_shared<CFile>();
+  std::shared_ptr<CFile> file = std::make_shared<CFile>();
 
 #ifdef WEBSERVER_DEBUG
   CLog::Log(LOGDEBUG, "webserver  [IN] %s", strURL.c_str());
