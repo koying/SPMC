@@ -70,7 +70,6 @@ private:
   am_private_t    *am_private;
   CDVDStreamInfo   m_hints;
   volatile int     m_speed;
-  volatile int64_t m_1st_pts;
   volatile int64_t m_cur_pts;
   volatile int64_t m_cur_pictcnt;
   volatile int64_t m_old_pictcnt;
