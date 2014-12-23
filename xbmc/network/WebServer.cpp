@@ -416,7 +416,6 @@ int CWebServer::CreateFileDownloadResponse(struct MHD_Connection *connection, co
     std::string ext = URIUtils::GetExtension(strURL);
     StringUtils::ToLower(ext);
     string mimeType = CreateMimeTypeFromExtension(ext.c_str());
-
     if (methodType != HEAD)
     {
       int64_t firstPosition = 0;
