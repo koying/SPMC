@@ -433,7 +433,7 @@ int CWebServer::CreateFileDownloadResponse(struct MHD_Connection *connection, co
     int64_t firstPosition = 0;
     int64_t lastPosition = fileLength - 1;
     uint64_t totalLength = 0;
-    std::auto_ptr<HttpFileDownloadContext> context(new HttpFileDownloadContext());
+    std::unique_ptr<HttpFileDownloadContext> context(new HttpFileDownloadContext());
     context->file = file;
     context->rangesLength = fileLength;
     context->contentType = mimeType;
