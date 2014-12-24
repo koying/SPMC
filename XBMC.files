@@ -9641,3 +9641,7 @@ xbmc/android/jni/PackageItemInfo.h
 xbmc/android/jni/PackageItemInfo.cpp
 xbmc/android/jni/DisplayMetrics.h
 xbmc/android/jni/DisplayMetrics.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnFrameAvailableListener.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java.in
