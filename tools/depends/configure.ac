@@ -125,9 +125,9 @@ case $host in
     if test "x$use_cpu" = "xarmeabi-v7a"; then
       platform_cflags+=" -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=neon"
     fi
-    platform_ldflags="-L$prefix/$deps_dir/lib/$use_sdk"
+    platform_ldflags="-isysroot $use_toolchain/sysroot -L$prefix/$deps_dir/lib/$use_sdk"
     platform_cxxflags="$platform_cflags -frtti"
-    platform_includes="-I$prefix/$deps_dir/include/$use_sdk"
+    platform_includes="-isysroot $use_toolchain/sysroot -I$prefix/$deps_dir/include/$use_sdk"
     platform_os="android"
     #android builds are always cross
     cross_compiling="yes"
@@ -139,9 +139,9 @@ case $host in
     use_sdk="${use_sdk:-android-17}"
     deps_dir="$use_host-$use_sdk"
     platform_cflags="-DANDROID -Os -fexceptions"
-    platform_ldflags="-L$prefix/$deps_dir/lib/$use_sdk"
+    platform_ldflags="-isysroot $use_toolchain/sysroot -L$prefix/$deps_dir/lib/$use_sdk"
     platform_cxxflags="$platform_cflags -frtti"
-    platform_includes="-I$prefix/$deps_dir/include/$use_sdk"
+    platform_includes="-isysroot $use_toolchain/sysroot -I$prefix/$deps_dir/include/$use_sdk"
     platform_os="android"
     #android builds are always cross
     cross_compiling="yes"
