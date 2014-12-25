@@ -32,6 +32,10 @@
 #include "cores/VideoRenderers/RenderManager.h"
 #include "guilib/GraphicContext.h"
 
+#if __cplusplus >= 201103L
+#define char16_t LIBRARY_char16_t
+#define char32_t LIBRARY_char32_t
+#endif
 #include <utils/RefBase.h>
 #include <binder/ProcessState.h>
 #include <media/stagefright/OMXClient.h>
@@ -43,6 +47,10 @@
 #include <ui/PixelFormat.h>
 #include <gui/SurfaceTexture.h>
 #include <media/stagefright/MediaSource.h>
+#if __cplusplus >= 201103L
+#undef char16_t
+#undef char32_t
+#endif
 
 #include "threads/Thread.h"
 #include "libavcodec/avcodec.h"
