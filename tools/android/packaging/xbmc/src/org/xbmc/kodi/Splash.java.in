@@ -349,7 +349,7 @@ public class Splash extends Activity
 
   private void SetupEnvironment()
   {
-    sXbmcHome = System.getProperty("xbmc.home", "");
+    sXbmcHome = System.getProperty("@APP_NAME@.home", "");
     if (!sXbmcHome.isEmpty())
     {
       fXbmcHome = new File(sXbmcHome);
@@ -408,7 +408,7 @@ public class Splash extends Activity
     fPackagePath = new File(sPackagePath);
     if (fPackagePath.length() < 50 * 1024 * 1024)
     {
-      sPackagePath = System.getProperty("xbmc.obb", "");
+      sPackagePath = System.getProperty("@APP_NAME@.obb", "");
       if (sPackagePath.equals(""))
       {
         try
