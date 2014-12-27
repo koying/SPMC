@@ -86,11 +86,11 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
   std::string appName = CCompileInfo::GetAppName();
   StringUtils::ToLower(appName);
-  std::string mainClass = "org/xbmc/" + appName + "/Main";
-  std::string bcReceiver = "org/xbmc/" + appName + "/XBMCBroadcastReceiver";
-  std::string frameListener = "org/xbmc/" + appName + "/XBMCOnFrameAvailableListener";
-  std::string settingsObserver = "org/xbmc/" + appName + "/XBMCSettingsContentObserver";
-  std::string audioFocusChangeListener = "org/xbmc/" + appName + "/XBMCOnAudioFocusChangeListener";
+  std::string mainClass = "com/semperpax/" + appName + "/Main";
+  std::string bcReceiver = "com/semperpax/" + appName + "/XBMCBroadcastReceiver";
+  std::string frameListener = "com/semperpax/" + appName + "/XBMCOnFrameAvailableListener";
+  std::string settingsObserver = "com/semperpax/" + appName + "/XBMCSettingsContentObserver";
+  std::string audioFocusChangeListener = "com/semperpax/" + appName + "/XBMCOnAudioFocusChangeListener";
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
