@@ -302,9 +302,9 @@ int CPVRDatabase::Get(CPVRChannelGroupInternal &results)
       }
       m_pDS->close();
     }
-    catch (...)
+    catch (DbErrors &error)
     {
-      CLog::Log(LOGERROR, "PVR - %s - couldn't load channels from the database", __FUNCTION__);
+      CLog::Log(LOGERROR, "PVR - %s - couldn't load channels from the database: %s", __FUNCTION__, error.getMsg());
     }
   }
   else
