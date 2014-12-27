@@ -1,4 +1,4 @@
-package org.xbmc.@APP_NAME_LC@;
+package com.semperpax.@APP_NAME_LC@;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
