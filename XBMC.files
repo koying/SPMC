@@ -9483,7 +9483,6 @@ android-ext-player.patch
 copying.txt
 gitrev.sh
 xbmc-xrandr.c
-tools/android/packaging/xbmc/AndroidManifest.xml
 tools/android/packaging/xbmc/src/com/semperpax/xbmc/XBMCBroadcastReceiver.java
 tools/android/packaging/xbmc/src/com/semperpax/xbmc/Splash.java
 tools/android/packaging/xbmc/src/com/semperpax/xbmc/Main.java
@@ -9521,8 +9520,6 @@ xbmc/android/activity/AndroidJoyStick.h
 xbmc/android/activity/AndroidJoyStick.cpp
 tools/android/packaging/xbmc/src/org/xbmc/xbmc/XBMCOnFrameAvailableListener.java
 tools/android/packaging/xbmc/src/org/xbmc/xbmc/XBMCBroadcastReceiver.java
-tools/android/packaging/xbmc/src/org/xbmc/xbmc/Splash.java
-tools/android/packaging/xbmc/src/org/xbmc/xbmc/Main.java
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h
 xbmc/cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS/Makefile.in
@@ -9645,3 +9642,4 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnFrameAvailableListener.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java.in
+tools/android/packaging/xbmc/AndroidManifest.xml.in
