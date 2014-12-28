@@ -40,8 +40,6 @@
 
 static void aml_hdmi_3D_mode(const std::string mode3d)
 {
-  CLog::Log(LOGDEBUG, "aml_hdmi_3D_mode: %s", mode3d.c_str());
-
   static std::string oldhdmi3dmode = MODE_HDMI3D_OFF;
   static bool reset_disp_mode = false;
 
@@ -194,7 +192,6 @@ void aml_set_stereo_mode(const int mode, const int view)
   if (last_mode == mode)
     return;
 
-  CLog::Log(LOGDEBUG, "aml_set_stereo_mode:mode(0x%x)", mode);
   if (!aml_supports_stereo(mode))
   {
     last_mode = mode;
