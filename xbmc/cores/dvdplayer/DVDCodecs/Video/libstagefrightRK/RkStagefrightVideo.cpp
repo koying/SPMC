@@ -435,15 +435,6 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
         return false;
     mimetype = "video/mpeg2";
     break;
-  case AV_CODEC_ID_VP3:
-  case AV_CODEC_ID_VP6:
-  case AV_CODEC_ID_VP6F:
-      if (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
-          || (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
-          || (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "hd" && hints.width <= 800))
-        return false;
-    mimetype = "video/vp6";
-    break;
     case AV_CODEC_ID_VP8:
       if (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
           || (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
