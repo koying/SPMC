@@ -1124,11 +1124,8 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
   }
 
   //correct any pattern in the timestamps
-  if (m_output.color_format != RENDER_FMT_BYPASS)
-  {
-    m_pullupCorrection.Add(pts);
-    pts += m_pullupCorrection.GetCorrection();
-  }
+  m_pullupCorrection.Add(pts);
+  pts += m_pullupCorrection.GetCorrection();
 
   //try to calculate the framerate
   CalcFrameRate();
@@ -1142,11 +1139,8 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
     pts -= DVD_TIME_BASE * interval;
   }
 
-  if (m_output.color_format != RENDER_FMT_BYPASS)
-  {
-    // Correct pts by user set delay and rendering delay
-    pts += m_iVideoDelay - DVD_SEC_TO_TIME(g_renderManager.GetDisplayLatency());
-  }
+  // Correct pts by user set delay and rendering delay
+  pts += m_iVideoDelay - DVD_SEC_TO_TIME(g_renderManager.GetDisplayLatency());
 
   if (m_speed < 0)
   {
