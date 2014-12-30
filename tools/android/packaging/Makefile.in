@@ -15,7 +15,7 @@ COPYDIRS = system addons language media
 GCC_VERSION=$(shell $(CC) -dumpversion)
 ZIP=zip
 
-SIGN_STORE=~/.android/debug.keystore
+SIGN_STORE=~/.android/spmc.keystore
 SIGN_STOREPASS=android
 SIGN_KEY=androiddebugkey
 SIGN_KEYPASS=
