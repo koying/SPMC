@@ -3,7 +3,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.semperpax.@APP_NAME_LC@"
     android:installLocation="auto"
-    android:versionCode="@APP_VERSION_CODE@"
+    android:versionCode="@APP_VERSION_CODE@00"
     android:versionName="@APP_VERSION@" >
 
     <!-- This is the platform API where NativeActivity was introduced. -->
