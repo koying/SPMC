@@ -18,6 +18,8 @@ DEPENDS = \
 	xbmc-pvr-addons xbmc-audioencoder-addons \
 	pythonmodule-pil libxslt ffmpeg
 
+FFMPEG_DEPENDS = gnutls
+
 ifeq ($(ENABLE_GPLV3),1)
   DEPENDS+=samba-gplv3 libcdio-gplv3
 else
@@ -26,12 +28,12 @@ endif
 
 ifeq ($(OS),ios)
   DEPENDS += Backrow
-  EXCLUDED_DEPENDS = libcec libusb gmp nettle gnutls
+  EXCLUDED_DEPENDS = libcec libusb
 endif
 
 ifeq ($(OS),osx)
   DEPENDS += libGLEW libsdl
-  EXCLUDED_DEPENDS = libusb gmp nettle gnutls
+  EXCLUDED_DEPENDS = libusb
 endif
 
 ifeq ($(OS),android)
@@ -39,7 +41,6 @@ ifeq ($(OS),android)
   ifeq ($(findstring arm,$(CPU)),arm)
     DEPENDS += android-rockchip-vpu
   endif
-  FFMPEG_DEPENDS = gnutls
 endif
 
 DEPENDS := $(filter-out $(EXCLUDED_DEPENDS),$(DEPENDS))
@@ -66,7 +67,6 @@ ifeq ($(OS),linux)
   endif
   DEPENDS += alsa-lib
   ALSA_LIB = alsa-lib
-  FFMPEG_DEPENDS = gnutls
 endif
 
 .PHONY: $(DEPENDS)
