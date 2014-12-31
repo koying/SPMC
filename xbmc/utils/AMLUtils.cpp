@@ -55,8 +55,8 @@ static void aml_hdmi_3D_mode(const std::string mode3d)
     if (reset_disp_mode)
     {
       // Some 3D HDTVs will not exit from 3D mode with 3doff
-      char disp_mode[256] = {};
-      if (SysfsUtils::GetString("/sys/class/display/mode", disp_mode, 255) != -1)
+      std::string disp_mode;
+      if (SysfsUtils::GetString("/sys/class/display/mode", disp_mode) != -1)
       {
         SysfsUtils::SetInt("/sys/class/graphics/fb0/blank", 1);
         // Setting the same mode does not reset HDMI on M8
@@ -118,11 +118,11 @@ bool aml_supports_stereo(const int mode)
     return last_rtn;
   }
 
-  if (mode == RENDER_STEREO_MODE_INTERLACED && strstr(disp_cap_3di.c_str(),"FramePacking"))
+  if (mode == RENDER_STEREO_MODE_INTERLACED && disp_cap_3d.find("FramePacking") != std::string::npos)
     last_rtn = true;
-  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL && strstr(disp_cap_3d.c_str(),"TopBottom"))
+  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL && disp_cap_3d.find("TopBottom") != std::string::npos)
     last_rtn = true;
-  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL && strstr(disp_cap_3d.c_str(),"SidebySide"))
+  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL && disp_cap_3d.find("SidebySide") != std::string::npos)
     last_rtn = true;
 
   last_mode = mode;
