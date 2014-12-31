@@ -47,7 +47,7 @@ static void aml_hdmi_3D_mode(const std::string mode3d)
   if (mode3d == oldhdmi3dmode)
     return;
 
-  aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
+  SysfsUtils::SetString("/sys/class/amhdmitx/amhdmitx0/config", mode3d.c_str());
   oldhdmi3dmode = mode3d;
 
   if (strstr(mode3d.c_str(), MODE_HDMI3D_OFF))
@@ -55,14 +55,14 @@ static void aml_hdmi_3D_mode(const std::string mode3d)
     if (reset_disp_mode)
     {
       // Some 3D HDTVs will not exit from 3D mode with 3doff
-      char disp_mode[256] = {};
-      if (aml_get_sysfs_str("/sys/class/display/mode", disp_mode, 255) != -1)
+      std::string disp_mode;
+      if (SysfsUtils::GetString("/sys/class/display/mode", disp_mode) != -1)
       {
-        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 1);
+        SysfsUtils::SetInt("/sys/class/graphics/fb0/blank", 1);
         // Setting the same mode does not reset HDMI on M8
-        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", "720p");
-        aml_set_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_mode", disp_mode);
-        aml_set_sysfs_int("/sys/class/graphics/fb0/blank", 0);
+        SysfsUtils::SetString("/sys/class/amhdmitx/amhdmitx0/disp_mode", "720p");
+        SysfsUtils::SetString("/sys/class/amhdmitx/amhdmitx0/disp_mode", disp_mode);
+        SysfsUtils::SetInt("/sys/class/graphics/fb0/blank", 0);
       }
 
       reset_disp_mode = false;
@@ -109,19 +109,19 @@ bool aml_supports_stereo(const int mode)
   if (last_mode == mode)
     return last_rtn;
 
-  char disp_cap_3d[256] = {};
-  if (aml_get_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_cap_3d", disp_cap_3d, 255) == -1)
+  std::string disp_cap_3d;
+  if (SysfsUtils::GetString("/sys/class/amhdmitx/amhdmitx0/disp_cap_3d", disp_cap_3d) == -1)
   {
     last_rtn = false;
     last_mode = -1;
     return last_rtn;
   }
 
-  if (mode == RENDER_STEREO_MODE_INTERLACED && strstr(disp_cap_3d,"FramePacking"))
+  if (mode == RENDER_STEREO_MODE_INTERLACED && disp_cap_3d.find("FramePacking") != std::string::npos)
     last_rtn = true;
-  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL && strstr(disp_cap_3d,"TopBottom"))
+  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL && disp_cap_3d.find("TopBottom") != std::string::npos)
     last_rtn = true;
-  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL && strstr(disp_cap_3d,"SidebySide"))
+  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL && disp_cap_3d.find("SidebySide") != std::string::npos)
     last_rtn = true;
 
   last_mode = mode;
