@@ -9643,3 +9643,6 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java.in
 tools/android/packaging/xbmc/AndroidManifest.xml.in
+xbmc/utils/SysfsUtils.h
+xbmc/utils/SysfsUtils.cpp
+xbmc/utils/Makefile.in
