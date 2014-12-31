@@ -27,6 +27,7 @@
   #include "android/activity/XBMCApp.h"
 #endif
 #include "utils/StringUtils.h"
+#include "utils/SysfsUtils.h"
 #include "utils/AMLUtils.h"
 
 bool CEGLNativeTypeAmlAndroid::CheckCompatibility()
@@ -41,9 +42,9 @@ bool CEGLNativeTypeAmlAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 {
   CEGLNativeTypeAndroid::GetNativeResolution(&m_fb_res);
 
-  char mode[256] = {0};
+  std::string mode;
   RESOLUTION_INFO hdmi_res;
-  if (aml_get_sysfs_str("/sys/class/display/mode", mode, 255) == 0 && aml_mode_to_resolution(mode, &hdmi_res))
+  if (SysfsUtils::GetString("/sys/class/display/mode", mode) == 0 && aml_mode_to_resolution(mode.c_str(), &hdmi_res))
   {
     m_curHdmiResolution = mode;
     *res = hdmi_res;
@@ -137,8 +138,8 @@ bool CEGLNativeTypeAmlAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &re
 {
   CEGLNativeTypeAndroid::GetNativeResolution(&m_fb_res);
 
-  char valstr[256] = {0};
-  if (aml_get_sysfs_str("/sys/class/amhdmitx/amhdmitx0/disp_cap", valstr, 255) < 0)
+  std::string valstr;
+  if (SysfsUtils::GetString("/sys/class/amhdmitx/amhdmitx0/disp_cap", valstr) < 0)
     return false;
   std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
 
@@ -173,7 +174,7 @@ bool CEGLNativeTypeAmlAndroid::SetDisplayResolution(const char *resolution)
     return true;
 
   // switch display resolution
-  if (aml_set_sysfs_str("/sys/class/display/mode", resolution) < 0)
+  if (SysfsUtils::SetString("/sys/class/display/mode", resolution) < 0)
     return false;
 
   m_curHdmiResolution = resolution;
