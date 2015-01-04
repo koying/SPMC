@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <string>
+#include <string.h>
 
 int SysfsUtils::SetString(const std::string& path, const std::string& valstr)
 {
@@ -81,11 +81,15 @@ int SysfsUtils::GetInt(const std::string& path, int& val)
   int fd = open(path.c_str(), O_RDONLY);
   if (fd >= 0)
   {
-    char bcmd[16];
-    read(fd, bcmd, sizeof(bcmd));
-    val = strtol(bcmd, NULL, 16);
+    char bcmd[16] = {0};
+    ssize_t sz = read(fd, bcmd, sizeof(bcmd));
+    if (sz > 0)
+    {
+      val = strtol(bcmd, NULL, 16);
+      close(fd);
+      return 0;
+    }
     close(fd);
-    return 0;
   }
 
   CLog::Log(LOGERROR, "%s: error reading %s",__FUNCTION__, path.c_str());
