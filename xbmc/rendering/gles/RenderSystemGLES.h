@@ -39,8 +39,6 @@ enum ESHADERMETHOD
   SM_TEXTURE_RGBA,
   SM_TEXTURE_RGBA_OES,
   SM_TEXTURE_RGBA_BLENDCOLOR,
-  SM_TEXTURE_RGBA_BLEND,
-  SM_TEXTURE_RGBA_OES_BLEND,
   SM_ESHADERCOUNT
 };
 
@@ -91,8 +89,7 @@ public:
   GLint GUIShaderGetCoord0();
   GLint GUIShaderGetCoord1();
   GLint GUIShaderGetUniCol();
-  GLint GUIShaderGetCoord0Matrix(); 
-  GLint GUIShaderGetBlendOffset();
+  GLint GUIShaderGetCoord0Matrix();
 
 protected:
   virtual void SetVSyncImpl(bool enable) = 0;
