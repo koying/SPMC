@@ -266,7 +266,6 @@ void CGUIDialogVideoSettings::InitializeSettings()
   entries.push_back(make_pair(16331, VS_INTERLACEMETHOD_MMAL_ADVANCED_HALF));
   entries.push_back(make_pair(16332, VS_INTERLACEMETHOD_MMAL_BOB));
   entries.push_back(make_pair(16333, VS_INTERLACEMETHOD_MMAL_BOB_HALF));
-  entries.push_back(make_pair(20131, VS_INTERLACEMETHOD_GLES_BLEND));
 
   /* remove unsupported methods */
   for (StaticIntegerSettingOptions::iterator it = entries.begin(); it != entries.end(); )

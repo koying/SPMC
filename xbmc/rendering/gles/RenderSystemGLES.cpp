@@ -43,9 +43,7 @@ static const char* ShaderNames[SM_ESHADERCOUNT] =
      "guishader_frag_multi_blendcolor.glsl",
      "guishader_frag_rgba.glsl",
      "guishader_frag_rgba_oes.glsl",
-     "guishader_frag_rgba_blendcolor.glsl",
-     "guishader_frag_rgba_blend.glsl",
-     "guishader_frag_rgba_blend_oes.glsl"
+     "guishader_frag_rgba_blendcolor.glsl"
     };
 
 CRenderSystemGLES::CRenderSystemGLES()
@@ -654,14 +652,6 @@ GLint CRenderSystemGLES::GUIShaderGetCoord0Matrix()
 {
   if (m_pGUIshader[m_method])
     return m_pGUIshader[m_method]->GetCoord0MatrixLoc();
-
-  return -1;
-}
-
-GLint CRenderSystemGLES::GUIShaderGetBlendOffset()
-{
-  if (m_pGUIshader[m_method])
-    return m_pGUIshader[m_method]->GetBlendOffsetLoc();
 
   return -1;
 }
