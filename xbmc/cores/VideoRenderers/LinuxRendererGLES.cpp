@@ -1478,15 +1478,7 @@ void CLinuxRendererGLES::RenderEglImage(int index, int field)
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(m_textureTarget, plane.id);
 
-  EDEINTERLACEMODE DeintMode = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
-  if (DeintMode != VS_DEINTERLACEMODE_OFF)
-  {
-    g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA_BLEND);
-    GLint   offsetLoc = g_Windowing.GUIShaderGetBlendOffset();
-    glUniform1f(offsetLoc, (GLfloat) 1.0f / plane.texwidth);
-  }
-  else
-    g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA);
+  g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA);
 
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat ver[4][4];
@@ -1551,15 +1543,7 @@ void CLinuxRendererGLES::RenderSurfaceTexture(int index, int field)
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_EXTERNAL_OES, plane.id);
 
-  EDEINTERLACEMODE DeintMode = CMediaSettings::Get().GetCurrentVideoSettings().m_DeinterlaceMode;
-  if (DeintMode != VS_DEINTERLACEMODE_OFF)
-  {
-    g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA_OES_BLEND);
-    GLint   offsetLoc = g_Windowing.GUIShaderGetBlendOffset();
-    glUniform1f(offsetLoc, (GLfloat) 1.0f / plane.texwidth);
-  }
-  else
-    g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA_OES);
+  g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA_OES);
 
   glUniformMatrix4fv(g_Windowing.GUIShaderGetCoord0Matrix(), 1, GL_FALSE, m_textureMatrix);
 
@@ -2866,6 +2850,9 @@ bool CLinuxRendererGLES::Supports(EDEINTERLACEMODE mode)
   if(m_renderMethod & RENDER_OMXEGL)
     return false;
 
+  if(m_renderMethod & RENDER_EGLIMG)
+    return false;
+
   if(m_renderMethod & RENDER_CVREF)
     return false;
 
@@ -2891,21 +2878,11 @@ bool CLinuxRendererGLES::Supports(EINTERLACEMETHOD method)
   if(m_renderMethod & RENDER_OMXEGL)
     return false;
 
-  if(m_renderMethod & RENDER_MEDIACODEC)
-  {
-    if (method == VS_INTERLACEMETHOD_GLES_BLEND)
-      return true;
-    else
-      return false;
-  }
-
   if(m_renderMethod & RENDER_EGLIMG)
-  {
-    if (method == VS_INTERLACEMETHOD_GLES_BLEND)
-      return true;
-    else
-      return false;
-  }
+    return false;
+
+  if(m_renderMethod & RENDER_MEDIACODEC)
+    return false;
 
   if(m_renderMethod & RENDER_CVREF)
     return false;
@@ -2916,7 +2893,7 @@ bool CLinuxRendererGLES::Supports(EINTERLACEMETHOD method)
   if(method == VS_INTERLACEMETHOD_AUTO)
     return true;
 
-#if !defined(TARGET_ANDROID) && (defined(__i386__) || defined(__x86_64__))
+#if defined(__i386__) || defined(__x86_64__)
   if(method == VS_INTERLACEMETHOD_DEINTERLACE
   || method == VS_INTERLACEMETHOD_DEINTERLACE_HALF
   || method == VS_INTERLACEMETHOD_SW_BLEND)
@@ -2959,10 +2936,7 @@ EINTERLACEMETHOD CLinuxRendererGLES::AutoInterlaceMethod()
     return VS_INTERLACEMETHOD_NONE;
 
   if(m_renderMethod & RENDER_EGLIMG)
-    return VS_INTERLACEMETHOD_GLES_BLEND;
-
-  if(m_renderMethod & RENDER_MEDIACODEC)
-    return VS_INTERLACEMETHOD_GLES_BLEND;
+    return VS_INTERLACEMETHOD_NONE;
 
   if(m_renderMethod & RENDER_CVREF)
     return VS_INTERLACEMETHOD_NONE;
@@ -2970,7 +2944,7 @@ EINTERLACEMETHOD CLinuxRendererGLES::AutoInterlaceMethod()
   if(m_renderMethod & RENDER_IMXMAP)
     return VS_INTERLACEMETHOD_NONE;
 
-#if !defined(TARGET_ANDROID) && ( defined(__i386__) || defined(__x86_64__))
+#if defined(__i386__) || defined(__x86_64__)
   return VS_INTERLACEMETHOD_DEINTERLACE_HALF;
 #else
   return VS_INTERLACEMETHOD_SW_BLEND;
