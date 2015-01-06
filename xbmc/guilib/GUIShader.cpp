@@ -42,7 +42,6 @@ CGUIShader::CGUIShader( const char *shader ) : CGLSLShaderProgram("guishader_ver
   m_hCord1  = 0;
   m_hUniCol = 0;
   m_hCoord0Matrix = 0;
-  m_hOffset = 0;
 
   m_proj   = NULL;
   m_model  = NULL;
@@ -56,7 +55,6 @@ void CGUIShader::OnCompiledAndLinked()
   m_hTex0   = glGetUniformLocation(ProgramHandle(), "m_samp0");
   m_hTex1   = glGetUniformLocation(ProgramHandle(), "m_samp1");
   m_hUniCol   = glGetUniformLocation(ProgramHandle(), "m_unicol");
-  m_hOffset  = glGetUniformLocation(ProgramHandle(),  "m_blendoffset");
 
   // Variables passed directly to the Vertex shader
   m_hProj  = glGetUniformLocation(ProgramHandle(), "m_proj");
@@ -92,7 +90,6 @@ bool CGUIShader::OnEnabled()
 
   glUniformMatrix4fv(m_hProj,  1, GL_FALSE, g_matrices.GetMatrix(MM_PROJECTION));
   glUniformMatrix4fv(m_hModel, 1, GL_FALSE, g_matrices.GetMatrix(MM_MODELVIEW));
-  glUniform1f(m_hOffset, 0.0f);
 
   return true;
 }
