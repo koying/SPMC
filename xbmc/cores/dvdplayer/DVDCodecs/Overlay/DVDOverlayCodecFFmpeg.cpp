@@ -242,7 +242,6 @@ CDVDOverlay* CDVDOverlayCodecFFmpeg::GetOverlay()
     if (rect.pict.data[0] == NULL)
       return NULL;
 
-    CLog::Log(LOGDEBUG, "rect: %d x %d x %d x %d size: %d x %d", rect.x, rect.y, rect.w, rect.h, m_pCodecContext->width, m_pCodecContext->height);
     RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
     if (stereo_mode ==RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
     {
