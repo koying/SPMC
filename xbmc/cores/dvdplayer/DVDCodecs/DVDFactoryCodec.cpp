@@ -211,10 +211,9 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
      if ( (pCodec = OpenCodec(new CDVDVideoCodecLibMpeg2(), hint, options)) ) return pCodec;
   }
 
-#if defined(HAS_LIBAMCODEC)
   if ((EDECODEMETHOD) CSettings::Get().GetInt("videoplayer.decodingmethod") == VS_DECODEMETHOD_HARDWARE)
   {
-    // amcodec can handle dvd playback.
+#if defined(HAS_LIBAMCODEC)
     if (!hint.software && CSettings::Get().GetBool("videoplayer.useamcodec"))
     {
       switch(hint.codec)
