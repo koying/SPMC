@@ -9646,3 +9646,5 @@ tools/android/packaging/xbmc/AndroidManifest.xml.in
 xbmc/utils/SysfsUtils.h
 xbmc/utils/SysfsUtils.cpp
 xbmc/utils/Makefile.in
+system/shaders/guishader_frag_rgba_bob.glsl
+system/shaders/guishader_frag_rgba_bob_oes.glsl
