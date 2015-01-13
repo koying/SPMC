@@ -1107,6 +1107,9 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
 
 void CRkStageFrightVideo::RenderFeaturesCallBack(const void *ctx, Features &renderFeatures)
 {
+  renderFeatures.push_back(RENDERFEATURE_ZOOM);
+  renderFeatures.push_back(RENDERFEATURE_STRETCH);
+  renderFeatures.push_back(RENDERFEATURE_PIXEL_RATIO);
 }
 
 void CRkStageFrightVideo::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, const void* render_ctx)
