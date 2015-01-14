@@ -48,6 +48,7 @@ void main()
   offsetU.y -= (temp1 - m_stepY/2.0 + float(m_field)*m_stepY)/2.0;
   offsetV.y -= (temp1 - m_stepY/2.0 + float(m_field)*m_stepY)/2.0;
 
+  /*
   if (temp1 > m_stepY)
   {
     // Blend missing line
@@ -62,19 +63,20 @@ void main()
 
     vec4 yuvBelow, rgbBelow;
 
-    yuv.rgba = vec4(texture2D(m_sampY, offsetY).r, texture2D(m_sampU, offsetU).r, texture2D(m_sampV, offsetV).r, 1.0) * 0.5;
+    yuv.rgba = vec4(texture2D(m_sampY, offsetY).r, texture2D(m_sampU, offsetU).g, texture2D(m_sampV, offsetV).a, 1.0) * 0.5;
     rgb   = m_yuvmat * yuv;
     rgb.a = m_alpha;
 
-    yuvBelow.rgba = vec4(texture2D(m_sampY, belowY).r, texture2D(m_sampU, belowU).r, texture2D(m_sampV, belowV).r, 1.0) * 0.5;
+    yuvBelow.rgba = vec4(texture2D(m_sampY, belowY).r, texture2D(m_sampU, belowU).g, texture2D(m_sampV, belowV).a, 1.0) * 0.5;
     rgbBelow   = m_yuvmat * yuvBelow;
     rgbBelow.a = m_alpha;
 
     gl_FragColor = rgb * 0.5 + rgbBelow * 0.5;
   }
   else
+  */
   {
-    yuv.rgba = vec4(texture2D(m_sampY, offsetY).r, texture2D(m_sampU, offsetU).r, texture2D(m_sampV, offsetV).r, 1.0);
+    yuv.rgba = vec4(texture2D(m_sampY, offsetY).r, texture2D(m_sampU, offsetU).g, texture2D(m_sampV, offsetV).a, 1.0);
 
     rgb   = m_yuvmat * yuv;
     rgb.a = m_alpha;

@@ -812,7 +812,7 @@ void CLinuxRendererGLES::LoadShaders(int field)
         m_pYUVProgShader = new YUV2RGBProgressiveShader(false, m_iFlags, m_format);
         m_pYUVBobShader = new YUV2RGBBobShader(false, m_iFlags, m_format);
         if ((m_pYUVProgShader && m_pYUVProgShader->CompileAndLink())
-            && (m_pYUVProgShader && m_pYUVProgShader->CompileAndLink()))
+            && (m_pYUVBobShader && m_pYUVBobShader->CompileAndLink()))
         {
           m_renderMethod = RENDER_GLSL;
           UpdateVideoFilter();
@@ -1074,7 +1074,8 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
 {
   YV12Image &im     = m_buffers[index].image;
   YUVFIELDS &fields = m_buffers[index].fields;
-  YUVPLANES &planes = fields[field];
+  YUVPLANES &planes = fields[FIELD_FULL];
+  YUVPLANES &planesf = fields[field];
 
   if (m_reloadShaders)
   {
@@ -1150,10 +1151,10 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
   // Setup texture coordinates
   for (int i=0; i<3; i++)
   {
-    m_tex[i][0][0] = m_tex[i][3][0] = planes[i].rect.x1;
-    m_tex[i][0][1] = m_tex[i][1][1] = planes[i].rect.y1 * (field != FIELD_FULL ? 2.0f : 1.0f);
-    m_tex[i][1][0] = m_tex[i][2][0] = planes[i].rect.x2;
-    m_tex[i][2][1] = m_tex[i][3][1] = planes[i].rect.y2 * (field != FIELD_FULL ? 2.0f : 1.0f);
+    m_tex[i][0][0] = m_tex[i][3][0] = planesf[i].rect.x1;
+    m_tex[i][0][1] = m_tex[i][1][1] = planesf[i].rect.y1 * (field != FIELD_FULL ? 2.0f : 1.0f);
+    m_tex[i][1][0] = m_tex[i][2][0] = planesf[i].rect.x2;
+    m_tex[i][2][1] = m_tex[i][3][1] = planesf[i].rect.y2 * (field != FIELD_FULL ? 2.0f : 1.0f);
   }
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
@@ -1930,11 +1931,13 @@ void CLinuxRendererGLES::UploadYV12Texture(int source)
     }
   }
 
-  bool deinterlacing;
+  bool deinterlacing = false;
+  /*
   if (m_currentField == FIELD_FULL)
     deinterlacing = false;
   else
     deinterlacing = true;
+    */
 
   glEnable(m_textureTarget);
   VerifyGLState();
