@@ -140,7 +140,8 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   m_flipindex = 0;
   m_currentField = FIELD_FULL;
   m_reloadShaders = 0;
-  m_pYUVShader = NULL;
+  m_pYUVProgShader = NULL;
+  m_pYUVBobShader = NULL;
   m_pVideoFilterShader = NULL;
   m_scalingMethod = VS_SCALINGMETHOD_LINEAR;
   m_scalingMethodGui = (ESCALINGMETHOD)-1;
@@ -200,11 +201,17 @@ CLinuxRendererGLES::~CLinuxRendererGLES()
     m_rgbBuffer = NULL;
   }
 
-  if (m_pYUVShader)
+  if (m_pYUVProgShader)
   {
-    m_pYUVShader->Free();
-    delete m_pYUVShader;
-    m_pYUVShader = NULL;
+    m_pYUVProgShader->Free();
+    delete m_pYUVProgShader;
+    m_pYUVProgShader = NULL;
+  }
+  if (m_pYUVBobShader)
+  {
+    m_pYUVBobShader->Free();
+    delete m_pYUVBobShader;
+    m_pYUVBobShader = NULL;
   }
 }
 
@@ -588,14 +595,18 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
   {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    if (m_pYUVShader)
-      m_pYUVShader->SetAlpha(alpha / 255.0f);
+    if (m_pYUVProgShader)
+      m_pYUVProgShader->SetAlpha(alpha / 255.0f);
+    if (m_pYUVBobShader)
+      m_pYUVBobShader->SetAlpha(alpha / 255.0f);
   }
   else
   {
     glDisable(GL_BLEND);
-    if (m_pYUVShader)
-      m_pYUVShader->SetAlpha(1.0f);
+    if (m_pYUVProgShader)
+      m_pYUVProgShader->SetAlpha(1.0f);
+    if (m_pYUVBobShader)
+      m_pYUVBobShader->SetAlpha(1.0f);
   }
 
   if ((flags & RENDER_FLAG_TOP) && (flags & RENDER_FLAG_BOT))
@@ -731,11 +742,17 @@ void CLinuxRendererGLES::LoadShaders(int field)
   int requestedMethod = CSettings::Get().GetInt("videoplayer.rendermethod");
   CLog::Log(LOGDEBUG, "GL: Requested render method: %d", requestedMethod);
 
-  if (m_pYUVShader)
+  if (m_pYUVProgShader)
   {
-    m_pYUVShader->Free();
-    delete m_pYUVShader;
-    m_pYUVShader = NULL;
+    m_pYUVProgShader->Free();
+    delete m_pYUVProgShader;
+    m_pYUVProgShader = NULL;
+  }
+  if (m_pYUVBobShader)
+  {
+    m_pYUVBobShader->Free();
+    delete m_pYUVBobShader;
+    m_pYUVBobShader = NULL;
   }
 
   switch(requestedMethod)
@@ -789,21 +806,32 @@ void CLinuxRendererGLES::LoadShaders(int field)
       // Try GLSL shaders if supported and user requested auto or GLSL.
       if (glCreateProgram)
       {
-        // create regular progressive scan shader
-        m_pYUVShader = new YUV2RGBProgressiveShader(false, m_iFlags, m_format);
+        // create regular scan shader
         CLog::Log(LOGNOTICE, "GL: Selecting Single Pass YUV 2 RGB shader");
 
-        if (m_pYUVShader && m_pYUVShader->CompileAndLink())
+        m_pYUVProgShader = new YUV2RGBProgressiveShader(false, m_iFlags, m_format);
+        m_pYUVBobShader = new YUV2RGBBobShader(false, m_iFlags, m_format);
+        if ((m_pYUVProgShader && m_pYUVProgShader->CompileAndLink())
+            && (m_pYUVProgShader && m_pYUVProgShader->CompileAndLink()))
         {
           m_renderMethod = RENDER_GLSL;
           UpdateVideoFilter();
           break;
         }
-        else if (m_pYUVShader)
+        else
         {
-          m_pYUVShader->Free();
-          delete m_pYUVShader;
-          m_pYUVShader = NULL;
+          if (m_pYUVProgShader)
+          {
+            m_pYUVProgShader->Free();
+            delete m_pYUVProgShader;
+            m_pYUVProgShader = NULL;
+          }
+          if (m_pYUVBobShader)
+          {
+            m_pYUVBobShader->Free();
+            delete m_pYUVBobShader;
+            m_pYUVBobShader = NULL;
+          }
           CLog::Log(LOGERROR, "GL: Error enabling YUV2RGB GLSL shader");
           // drop through and try SW
         }
@@ -1074,26 +1102,32 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
   glActiveTexture(GL_TEXTURE0);
   VerifyGLState();
 
-  m_pYUVShader->SetBlack(CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
-  m_pYUVShader->SetContrast(CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast * 0.02f);
-  m_pYUVShader->SetWidth(im.width);
-  m_pYUVShader->SetHeight(im.height);
-  if     (field == FIELD_TOP)
-    m_pYUVShader->SetField(1);
-  else if(field == FIELD_BOT)
-    m_pYUVShader->SetField(0);
+  Shaders::BaseYUV2RGBShader *pYUVShader;
+  if (field != FIELD_FULL)
+    pYUVShader = m_pYUVBobShader;
+  else
+    pYUVShader = m_pYUVProgShader;
 
-  m_pYUVShader->SetMatrices(g_matrices.GetMatrix(MM_PROJECTION), g_matrices.GetMatrix(MM_MODELVIEW));
-  m_pYUVShader->Enable();
+  pYUVShader->SetBlack(CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+  pYUVShader->SetContrast(CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  pYUVShader->SetWidth(im.width);
+  pYUVShader->SetHeight(im.height);
+  if     (field == FIELD_TOP)
+    pYUVShader->SetField(1);
+  else if(field == FIELD_BOT)
+    pYUVShader->SetField(0);
+
+  pYUVShader->SetMatrices(g_matrices.GetMatrix(MM_PROJECTION), g_matrices.GetMatrix(MM_MODELVIEW));
+  pYUVShader->Enable();
 
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat m_vert[4][3];
   GLfloat m_tex[3][4][2];
 
-  GLint vertLoc = m_pYUVShader->GetVertexLoc();
-  GLint Yloc    = m_pYUVShader->GetYcoordLoc();
-  GLint Uloc    = m_pYUVShader->GetUcoordLoc();
-  GLint Vloc    = m_pYUVShader->GetVcoordLoc();
+  GLint vertLoc = pYUVShader->GetVertexLoc();
+  GLint Yloc    = pYUVShader->GetYcoordLoc();
+  GLint Uloc    = pYUVShader->GetUcoordLoc();
+  GLint Vloc    = pYUVShader->GetVcoordLoc();
 
   glVertexAttribPointer(vertLoc, 3, GL_FLOAT, 0, 0, m_vert);
   glVertexAttribPointer(Yloc, 2, GL_FLOAT, 0, 0, m_tex[0]);
@@ -1117,16 +1151,16 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
   for (int i=0; i<3; i++)
   {
     m_tex[i][0][0] = m_tex[i][3][0] = planes[i].rect.x1;
-    m_tex[i][0][1] = m_tex[i][1][1] = planes[i].rect.y1;
+    m_tex[i][0][1] = m_tex[i][1][1] = planes[i].rect.y1 * (field != FIELD_FULL ? 2.0f : 1.0f);
     m_tex[i][1][0] = m_tex[i][2][0] = planes[i].rect.x2;
-    m_tex[i][2][1] = m_tex[i][3][1] = planes[i].rect.y2;
+    m_tex[i][2][1] = m_tex[i][3][1] = planes[i].rect.y2 * (field != FIELD_FULL ? 2.0f : 1.0f);
   }
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
 
   VerifyGLState();
 
-  m_pYUVShader->Disable();
+  pYUVShader->Disable();
   VerifyGLState();
 
   glDisableVertexAttribArray(vertLoc);
@@ -1187,7 +1221,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
   VerifyGLState();
 
   // make sure the yuv shader is loaded and ready to go
-  if (!m_pYUVShader || (!m_pYUVShader->OK()))
+  if (!m_pYUVProgShader || (!m_pYUVProgShader->OK()))
   {
     CLog::Log(LOGERROR, "GL: YUV shader not active, cannot do multipass render");
     return;
@@ -1196,14 +1230,14 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
   m_fbo.BeginRender();
   VerifyGLState();
 
-  m_pYUVShader->SetBlack(CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
-  m_pYUVShader->SetContrast(CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast * 0.02f);
-  m_pYUVShader->SetWidth(im.width);
-  m_pYUVShader->SetHeight(im.height);
+  m_pYUVProgShader->SetBlack(CMediaSettings::Get().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+  m_pYUVProgShader->SetContrast(CMediaSettings::Get().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  m_pYUVProgShader->SetWidth(im.width);
+  m_pYUVProgShader->SetHeight(im.height);
   if     (field == FIELD_TOP)
-    m_pYUVShader->SetField(1);
+    m_pYUVProgShader->SetField(1);
   else if(field == FIELD_BOT)
-    m_pYUVShader->SetField(0);
+    m_pYUVProgShader->SetField(0);
 
   VerifyGLState();
 //TODO
@@ -1225,7 +1259,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
   VerifyGLState();
 
 
-  if (!m_pYUVShader->Enable())
+  if (!m_pYUVProgShader->Enable())
   {
     CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
   }
@@ -1265,7 +1299,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
 //  glEnd();
 //  VerifyGLState();
 
-  m_pYUVShader->Disable();
+  m_pYUVProgShader->Disable();
 
   g_matrices.MatrixMode(MM_MODELVIEW);
   g_matrices.PopMatrix(); // pop modelview
@@ -2948,14 +2982,16 @@ bool CLinuxRendererGLES::Supports(EINTERLACEMETHOD method)
   if(method == VS_INTERLACEMETHOD_AUTO)
     return true;
 
-#if !defined(TARGET_ANDROID) && (defined(__i386__) || defined(__x86_64__))
-  if(method == VS_INTERLACEMETHOD_DEINTERLACE
-  || method == VS_INTERLACEMETHOD_DEINTERLACE_HALF
-  || method == VS_INTERLACEMETHOD_SW_BLEND)
-#else
-  if(method == VS_INTERLACEMETHOD_SW_BLEND)
-#endif
+  switch (method)
+  {
+  case VS_INTERLACEMETHOD_RENDER_BOB:
+  case VS_INTERLACEMETHOD_RENDER_BOB_INVERTED:
+  case VS_INTERLACEMETHOD_SW_BLEND:
     return true;
+
+  default:
+    break;
+  }
 
   return false;
 }
@@ -3005,7 +3041,7 @@ EINTERLACEMETHOD CLinuxRendererGLES::AutoInterlaceMethod()
 #if !defined(TARGET_ANDROID) && (defined(__i386__) || defined(__x86_64__))
   return VS_INTERLACEMETHOD_DEINTERLACE_HALF;
 #else
-  return VS_INTERLACEMETHOD_SW_BLEND;
+  return VS_INTERLACEMETHOD_RENDER_BOB;
 #endif
 }
 
