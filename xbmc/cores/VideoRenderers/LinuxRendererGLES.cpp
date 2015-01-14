@@ -1528,20 +1528,10 @@ void CLinuxRendererGLES::RenderEglImage(int index, int field)
     ver[i][3] = 1.0f;
   }
 
-  if (field == FIELD_FULL)
-  {
-    tex[0][0] = tex[3][0] = plane.rect.x1;
-    tex[0][1] = tex[1][1] = plane.rect.y1;
-    tex[1][0] = tex[2][0] = plane.rect.x2;
-    tex[2][1] = tex[3][1] = plane.rect.y2;
-  }
-  else
-  {
-    tex[0][0] = tex[3][0] = planef.rect.x1;
-    tex[0][1] = tex[1][1] = planef.rect.y1 * 2.0f;
-    tex[1][0] = tex[2][0] = planef.rect.x2;
-    tex[2][1] = tex[3][1] = planef.rect.y2 * 2.0f;
-  }
+  tex[0][0] = tex[3][0] = planef.rect.x1;
+  tex[0][1] = tex[1][1] = planef.rect.y1 * (field != FIELD_FULL ? 2.0f : 1.0f);
+  tex[1][0] = tex[2][0] = planef.rect.x2;
+  tex[2][1] = tex[3][1] = planef.rect.y2 * (field != FIELD_FULL ? 2.0f : 1.0f);
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
 
@@ -1617,20 +1607,10 @@ void CLinuxRendererGLES::RenderSurfaceTexture(int index, int field)
   }
 
   // Set texture coordinates (MediaCodec is flipped in y)
-  if (field == FIELD_FULL)
-  {
-    tex[0][0] = tex[3][0] = plane.rect.x1;
-    tex[0][1] = tex[1][1] = plane.rect.y2;
-    tex[1][0] = tex[2][0] = plane.rect.x2;
-    tex[2][1] = tex[3][1] = plane.rect.y1;
-  }
-  else
-  {
-    tex[0][0] = tex[3][0] = planef.rect.x1;
-    tex[0][1] = tex[1][1] = planef.rect.y2 * 2.0f;
-    tex[1][0] = tex[2][0] = planef.rect.x2;
-    tex[2][1] = tex[3][1] = planef.rect.y1 * 2.0f;
-  }
+  tex[0][0] = tex[3][0] = planef.rect.x1;
+  tex[0][1] = tex[1][1] = planef.rect.y2 * (field != FIELD_FULL ? 2.0f : 1.0f);
+  tex[1][0] = tex[2][0] = planef.rect.x2;
+  tex[2][1] = tex[3][1] = planef.rect.y1 * (field != FIELD_FULL ? 2.0f : 1.0f);
 
   for(int i = 0; i < 4; i++)
   {

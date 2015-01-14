@@ -40,13 +40,11 @@ void main ()
   if (temp1 > m_step)
   {
     // Blend missing line
-    vec2 above, below;
-    above.x = source.x;
-    above.y = source.y;
+    vec2 below;
     below.x = source.x;
     below.y = source.y + 2.0*m_step;
 
-    gl_FragColor.rgba = texture2D(m_samp0, above).rgba * 0.5 + texture2D(m_samp0, below).rgba * 0.5;
+    gl_FragColor.rgba = texture2D(m_samp0, source).rgba * 0.5 + texture2D(m_samp0, below).rgba * 0.5;
   }
   else
     gl_FragColor.rgba = texture2D(m_samp0, source).rgba;
