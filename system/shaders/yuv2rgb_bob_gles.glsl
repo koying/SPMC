@@ -60,13 +60,24 @@ void main()
     belowV.x = offsetV.x;
     belowV.y = offsetV.y + m_stepY;
 
+    vec4 yuvBelow, rgbBelow;
+
     yuv.rgba = vec4(texture2D(m_sampY, offsetY).r, texture2D(m_sampU, offsetU).r, texture2D(m_sampV, offsetV).r, 1.0) * 0.5;
-    yuv.rgba += vec4(texture2D(m_sampY, belowY).r, texture2D(m_sampU, belowU).r, texture2D(m_sampV, belowV).r, 1.0) * 0.5;
+    rgb   = m_yuvmat * yuv;
+    rgb.a = m_alpha;
+
+    yuvBelow.rgba = vec4(texture2D(m_sampY, belowY).r, texture2D(m_sampU, belowU).r, texture2D(m_sampV, belowV).r, 1.0) * 0.5;
+    rgbBelow   = m_yuvmat * yuvBelow;
+    rgbBelow.a = m_alpha;
+
+    gl_FragColor = rgb * 0.5 + rgbBelow * 0.5;
   }
   else
+  {
     yuv.rgba = vec4(texture2D(m_sampY, offsetY).r, texture2D(m_sampU, offsetU).r, texture2D(m_sampV, offsetV).r, 1.0);
 
-  rgb   = m_yuvmat * yuv;
-  rgb.a = m_alpha;
-  gl_FragColor = rgb;
+    rgb   = m_yuvmat * yuv;
+    rgb.a = m_alpha;
+    gl_FragColor = rgb;
+  }
 }
