@@ -100,6 +100,10 @@ static PFNGLTEXDIRECTINVALIDATEVIVPROC glTexDirectInvalidateVIV;
 #include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #endif
 
+#ifndef GL_UNPACK_ROW_LENGTH_EXT
+#define GL_UNPACK_ROW_LENGTH_EXT 0x0CF2
+#endif
+
 using namespace Shaders;
 
 CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
@@ -460,15 +464,24 @@ void CLinuxRendererGLES::LoadPlane( YUVPLANE& plane, int type, unsigned flipinde
 
   glBindTexture(m_textureTarget, plane.id);
 
-  // OpenGL ES does not support strided texture input.
   if(stride != width * bps)
   {
-    unsigned char* src = (unsigned char*)data;
-    for (unsigned int y = 0; y < height;++y, src += stride)
-      glTexSubImage2D(m_textureTarget, 0, 0, y, width, 1, type, datatype, src);
-  } else {
-    glTexSubImage2D(m_textureTarget, 0, 0, 0, width, height, type, datatype, pixelData);
+    if (g_Windowing.SupportsEGLSubimage())
+    {
+      glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, stride / bps);
+      glTexSubImage2D(m_textureTarget, 0, 0, 0, width, height, type, datatype, pixelData);
+      glPixelStorei(GL_UNPACK_ROW_LENGTH_EXT, 0);
+    }
+    else
+    {
+      // OpenGL ES does not support strided texture input.
+      unsigned char* src = (unsigned char*)data;
+      for (unsigned int y = 0; y < height;++y, src += stride)
+        glTexSubImage2D(m_textureTarget, 0, 0, y, width, 1, type, datatype, src);
+    }
   }
+  else
+    glTexSubImage2D(m_textureTarget, 0, 0, 0, width, height, type, datatype, pixelData);
 
   /* check if we need to load any border pixels */
   if(height < plane.texheight)
