@@ -117,6 +117,10 @@ bool CRenderSystemGLES::InitRenderSystem()
     m_renderCaps |= RENDER_CAPS_BGRA_APPLE;
   }
 
+  if (IsExtSupported("GL_EXT_unpack_subimage"))
+  {
+    m_renderCaps |= RENDER_CAPS_EGL_SUBIMAGE;
+  }
 
 
   m_bRenderCreated = true;
