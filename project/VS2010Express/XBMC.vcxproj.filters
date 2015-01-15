@@ -3230,6 +3230,8 @@
     <ClCompile Include="..\..\xbmc\pvr\PVRSettings.cpp">
       <Filter>pvr</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMultiSource.cpp">
+      <Filter>cores\dvdplayer\DVDInputStreams</Filte    </ClCompile>
     <ClCompile Include="..\..\xbmc\filesystem\VideoDatabaseFile.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
@@ -6266,6 +6268,9 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\pvr\PVRSettings.h">
       <Filter>pvr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMultiSource.h">
+      <Filter>cores\dvdplayer\DVDInputStreams</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseFile.h">
       <Filter>filesystem</Filter>
