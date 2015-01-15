@@ -746,7 +746,8 @@ bool CApplication::Create()
   CUtil::GetHomePath(strExecutablePath);
 
 #ifdef HAS_XRANDR
-  g_xrandr.LoadCustomModeLinesToAllOutputs();
+  if (!IsHeadless()) // TODO Shouldn't this be in WinSystemX11?
+    g_xrandr.LoadCustomModeLinesToAllOutputs();
 #endif
 
   // for python scripts that check the OS
