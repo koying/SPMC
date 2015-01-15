@@ -50,7 +50,8 @@ enum
   RENDER_CAPS_NPOT     = (1 << 1),
   RENDER_CAPS_DXT_NPOT = (1 << 2),
   RENDER_CAPS_BGRA     = (1 << 3),
-  RENDER_CAPS_BGRA_APPLE = (1 << 4)
+  RENDER_CAPS_BGRA_APPLE = (1 << 4),
+  RENDER_CAPS_EGL_SUBIMAGE = (1 << 5)
 };
 
 enum
@@ -140,6 +141,7 @@ public:
   bool SupportsBGRA() const;
   bool SupportsBGRAApple() const;
   bool SupportsNPOT(bool dxt) const;
+  bool SupportsEGLSubimage() const;
   bool SupportsStereo(RENDER_STEREO_MODE mode) const;
   unsigned int GetMaxTextureSize() const { return m_maxTextureSize; }
   unsigned int GetMinDXTPitch() const { return m_minDXTPitch; }
