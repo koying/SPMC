@@ -678,6 +678,22 @@ GLint CRenderSystemGLES::GUIShaderGetStep()
   return -1;
 }
 
+GLint CRenderSystemGLES::GUIShaderGetContrast()
+{
+  if (m_pGUIshader[m_method])
+    return m_pGUIshader[m_method]->GetContrastLoc();
+
+  return -1;
+}
+
+GLint CRenderSystemGLES::GUIShaderGetBrightness()
+{
+  if (m_pGUIshader[m_method])
+    return m_pGUIshader[m_method]->GetBrightnessLoc();
+
+  return -1;
+}
+
 void CRenderSystemGLES::SetStereoMode(RENDER_STEREO_MODE mode, RENDER_STEREO_VIEW view)
 {
   CRenderSystemBase::SetStereoMode(mode, view);
