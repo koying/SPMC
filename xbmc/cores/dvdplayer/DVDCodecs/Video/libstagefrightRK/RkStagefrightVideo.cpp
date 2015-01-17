@@ -1055,7 +1055,7 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
 
   CRect dst_rect = DestRect;
   RENDER_STEREO_MODE stereo_mode = m_g_graphicsContext->GetStereoMode();
-   if (stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
+  if (stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
   {
     dst_rect.x2 *= 2.0;
   }
@@ -1064,7 +1064,18 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
     dst_rect.y2 *= 2.0;
   }
 
-  int nonstd = ((int)dst_rect.x1<<8) + ((int)dst_rect.y1<<20);
+  if (dst_rect.x1 < 0)
+  {
+    dst_rect.x2 += dst_rect.x1;
+    dst_rect.x1 = 0;
+  }
+  if (dst_rect.y1 < 0)
+  {
+    dst_rect.y2 += dst_rect.y1;
+    dst_rect.y1 = 0;
+  }
+
+  int nonstd = (((int)dst_rect.x1 & 0xfff)<<8) + (((int)dst_rect.y1 & 0xfff)<<20);
   int grayscale = ((int)dst_rect.Width() << 8) + ((int)dst_rect.Height() << 20);
 
   info.nonstd &= 0x00;
