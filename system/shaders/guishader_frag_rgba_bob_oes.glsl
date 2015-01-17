@@ -39,17 +39,11 @@ void main ()
   float temp2 = source.y - temp1;
   source.y = temp2 + m_step/2.0 - float(m_field)*m_step;
   
-  if (temp1 > m_step)
-  {
-    // Blend missing line
-    vec2 above, below;
-    above.x = source.x;
-    above.y = source.y;
-    below.x = source.x;
-    below.y = source.y + 2.0*m_step;
+  // Blend missing line
+  vec2 below;
+  float bstep = step(m_step, temp1);
+  below.x = source.x;
+  below.y = source.y + (2.0*m_step*bstep);
 
-    gl_FragColor.rgba = texture2D(m_samp0, above).rgba * 0.5 + texture2D(m_samp0, below).rgba * 0.5;
-  }
-  else
-    gl_FragColor.rgba = texture2D(m_samp0, source).rgba;
+  gl_FragColor = mix(texture2D(m_samp0, source), texture2D(m_samp0, below), 0.5);
 }
