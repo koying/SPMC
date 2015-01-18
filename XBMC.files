@@ -9648,3 +9648,4 @@ xbmc/utils/SysfsUtils.cpp
 xbmc/utils/Makefile.in
 system/shaders/guishader_frag_rgba_bob.glsl
 system/shaders/guishader_frag_rgba_bob_oes.glsl
+system/shaders/guishader_frag_rgba_oes.glsl
