@@ -205,18 +205,7 @@ CLinuxRendererGLES::~CLinuxRendererGLES()
     m_rgbBuffer = NULL;
   }
 
-  if (m_pYUVProgShader)
-  {
-    m_pYUVProgShader->Free();
-    delete m_pYUVProgShader;
-    m_pYUVProgShader = NULL;
-  }
-  if (m_pYUVBobShader)
-  {
-    m_pYUVBobShader->Free();
-    delete m_pYUVBobShader;
-    m_pYUVBobShader = NULL;
-  }
+  ReleaseShaders();
 }
 
 bool CLinuxRendererGLES::ValidateRenderTarget()
@@ -755,18 +744,7 @@ void CLinuxRendererGLES::LoadShaders(int field)
   int requestedMethod = CSettings::Get().GetInt("videoplayer.rendermethod");
   CLog::Log(LOGDEBUG, "GL: Requested render method: %d", requestedMethod);
 
-  if (m_pYUVProgShader)
-  {
-    m_pYUVProgShader->Free();
-    delete m_pYUVProgShader;
-    m_pYUVProgShader = NULL;
-  }
-  if (m_pYUVBobShader)
-  {
-    m_pYUVBobShader->Free();
-    delete m_pYUVBobShader;
-    m_pYUVBobShader = NULL;
-  }
+  ReleaseShaders();
 
   switch(requestedMethod)
   {
@@ -833,18 +811,7 @@ void CLinuxRendererGLES::LoadShaders(int field)
         }
         else
         {
-          if (m_pYUVProgShader)
-          {
-            m_pYUVProgShader->Free();
-            delete m_pYUVProgShader;
-            m_pYUVProgShader = NULL;
-          }
-          if (m_pYUVBobShader)
-          {
-            m_pYUVBobShader->Free();
-            delete m_pYUVBobShader;
-            m_pYUVBobShader = NULL;
-          }
+          ReleaseShaders();
           CLog::Log(LOGERROR, "GL: Error enabling YUV2RGB GLSL shader");
           // drop through and try SW
         }
@@ -924,6 +891,22 @@ void CLinuxRendererGLES::LoadShaders(int field)
     CLog::Log(LOGDEBUG, "CLinuxRendererGLES: Reorder drawpoints due to method change from %i to %i", m_oldRenderMethod, m_renderMethod);
     ReorderDrawPoints();
     m_oldRenderMethod = m_renderMethod;
+  }
+}
+
+void CLinuxRendererGLES::ReleaseShaders()
+{
+  if (m_pYUVProgShader)
+  {
+    m_pYUVProgShader->Free();
+    delete m_pYUVProgShader;
+    m_pYUVProgShader = NULL;
+  }
+  if (m_pYUVBobShader)
+  {
+    m_pYUVBobShader->Free();
+    delete m_pYUVBobShader;
+    m_pYUVBobShader = NULL;
   }
 }
 
