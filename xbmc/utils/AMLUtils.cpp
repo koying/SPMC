@@ -109,7 +109,6 @@ bool aml_supports_stereo(const int mode)
   if (last_mode == mode)
     return last_rtn;
 
-  CLog::Log(LOGDEBUG, "aml_supports_stereo:mode(0x%x)", mode);
   std::string disp_cap_3d;
   if (SysfsUtils::GetString("/sys/class/amhdmitx/amhdmitx0/disp_cap_3d", disp_cap_3d) == -1)
   {
