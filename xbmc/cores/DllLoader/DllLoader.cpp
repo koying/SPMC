@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "DllLoader.h"
 #include "DllLoaderContainer.h"
 #include "filesystem/SpecialProtocol.h"

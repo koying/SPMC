@@ -1020,7 +1020,7 @@ bool CGUIMediaWindow::OnClick(int iItem)
   }
   else if (pItem->IsAndroidSetting())
   {
-    CStdString intent = URIUtils::GetFileName(pItem->GetPath());
+    std::string intent = URIUtils::GetFileName(pItem->GetPath());
     CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to launch: %s",intent.c_str());
     return CXBMCApp::StartActivity("", intent);
   }

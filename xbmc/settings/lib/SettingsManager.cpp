@@ -26,6 +26,7 @@
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
 
+#include <algorithm>
 
 CSettingsManager::CSettingsManager()
   : m_initialized(false), m_loaded(false)

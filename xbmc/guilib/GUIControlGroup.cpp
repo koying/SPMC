@@ -21,6 +21,8 @@
 #include "GUIControlGroup.h"
 #include "GUIControlProfiler.h"
 
+#include <assert.h>
+
 using namespace std;
 
 CGUIControlGroup::CGUIControlGroup()

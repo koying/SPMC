@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "dbwrappers/dataset.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/VideoSettings.h"

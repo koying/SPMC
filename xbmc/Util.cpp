@@ -1659,7 +1659,7 @@ bool CUtil::Command(const std::vector<std::string>& arrArgs, bool waitExit)
   return (waitExit) ? (WEXITSTATUS(n) == 0) : true;
 }
 
-bool CUtil::SudoCommand(const CStdString &strCommand)
+bool CUtil::SudoCommand(const std::string &strCommand)
 {
   CLog::Log(LOGDEBUG, "Executing sudo command: <%s>", strCommand.c_str());
   pid_t child = fork();

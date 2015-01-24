@@ -9649,3 +9649,11 @@ xbmc/utils/Makefile.in
 system/shaders/guishader_frag_rgba_bob.glsl
 system/shaders/guishader_frag_rgba_bob_oes.glsl
 system/shaders/guishader_frag_rgba_oes.glsl
+xbmc/filesystem/SMBFile.cpp
+xbmc/filesystem/SMBFile.h
+xbmc/filesystem/BlurayFile.h
+xbmc/filesystem/BlurayFile.cpp
+xbmc/input/KeyboardLayoutConfiguration.h
+xbmc/input/KeyboardLayout.h
+xbmc/input/KeyboardLayoutConfiguration.cpp
+xbmc/input/KeyboardLayout.cpp
