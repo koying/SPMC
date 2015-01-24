@@ -29,6 +29,8 @@
 #include "utils/log.h"
 #include "TextureCache.h"
 
+#include <assert.h>
+
 using namespace std;
 
 

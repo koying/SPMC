@@ -18,6 +18,7 @@
  *
  */
 
+#include <stdlib.h>
 
 #include "MusicInfoTagLoaderSPC.h"
 #include "snesapu/Types.h"

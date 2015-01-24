@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "MusicInfoTagLoaderASAP.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"

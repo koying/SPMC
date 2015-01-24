@@ -18,6 +18,9 @@
  *
  */
 
+#include <stdlib.h>
+#include <algorithm>
+
 #include "FileItem.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
