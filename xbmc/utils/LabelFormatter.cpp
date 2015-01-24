@@ -18,6 +18,9 @@
  *
  */
 
+#include <stdlib.h>
+#include <assert.h>
+
 #include "LabelFormatter.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"

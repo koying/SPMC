@@ -70,7 +70,7 @@ CAndroidSettingDirectory::~CAndroidSettingDirectory(void)
 
 bool CAndroidSettingDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
-  CStdString dirname = url.GetFileName();
+  std::string dirname = url.GetFileName();
   URIUtils::RemoveSlashAtEnd(dirname);
   int sdk = CJNIBase::GetSDKVersion();
   CLog::Log(LOGDEBUG, "CAndroidSettingDirectory::GetDirectory: %s (sdk:%d;intents:%d)",dirname.c_str(), sdk, m_intents.size());

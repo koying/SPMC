@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "system.h"
 #include <EGL/egl.h>
 #include "EGLNativeTypeRKAndroid.h"

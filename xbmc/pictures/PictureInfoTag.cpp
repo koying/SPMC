@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "PictureInfoTag.h"
 #include "XBDateTime.h"
 #include "Util.h"

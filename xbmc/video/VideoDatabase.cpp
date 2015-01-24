@@ -3617,7 +3617,7 @@ bool CVideoDatabase::GetStreamDetails(CVideoInfoTag& tag) const
   try
   {
     std::string strSQL = PrepareSQL("SELECT * FROM streamdetails WHERE idFile = %i", tag.m_iFileId);
-    pDS->query(strSQL);
+    pDS->query(strSQL.c_str());
 
     while (!pDS->eof())
     {

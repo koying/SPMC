@@ -29,6 +29,8 @@
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
 
+#include <assert.h>
+
 #ifdef TARGET_POSIX
 #include <dirent.h>
 #endif

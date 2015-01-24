@@ -36,6 +36,8 @@
 #define CacheLocalFile CWin32File
 #endif // TARGET_WINDOWS
 
+#include <assert.h>
+
 using namespace XFILE;
 
 CCacheStrategy::CCacheStrategy() : m_bEndOfInput(false)

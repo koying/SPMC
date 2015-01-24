@@ -23,6 +23,8 @@
 #include "GUIInfoManager.h"
 #include "Key.h"
 
+#include <assert.h>
+
 using namespace std;
 
 CGUIPanelContainer::CGUIPanelContainer(int parentID, int controlID, float posX, float posY, float width, float height, ORIENTATION orientation, const CScroller& scroller, int preloadItems)

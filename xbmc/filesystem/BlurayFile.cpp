@@ -24,6 +24,8 @@
 #include "URL.h"
 #include "utils/StringUtils.h"
 
+#include <assert.h>
+
 namespace XFILE
 {
 
