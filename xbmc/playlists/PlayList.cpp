@@ -30,6 +30,9 @@
 #include "utils/StringUtils.h"
 #include "interfaces/AnnouncementManager.h"
 
+#include <algorithm>
+#include <assert.h>
+
 //using namespace std;
 using namespace MUSIC_INFO;
 using namespace XFILE;

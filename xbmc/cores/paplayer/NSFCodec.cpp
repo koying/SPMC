@@ -18,6 +18,8 @@
  *
  */
 
+#include <stdlib.h>
+
 #include "NSFCodec.h"
 #include "utils/log.h"
 #include "utils/RegExp.h"

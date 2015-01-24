@@ -24,7 +24,7 @@
 #if defined(TARGET_ANDROID)
 #include "IFile.h"
 #include "URL.h"
-#include "utils/StdString.h"
+
 namespace XFILE
 {
 class CFileAndroidSetting : public IFile
@@ -56,7 +56,7 @@ protected:
 
 private:
   CURL              m_url;
-  CStdString        m_appname;
+  std::string        m_appname;
   int               m_iconWidth;
   int               m_iconHeight;
 };
