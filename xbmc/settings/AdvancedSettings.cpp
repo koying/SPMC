@@ -177,6 +177,7 @@ void CAdvancedSettings::Initialize()
   m_stagefrightConfig.useSwRenderer = false;
   m_stagefrightConfig.useInputDTS = false;
   m_MediacodecConfig.useAVCcodec = "-1";
+  m_MediacodecConfig.useHEVCcodec = "1";
   m_MediacodecConfig.useVC1codec = "-1";
   m_MediacodecConfig.useVPXcodec = "-1";
   m_MediacodecConfig.useMP4codec = "-1";
@@ -630,6 +631,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     if (pMediacodecElem)
     {
       XMLUtils::GetString(pMediacodecElem,"useavccodec",m_MediacodecConfig.useAVCcodec);
+      XMLUtils::GetString(pStagefrightElem,"usehevccodec",m_MediacodecConfig.useHEVCcodec);
       XMLUtils::GetString(pMediacodecElem,"usevc1codec",m_MediacodecConfig.useVC1codec);
       XMLUtils::GetString(pMediacodecElem,"usevpxcodec",m_MediacodecConfig.useVPXcodec);
       XMLUtils::GetString(pMediacodecElem,"usemp4codec",m_MediacodecConfig.useMP4codec);
