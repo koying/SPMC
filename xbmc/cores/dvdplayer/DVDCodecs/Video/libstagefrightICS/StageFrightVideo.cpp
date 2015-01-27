@@ -416,65 +416,82 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   }
 
   const char* mimetype;
+  std::string use_codec;
   switch (hints.codec)
   {
-  case AV_CODEC_ID_HEVC:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useHEVCcodec == 0)
-      return false;
-    mimetype = "video/hevc";
-    break;
-  case AV_CODEC_ID_H264:
-//  case AV_CODEC_ID_H264MVC:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "0"
-        || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "sd" && hints.width > 800)
-        || (p->m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
-      return false;
-    mimetype = "video/avc";
-    if (hints.extradata && *(uint8_t*)hints.extradata == 1)
-      p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
-    break;
-  case AV_CODEC_ID_MPEG4:
-      if (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "0"
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "sd" && hints.width > 800)
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "hd" && hints.width <= 800))
+    case AV_CODEC_ID_HEVC:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useHEVCcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
-    mimetype = "video/mp4v-es";
-    break;
-  case AV_CODEC_ID_MPEG2VIDEO:
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "0"
-        || (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "sd" && hints.width > 800)
-        || (p->m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "hd" && hints.width <= 800))
-      return false;
-    mimetype = "video/mpeg2";
-    break;
-  case AV_CODEC_ID_VP3:
-  case AV_CODEC_ID_VP6:
-  case AV_CODEC_ID_VP6F:
-      if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "hd" && hints.width <= 800))
+      mimetype = "video/hevc";
+      break;
+    case AV_CODEC_ID_H264:
+      //  case AV_CODEC_ID_H264MVC:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useAVCcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
+        return false;
+      mimetype = "video/avc";
+      if (hints.extradata && *(uint8_t*)hints.extradata == 1)
+        p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
+      break;
+    case AV_CODEC_ID_MPEG4:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useMP4codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
+        return false;
+      mimetype = "video/mp4v-es";
+      break;
+    case AV_CODEC_ID_MPEG2VIDEO:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useMPEG2codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
+        return false;
+      mimetype = "video/mpeg2";
+      break;
+    case AV_CODEC_ID_VP3:
+    case AV_CODEC_ID_VP6:
+    case AV_CODEC_ID_VP6F:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useVPXcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
       mimetype = "video/vp6";
       break;
-  case AV_CODEC_ID_VP8:
-      if (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "hd" && hints.width <= 800))
+    case AV_CODEC_ID_VP8:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useVPXcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
       return false;
-    mimetype = "video/x-vnd.on2.vp8";
-    break;
-  case AV_CODEC_ID_VC1:
-  case AV_CODEC_ID_WMV3:
-      if (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "0"
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "sd" && hints.width > 800)
-          || (p->m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "hd" && hints.width <= 800))
+      mimetype = "video/x-vnd.on2.vp8";
+      break;
+    case AV_CODEC_ID_VC1:
+    case AV_CODEC_ID_WMV3:
+      use_codec = g_advancedSettings.m_stagefrightConfig.useVC1codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
-    mimetype = "video/vc1";
-    break;
-  default:
-    return false;
-    break;
+      mimetype = "video/vc1";
+      break;
+    default:
+      return false;
+      break;
   }
 
   p->meta->setCString(kKeyMIMEType, mimetype);
