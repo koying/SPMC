@@ -390,10 +390,15 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
   int dec_extrasize = 0;
   void* dec_extradata = NULL;
 
+  std::string use_codec;
   switch (hints.codec)
   {
     case AV_CODEC_ID_HEVC:
-      if (m_g_advancedSettings->m_stagefrightConfig.useHEVCcodec == 0)
+      use_codec = g_advancedSettings.m_stagefrightConfig.useHEVCcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
       mimetype = "video/hevc";
       m_metadata->setData(kKeyHVCC, kTypeAVCC, hints.extradata, hints.extrasize);
@@ -413,40 +418,50 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
           return false;
       }
 
-      if (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "0"
-          || (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "sd" && hints.width > 800)
-          || (m_g_advancedSettings->m_stagefrightConfig.useAVCcodec == "hd" && hints.width <= 800))
+      use_codec = g_advancedSettings.m_stagefrightConfig.useAVCcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
       mimetype = "video/avc";
       if (hints.extradata && *(uint8_t*)hints.extradata == 1)
         m_metadata->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
     break;
   case AV_CODEC_ID_MPEG4:
-      if (m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "0"
-          || (m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "sd" && hints.width > 800)
-          || (m_g_advancedSettings->m_stagefrightConfig.useMP4codec == "hd" && hints.width <= 800))
+      use_codec = g_advancedSettings.m_stagefrightConfig.useMP4codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
     mimetype = "video/mp4v-es";
     break;
   case AV_CODEC_ID_MPEG2VIDEO:
-      if (m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "0"
-          || (m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "sd" && hints.width > 800)
-          || (m_g_advancedSettings->m_stagefrightConfig.useMPEG2codec == "hd" && hints.width <= 800))
+      use_codec = g_advancedSettings.m_stagefrightConfig.useMPEG2codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
     mimetype = "video/mpeg2";
     break;
     case AV_CODEC_ID_VP8:
-      if (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "0"
-          || (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "sd" && hints.width > 800)
-          || (m_g_advancedSettings->m_stagefrightConfig.useVPXcodec == "hd" && hints.width <= 800))
+      use_codec = g_advancedSettings.m_stagefrightConfig.useVPXcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
       mimetype = "video/x-vnd.on2.vp8";
       break;
   case AV_CODEC_ID_VC1:
   //case AV_CODEC_ID_WMV3:
-      if (m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "0"
-          || (m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "sd" && hints.width > 800)
-          || (m_g_advancedSettings->m_stagefrightConfig.useVC1codec == "hd" && hints.width <= 800))
+      use_codec = g_advancedSettings.m_stagefrightConfig.useVC1codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
         return false;
     mimetype = "video/vc1";
     dec_extrasize = hints.extrasize;
