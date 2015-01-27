@@ -112,6 +112,7 @@ struct StagefrightConfig
 struct MediacodecConfig
 {
   std::string useAVCcodec;
+  std::string useHEVCcodec;
   std::string useVC1codec;
   std::string useVPXcodec;
   std::string useMP4codec;
