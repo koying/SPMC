@@ -328,20 +328,25 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   m_drop = false;
   m_hints = hints;
 
+  std::string use_codec;
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_MPEG2VIDEO:
-      if (g_advancedSettings.m_MediacodecConfig.useMPEG2codec == "0"
-          || (g_advancedSettings.m_MediacodecConfig.useMPEG2codec == "sd" && m_hints.width > 800)
-          || (g_advancedSettings.m_MediacodecConfig.useMPEG2codec == "hd" && m_hints.width <= 800))
+      use_codec = g_advancedSettings.m_MediacodecConfig.useMPEG2codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && m_hints.width > 800)
+          || (use_codec == "hd" && m_hints.width <= 800)
+          || (use_codec == "uhd" && m_hints.width <= 2000))
         return false;
       m_mime = "video/mpeg2";
       m_formatname = "amc-mpeg2";
       break;
     case AV_CODEC_ID_MPEG4:
-      if (g_advancedSettings.m_MediacodecConfig.useMP4codec == "0"
-          || (g_advancedSettings.m_MediacodecConfig.useMP4codec == "sd" && m_hints.width > 800)
-          || (g_advancedSettings.m_MediacodecConfig.useMP4codec == "hd" && m_hints.width <= 800))
+      use_codec = g_advancedSettings.m_MediacodecConfig.useMP4codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && m_hints.width > 800)
+          || (use_codec == "hd" && m_hints.width <= 800)
+          || (use_codec == "uhd" && m_hints.width <= 2000))
         return false;
       m_mime = "video/mp4v-es";
       m_formatname = "amc-mpeg4";
@@ -354,9 +359,11 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_VP6:
     case AV_CODEC_ID_VP6F:
     case AV_CODEC_ID_VP8:
-      if (g_advancedSettings.m_MediacodecConfig.useVPXcodec == "0"
-          || (g_advancedSettings.m_MediacodecConfig.useVPXcodec == "sd" && m_hints.width > 800)
-          || (g_advancedSettings.m_MediacodecConfig.useVPXcodec == "hd" && m_hints.width <= 800))
+      use_codec = g_advancedSettings.m_MediacodecConfig.useVPXcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && m_hints.width > 800)
+          || (use_codec == "hd" && m_hints.width <= 800)
+          || (use_codec == "uhd" && m_hints.width <= 2000))
         return false;
       //m_mime = "video/x-vp6";
       //m_mime = "video/x-vp7";
@@ -366,9 +373,11 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_AVS:
     case AV_CODEC_ID_CAVS:
     case AV_CODEC_ID_H264:
-      if (g_advancedSettings.m_MediacodecConfig.useAVCcodec == "0"
-          || (g_advancedSettings.m_MediacodecConfig.useAVCcodec == "sd" && m_hints.width > 800)
-          || (g_advancedSettings.m_MediacodecConfig.useAVCcodec == "hd" && m_hints.width <= 800))
+      use_codec = g_advancedSettings.m_MediacodecConfig.useAVCcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && m_hints.width > 800)
+          || (use_codec == "hd" && m_hints.width <= 800)
+          || (use_codec == "uhd" && m_hints.width <= 2000))
         return false;
       m_mime = "video/avc";
       m_formatname = "amc-h264";
@@ -384,6 +393,12 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       }
       break;
     case AV_CODEC_ID_HEVC:
+      use_codec = g_advancedSettings.m_MediacodecConfig.useHEVCcodec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && m_hints.width > 800)
+          || (use_codec == "hd" && m_hints.width <= 800)
+          || (use_codec == "uhd" && m_hints.width <= 2000))
+        return false;
       m_mime = "video/hevc";
       m_formatname = "amc-h265";
       // check for hevc-hvcC and convert to h264-annex-b
@@ -400,9 +415,11 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       break;
     case AV_CODEC_ID_VC1:
     case AV_CODEC_ID_WMV3:
-      if (g_advancedSettings.m_MediacodecConfig.useVC1codec == "0"
-          || (g_advancedSettings.m_MediacodecConfig.useVC1codec == "sd" && m_hints.width > 800)
-          || (g_advancedSettings.m_MediacodecConfig.useVC1codec == "hd" && m_hints.width <= 800))
+      use_codec = g_advancedSettings.m_MediacodecConfig.useVC1codec;
+      if (use_codec == "0"
+          || (use_codec == "sd" && m_hints.width > 800)
+          || (use_codec == "hd" && m_hints.width <= 800)
+          || (use_codec == "uhd" && m_hints.width <= 2000))
         return false;
       m_mime = "video/wvc1";
       //m_mime = "video/wmv9";
