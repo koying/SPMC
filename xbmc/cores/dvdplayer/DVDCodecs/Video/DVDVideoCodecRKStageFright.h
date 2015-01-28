@@ -56,8 +56,7 @@ protected:
   
   std::string              m_pFormatName;
   static DllLibStageFrightCodec*     m_stf_dll;
-  static bool       m_isvalid;
-  static void *     m_stf_handle;
+  void *     m_stf_handle;
 };
 
 #endif
