@@ -44,8 +44,6 @@
 #include "DllLibStageFrightCodec.h"
 
 CCriticalSection            RKSTF_valid_mutex;
-bool                        CDVDVideoCodecRKStageFright::m_isvalid = false;
-void*                       CDVDVideoCodecRKStageFright::m_stf_handle = NULL;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +54,7 @@ DllLibStageFrightCodec*     CDVDVideoCodecRKStageFright::m_stf_dll = NULL;
 CDVDVideoCodecRKStageFright::CDVDVideoCodecRKStageFright()
   : CDVDVideoCodec()
   , m_convert_bitstream(false),  m_converter(NULL)
+  , m_stf_handle(NULL)
 {
   if (!m_stf_dll)
   {
@@ -154,7 +153,6 @@ bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &
     }
 
     CSingleLock lock (RKSTF_valid_mutex);
-    m_isvalid = true;
     return true;
   }
 
@@ -171,7 +169,6 @@ void CDVDVideoCodecRKStageFright::Dispose()
   }
 
   CSingleLock lock (RKSTF_valid_mutex);
-  m_isvalid = false;
 
   if (m_stf_handle)
   {
