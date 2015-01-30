@@ -4,7 +4,7 @@ include ../../Makefile.include
 LIBNAME=xbmc-pvr-addons
 VERSION=928652cc149afdd49104e6718f5b0ccfcc1872a6
 GIT_DIR=$(TARBALLS_LOCATION)/$(LIBNAME).git
-BASE_URL=git://github.com/opdenkamp/$(LIBNAME).git
+BASE_URL=http://github.com/opdenkamp/$(LIBNAME).git
 DYLIB=$(PLATFORM)/addons/pvr.demo/.libs/libpvrdemo-addon.so
 XBMC_ADDONSDIR=../../../../addons
 
