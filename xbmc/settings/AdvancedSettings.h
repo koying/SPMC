@@ -97,26 +97,33 @@ struct RefreshVideoLatency
   float delay;
 };
 
-struct StagefrightConfig
+class CodecConfig
 {
+public:
+  CodecConfig();
+
   std::string useAVCcodec;
   std::string useHEVCcodec;
   std::string useVC1codec;
   std::string useVPXcodec;
   std::string useMP4codec;
   std::string useMPEG2codec;
+};
+
+struct StagefrightConfig : public CodecConfig
+{
+public:
+  StagefrightConfig();
+
   bool useSwRenderer;
   bool useInputDTS;
 };
 
-struct MediacodecConfig
+struct MediacodecConfig : public CodecConfig
 {
-  std::string useAVCcodec;
-  std::string useHEVCcodec;
-  std::string useVC1codec;
-  std::string useVPXcodec;
-  std::string useMP4codec;
-  std::string useMPEG2codec;
+public:
+  MediacodecConfig();
+
   bool useSwRenderer;
 };
 
