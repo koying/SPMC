@@ -329,10 +329,12 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   m_hints = hints;
 
   std::string use_codec;
+  std::map<std::string, std::string> codec_config = g_advancedSettings.m_codecconfigs["mediacodec"];
+
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_MPEG2VIDEO:
-      use_codec = g_advancedSettings.m_MediacodecConfig.useMPEG2codec;
+      use_codec = codec_config["useMPEG2codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
           || (use_codec == "hd" && m_hints.width <= 800)
@@ -342,7 +344,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       m_formatname = "amc-mpeg2";
       break;
     case AV_CODEC_ID_MPEG4:
-      use_codec = g_advancedSettings.m_MediacodecConfig.useMP4codec;
+      use_codec = codec_config["useMP4codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
           || (use_codec == "hd" && m_hints.width <= 800)
@@ -359,7 +361,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_VP6:
     case AV_CODEC_ID_VP6F:
     case AV_CODEC_ID_VP8:
-      use_codec = g_advancedSettings.m_MediacodecConfig.useVPXcodec;
+      use_codec = codec_config["useVPXcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
           || (use_codec == "hd" && m_hints.width <= 800)
@@ -373,7 +375,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_AVS:
     case AV_CODEC_ID_CAVS:
     case AV_CODEC_ID_H264:
-      use_codec = g_advancedSettings.m_MediacodecConfig.useAVCcodec;
+      use_codec = codec_config["useAVCcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
           || (use_codec == "hd" && m_hints.width <= 800)
@@ -393,7 +395,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       }
       break;
     case AV_CODEC_ID_HEVC:
-      use_codec = g_advancedSettings.m_MediacodecConfig.useHEVCcodec;
+      use_codec = codec_config["useHEVCcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
           || (use_codec == "hd" && m_hints.width <= 800)
@@ -415,7 +417,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       break;
     case AV_CODEC_ID_VC1:
     case AV_CODEC_ID_WMV3:
-      use_codec = g_advancedSettings.m_MediacodecConfig.useVC1codec;
+      use_codec = codec_config["useVC1codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
           || (use_codec == "hd" && m_hints.width <= 800)
@@ -493,7 +495,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   }
 
   // blacklist of devices that cannot surface render.
-  m_render_sw = CanSurfaceRenderBlackList(m_codecname) || g_advancedSettings.m_MediacodecConfig.useSwRenderer;
+  m_render_sw = CanSurfaceRenderBlackList(m_codecname) || codec_config["useSwRenderer"] == "true" || codec_config["useSwRenderer"] == "1";
   if (m_render_sw)
   {
     if (m_colorFormat == -1)
