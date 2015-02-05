@@ -60,6 +60,7 @@
 #include "URL.h"
 #include "addons/Skin.h"
 #include <memory>
+#include <functional>
 #include "cores/DataCacheCore.h"
 
 // stuff for current song
