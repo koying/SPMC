@@ -32,6 +32,7 @@
 #include "settings/AdvancedSettings.h"
 
 #include <assert.h>
+#include <algorithm>
 
 using namespace AUTOPTR;
 using namespace XFILE;

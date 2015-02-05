@@ -37,6 +37,7 @@
 #endif // TARGET_WINDOWS
 
 #include <assert.h>
+#include <algorithm>
 
 using namespace XFILE;
 
