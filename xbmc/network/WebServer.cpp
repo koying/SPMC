@@ -25,6 +25,7 @@
 #include "WebServer.h"
 #ifdef HAS_WEB_SERVER
 #include <memory>
+#include <algorithm>
 
 #include "URL.h"
 #include "Util.h"
