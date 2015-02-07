@@ -37,6 +37,8 @@
 #include "XBIRRemote.h"
 #include "Util.h"
 
+#include <algorithm>
+
 #if defined(TARGET_WINDOWS)
 #include "input/windows/WINJoystick.h"
 #elif defined(HAS_SDL_JOYSTICK) || defined(HAS_EVENT_SERVER)
