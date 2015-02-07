@@ -27,10 +27,10 @@
 #include "guilib/gui3d.h"
 #if defined(TARGET_ANDROID)
   #include "android/activity/XBMCApp.h"
+  #include "android/jni/Build.h"
 #endif
 #include "utils/StringUtils.h"
 #include "utils/SysfsUtils.h"
-#include "android/jni/Build.h"
 #include "utils/RegExp.h"
 
 bool CEGLNativeTypeRKAndroid::CheckCompatibility()
