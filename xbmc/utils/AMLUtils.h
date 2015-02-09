@@ -42,7 +42,7 @@ enum AML_DISPLAY_AXIS_PARAM
 };
 
 bool aml_present();
-void aml_permissions();
+bool aml_permissions();
 bool aml_hw3d_present();
 bool aml_supports_stereo(const int mode);
 void aml_set_stereo_mode(const int mode, const int view);
