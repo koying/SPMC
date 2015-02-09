@@ -106,13 +106,13 @@ public:
     if (options && options->getSeekTo(&time_us, &mode))
     {
 #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: reading source(%d): seek:%llu\n", CLASSNAME,in_queue.size(), time_us);
+      CLog::Log(LOGDEBUG, "%s: reading source(%d): seek:%llu\n", CLASSNAME,p->m_in_queue.size(), time_us);
 #endif
     }
     else
     {
 #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: reading source(%d)\n", CLASSNAME,in_queue.size());
+      CLog::Log(LOGDEBUG, "%s: reading source(%d)\n", CLASSNAME,p->m_in_queue.size());
 #endif
     }
 
@@ -123,7 +123,7 @@ public:
     if (p->m_in_queue.empty())
     {
       p->in_mutex.unlock();
-      return VC_ERROR;
+      return ERROR_IO;
     }
     
     frame = p->m_in_queue.front();
@@ -134,7 +134,7 @@ public:
     p->in_mutex.unlock();
 
 #if defined(DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, ">>> exiting reading source(%d); pts:%llu\n", in_queue.size(),frame->pts);
+    CLog::Log(LOGDEBUG, ">>> exiting reading source(%d); pts:%llu\n", p->m_in_queue.size(),frame->pts);
 #endif
 
     free(frame);
@@ -312,7 +312,7 @@ public:
       p->out_mutex.unlock();
       continue;
 #if defined(DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, img:%p, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, frame->eglimg, XbmcThreads::SystemClockMillis() - time);
+      CLog::Log(LOGDEBUG, "%s: >>> pushed OUT frame; w:%d, h:%d, dw:%d, dh:%d, kf:%d, ur:%d, tm:%d\n", CLASSNAME, frame->width, frame->height, dw, dh, keyframe, unreadable, XbmcThreads::SystemClockMillis() - time);
     #endif
     }
     while (!decode_done && !m_bStop);
@@ -328,7 +328,7 @@ CRkStageFrightVideo::CRkStageFrightVideo(CDVDCodecInterface* interface)
   , drop_state(false), resetting(false)
 {
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CStageFrightVideo));
+  CLog::Log(LOGDEBUG, "%s::ctor: %d\n", CLASSNAME, sizeof(CRkStageFrightVideo));
 #endif
   p = new CStageFrightVideoPrivate;
   m_g_advancedSettings = interface->GetAdvancedSettings();
@@ -574,7 +574,7 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
     Decode((uint8_t*)dec_extradata, dec_extrasize, 0, 0);
 
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, ">>> format col:%d, w:%d, h:%d, sw:%d, sh:%d, ctl:%d,%d; cbr:%d,%d\n", p->videoColorFormat, p->width, p->height, p->videoStride, p->videoSliceHeight, cropTop, cropLeft, cropBottom, cropRight);
+  CLog::Log(LOGDEBUG, ">>> format col:%d, w:%d, h:%d, sw:%d, sh:%d, ctl:%d,%d; cbr:%d,%d\n", videoColorFormat, width, height, videoStride, videoSliceHeight, cropTop, cropLeft, cropBottom, cropRight);
 #endif
 
   return true;
@@ -667,7 +667,7 @@ int  CRkStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double p
   if (outbuf_queue.size())
     ret |= VC_PICTURE;
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::Decode: pushed IN frame (%d); tm:%d\n", CLASSNAME,in_queue.size(), XbmcThreads::SystemClockMillis() - time);
+  CLog::Log(LOGDEBUG, "%s::Decode: pushed IN frame (%d); tm:%d\n", CLASSNAME,m_in_queue.size(), XbmcThreads::SystemClockMillis() - time);
 #endif
 
   return ret;
@@ -679,9 +679,6 @@ bool CRkStageFrightVideo::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
   unsigned int time = XbmcThreads::SystemClockMillis();
 #endif
   ReleaseVpuFrame((VPU_FRAME*)pDvdVideoPicture->render_ctx);
-#if defined(DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "%s::ClearPicture buf:%p (%d)\n", CLASSNAME, pDvdVideoPicture->stfbuf, XbmcThreads::SystemClockMillis() - time);
-#endif
 #if defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "%s::ClearPicture img:%p (%d)\n", CLASSNAME, pDvdVideoPicture, XbmcThreads::SystemClockMillis() - time);
 #endif
@@ -853,7 +850,7 @@ void CRkStageFrightVideo::Dispose()
     m_omxclient->disconnect();
 
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "Cleaning IN(%d)\n", in_queue.size());
+  CLog::Log(LOGDEBUG, "Cleaning IN(%d)\n", m_in_queue.size());
 #endif
   while (!m_in_queue.empty())
   {
@@ -964,7 +961,7 @@ void CRkStageFrightVideo::SetDropState(bool bDrop)
     return;
 
 #if defined(DEBUG_VERBOSE)
-  CLog::Log(LOGDEBUG, "%s::SetDropState (%d->%d)\n", CLASSNAME,p->drop_state,bDrop);
+  CLog::Log(LOGDEBUG, "%s::SetDropState (%d->%d)\n", CLASSNAME,drop_state,bDrop);
 #endif
 
   drop_state = bDrop;
@@ -1039,7 +1036,7 @@ void CRkStageFrightVideo::Render(const CRect &SrcRect, const CRect &DestRect, co
 {
 #ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();
-  CLog::Log(LOGDEBUG, "RenderUpdateCallBack buf:%p\n", stfbuf);
+  CLog::Log(LOGDEBUG, "RenderUpdateCallBack buf:%p\n", render_ctx);
 #endif
 
   if (!render_ctx)
