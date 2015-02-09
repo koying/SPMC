@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "settings/lib/ISettingCallback.h"
 #include "settings/lib/ISettingsHandler.h"
@@ -95,36 +96,6 @@ struct RefreshVideoLatency
   float refreshmax;
 
   float delay;
-};
-
-class CodecConfig
-{
-public:
-  CodecConfig();
-
-  std::string useAVCcodec;
-  std::string useHEVCcodec;
-  std::string useVC1codec;
-  std::string useVPXcodec;
-  std::string useMP4codec;
-  std::string useMPEG2codec;
-};
-
-struct StagefrightConfig : public CodecConfig
-{
-public:
-  StagefrightConfig();
-
-  bool useSwRenderer;
-  bool useInputDTS;
-};
-
-struct MediacodecConfig : public CodecConfig
-{
-public:
-  MediacodecConfig();
-
-  bool useSwRenderer;
 };
 
 typedef std::vector<TVShowRegexp> SETTINGS_TVSHOWLIST;
@@ -215,8 +186,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     bool m_DXVAAllowHqScaling;
     int  m_videoFpsDetect;
     int  m_videoBusyDialogDelay_ms;
-    StagefrightConfig m_stagefrightConfig;
-    MediacodecConfig m_MediacodecConfig;
+    std::map<std::string, std::map<std::string, std::string> > m_codecconfigs;
 
     std::string m_videoDefaultPlayer;
     std::string m_videoDefaultDVDPlayer;

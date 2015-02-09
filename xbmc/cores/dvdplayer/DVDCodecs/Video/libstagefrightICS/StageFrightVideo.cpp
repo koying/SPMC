@@ -405,9 +405,6 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
   else
     p->aspect_ratio = 1.0;
 
-  if (p->m_g_advancedSettings->m_stagefrightConfig.useSwRenderer)
-    p->quirks |= QuirkSWRender;
-
   p->meta = new MetaData;
   if (p->meta == NULL)
   {
@@ -417,10 +414,15 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
 
   const char* mimetype;
   std::string use_codec;
+  std::map<std::string, std::string> codec_config = p->m_g_advancedSettings->m_codecconfigs["stagefright"];
+
+  if (codec_config["useSwRenderer"] == "true" || codec_config["useSwRenderer"] == "1")
+    p->quirks |= QuirkSWRender;
+
   switch (hints.codec)
   {
     case AV_CODEC_ID_HEVC:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useHEVCcodec;
+      use_codec = codec_config["useHEVCcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -430,7 +432,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       break;
     case AV_CODEC_ID_H264:
       //  case AV_CODEC_ID_H264MVC:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useAVCcodec;
+      use_codec = codec_config["useAVCcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -441,7 +443,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
         p->meta->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
       break;
     case AV_CODEC_ID_MPEG4:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useMP4codec;
+      use_codec = codec_config["useMP4codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -450,7 +452,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       mimetype = "video/mp4v-es";
       break;
     case AV_CODEC_ID_MPEG2VIDEO:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useMPEG2codec;
+      use_codec = codec_config["useMPEG2codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -461,7 +463,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
     case AV_CODEC_ID_VP3:
     case AV_CODEC_ID_VP6:
     case AV_CODEC_ID_VP6F:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useVPXcodec;
+      use_codec = codec_config["useVPXcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -470,7 +472,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       mimetype = "video/vp6";
       break;
     case AV_CODEC_ID_VP8:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useVPXcodec;
+      use_codec = codec_config["useVPXcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -481,7 +483,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       break;
     case AV_CODEC_ID_VC1:
     case AV_CODEC_ID_WMV3:
-      use_codec = g_advancedSettings.m_stagefrightConfig.useVC1codec;
+      use_codec = codec_config["useVC1codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
@@ -570,7 +572,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       CLog::Log(LOGERROR, "%s::%s - %s\n", CLASSNAME, __func__,"Blacklisted component (software)");
       return false;
     }
-    else if (!strncmp(component, "OMX.Nvidia.mp4.decode", 21) && p->m_g_advancedSettings->m_stagefrightConfig.useMP4codec != "1")
+    else if (!strncmp(component, "OMX.Nvidia.mp4.decode", 21) && codec_config["useMP4codec"] != "1")
     {
       // Has issues with some XVID encoded MP4. Only fails after actual decoding starts...
       CLog::Log(LOGERROR, "%s::%s - %s\n", CLASSNAME, __func__,"Blacklisted component (MP4)");
@@ -637,10 +639,7 @@ int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts
       return VC_ERROR;
 
     frame->status  = OK;
-    if (p->m_g_advancedSettings->m_stagefrightConfig.useInputDTS)
-      frame->pts = (dts != DVD_NOPTS_VALUE) ? pts_dtoi(dts) : ((pts != DVD_NOPTS_VALUE) ? pts_dtoi(pts) : 0);
-    else
-      frame->pts = (pts != DVD_NOPTS_VALUE) ? pts_dtoi(pts) : ((dts != DVD_NOPTS_VALUE) ? pts_dtoi(dts) : 0);
+    frame->pts = (pts != DVD_NOPTS_VALUE) ? pts_dtoi(pts) : ((dts != DVD_NOPTS_VALUE) ? pts_dtoi(dts) : 0);
 
     // No valid pts? libstagefright asserts on this.
     if (frame->pts < 0)
