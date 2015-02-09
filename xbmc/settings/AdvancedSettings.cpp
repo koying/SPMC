@@ -19,6 +19,7 @@
  */
 
 #include <limits.h>
+#include <utility>
 
 #include "system.h"
 #include "AdvancedSettings.h"
@@ -168,6 +169,7 @@ void CAdvancedSettings::Initialize()
   m_DXVAAllowHqScaling = false;
   m_videoFpsDetect = 1;
   m_videoBusyDialogDelay_ms = 500;
+  m_codecconfigs.clear();
 
   m_videoDefaultLatency = 0.0;
 
@@ -599,30 +601,24 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     XMLUtils::GetBoolean(pElement,"vdpauHDdeintSkipChroma",m_videoVDPAUdeintSkipChromaHD);
     XMLUtils::GetBoolean(pElement,"useffmpegvda", m_useFfmpegVda);
 
+    m_codecconfigs["stagefright"]["useMP4codec"] = "hd";
+
     TiXmlElement* pCodecConfigElem = pElement->FirstChildElement("codecconfig");
     while (pCodecConfigElem)
     {
       std::string codec = pCodecConfigElem->Attribute("codec");
-      if (codec == "stagefright")
+      if (!codec.empty())
       {
-        XMLUtils::GetString(pCodecConfigElem,"useavccodec",m_stagefrightConfig.useAVCcodec);
-        XMLUtils::GetString(pCodecConfigElem,"usehevccodec",m_stagefrightConfig.useHEVCcodec);
-        XMLUtils::GetString(pCodecConfigElem,"usevc1codec",m_stagefrightConfig.useVC1codec);
-        XMLUtils::GetString(pCodecConfigElem,"usevpxcodec",m_stagefrightConfig.useVPXcodec);
-        XMLUtils::GetString(pCodecConfigElem,"usemp4codec",m_stagefrightConfig.useMP4codec);
-        XMLUtils::GetString(pCodecConfigElem,"usempeg2codec",m_stagefrightConfig.useMPEG2codec);
-        XMLUtils::GetBoolean(pCodecConfigElem,"useswrenderer",m_stagefrightConfig.useSwRenderer);
-        XMLUtils::GetBoolean(pCodecConfigElem,"useinputdts",m_stagefrightConfig.useInputDTS);
-      }
-      else if (codec == "mediacodec")
-      {
-        XMLUtils::GetString(pCodecConfigElem,"useavccodec",m_MediacodecConfig.useAVCcodec);
-        XMLUtils::GetString(pCodecConfigElem,"usehevccodec",m_MediacodecConfig.useHEVCcodec);
-        XMLUtils::GetString(pCodecConfigElem,"usevc1codec",m_MediacodecConfig.useVC1codec);
-        XMLUtils::GetString(pCodecConfigElem,"usevpxcodec",m_MediacodecConfig.useVPXcodec);
-        XMLUtils::GetString(pCodecConfigElem,"usemp4codec",m_MediacodecConfig.useMP4codec);
-        XMLUtils::GetString(pCodecConfigElem,"usempeg2codec",m_MediacodecConfig.useMPEG2codec);
-        XMLUtils::GetBoolean(pCodecConfigElem,"useswrenderer",m_MediacodecConfig.useSwRenderer);
+        TiXmlElement* pCodecConfigChild = pCodecConfigElem->FirstChildElement();
+        while (pCodecConfigChild)
+        {
+          std::string key = pCodecConfigChild->Value();
+          std::string value;
+          if (XMLUtils::GetString(pCodecConfigElem, key.c_str(), value))
+            m_codecconfigs[codec].insert(std::make_pair(key, value));
+
+          pCodecConfigChild = pCodecConfigChild->NextSiblingElement();
+        }
       }
       pCodecConfigElem = pCodecConfigElem->NextSiblingElement("codecconfig");
     }
@@ -1428,28 +1424,4 @@ void CAdvancedSettings::setExtraLogLevel(const std::vector<CVariant> &components
 
     m_extraLogLevels |= static_cast<int>(it->asInteger());
   }
-}
-
-
-CodecConfig::CodecConfig()
-  : useAVCcodec("-1")
-  , useHEVCcodec("1")
-  , useVC1codec("-1")
-  , useVPXcodec("-1")
-  , useMP4codec("hd")
-  , useMPEG2codec("-1")
-{
-}
-
-
-StagefrightConfig::StagefrightConfig()
-  : useSwRenderer(false)
-  , useInputDTS(false)
-{
-}
-
-
-MediacodecConfig::MediacodecConfig()
-  : useSwRenderer(false)
-{
 }
