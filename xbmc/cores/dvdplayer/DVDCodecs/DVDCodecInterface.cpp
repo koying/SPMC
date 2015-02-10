@@ -26,6 +26,7 @@
 #include "settings/AdvancedSettings.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "guilib/GraphicContext.h"
+#include "windowing/WinSystem.h"
 
 CDVDCodecInterface::CDVDCodecInterface()
 {
@@ -41,7 +42,7 @@ CApplicationMessenger* CDVDCodecInterface::GetApplicationMessenger() const
   return &CApplicationMessenger::Get();
 }
 
-CWinSystemEGL* CDVDCodecInterface::GetWindowSystem() const
+CWinSystemBase* CDVDCodecInterface::GetWindowSystem() const
 {
   return &g_Windowing;
 }

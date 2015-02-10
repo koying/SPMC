@@ -9657,3 +9657,6 @@ xbmc/input/KeyboardLayoutConfiguration.h
 xbmc/input/KeyboardLayout.h
 xbmc/input/KeyboardLayoutConfiguration.cpp
 xbmc/input/KeyboardLayout.cpp
+xbmc/cores/dvdplayer/DVDCodecs/DVDCodecInterface.cpp
+xbmc/cores/dvdplayer/DVDCodecs/DVDCodecInterface.h
+xbmc/cores/dvdplayer/DVDCodecs/Makefile.in
