@@ -205,10 +205,9 @@ bool aml_permissions()
       CLog::Log(LOGERROR, "AML: no rw on /dev/amvideo");
       permissions_ok = 0;
     }
-    // TODO
-    if (!SysfsUtils::HasRW("/dev/amstream*"))
+    if (!SysfsUtils::HasRW("/dev/amstream_mpts"))
     {
-      CLog::Log(LOGERROR, "AML: no rw on /dev/amstream");
+      CLog::Log(LOGERROR, "AML: no rw on /dev/amstream*");
       permissions_ok = 0;
     }
     if (!SysfsUtils::HasRW("/sys/class/video/axis"))
