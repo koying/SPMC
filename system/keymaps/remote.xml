@@ -52,7 +52,7 @@
       <pageplus>PageUp</pageplus>
       <pageminus>PageDown</pageminus>
       <back>Back</back>
-      <menu>PreviousMenu</menu>
+      <menu>ContextMenu</menu>
       <contentsmenu>PreviousMenu</contentsmenu>
       <rootmenu>PreviousMenu</rootmenu>
       <title>ContextMenu</title>
@@ -183,8 +183,8 @@
       <right>StepForward</right>
       <up>ChapterOrBigStepForward</up>
       <down>ChapterOrBigStepBack</down>
-      <back>Back</back>
-      <menu>OSD</menu>
+      <back>Stop</back>
+      <menu>CodecInfo</menu>
       <contentsmenu>OSD</contentsmenu>
       <rootmenu>OSD</rootmenu>
       <start>OSD</start>
