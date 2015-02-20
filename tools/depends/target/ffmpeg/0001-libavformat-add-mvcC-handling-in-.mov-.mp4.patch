@@ -1,0 +1,57 @@
+From 40bca2ae81bb9cd131b90bf262e976674ca6fab8 Mon Sep 17 00:00:00 2001
+From: Deborah Crook <deborah@kynesim.co.uk>
+Date: Fri, 16 Jan 2015 14:24:17 +0000
+Subject: [PATCH] libavformat: add mvcC handling in .mov/.mp4
+
+---
+ libavformat/mov.c |   28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/libavformat/mov.c b/libavformat/mov.c
+index 7455e3b..29bfec9 100644
+--- a/libavformat/mov.c
++++ b/libavformat/mov.c
+@@ -1201,6 +1201,33 @@ static int mov_read_glbl(MOVContext *c, AVIOContext *pb, MOVAtom atom)
+     return 0;
+ }
+
++static int mov_read_mvcc(MOVContext *c, AVIOContext *pb, MOVAtom atom)
++{
++    int extradata_size;
++    int ret, i;
++    uint32_t n;
++    AVStream *st;
++
++    if (c->fc->nb_streams < 1)
++        return 0;
++    st = c->fc->streams[c->fc->nb_streams-1];
++    extradata_size = st->codec->extradata_size;
++
++    if ((uint64_t)atom.size > (1<<30))
++        return AVERROR_INVALIDDATA;
++
++    if (extradata_size == 0)
++        return 0;
++    if ((ret = mov_read_extradata(c, pb, atom, AV_CODEC_ID_H264)) < 0)
++        return ret;
++    for (i = 0, n = 0; i < 4; i++)
++        n = (n << 8) | st->codec->extradata[extradata_size+i];
++    n -= 4;
++    for (i = 0; i < 4; i++)
++        st->codec->extradata[extradata_size+i] = (n >> ((3 - i) << 3)) & 0xff;
++    return 0;
++}
++
+ static int mov_read_dvc1(MOVContext *c, AVIOContext *pb, MOVAtom atom)
+ {
+     AVStream *st;
+@@ -3383,6 +3410,7 @@ static const MOVParseTableEntry mov_default_parse_table[] = {
+ { MKTAG('C','i','n', 0x8e), mov_read_targa_y216 },
+ { MKTAG('f','r','e','e'), mov_read_free },
+ { MKTAG('-','-','-','-'), mov_read_custom },
++{ MKTAG('m','v','c','C'), mov_read_mvcc },
+ { 0, NULL }
+ };
+
+--
+1.7.10.4
