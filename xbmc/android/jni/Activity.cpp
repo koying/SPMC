@@ -67,3 +67,11 @@ void CJNIApplicationMainActivity::_onNewIntent(JNIEnv *env, jobject context, job
   if(m_appInstance)
     m_appInstance->onNewIntent(CJNIIntent(jhobject(intent)));
 }
+
+void CJNIApplicationMainActivity::_onVolumeChanged(JNIEnv *env, jobject context, jint volume)
+{
+  (void)env;
+  (void)context;
+  if(m_appInstance)
+    m_appInstance->onVolumeChanged(volume);
+}
