@@ -277,12 +277,14 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   m_format.m_frameSamples   = m_format.m_frames * m_format.m_channelLayout.Count();
   format                    = m_format;
 
+#if defined(HAS_LIBAMCODEC)
   JNIEnv* jenv = xbmc_jnienv();
   // Set the initial volume
   float volume = 1.0;
   if (!m_passthrough)
     volume = m_volume;
   CXBMCApp::SetSystemVolume(jenv, volume);
+#endif
 
   return true;
 }
