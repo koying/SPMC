@@ -2856,7 +2856,7 @@ bool CApplication::OnAction(const CAction &action)
   }
 
   // Check for global volume control
-  if (action.GetAmount() && (action.GetID() == ACTION_VOLUME_UP || action.GetID() == ACTION_VOLUME_DOWN))
+  if (action.GetAmount() && (action.GetID() == ACTION_VOLUME_UP || action.GetID() == ACTION_VOLUME_DOWN || action.GetID() == ACTION_VOLUME_SET))
   {
     if (!m_pPlayer->IsPassthrough())
     {
@@ -2874,12 +2874,17 @@ bool CApplication::OnAction(const CAction &action)
 #endif
       if (action.GetID() == ACTION_VOLUME_UP)
         volume += (float)fabs(action.GetAmount()) * action.GetAmount() * step;
-      else
+      else if (action.GetID() == ACTION_VOLUME_DOWN)
         volume -= (float)fabs(action.GetAmount()) * action.GetAmount() * step;
-      SetVolume(volume, false);
+      else
+        volume = action.GetAmount() * step;
+      if (volume != m_volumeLevel)
+      {
+        SetVolume(volume, false);
+        // show visual feedback of volume change...
+        ShowVolumeBar(&action);
+      }
     }
-    // show visual feedback of volume change...
-    ShowVolumeBar(&action);
     return true;
   }
   // Check for global seek control
