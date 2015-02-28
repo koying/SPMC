@@ -20,6 +20,8 @@
 
 #include "JNIBase.h"
 
+#include <algorithm>
+
 using namespace jni;
 int CJNIBase::m_sdk_version = -1;
 
@@ -48,4 +50,11 @@ void CJNIBase::SetSDKVersion(int version)
 int CJNIBase::GetSDKVersion()
 {
   return m_sdk_version;
+}
+
+const std::string CJNIBase::GetDotClassName()
+{
+  std::string dotClassName = m_className;
+  std::replace(dotClassName.begin(), dotClassName.end(), '/', '.');
+  return dotClassName;
 }
