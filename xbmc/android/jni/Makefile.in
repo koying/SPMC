@@ -56,6 +56,7 @@ SRCS      += Activity.cpp
 SRCS      += Resources.cpp
 SRCS      += PackageItemInfo.cpp
 SRCS      += DisplayMetrics.cpp
+SRCS      += Notification.cpp
 
 LIB        = jni.a
 
