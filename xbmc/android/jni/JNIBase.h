@@ -37,7 +37,8 @@ protected:
   CJNIBase(std::string classname);
   ~CJNIBase();
 
-  const std::string & GetClassName() {return m_className;};
+  const std::string & GetClassName() {return m_className;}
+  const std::string GetDotClassName();
 
   jni::jhobject m_object;
 
