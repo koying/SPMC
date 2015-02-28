@@ -9659,3 +9659,5 @@ xbmc/input/KeyboardLayoutConfiguration.cpp
 xbmc/input/KeyboardLayout.cpp
 xbmc/filesystem/VideoDatabaseFile.cpp
 xbmc/filesystem/VideoDatabaseFile.h
+xbmc/android/jni/Notification.h
+xbmc/android/jni/Notification.cpp
