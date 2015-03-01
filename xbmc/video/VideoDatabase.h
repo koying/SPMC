@@ -129,6 +129,7 @@ namespace VIDEO
 
 typedef enum
 {
+  VIDEODB_CONTENT_UNKNOWN = 0,
   VIDEODB_CONTENT_MOVIES = 1,
   VIDEODB_CONTENT_TVSHOWS = 2,
   VIDEODB_CONTENT_MUSICVIDEOS = 3,
@@ -573,6 +574,7 @@ public:
   bool GetResumePoint(CVideoInfoTag& tag);
   bool GetStreamDetails(CFileItem& item);
   bool GetStreamDetails(CVideoInfoTag& tag) const;
+  CVideoInfoTag GetDetailsByTypeAndId(VIDEODB_CONTENT_TYPE type, int id);
 
   // scraper settings
   void SetScraperForPath(const std::string& filePath, const ADDON::ScraperPtr& info, const VIDEO::SScanSettings& settings);
@@ -861,7 +863,6 @@ protected:
   void AddCast(int mediaId, const char *mediaType, const std::vector<SActorInfo> &cast);
 
   void DeleteStreamDetails(int idFile);
-  CVideoInfoTag GetDetailsByTypeAndId(VIDEODB_CONTENT_TYPE type, int id);
   CVideoInfoTag GetDetailsForMovie(std::unique_ptr<dbiplus::Dataset> &pDS, bool getDetails = false);
   CVideoInfoTag GetDetailsForMovie(const dbiplus::sql_record* const record, bool getDetails = false);
   CVideoInfoTag GetDetailsForTvShow(std::unique_ptr<dbiplus::Dataset> &pDS, bool getDetails = false, CFileItem* item = NULL);

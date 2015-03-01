@@ -19,7 +19,6 @@
  */
 
 #include "VideoDatabaseFile.h"
-#include "video/VideoDatabase.h"
 #include "URL.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
@@ -37,26 +36,15 @@ CVideoDatabaseFile::~CVideoDatabaseFile(void)
   Close();
 }
 
-std::string CVideoDatabaseFile::TranslateUrl(const CURL& url)
+VIDEODB_CONTENT_TYPE CVideoDatabaseFile::GetType(const CURL& url)
 {
-  std::string strFileName=URIUtils::GetFileName(url.Get());
-  if (strFileName.empty())
-	  return "";
-
   std::string strPath = URIUtils::GetDirectory(url.Get());
   if (strPath.empty())
-	  return "";
-
-  std::string strExtension = URIUtils::GetExtension(strFileName);
-  URIUtils::RemoveExtension(strFileName);
-
-  if (!StringUtils::IsNaturalNumber(strFileName))
-    return "";
-  long idDb=atol(strFileName.c_str());
+    return VIDEODB_CONTENT_UNKNOWN;
 
   std::vector<std::string> pathElem = StringUtils::Split(strPath, "/");
   if (pathElem.size() == 0)
-    return "";
+    return VIDEODB_CONTENT_UNKNOWN;
 
   std::string itemType = pathElem.at(2);
   VIDEODB_CONTENT_TYPE type;
@@ -67,6 +55,50 @@ std::string CVideoDatabaseFile::TranslateUrl(const CURL& url)
   else if (itemType == "musicvideos" || itemType == "recentlyaddedmusicvideos")
     type = VIDEODB_CONTENT_MUSICVIDEOS;
   else
+    type = VIDEODB_CONTENT_UNKNOWN;
+
+  return type;
+}
+
+CVideoInfoTag CVideoDatabaseFile::GetVideoTag(const CURL& url)
+{
+  CVideoInfoTag tag;
+
+  std::string strFileName = URIUtils::GetFileName(url.Get());
+  if (strFileName.empty())
+    return tag;
+
+  URIUtils::RemoveExtension(strFileName);
+  if (!StringUtils::IsNaturalNumber(strFileName))
+    return tag;
+  long idDb = atol(strFileName.c_str());
+
+  VIDEODB_CONTENT_TYPE type = GetType(url);
+  if (type == VIDEODB_CONTENT_UNKNOWN)
+    return tag;
+
+  CVideoDatabase videoDatabase;
+  if (!videoDatabase.Open())
+    return tag;
+
+  tag = videoDatabase.GetDetailsByTypeAndId(type, idDb);
+
+  return tag;
+}
+
+std::string CVideoDatabaseFile::TranslateUrl(const CURL& url)
+{
+  std::string strFileName = URIUtils::GetFileName(url.Get());
+  if (strFileName.empty())
+    return "";
+
+  URIUtils::RemoveExtension(strFileName);
+  if (!StringUtils::IsNaturalNumber(strFileName))
+    return "";
+  long idDb = atol(strFileName.c_str());
+
+  VIDEODB_CONTENT_TYPE type = GetType(url);
+  if (type == VIDEODB_CONTENT_UNKNOWN)
     return "";
 
   CVideoDatabase videoDatabase;
