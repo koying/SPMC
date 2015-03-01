@@ -21,6 +21,7 @@
 
 #include "IFile.h"
 #include "File.h"
+#include "video/VideoDatabase.h"
 
 namespace XFILE
 {
@@ -40,6 +41,10 @@ public:
   virtual int64_t GetLength();
 
   static std::string TranslateUrl(const CURL& url);
+  static CVideoInfoTag GetVideoTag(const CURL& url);
+
+  static VIDEODB_CONTENT_TYPE GetType(const CURL &url);
+
 protected:
   CFile m_file;
 };
