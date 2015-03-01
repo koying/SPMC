@@ -118,6 +118,7 @@ res:
 	cp -fp media/drawable-xhdpi/banner.png xbmc/res/drawable-xhdpi/banner.png
 	cp -fp media/drawable-xhdpi/ouya_icon.png xbmc/res/drawable-xhdpi/ouya_icon.png
 	cp xbmc/strings.xml xbmc/res/values/
+	cp xbmc/colors.xml xbmc/res/values/
 	cp -fp media/leanback_icon.png xbmc/res/drawable-xhdpi/leanback_icon.png
 	mkdir -p tmp/res; $(AAPT) c -S xbmc/res -C tmp/res; cp -r -n xbmc/res tmp/ || true
 	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME_LC@app-debug-skeleton.apk -J xbmc/src
@@ -136,6 +137,7 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 	cp -fp xbmc/obj/local/$(CPU)/*.so xbmc/lib/$(CPU)/
 	$(STRIP) --strip-unneeded xbmc/lib/$(CPU)/*.so
 	install -p $(GDBPATH) ./xbmc/libs/$(CPU)/gdbserver
+	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/libs
 	echo "set solib-search-path ./obj/local/$(CPU)" > ./xbmc/libs/$(CPU)/gdb.setup
 	echo "directory $(TOOLCHAIN)/sysroot/usr/include $(NDKROOT)/sources/android/native_app_glue" \
 	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/libs/$(CPU)/gdb.setup
@@ -143,9 +145,9 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/*.java
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java
-	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java
+	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/libs
 
 package: libs python xbmc/classes.dex
 	@echo "Creating package..."

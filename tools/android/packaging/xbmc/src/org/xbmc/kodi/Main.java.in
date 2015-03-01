@@ -1,29 +1,64 @@
-package com.semperpax.@APP_NAME_LC@;
+package com.semperpax.spmc;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.ExecutionException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.DownloadManager.Request;
 import android.app.NativeActivity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.support.v4.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 
-public class Main extends NativeActivity 
+public class Main extends NativeActivity
 {
+  private static final String TAG = "spmc";
+  private static final int MAX_RECOMMENDATIONS = 3;
+
   private View thisView;
   private Handler handler = new Handler();
   private XBMCSettingsContentObserver mSettingsContentObserver;
+  private String m_jsonURL;
+  private NotificationManager mNotificationManager;
 
   native void _onNewIntent(Intent intent);
 
-  public Main() 
+  public Main()
   {
     super();
   }
 
   @Override
-  public void onCreate(Bundle savedInstanceState) 
+  public void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
 
@@ -75,7 +110,7 @@ public class Main extends NativeActivity
             }
           });
       setVolumeControlStream(AudioManager.STREAM_MUSIC);
-      
+
       mSettingsContentObserver = new XBMCSettingsContentObserver(this,new Handler());
       getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
   }
@@ -128,6 +163,28 @@ public class Main extends NativeActivity
         thisView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
       }
     }
+
+    if (android.os.Build.VERSION.SDK_INT >= 21)
+    {
+      // Leanback
+
+      new Thread()
+      {
+        public void run()
+        {
+          try
+          {
+            sleep(10000);
+            updateLeanback("http://localhost:8080", "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", \"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, \"limits\": { \"start\" : 0, \"end\": 3}, \"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"1\"}");
+          }
+          catch (Exception e)
+          {
+            e.printStackTrace();
+          }
+        }
+      }.start();
+    }
+
   }
 
   @Override
@@ -140,11 +197,195 @@ public class Main extends NativeActivity
         {
           sleep(1000);
           android.os.Process.killProcess(android.os.Process.myPid());
-        } catch (Exception e) {}
+        }
+        catch (InterruptedException e) {}
+
       }
     }.start();
 
     getApplicationContext().getContentResolver().unregisterContentObserver(mSettingsContentObserver);
     super.onDestroy();
+  }
+
+  public JSONObject requestJson(String jsonRequest)
+  {
+    try
+    {
+      Log.d(TAG, "JSON in: " + jsonRequest);
+
+      StringBuilder strbuilder = new StringBuilder();
+      HttpClient client = new DefaultHttpClient();
+      HttpPost httpPost = new HttpPost(m_jsonURL + "/jsonrpc");
+      httpPost.setHeader(HTTP.CONTENT_TYPE, "application/json");
+      httpPost.setEntity(new StringEntity(jsonRequest));
+      try
+      {
+        HttpResponse response = client.execute(httpPost);
+        StatusLine statusLine = response.getStatusLine();
+        int statusCode = statusLine.getStatusCode();
+        if (statusCode == 200) {
+          HttpEntity entity = response.getEntity();
+          InputStream content = entity.getContent();
+
+          BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+          String line;
+          while ((line = reader.readLine()) != null) {
+            strbuilder.append(line);
+          }
+
+          Log.d(TAG, "JSON out: " + strbuilder.toString());
+
+          try
+          {
+            JSONObject resp = new JSONObject(strbuilder.toString());
+            return resp;
+          }
+          catch (Exception e)
+          {
+            Log.e(TAG, "Failed to parse JSON");
+            e.printStackTrace();
+            return null;
+          }
+
+        } else {
+          Log.e(TAG, "Failed to read JSON");
+          return null;
+        }
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+        return null;
+      }
+    }
+    catch (Exception e)
+    {
+      Log.e(TAG, "Failed to read JSON");
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public Bitmap getBitmapFromJSON(String src)
+  {
+    try
+    {
+      JSONObject req = requestJson("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \"" + src + "\"}, \"id\": \"1\"}");
+      if (req == null)
+        return null;
+
+      JSONObject result = req.getJSONObject("result");
+      String surl = result.getJSONObject("details").getString("path");
+
+      URL url = new URL(m_jsonURL + "/" + surl);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setDoInput(true);
+      connection.connect();
+      InputStream input = connection.getInputStream();
+      Bitmap myBitmap = BitmapFactory.decodeStream(input);
+      return myBitmap;
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public String getBitmapUrlFromJSON(String src)
+  {
+    try
+    {
+      JSONObject req = requestJson("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \"" + src + "\"}, \"id\": \"1\"}");
+      if (req == null)
+        return null;
+
+      JSONObject result = req.getJSONObject("result");
+      String surl = result.getJSONObject("details").getString("path");
+
+      return (m_jsonURL + "/" + surl);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public void updateLeanback(String jsonUrl, String jsonRequest)
+  {
+    m_jsonURL = jsonUrl;
+
+    if (mNotificationManager == null)
+    {
+      mNotificationManager = (NotificationManager) getApplicationContext()
+          .getSystemService(Context.NOTIFICATION_SERVICE);
+    }
+
+    XBMCRecommendationBuilder builder = new XBMCRecommendationBuilder()
+        .setContext(getApplicationContext())
+        .setSmallIcon(R.drawable.notif_icon);
+
+    JSONObject rep = requestJson(jsonRequest);
+    if (rep == null)
+      return;
+
+    try
+    {
+      JSONObject results = rep.getJSONObject("result");
+      JSONArray movies = results.getJSONArray("movies");
+
+      int count = 0;
+      for (int i = 0; i < movies.length(); ++i)
+      {
+        JSONObject movie = movies.getJSONObject(i);
+        int id = Integer.parseInt(movie.getString("imdbnumber").replace("tt",
+            ""));
+
+        final XBMCRecommendationBuilder notificationBuilder = builder
+            .setBackground(XBMCContentProvider.GetImageUri(getBitmapUrlFromJSON(movie.getString("fanart"))).toString()).setId(id)
+            .setPriority(MAX_RECOMMENDATIONS - count)
+            .setTitle(movie.getString("title"))
+            .setDescription(movie.getString("tagline"))
+            .setIntent(buildPendingIntent(movie, id));
+
+        Bitmap bitmap = getBitmapFromJSON(movie.getString("thumbnail"));
+        notificationBuilder.setBitmap(bitmap);
+        Notification notification = notificationBuilder.build();
+        mNotificationManager.notify(id, notification);
+        ++count;
+      }
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+
+  }
+
+  private PendingIntent buildPendingIntent(JSONObject movie, int id)
+  {
+    try
+    {
+      Intent detailsIntent = new Intent(this, Main.class);
+      //detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
+      //detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
+
+      TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+      stackBuilder.addParentStack(Main.class);
+      stackBuilder.addNextIntent(detailsIntent);
+      // Ensure a unique PendingIntents, otherwise all recommendations end up
+      // with
+      // the same
+      // PendingIntent
+      detailsIntent.setAction(movie.getString("imdbnumber"));
+
+      return stackBuilder
+          .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
   }
 }

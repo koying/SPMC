@@ -9661,3 +9661,4 @@ xbmc/filesystem/VideoDatabaseFile.cpp
 xbmc/filesystem/VideoDatabaseFile.h
 xbmc/android/jni/Notification.h
 xbmc/android/jni/Notification.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java.in

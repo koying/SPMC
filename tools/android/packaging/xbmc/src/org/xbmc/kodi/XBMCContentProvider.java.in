@@ -39,9 +39,11 @@ import android.util.Log;
 public class XBMCContentProvider extends ContentProvider
 {
 
+  private static String TAG = "XBMCContentProvider";
+  
   public static String AUTHORITY = "com.semperpax.spmc";
-  public static String CONTENT_URI = "content://" + AUTHORITY + "/";
-
+  public static String AUTHORITY_IMAGE = AUTHORITY + ".image";
+ 
   @Override
   public boolean onCreate()
   {
@@ -50,18 +52,28 @@ public class XBMCContentProvider extends ContentProvider
 
   public static Uri GetImageUri(String surl)
   {
-    return Uri.fromParts("content", AUTHORITY + ".image", surl);
+    Uri.Builder builder = new Uri.Builder();
+    builder.scheme("content")
+    .authority(AUTHORITY_IMAGE)
+    .fragment(surl);
+    
+    Uri out = builder.build();
+    Log.d(TAG, "GetImageUri: in:" + surl + " out:" + out.toString());
+    return out;    
   }
   
   @Override
   public ParcelFileDescriptor openFile(Uri uri, String mode)
       throws FileNotFoundException
   {
+    Log.d(TAG, "openFile: " + uri.toString());
+    
     ParcelFileDescriptor[] pipe = null;
 
     try
     {
       String decodedUrl = uri.getFragment();
+      Log.d(TAG, "  decodedUrl: " + decodedUrl);
       pipe = ParcelFileDescriptor.createPipe();
 
       URL url = new URL(decodedUrl);

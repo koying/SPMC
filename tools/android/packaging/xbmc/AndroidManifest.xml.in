@@ -87,6 +87,11 @@
                 android:name="android.app.lib_name"
                 android:value="@APP_NAME_LC@" />
         </activity>
+
+        <provider android:name=".XBMCContentProvider"
+            android:authorities="com.semperpax.spmc.image"
+            android:exported="true" />
+
     </application>
 
 </manifest><!-- END_INCLUDE(manifest) -->
