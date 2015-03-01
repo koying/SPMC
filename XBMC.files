@@ -9657,3 +9657,5 @@ xbmc/input/KeyboardLayoutConfiguration.h
 xbmc/input/KeyboardLayout.h
 xbmc/input/KeyboardLayoutConfiguration.cpp
 xbmc/input/KeyboardLayout.cpp
+xbmc/filesystem/VideoDatabaseFile.cpp
+xbmc/filesystem/VideoDatabaseFile.h
