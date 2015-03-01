@@ -86,6 +86,7 @@
 
 #include "CompileInfo.h"
 #include "video/videosync/VideoSyncAndroid.h"
+#include "filesystem/VideoDatabaseFile.h"
 
 #define GIGABYTES       1073741824
 
@@ -835,8 +836,11 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
   std::string action = intent.getAction();
   if (action == "android.intent.action.VIEW")
   {
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PLAY, 1, 0, static_cast<void*>(
-                                         new CFileItem(GetFilenameFromIntent(intent))));
+    std::string playFile = GetFilenameFromIntent(intent);
+    CFileItem* item = new CFileItem(playFile, false);
+    if (item->IsVideoDb() && !item->HasVideoInfoTag())
+      *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PLAY, 0, 0, static_cast<void*>(item));
   }
 }
 
