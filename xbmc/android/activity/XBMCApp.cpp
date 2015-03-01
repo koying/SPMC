@@ -70,6 +70,7 @@
 #include "android/jni/MediaStore.h"
 #include "android/jni/Build.h"
 #include "CompileInfo.h"
+#include "filesystem/VideoDatabaseFile.h"
 
 #define GIGABYTES       1073741824
 
@@ -592,7 +593,10 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
   if (action == "android.intent.action.VIEW")
   {
     std::string playFile = GetFilenameFromIntent(intent);
-    CApplicationMessenger::Get().MediaPlay(playFile);
+    CFileItem item(playFile, false);
+    if (item.IsVideoDb() && !item.HasVideoInfoTag())
+      *(item.GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item.GetPath()));
+    CApplicationMessenger::Get().MediaPlay(item);
   }
 }
 
