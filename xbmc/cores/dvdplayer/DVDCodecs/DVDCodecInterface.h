@@ -24,7 +24,7 @@
 
 class CApplication;
 class CApplicationMessenger;
-class CWinSystemEGL;
+class CWinSystemBase;
 class CAdvancedSettings;
 class CXBMCRenderManager;
 class CGraphicContext;
@@ -37,7 +37,7 @@ public:
 public:
   CApplication *GetApplication() const;
   CApplicationMessenger *GetApplicationMessenger() const;
-  CWinSystemEGL *GetWindowSystem() const;
+  CWinSystemBase *GetWindowSystem() const;
   CAdvancedSettings *GetAdvancedSettings() const;
   CXBMCRenderManager *GetRenderManager() const;
   CGraphicContext* GetGraphicsContext() const;
