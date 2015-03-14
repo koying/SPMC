@@ -33,6 +33,14 @@
           <default>true</default>
           <control type="toggle" />
         </setting>
+        <setting id="videoplayer.framepacking" type="boolean" label="38112" help="38113">
+          <dependencies>
+            <dependency type="enable" setting="videoplayer.supportmvc">true</dependency>
+          </dependencies>
+          <level>2</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
       </group>
     </category>
     <category id="myvideos">
