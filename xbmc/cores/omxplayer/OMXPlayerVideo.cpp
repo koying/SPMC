@@ -650,9 +650,7 @@ int OMXPlayerVideo::GetFreeSpace()
 
 void OMXPlayerVideo::SetVideoRect(const CRect &InSrcRect, const CRect &InDestRect)
 {
-  // we get called twice a frame for left/right. Can ignore the rights.
-  if (g_graphicsContext.GetStereoView() == RENDER_STEREO_VIEW_RIGHT)
-    return;
+  assert(g_graphicsContext.GetStereoView() != RENDER_STEREO_VIEW_RIGHT);
 
   CRect SrcRect = InSrcRect, DestRect = InDestRect;
   unsigned flags = GetStereoModeFlags(GetStereoMode());
@@ -692,42 +690,10 @@ void OMXPlayerVideo::SetVideoRect(const CRect &InSrcRect, const CRect &InDestRec
   CRect gui(0, 0, CDisplaySettings::GetInstance().GetResolutionInfo(res).iWidth, CDisplaySettings::GetInstance().GetResolutionInfo(res).iHeight);
   CRect display(0, 0, CDisplaySettings::GetInstance().GetResolutionInfo(res).iScreenWidth, CDisplaySettings::GetInstance().GetResolutionInfo(res).iScreenHeight);
 
-  switch (video_stereo_mode)
-  {
-  case RENDER_STEREO_MODE_SPLIT_VERTICAL:
-    // optimisation - use simpler display mode in common case of unscaled 3d with same display mode
-    if (video_stereo_mode == display_stereo_mode && DestRect.x1 == 0.0f && DestRect.x2 * 2.0f == gui.Width() && !stereo_invert)
-    {
-      SrcRect.x2 *= 2.0f;
-      DestRect.x2 *= 2.0f;
-      video_stereo_mode = RENDER_STEREO_MODE_OFF;
-      display_stereo_mode = RENDER_STEREO_MODE_OFF;
-    }
-    else if (stereo_invert)
-    {
-      SrcRect.x1 += m_hints.width / 2;
-      SrcRect.x2 += m_hints.width / 2;
-    }
-    break;
-
-  case RENDER_STEREO_MODE_SPLIT_HORIZONTAL:
-    // optimisation - use simpler display mode in common case of unscaled 3d with same display mode
-    if (video_stereo_mode == display_stereo_mode && DestRect.y1 == 0.0f && DestRect.y2 * 2.0f == gui.Height() && !stereo_invert)
-    {
-      SrcRect.y2 *= 2.0f;
-      DestRect.y2 *= 2.0f;
-      video_stereo_mode = RENDER_STEREO_MODE_OFF;
-      display_stereo_mode = RENDER_STEREO_MODE_OFF;
-    }
-    else if (stereo_invert)
-    {
-      SrcRect.y1 += m_hints.height / 2;
-      SrcRect.y2 += m_hints.height / 2;
-    }
-    break;
-
-  default: break;
-  }
+  if (display_stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
+    DestRect.x2 *= 2.0f;
+  else if (display_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
+    DestRect.y2 *= 2.0f;
 
   if (gui != display)
   {
@@ -738,7 +704,7 @@ void OMXPlayerVideo::SetVideoRect(const CRect &InSrcRect, const CRect &InDestRec
     DestRect.y1 *= yscale;
     DestRect.y2 *= yscale;
   }
-  m_omxVideo.SetVideoRect(SrcRect, DestRect, video_stereo_mode, display_stereo_mode);
+  m_omxVideo.SetVideoRect(SrcRect, DestRect, m_video_stereo_mode, m_display_stereo_mode, m_StereoInvert);
 }
 
 void OMXPlayerVideo::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect)
