@@ -97,7 +97,8 @@
             -->
       <button id="1">Pause</button>
       <button id="2">Stop</button>
-      <button id="3">OSD</button>
+      <button id="3">CodecInfo</button>
+      <button id="4">OSD</button>
       <!--
             Left shoulder changes aspect ratio.
             Right shoulder changes subtitles.
