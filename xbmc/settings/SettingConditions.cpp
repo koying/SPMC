@@ -241,10 +241,7 @@ void CSettingConditions::Initialize()
   m_simpleConditions.insert("has_mediacodec");
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
-  if (!(
-        (StringUtils::StartsWithNoCase(CJNIBuild::MANUFACTURER, "nvidia") && StringUtils::StartsWithNoCase(CJNIBuild::MODEL, "shield")))  // Nvidia shield crashing
-      )
-    m_simpleConditions.insert("have_libstagefrightdecoder");
+  m_simpleConditions.insert("have_libstagefrightdecoder");
 #endif
 #ifdef HAS_RKSTF
   if (StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
