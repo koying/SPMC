@@ -29,6 +29,7 @@
 #include "utils/win32/Win32Log.h"
 #include "PasswordManager.h"
 #include "utils/auto_buffer.h"
+#include <cassert>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
