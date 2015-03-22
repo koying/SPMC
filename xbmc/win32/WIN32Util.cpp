@@ -53,6 +53,7 @@
                      "special://xbmc/"
 
 #include <locale.h>
+#include <cassert>
 
 extern HWND g_hWnd;
 
