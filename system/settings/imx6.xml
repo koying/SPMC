@@ -13,6 +13,26 @@
         </setting>
       </group>
     </category>
+    <category id="audiooutput">
+      <group id="1">
+        <setting id="audiooutput.supportdtshdcpudecoding" type="boolean" label="38120" help="38121">
+          <level>2</level>
+          <default>false</default>
+          <control type="toggle" />
+          <dependencies>
+            <dependency type="enable">
+            <or>
+              <condition setting="audiooutput.passthrough" operator="is">false</condition>
+              <and>
+                <condition setting="audiooutput.dtshdpassthrough" operator="is">false</condition>
+                <condition setting="audiooutput.dtspassthrough" operator="is">false</condition>
+              </and>
+            </or>
+            </dependency>
+          </dependencies>
+        </setting>
+      </group>
+    </category>
   </section>
   <section id="videos">
     <category id="videoacceleration">
