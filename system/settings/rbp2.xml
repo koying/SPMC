@@ -19,6 +19,11 @@
       </group>
     </category>
     <category id="audiooutput">
+      <group id="1">
+        <setting id="audiooutput.supportdtshdcpudecoding">
+          <default>true</default>
+        </setting>
+      </group>
       <group id="3">
         <setting id="audiooutput.ac3transcode" help="36429">
         </setting>
