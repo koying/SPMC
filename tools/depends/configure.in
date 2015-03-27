@@ -106,12 +106,9 @@ case $host in
     platform_cxxflags="$platform_cflags -frtti"
     platform_includes="-isysroot $use_toolchain/sysroot -I$prefix/$deps_dir/include/$use_sdk"
     platform_os="android"
-    if test "x$use_gplv3" = "xauto"; then
-      use_gplv3=0
-    fi
     #android builds are always cross
     cross_compiling="yes"
-  ;;     
+  ;;
   i*86*-linux-android*)
     if test "x$use_cpu" = "xauto"; then
       use_cpu=$host_cpu
@@ -123,9 +120,6 @@ case $host in
     platform_cxxflags="$platform_cflags -frtti"
     platform_includes="-isysroot $use_toolchain/sysroot -I$prefix/$deps_dir/include/$use_sdk"
     platform_os="android"
-    if test "x$use_gplv3" = "xauto"; then
-      use_gplv3=0
-    fi
     #android builds are always cross
     cross_compiling="yes"
   ;;
