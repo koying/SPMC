@@ -41,7 +41,7 @@ CApplicationMessenger* CDVDCodecInterface::GetApplicationMessenger() const
   return &CApplicationMessenger::Get();
 }
 
-CWinSystemEGL* CDVDCodecInterface::GetWindowSystem() const
+CWinSystemBase* CDVDCodecInterface::GetWindowSystem() const
 {
   return &g_Windowing;
 }
