@@ -1109,6 +1109,11 @@ int CButtonTranslator::GetActionCode(int window, const CKey &key, std::string &s
     return 0;
   buttonMap::const_iterator it2 = (*it).second.find(code);
   int action = 0;
+  if (it2 == (*it).second.end() && code & CKey::MODIFIER_LONG) // If long action not found, try short one
+  {
+    code &= ~CKey::MODIFIER_LONG;
+    it2 = (*it).second.find(code);
+  }
   if (it2 != (*it).second.end())
   {
     action = (*it2).second.id;
@@ -1516,6 +1521,8 @@ uint32_t CButtonTranslator::TranslateKeyboardButton(TiXmlElement *pButton)
         button_id |= CKey::MODIFIER_SUPER;
       else if (substr == "meta" || substr == "cmd")
         button_id |= CKey::MODIFIER_META;
+      else if (substr == "long")
+        button_id |= CKey::MODIFIER_LONG;
       else
         CLog::Log(LOGERROR, "Keyboard Translator: Unknown key modifier %s in %s", substr.c_str(), strMod.c_str());
      }

@@ -32,6 +32,8 @@
 #include "peripherals/Peripherals.h"
 #include "peripherals/devices/PeripheralHID.h"
 
+#define HOLD_THRESHOLD 100
+
 using namespace std;
 using namespace PERIPHERALS;
 
@@ -153,6 +155,8 @@ const CKey CKeyboardStat::ProcessKeyDown(XBMC_keysym& keysym)
   if (keysym.mod == m_lastKeysym.mod && keysym.scancode == m_lastKeysym.scancode && keysym.sym == m_lastKeysym.sym && keysym.unicode == m_lastKeysym.unicode)
   {
     held = CTimeUtils::GetFrameTime() - m_lastKeyTime;
+    if (held > HOLD_THRESHOLD)
+      modifiers |= CKey::MODIFIER_LONG;
   }
   else
   {
