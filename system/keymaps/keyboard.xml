@@ -54,6 +54,7 @@
       <return>Select</return>
       <enter>Select</enter>
       <backspace>Back</backspace>
+      <backspace mod="long">ActivateWindow(Home)</backspace>
       <key id='65446'>Back</key>
       <m>ActivateWindow(PlayerControls)</m>
       <s>ActivateWindow(shutdownmenu)</s>
