@@ -78,6 +78,7 @@ public:
   static void GetActions(std::vector<std::string> &actionList);
   static void GetWindows(std::vector<std::string> &windowList);
 
+  bool IsPossibleLonpress(int window, const CKey &key);
   CAction GetAction(int window, const CKey &key, bool fallback = true);
 
   /*! \brief Translate between a window name and it's id
