@@ -58,6 +58,7 @@ private:
 
   XBMC_keysym m_lastKeysym;
   unsigned int m_lastKeyTime;
+  uint32_t m_lastModifiers;
 };
 
 extern CKeyboardStat g_Keyboard;

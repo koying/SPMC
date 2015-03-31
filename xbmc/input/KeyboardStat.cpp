@@ -43,6 +43,7 @@ CKeyboardStat::CKeyboardStat()
 {
   memset(&m_lastKeysym, 0, sizeof(m_lastKeysym));
   m_lastKeyTime = 0;
+  m_lastModifiers = 0;
 }
 
 CKeyboardStat::~CKeyboardStat()
@@ -156,12 +157,20 @@ const CKey CKeyboardStat::ProcessKeyDown(XBMC_keysym& keysym)
   {
     held = CTimeUtils::GetFrameTime() - m_lastKeyTime;
     if (held > HOLD_THRESHOLD)
+    {
       modifiers |= CKey::MODIFIER_LONG;
+      if (modifiers != m_lastModifiers)
+      {
+        held = 0;
+        m_lastModifiers = modifiers;
+      }
+    }
   }
   else
   {
     m_lastKeysym = keysym;
     m_lastKeyTime = CTimeUtils::GetFrameTime();
+    m_lastModifiers = modifiers;
     held = 0;
   }
 
@@ -186,6 +195,7 @@ void CKeyboardStat::ProcessKeyUp(void)
 {
   memset(&m_lastKeysym, 0, sizeof(m_lastKeysym));
   m_lastKeyTime = 0;
+  m_lastModifiers = 0;
 }
 
 // Return the key name given a key ID
@@ -219,6 +229,10 @@ std::string CKeyboardStat::GetKeyName(int KeyID)
     keyname.append(keytable.keyname);
   else
     keyname += StringUtils::Format("%i", keyid);
+
+  if (KeyID & CKey::MODIFIER_LONG)
+    keyname.append(" (long)");
+
   keyname += StringUtils::Format(" (0x%02x)", KeyID);
 
   return keyname;

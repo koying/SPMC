@@ -2379,6 +2379,24 @@ bool CApplication::OnKey(const CKey& key)
   // special handling if the screensaver is active
   CAction action = CButtonTranslator::GetInstance().GetAction(iWin, key);
 
+  if(key.GetHeld() > 0)
+  {
+    // Only repeat navigation keys
+    switch (action.GetID())
+    {
+      case ACTION_MOVE_LEFT:
+      case ACTION_MOVE_RIGHT:
+      case ACTION_MOVE_DOWN:
+      case ACTION_MOVE_UP:
+      case ACTION_NAV_BACK:
+      case ACTION_PREVIOUS_MENU:
+        break;
+
+      default:
+        return true;
+    }
+  }
+
   // a key has been pressed.
   // reset Idle Timer
   m_idleTimer.StartZero();
