@@ -252,12 +252,12 @@ CDVDOverlay* CDVDOverlayCodecFFmpeg::GetOverlay()
       if (rect.h > m_height / 2)
       {
         m_height /= 2;
-        rect.h -= m_pCodecContext->height / 2;
+        rect.h /= 2;
       }
       else if (rect.w > m_width / 2)
       {
         m_width /= 2;
-        rect.w -= m_pCodecContext->width / 2;
+        rect.w /= 2;
       }
     }
 
