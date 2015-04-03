@@ -35,7 +35,7 @@ using namespace jni;
 CJNISurfaceTextureOnFrameAvailableListener* CJNISurfaceTextureOnFrameAvailableListener::m_listenerInstance(NULL);
 
 CJNISurfaceTextureOnFrameAvailableListener::CJNISurfaceTextureOnFrameAvailableListener()
-: CJNIBase("com/semperpax/spmc/XBMCOnFrameAvailableListener")
+: CJNIBase("com/semperpax/spmc15/XBMCOnFrameAvailableListener")
 {
   CJNIApplicationMainActivity *appInstance = CJNIApplicationMainActivity::GetAppInstance();
   if (!appInstance)
