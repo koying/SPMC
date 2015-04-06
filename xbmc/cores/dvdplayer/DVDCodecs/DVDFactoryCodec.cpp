@@ -335,18 +335,7 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
 #if defined(HAS_LIBSTAGEFRIGHT)
     if (!hint.software && CSettings::Get().GetBool("videoplayer.usestagefright"))
     {
-      switch(hint.codec)
-      {
-        case AV_CODEC_ID_MPEG4:
-        case AV_CODEC_ID_MSMPEG4V2:
-        case AV_CODEC_ID_MSMPEG4V3:
-          // Avoid h/w decoder for SD; Those files might use features
-          // not supported and can easily be soft-decoded
-          if (hint.width <= 800)
-            break;
-        default:
-          if ( (pCodec = OpenCodec(new CDVDVideoCodecStageFright(), hint, options)) ) return pCodec;
-      }
+      if ( (pCodec = OpenCodec(new CDVDVideoCodecStageFright(), hint, options)) ) return pCodec;
     }
 #endif
 
