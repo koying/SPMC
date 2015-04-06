@@ -584,6 +584,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     XMLUtils::GetBoolean(pElement,"useffmpegvda", m_useFfmpegVda);
 
     m_codecconfigs["stagefright"]["useMP4codec"] = "hd";
+    m_codecconfigs["mediacodec"]["useMP4codec"] = "hd";
 
     TiXmlElement* pCodecConfigElem = pElement->FirstChildElement("codecconfig");
     while (pCodecConfigElem)
