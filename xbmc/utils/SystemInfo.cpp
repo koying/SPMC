@@ -877,7 +877,9 @@ bool CSysInfo::HWSupportsStereo(const int mode)
 #if defined(TARGET_ANDROID)
   if (aml_present())
     return aml_supports_stereo(mode);
-  else if (SysfsUtils::Has("/sys/class/graphics/fb0/3d_present"))  // AFTV
+  else if (SysfsUtils::Has("/sys/class/graphics/fb0/3d_present") && SysfsUtils::HasRW("/sys/class/graphics/fb0/format_3d"))  // AFTV
+    return true;
+  else if (SysfsUtils::HasRW("/sys/class/display/display0.HDMI/3dmode")) // RK
     return true;
 #endif
   return false;
@@ -900,6 +902,21 @@ void CSysInfo::HWSetStereoMode(const int mode, const int view)
         break;
       case RENDER_STEREO_MODE_SPLIT_HORIZONTAL:
         SysfsUtils::SetInt("/sys/class/graphics/fb0/format_3d", 2);
+        break;
+    }
+  }
+  else if (SysfsUtils::Has("/sys/class/display/display0.HDMI/3dmode")) // RK
+  {
+    switch(mode)
+    {
+      default:
+        SysfsUtils::SetInt("/sys/class/display/display0.HDMI/3dmode", -1);
+        break;
+      case RENDER_STEREO_MODE_SPLIT_VERTICAL:
+        SysfsUtils::SetInt("/sys/class/display/display0.HDMI/3dmode", 8);
+        break;
+      case RENDER_STEREO_MODE_SPLIT_HORIZONTAL:
+        SysfsUtils::SetInt("/sys/class/display/display0.HDMI/3dmode", 6);
         break;
     }
   }
