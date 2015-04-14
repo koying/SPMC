@@ -37,6 +37,5 @@ protected:
   mutable std::string m_curHdmiResolution;
   mutable RESOLUTION_INFO m_fb_res;
 
-  bool SetDisplayResolution(const char *resolution);
   bool SysModeToResolution(std::string mode, RESOLUTION_INFO *res) const;
 };
