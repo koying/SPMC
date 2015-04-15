@@ -95,6 +95,10 @@ void CPlayList::Add(const CFileItemPtr &item, int iPosition, int iOrder)
   else
     item->m_iprogramCount = iOrder;
 
+  // Dereference videodb files
+  if (item->IsVideoDb())
+    item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
+
   // increment the playable counter
   item->ClearProperty("unplayable");
   if (m_iPlayableItems < 0)
