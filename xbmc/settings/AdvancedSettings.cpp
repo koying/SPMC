@@ -361,6 +361,7 @@ void CAdvancedSettings::Initialize()
   m_jsonTcpPort = 9090;
 
   m_enableMultimediaKeys = false;
+  m_disableminimize = false;
 
   m_canWindowed = true;
   m_guiVisualizeDirtyRegions = false;
@@ -1135,6 +1136,12 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
   if (pElement)
   {
     XMLUtils::GetBoolean(pRootElement, "enablemultimediakeys", m_enableMultimediaKeys);
+  }
+
+  pElement = pRootElement->FirstChildElement("disableminimize");
+  if (pElement)
+  {
+    XMLUtils::GetBoolean(pRootElement, "disableminimize", m_disableminimize);
   }
   
   pElement = pRootElement->FirstChildElement("gui");
