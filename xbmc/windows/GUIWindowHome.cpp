@@ -61,18 +61,21 @@ bool CGUIWindowHome::OnAction(const CAction &action)
       g_application.SwitchToFullScreen();
       return true;
     }
-    CLog::Log(LOGDEBUG, "CGUIWindowHome::OnBack - %d", m_countBackCalled);
-    if (!m_countBackCalled)
+    if (!g_advancedSettings.m_disableminimize)
     {
-      m_countBackCalled++;
-      CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Press again to Minimize", "", 1000, false);
-      return false;
-    }
-    else
-    {
-      m_countBackCalled = 0;
-      g_application.Minimize();
-      return true;
+      CLog::Log(LOGDEBUG, "CGUIWindowHome::OnBack - %d", m_countBackCalled);
+      if (!m_countBackCalled)
+      {
+        m_countBackCalled++;
+        CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Press again to Minimize", "", 1000, false);
+        return false;
+      }
+      else
+      {
+        m_countBackCalled = 0;
+        g_application.Minimize();
+        return true;
+      }
     }
   }
 
