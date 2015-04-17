@@ -297,7 +297,7 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, unsigne
 #if defined(HAS_RKSTF)
     if (!hint.software && CSettings::Get().HasCondition("have_rklibstagefrightdecoder") && CSettings::Get().GetBool("videoplayer.userkstagefright"))
     {
-      if ( (pCodec = OpenCodec(new CDVDVideoCodecRKStageFright(), hint, options)) ) return pCodec;
+      if ( (pCodec = OpenCodec(new CDVDVideoCodecRockchip(), hint, options)) ) return pCodec;
     }
 #endif
 
