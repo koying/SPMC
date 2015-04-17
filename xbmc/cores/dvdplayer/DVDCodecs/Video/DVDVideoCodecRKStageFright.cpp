@@ -43,15 +43,15 @@
 
 #include "DllLibStageFrightCodec.h"
 
-CCriticalSection            RKSTF_valid_mutex;
+CCriticalSection            RK_valid_mutex;
 
 #define CLASSNAME "CDVDVideoCodecStageFright"
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-DllLibStageFrightCodec*     CDVDVideoCodecRKStageFright::m_stf_dll = NULL;
+DllLibStageFrightCodec*     CDVDVideoCodecRockchip::m_stf_dll = NULL;
 
-CDVDVideoCodecRKStageFright::CDVDVideoCodecRKStageFright()
+CDVDVideoCodecRockchip::CDVDVideoCodecRockchip()
   : CDVDVideoCodec()
   , m_convert_bitstream(false),  m_converter(NULL)
   , m_stf_handle(NULL)
@@ -59,17 +59,18 @@ CDVDVideoCodecRKStageFright::CDVDVideoCodecRKStageFright()
   if (!m_stf_dll)
   {
     m_stf_dll = new DllLibStageFrightCodec;
-    m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
+    //m_stf_dll->SetFile(DLL_PATH_LIBSTAGEFRIGHTRK);
+    m_stf_dll->SetFile(DLL_PATH_LIBRKCODEC);
   }
   m_pFormatName = "rkstf";
 }
 
-CDVDVideoCodecRKStageFright::~CDVDVideoCodecRKStageFright()
+CDVDVideoCodecRockchip::~CDVDVideoCodecRockchip()
 {
   Dispose();
 }
 
-bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
+bool CDVDVideoCodecRockchip::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
 #if defined(HAS_RKSTF)
   if (!StringUtils::StartsWithNoCase(CJNIBuild::HARDWARE, "rk3"))  // Rockchip
@@ -152,14 +153,14 @@ bool CDVDVideoCodecRKStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &
       return false;
     }
 
-    CSingleLock lock (RKSTF_valid_mutex);
+    CSingleLock lock (RK_valid_mutex);
     return true;
   }
 
   return false;
 }
 
-void CDVDVideoCodecRKStageFright::Dispose()
+void CDVDVideoCodecRockchip::Dispose()
 {
   if (m_converter)
   {
@@ -168,7 +169,7 @@ void CDVDVideoCodecRKStageFright::Dispose()
     m_converter = NULL;
   }
 
-  CSingleLock lock (RKSTF_valid_mutex);
+  CSingleLock lock (RK_valid_mutex);
 
   if (m_stf_handle)
   {
@@ -178,12 +179,12 @@ void CDVDVideoCodecRKStageFright::Dispose()
   }
 }
 
-void CDVDVideoCodecRKStageFright::SetDropState(bool bDrop)
+void CDVDVideoCodecRockchip::SetDropState(bool bDrop)
 {
   m_stf_dll->stf_SetDropState(m_stf_handle, bDrop);
 }
 
-int CDVDVideoCodecRKStageFright::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecRockchip::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
 #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
@@ -212,32 +213,32 @@ int CDVDVideoCodecRKStageFright::Decode(uint8_t *pData, int iSize, double dts, d
   return rtn;
 }
 
-void CDVDVideoCodecRKStageFright::Reset(void)
+void CDVDVideoCodecRockchip::Reset(void)
 {
   m_stf_dll->stf_Reset(m_stf_handle);
 }
 
-bool CDVDVideoCodecRKStageFright::GetPicture(DVDVideoPicture* pDvdVideoPicture)
+bool CDVDVideoCodecRockchip::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   return m_stf_dll->stf_GetPicture(m_stf_handle, pDvdVideoPicture);
 }
 
-bool CDVDVideoCodecRKStageFright::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
+bool CDVDVideoCodecRockchip::ClearPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   return m_stf_dll->stf_ClearPicture(m_stf_handle, pDvdVideoPicture);
 }
 
-void CDVDVideoCodecRKStageFright::SetSpeed(int iSpeed)
+void CDVDVideoCodecRockchip::SetSpeed(int iSpeed)
 {
   m_stf_dll->stf_SetSpeed(m_stf_handle, iSpeed);
 }
 
-int CDVDVideoCodecRKStageFright::GetDataSize(void)
+int CDVDVideoCodecRockchip::GetDataSize(void)
 {
   return 0;
 }
 
-double CDVDVideoCodecRKStageFright::GetTimeSize(void)
+double CDVDVideoCodecRockchip::GetTimeSize(void)
 {
   return 0;
 }
