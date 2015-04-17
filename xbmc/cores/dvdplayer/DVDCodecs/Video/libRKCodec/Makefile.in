@@ -1,0 +1,35 @@
+ARCH=@ARCH@
+
+INCLUDES+=-I@abs_top_srcdir@/xbmc/cores/dvdplayer
+INCLUDES+=-I..
+
+SRCS = StageFrightInterface.cpp
+SRCS += RkCodecVideo.cpp
+INCLUDES += -I${prefix}/opt/rkvpu/src/common
+INCLUDES += -I${prefix}/opt/rkvpu/src/common/include
+
+LIBNAME=libXBMCvcodec_RKCodec
+LIB_SHARED=@abs_top_srcdir@/system/players/dvdplayer/$(LIBNAME)-$(ARCH).so
+
+LIBS += -L${prefix}/opt/rkvpu/lib -lstdc++ -lvpu -lrk_on2 -L@abs_top_srcdir@ -l@APP_NAME_LC@
+
+all: $(LIB_SHARED)
+
+include @abs_top_srcdir@/Makefile.include
+-include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))
+
+JNICXXFLAGS = $(CXXFLAGS) -std=gnu++0x -Wextra
+STFCXXFLAGS = $(CXXFLAGS) -Wno-multichar -fno-rtti -fPIC
+
+$(LIB_SHARED): $(OBJS)
+	$(CXX) $(STFCXXFLAGS) $(LDFLAGS) -shared -Wl,-no-undefined -g -o $(LIB_SHARED) $(OBJS) $(LIBS)
+
+%.o : %.cpp
+	$(CXX) -MF $*.d -MD -c $(STFCXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
+
+CLEAN_FILES = \
+	$(LIB_SHARED) \
+
+DISTCLEAN_FILES= \
+	Makefile \
+
