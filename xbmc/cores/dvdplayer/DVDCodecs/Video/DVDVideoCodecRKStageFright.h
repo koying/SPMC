@@ -25,14 +25,14 @@
 #include "DVDStreamInfo.h"
 
 class DllLibStageFrightCodec;
-class CDVDVideoCodecRKStageFright;
+class CDVDVideoCodecRockchip;
 class CBitstreamConverter;
 
-class CDVDVideoCodecRKStageFright : public CDVDVideoCodec
+class CDVDVideoCodecRockchip : public CDVDVideoCodec
 {
 public:
-  CDVDVideoCodecRKStageFright();
-  virtual ~CDVDVideoCodecRKStageFright();
+  CDVDVideoCodecRockchip();
+  virtual ~CDVDVideoCodecRockchip();
 
   // Required overrides
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
