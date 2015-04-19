@@ -405,8 +405,8 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
       mimetype = "video/hevc";
       m_metadata->setData(kKeyHVCC, kTypeAVCC, hints.extradata, hints.extrasize);
       break;
-  case AV_CODEC_ID_H264:
-//  case AV_CODEC_ID_H264MVC:
+    case AV_CODEC_ID_H264:
+      //  case AV_CODEC_ID_H264MVC:
       switch(hints.profile)
       {
         case FF_PROFILE_H264_HIGH_10:
@@ -429,25 +429,25 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
       mimetype = "video/avc";
       if (hints.extradata && *(uint8_t*)hints.extradata == 1)
         m_metadata->setData(kKeyAVCC, kTypeAVCC, hints.extradata, hints.extrasize);
-    break;
-  case AV_CODEC_ID_MPEG4:
+      break;
+    case AV_CODEC_ID_MPEG4:
       use_codec = codec_config["useMP4codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
           || (use_codec == "uhd" && hints.width <= 2000))
         return false;
-    mimetype = "video/mp4v-es";
-    break;
-  case AV_CODEC_ID_MPEG2VIDEO:
+      mimetype = "video/mp4v-es";
+      break;
+    case AV_CODEC_ID_MPEG2VIDEO:
       use_codec = codec_config["useMPEG2codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
           || (use_codec == "uhd" && hints.width <= 2000))
         return false;
-    mimetype = "video/mpeg2";
-    break;
+      mimetype = "video/mpeg2";
+      break;
     case AV_CODEC_ID_VP8:
       use_codec = codec_config["useVPXcodec"];
       if (use_codec == "0"
@@ -457,23 +457,35 @@ bool CRkStageFrightVideo::Open(CDVDStreamInfo &hints)
         return false;
       mimetype = "video/x-vnd.on2.vp8";
       break;
-  case AV_CODEC_ID_VC1:
-  //case AV_CODEC_ID_WMV3:
+    case AV_CODEC_ID_WMV3:
       use_codec = codec_config["useVC1codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
           || (use_codec == "hd" && hints.width <= 800)
           || (use_codec == "uhd" && hints.width <= 2000))
         return false;
-    mimetype = "video/vc1";
-    dec_extrasize = hints.extrasize;
-    dec_extradata = hints.extradata;
-    m_metadata->setInt32(kKeyVC1ExtraSize, dec_extrasize);
-    m_metadata->setData(kKeyExtraData, kTypeAVCC, hints.extradata, hints.extrasize);
-    break;
-  default:
-    return false;
-    break;
+      mimetype = "video/wmv3";
+      dec_extrasize = hints.extrasize;
+      dec_extradata = hints.extradata;
+      m_metadata->setInt32(kKeyVC1ExtraSize, dec_extrasize);
+      m_metadata->setData(kKeyExtraData, kTypeAVCC, hints.extradata, hints.extrasize);
+      break;
+    case AV_CODEC_ID_VC1:
+      use_codec = codec_config["useVC1codec"];
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
+        return false;
+      mimetype = "video/vc1";
+      dec_extrasize = hints.extrasize;
+      dec_extradata = hints.extradata;
+      m_metadata->setInt32(kKeyVC1ExtraSize, dec_extrasize);
+      m_metadata->setData(kKeyExtraData, kTypeAVCC, hints.extradata, hints.extrasize);
+      break;
+    default:
+      return false;
+      break;
   }
 
   m_metadata->setCString(kKeyMIMEType, mimetype);
