@@ -463,12 +463,6 @@ static vformat_t codecid_to_vformat(enum AVCodecID id)
     case AV_CODEC_ID_H264:
       format = VFORMAT_H264;
       break;
-    /*
-    case AV_CODEC_ID_H264MVC:
-      // H264 Multiview Video Coding (3d blurays)
-      format = VFORMAT_H264MVC;
-      break;
-    */
     case AV_CODEC_ID_MJPEG:
       format = VFORMAT_MJPEG;
       break;
@@ -557,11 +551,6 @@ static vdec_type_t codec_tag_to_vdec_type(unsigned int codec_tag)
       // h264
       dec_type = VIDEO_DEC_FORMAT_H264;
       break;
-    /*
-    case AV_CODEC_ID_H264MVC:
-      dec_type = VIDEO_DEC_FORMAT_H264;
-      break;
-    */
     case AV_CODEC_ID_RV30:
     case CODEC_TAG_RV30:
       // realmedia 3
@@ -1113,7 +1102,7 @@ int pre_header_feeding(am_private_t *para, am_packet_t *pkt)
             }
         }
 
-        if (VFORMAT_H264 == para->video_format || VFORMAT_H264_4K2K == para->video_format) {
+        if (VFORMAT_H264 == para->video_format || VFORMAT_H264_4K2K == para->video_format || VFORMAT_H264MVC == para->video_format) {
             ret = h264_write_header(para, pkt);
             if (ret != PLAYER_SUCCESS) {
                 return ret;
@@ -1563,9 +1552,10 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   // handle extradata
   am_private->video_format      = codecid_to_vformat(hints.codec);
   if (am_private->video_format == VFORMAT_H264) {
-      if (hints.width > 1920 || hints.height > 1088) {
-        am_private->video_format = VFORMAT_H264_4K2K;
-      }
+    if (hints.profile == 118 || hints.profile == 128)
+      am_private->video_codec_type = VFORMAT_H264MVC;
+    else if (hints.width > 1920 || hints.height > 1088)
+      am_private->video_format = VFORMAT_H264_4K2K;
   }
   switch (am_private->video_format)
   {
@@ -1990,7 +1980,7 @@ void CAMLCodec::SetSpeed(int speed)
       break;
     default:
       m_dll->codec_resume(&am_private->vcodec);
-      if ((am_private->video_format == VFORMAT_H264) || (am_private->video_format == VFORMAT_H264_4K2K))
+      if ((am_private->video_format == VFORMAT_H264) || (am_private->video_format == VFORMAT_H264_4K2K) || (am_private->video_format == VFORMAT_H264MVC))
         m_dll->codec_set_cntl_mode(&am_private->vcodec, TRICKMODE_FFFB);
       else
         m_dll->codec_set_cntl_mode(&am_private->vcodec, TRICKMODE_I);
