@@ -1553,7 +1553,10 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   am_private->video_format      = codecid_to_vformat(hints.codec);
   if (am_private->video_format == VFORMAT_H264) {
     if (hints.profile == 118 || hints.profile == 128)
+	{
       am_private->video_codec_type = VFORMAT_H264MVC;
+      m_hints.stereo_mode = "top_bottom";
+	}
     else if (hints.width > 1920 || hints.height > 1088)
       am_private->video_format = VFORMAT_H264_4K2K;
   }
@@ -1936,6 +1939,7 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
   pDvdVideoPicture->format = RENDER_FMT_BYPASS;
   pDvdVideoPicture->iDuration = (double)(am_private->video_rate * DVD_TIME_BASE) / UNIT_FREQ;
+  pDvdVideoPicture->stereo_mode = m_hints.stereo_mode;
 
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
   if (m_speed == DVD_PLAYSPEED_NORMAL)
