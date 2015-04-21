@@ -2348,7 +2348,10 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   else if (m_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
   {
     dst_rect.y2 *= 2.0;
-    SetVideo3dMode(MODE_3D_DISABLE);
+    if (!m_hints.stereo_mode.empy())
+      SetVideo3dMode(MODE_3D_BT);
+    else
+      SetVideo3dMode(MODE_3D_DISABLE);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_INTERLACED)
   {
