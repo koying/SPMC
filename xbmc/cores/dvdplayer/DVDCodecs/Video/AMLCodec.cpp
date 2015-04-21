@@ -1553,10 +1553,11 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   am_private->video_format      = codecid_to_vformat(hints.codec);
   if (am_private->video_format == VFORMAT_H264) {
     if (hints.profile == 118 || hints.profile == 128)
-	{
+    {
+      CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder: MVD detected");
       am_private->video_codec_type = VFORMAT_H264MVC;
       m_hints.stereo_mode = "top_bottom";
-	}
+    }
     else if (hints.width > 1920 || hints.height > 1088)
       am_private->video_format = VFORMAT_H264_4K2K;
   }
