@@ -9496,7 +9496,7 @@ xbmc/DllPaths_generated_android.h.in
 xbmc/DllPaths_generated.h.in
 Makefile.in
 Makefile.include.in
-configure.in
+configure.ac
 xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS/StageFrightInterface.h
 xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS/StageFrightInterface.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/DllLibStageFrightCodec.h
