@@ -1554,8 +1554,8 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   if (am_private->video_format == VFORMAT_H264) {
     if (hints.profile == 118 || hints.profile == 128)
     {
-      CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder: MVD detected");
-      am_private->video_codec_type = VFORMAT_H264MVC;
+      CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder: MVC detected");
+      am_private->video_format = VFORMAT_H264MVC;
       m_hints.stereo_mode = "top_bottom";
     }
     else if (hints.width > 1920 || hints.height > 1088)
@@ -1586,8 +1586,8 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   }
 
   CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder "
-    "hints.width(%d), hints.height(%d), hints.codec(%d), hints.codec_tag(%d), hints.pid(%d)",
-    hints.width, hints.height, hints.codec, hints.codec_tag, hints.pid);
+    "hints.width(%d), hints.height(%d), hints.codec(%d), hints.codec_tag(%d), hints.profile(%d), hints.pid(%d)",
+    hints.width, hints.height, hints.codec, hints.codec_tag, hints.profile, hints.pid);
   CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder hints.fpsrate(%d), hints.fpsscale(%d), hints.rfpsrate(%d), hints.rfpsscale(%d), video_rate(%d)",
     hints.fpsrate, hints.fpsscale, hints.rfpsrate, hints.rfpsscale, am_private->video_rate);
   CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder hints.aspect(%f), video_ratio.num(%d), video_ratio.den(%d)",
@@ -1940,7 +1940,7 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
   pDvdVideoPicture->format = RENDER_FMT_BYPASS;
   pDvdVideoPicture->iDuration = (double)(am_private->video_rate * DVD_TIME_BASE) / UNIT_FREQ;
-  pDvdVideoPicture->stereo_mode = m_hints.stereo_mode;
+  strncpy(pDvdVideoPicture->stereo_mode, m_hints.stereo_mode.c_str(), sizeof(pDvdVideoPicture->stereo_mode)-1);
 
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
   if (m_speed == DVD_PLAYSPEED_NORMAL)
@@ -2348,10 +2348,10 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   else if (m_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
   {
     dst_rect.y2 *= 2.0;
-    if (!m_hints.stereo_mode.empy())
-      SetVideo3dMode(MODE_3D_BT);
-    else
+    if (m_hints.stereo_mode.empty())
       SetVideo3dMode(MODE_3D_DISABLE);
+//    else
+//      SetVideo3dMode(MODE_3D_BT);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_INTERLACED)
   {
