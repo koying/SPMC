@@ -305,6 +305,8 @@ public:
 #define PLAYER_UNSUPPORT        (-(P_PRE|0x35))
 #define PLAYER_CHECK_CODEC_ERROR  (-(P_PRE|0x39))
 
+#define VIDEO_PATH       "/dev/amvideo"
+
 #define HDR_BUF_SIZE 1024
 typedef struct hdr_buf {
     char *data;
@@ -669,6 +671,57 @@ int check_in_pts(am_private_t *para, am_packet_t *pkt)
     return PLAYER_SUCCESS;
 }
 
+static int check_size_in_buffer(unsigned char *p, int len)
+{
+    unsigned int size;
+    unsigned char *q = p;
+    while ((q + 4) < (p + len)) {
+        size = (*q << 24) | (*(q + 1) << 16) | (*(q + 2) << 8) | (*(q + 3));
+        if (size & 0xff000000) {
+            return 0;
+        }
+
+        if (q + size + 4 == p + len) {
+            return 1;
+        }
+
+        q += size + 4;
+    }
+    return 0;
+}
+
+static int check_size_in_buffer3(unsigned char *p, int len)
+{
+    unsigned int size;
+    unsigned char *q = p;
+    while ((q + 3) < (p + len)) {
+        size = (*q << 16) | (*(q + 1) << 8) | (*(q + 2));
+
+        if (q + size + 3 == p + len) {
+            return 1;
+        }
+
+        q += size + 3;
+    }
+    return 0;
+}
+
+static int check_size_in_buffer2(unsigned char *p, int len)
+{
+    unsigned int size;
+    unsigned char *q = p;
+    while ((q + 2) < (p + len)) {
+        size = (*q << 8) | (*(q + 1));
+
+        if (q + size + 2 == p + len) {
+            return 1;
+        }
+
+        q += size + 2;
+    }
+    return 0;
+}
+
 static int write_header(am_private_t *para, am_packet_t *pkt)
 {
     int write_bytes = 0, len = 0;
@@ -919,9 +972,122 @@ static int divx3_write_header(am_private_t *para, am_packet_t *pkt)
     return PLAYER_SUCCESS;
 }
 
+int h264_update_frame_header(am_packet_t *pkt)
+{
+    int nalsize, size = pkt->data_size;
+    unsigned char *data = pkt->data;
+    unsigned char *p = data;
+    if (p != NULL) {
+        if (check_size_in_buffer(p, size)) {
+            while ((p + 4) < (data + size)) {
+                nalsize = (*p << 24) | (*(p + 1) << 16) | (*(p + 2) << 8) | (*(p + 3));
+                *p = 0;
+                *(p + 1) = 0;
+                *(p + 2) = 0;
+                *(p + 3) = 1;
+                p += (nalsize + 4);
+            }
+            return PLAYER_SUCCESS;
+        } else if (check_size_in_buffer3(p, size)) {
+            while ((p + 3) < (data + size)) {
+                nalsize = (*p << 16) | (*(p + 1) << 8) | (*(p + 2));
+                *p = 0;
+                *(p + 1) = 0;
+                *(p + 2) = 1;
+                p += (nalsize + 3);
+            }
+            return PLAYER_SUCCESS;
+        } else if (check_size_in_buffer2(p, size)) {
+            unsigned char *new_data;
+            int new_len = 0;
+
+            new_data = (unsigned char *)malloc(size + 2 * 1024);
+            if (!new_data) {
+                return PLAYER_NOMEM;
+            }
+
+            while ((p + 2) < (data + size)) {
+                nalsize = (*p << 8) | (*(p + 1));
+                *(new_data + new_len) = 0;
+                *(new_data + new_len + 1) = 0;
+                *(new_data + new_len + 2) = 0;
+                *(new_data + new_len + 3) = 1;
+                memcpy(new_data + new_len + 4, p + 2, nalsize);
+                p += (nalsize + 2);
+                new_len += nalsize + 4;
+            }
+
+            free(pkt->buf);
+
+            pkt->buf = new_data;
+            pkt->buf_size = size + 2 * 1024;
+            pkt->data = pkt->buf;
+            pkt->data_size = new_len;
+        }
+    } else {
+        return PLAYER_FAILED;
+    }
+    return PLAYER_SUCCESS;
+}
+
 static int h264_add_header(unsigned char *buf, int size, am_packet_t *pkt)
 {
-    if (size > HDR_BUF_SIZE)
+  char nal_start_code[] = {0x0, 0x0, 0x0, 0x1};
+  int nalsize;
+  unsigned char* p;
+  int tmpi;
+  unsigned char* extradata = buf;
+  int header_len = 0;
+  char* buffer = pkt->hdr->data;
+
+  p = extradata;
+  if ((p[0] == 0 && p[1] == 0 && p[2] == 0 && p[3] == 1) && size < HDR_BUF_SIZE) {
+      memcpy(buffer, buf, size);
+      pkt->hdr->size = size;
+      return PLAYER_SUCCESS;
+  }
+  if (size < 4) {
+      return PLAYER_FAILED;
+  }
+
+  if (size < 10) {
+      return PLAYER_FAILED;
+  }
+
+  if (*p != 1) {
+      return PLAYER_FAILED;
+  }
+
+  int cnt = *(p + 5) & 0x1f; //number of sps
+  // printf("number of sps :%d\n", cnt);
+  p += 6;
+  for (tmpi = 0; tmpi < cnt; tmpi++) {
+      nalsize = (*p << 8) | (*(p + 1));
+      memcpy(&(buffer[header_len]), nal_start_code, 4);
+      header_len += 4;
+      memcpy(&(buffer[header_len]), p + 2, nalsize);
+      header_len += nalsize;
+      p += (nalsize + 2);
+  }
+
+  cnt = *(p++); //Number of pps
+  // printf("number of pps :%d\n", cnt);
+  for (tmpi = 0; tmpi < cnt; tmpi++) {
+      nalsize = (*p << 8) | (*(p + 1));
+      memcpy(&(buffer[header_len]), nal_start_code, 4);
+      header_len += 4;
+      memcpy(&(buffer[header_len]), p + 2, nalsize);
+      header_len += nalsize;
+      p += (nalsize + 2);
+  }
+  if (header_len >= HDR_BUF_SIZE) {
+      return PLAYER_FAILED;
+  }
+  pkt->hdr->size = header_len;
+  return PLAYER_SUCCESS;
+
+  /*
+  if (size > HDR_BUF_SIZE)
     {
         free(pkt->hdr->data);
         pkt->hdr->data = (char *)malloc(size);
@@ -932,6 +1098,7 @@ static int h264_add_header(unsigned char *buf, int size, am_packet_t *pkt)
     memcpy(pkt->hdr->data, buf, size);
     pkt->hdr->size = size;
     return PLAYER_SUCCESS;
+    */
 }
 
 static int h264_write_header(am_private_t *para, am_packet_t *pkt)
@@ -1252,6 +1419,9 @@ int set_header_info(am_private_t *para)
     //if (pkt->hdr)
     //  pkt->hdr->size = 0;
 
+    if (((para->video_format == VFORMAT_H264) || (para->video_format == VFORMAT_H264MVC)))  {
+        return h264_update_frame_header(pkt);
+    }
     if (para->video_format == VFORMAT_MPEG4)
     {
       if (para->video_codec_type == VIDEO_DEC_FORMAT_MPEG4_3)
@@ -1552,7 +1722,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   // handle extradata
   am_private->video_format      = codecid_to_vformat(hints.codec);
   if (am_private->video_format == VFORMAT_H264) {
-    if (hints.profile == 118 || hints.profile == 128)
+    if (hints.profile == 118 || hints.profile == 128 || hints.codec_tag == AV_CODEC_ID_H264MVC)
     {
       CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder: MVC detected");
       am_private->video_format = VFORMAT_H264MVC;
@@ -1615,8 +1785,8 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
     case VFORMAT_MPEG4:
       am_private->gcodec.param = (void*)EXTERNAL_PTS;
       break;
-    case VFORMAT_H264:
     case VFORMAT_H264MVC:
+    case VFORMAT_H264:
       am_private->gcodec.format = VIDEO_DEC_FORMAT_H264;
       am_private->gcodec.param  = (void*)EXTERNAL_PTS;
       // h264 in an avi file
@@ -1690,6 +1860,9 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   m_dll->codec_set_cntl_syncthresh(&am_private->vcodec, 0);
   // disable tsync, we are playing video disconnected from audio.
   SysfsUtils::SetInt("/sys/class/tsync/enable", 0);
+
+  if (am_private->video_format == VFORMAT_H264MVC)
+    SetVideo3dMode(MODE_3D_BT);
 
   am_private->am_pkt.codec = &am_private->vcodec;
   pre_header_feeding(am_private, &am_private->am_pkt);
@@ -1840,8 +2013,8 @@ int CAMLCodec::Decode(uint8_t *pData, size_t iSize, double dts, double pts)
     if (am_private->am_pkt.avdts != (int64_t)AV_NOPTS_VALUE)
       am_private->am_pkt.avdts -= m_start_dts;
 
-    //CLog::Log(LOGDEBUG, "CAMLCodec::Decode: iSize(%d), dts(%f), pts(%f), avdts(%llx), avpts(%llx)",
-    //  iSize, dts, pts, am_private->am_pkt.avdts, am_private->am_pkt.avpts);
+    CLog::Log(LOGDEBUG, "CAMLCodec::Decode: iSize(%d), dts(%f), pts(%f), avdts(%llx), avpts(%llx)",
+      iSize, dts, pts, am_private->am_pkt.avdts, am_private->am_pkt.avpts);
 
     // some formats need header/data tweaks.
     // the actual write occurs once in write_av_packet
@@ -2062,8 +2235,8 @@ void CAMLCodec::Process()
       pts_video = get_pts_video();
       if (m_cur_pts != pts_video && pts_video != 0)
       {
-        //CLog::Log(LOGDEBUG, "CAMLCodec::Process: pts_video(%lld), pts_video/PTS_FREQ(%f), duration(%f)",
-        //  pts_video, (double)pts_video/PTS_FREQ, 1.0/((double)(pts_video - m_cur_pts)/PTS_FREQ));
+        CLog::Log(LOGDEBUG, "CAMLCodec::Process: pts_video(%lld), pts_video/PTS_FREQ(%f), duration(%f)",
+          pts_video, (double)pts_video/PTS_FREQ, 1.0/((double)(pts_video - m_cur_pts)/PTS_FREQ));
 
         // other threads look at these, do them first
         m_cur_pts = pts_video;
@@ -2192,12 +2365,33 @@ void CAMLCodec::SetVideo3dMode(const int mode3d)
 {
   static int old3dmode = MODE_3D_DISABLE;
 
+  if (!m_hints.stereo_mode.empty() && mode3d == MODE_3D_DISABLE)
+    return;
+
   if (mode3d == old3dmode)
     return;
 
   CLog::Log(LOGDEBUG, "CAMLCodec::SetVideo3dMode:mode3d(0x%x)", mode3d);
-  SysfsUtils::SetInt("/sys/class/ppmgr/ppmgr_3d_mode", mode3d);
-  old3dmode = mode3d;
+  CLog::Log(LOGDEBUG, "AMSTREAM_IOC_SET_3D_TYPE: 0x%x", AMSTREAM_IOC_SET_3D_TYPE);
+  CLog::Log(LOGDEBUG, "AMSTREAM_IOC_GET_3D_TYPE: 0x%x", AMSTREAM_IOC_GET_3D_TYPE);
+
+  //  SysfsUtils::SetInt("/sys/class/ppmgr/ppmgr_3d_mode", mode3d);
+
+  int video_fd;
+  video_fd = open(VIDEO_PATH, O_RDWR);
+  if (video_fd < 0)
+  {
+    CLog::Log(LOGERROR, "CAMLCodec::SetVideo3dMode - Cannot open video device");
+      return;
+  }
+
+  int ret = ioctl(video_fd, AMSTREAM_IOC_SET_3D_TYPE, mode3d);
+  if (ret < 0)
+    CLog::Log(LOGERROR, "CAMLCodec::SetVideo3dMode - Cannot set 3D mode (0x%x)", ret);
+  else
+    old3dmode = mode3d;
+
+  close(video_fd);
 }
 
 std::string CAMLCodec::GetStereoMode()
@@ -2348,10 +2542,7 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   else if (m_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
   {
     dst_rect.y2 *= 2.0;
-    if (m_hints.stereo_mode.empty())
-      SetVideo3dMode(MODE_3D_DISABLE);
-//    else
-//      SetVideo3dMode(MODE_3D_BT);
+    SetVideo3dMode(MODE_3D_DISABLE);
   }
   else if (m_stereo_mode == RENDER_STEREO_MODE_INTERLACED)
   {
@@ -2401,9 +2592,9 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   char video_axis[256] = {};
   sprintf(video_axis, "%d %d %d %d", (int)dst_rect.x1, (int)dst_rect.y1, (int)dst_rect.x2, (int)dst_rect.y2);
 
-  SysfsUtils::SetString("/sys/class/video/axis", video_axis);
+  //SysfsUtils::SetString("/sys/class/video/axis", video_axis);
   // make sure we are in 'full stretch' so we can stretch
-  SysfsUtils::SetInt("/sys/class/video/screen_mode", 1);
+  //SysfsUtils::SetInt("/sys/class/video/screen_mode", 1);
 
   // we only get called once gui has changed to something
   // that would show video playback, so show it.
