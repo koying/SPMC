@@ -1,0 +1,13 @@
+--- a/libamplayer/include/amcodec/amports/amstream.h	2015-04-25 12:17:53.661613215 +0200
++++ b/libamplayer/include/amcodec/amports/amstream.h	2015-04-25 12:15:43.449608483 +0200
+@@ -84,5 +84,10 @@
+ #define AMSTREAM_IOC_TS_SKIPBYTE _IOW(AMSTREAM_IOC_MAGIC, 0x1d, int)
+ #define AMSTREAM_IOC_SUB_TYPE    _IOW(AMSTREAM_IOC_MAGIC, 0x1e, int)
+ #define AMSTREAM_IOC_CLEAR_VIDEO    _IOW(AMSTREAM_IOC_MAGIC, 0x1f, int)
++
++//VPP.3D IOCTL command list
++#define  AMSTREAM_IOC_SET_3D_TYPE  _IOW(AMSTREAM_IOC_MAGIC, 0x3c, unsigned int)
++#define  AMSTREAM_IOC_GET_3D_TYPE  _IOW(AMSTREAM_IOC_MAGIC, 0x3d, unsigned int)
++
+ #define AMSTREAM_IOC_APTS             _IOR(AMSTREAM_IOC_MAGIC, 0x40, unsigned long)
+ #define AMSTREAM_IOC_VPTS             _IOR(AMSTREAM_IOC_MAGIC, 0x41, unsigned long)
