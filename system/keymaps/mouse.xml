@@ -50,7 +50,7 @@
   </SlideShow>
   <FullscreenVideo>
     <mouse>
-      <rightclick>Info</rightclick>
+      <rightclick>Stop</rightclick>
     </mouse>
   </FullscreenVideo>
 </keymap>
