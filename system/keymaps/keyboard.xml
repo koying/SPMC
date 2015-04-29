@@ -61,6 +61,7 @@
       <i>Info</i>
       <menu>ContextMenu</menu>
       <c>ContextMenu</c>
+      <leftwindows>ContextMenu</leftwindows>
       <space>Pause</space>
       <x>Stop</x>
       <period>SkipNext</period>
@@ -276,6 +277,7 @@
       <pagedown>SkipPrevious</pagedown>
       <menu>CodecInfo</menu>
       <c>CodecInfo</c>
+      <leftwindows>CodecInfo</leftwindows>
     </keyboard>
   </FullscreenVideo>
   <VideoTimeSeek>
