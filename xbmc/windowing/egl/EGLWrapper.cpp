@@ -26,9 +26,10 @@
   #include "EGLNativeTypeWayland.h"
 #endif
 #if defined(TARGET_ANDROID)
-  #include "EGLNativeTypeAndroid.h"
   #include "EGLNativeTypeAmlAndroid.h"
   #include "EGLNativeTypeRKAndroid.h"
+  #include "EGLNativeTypeTegraAndroid.h"
+  #include "EGLNativeTypeAndroid.h"
 #endif
 #if defined(TARGET_RASPBERRY_PI)
   #include "EGLNativeTypeRaspberryPI.h"
@@ -97,6 +98,7 @@ bool CEGLWrapper::Initialize(const std::string &implementation)
 #if defined(TARGET_ANDROID)
       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlAndroid>(implementation)) ||
       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRKAndroid>(implementation)) ||
+      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeTegraAndroid>(implementation)) ||
       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation)) ||
 #endif
 #if defined(TARGET_RASPBERRY_PI)
