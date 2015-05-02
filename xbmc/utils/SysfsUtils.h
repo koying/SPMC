@@ -30,4 +30,7 @@ public:
   static int GetInt(const std::string& path, int& val);
   static bool Has(const std::string& path);
   static bool HasRW(const std::string &path);
+
+  static bool Su(const std::string &cmd);
+  static bool Chmod(const std::string &path);
 };
