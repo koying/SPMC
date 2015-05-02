@@ -2343,7 +2343,7 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   ShowMainVideo(true);
 }
 
-void CAMLCodec::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect)
+void CAMLCodec::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, DWORD flags, const void*)
 {
   CAMLCodec *codec = (CAMLCodec*)ctx;
   codec->SetVideoRect(SrcRect, DestRect);
