@@ -1041,8 +1041,10 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   else if(pic.format == RENDER_FMT_MMAL)
     m_pRenderer->AddProcessor(pic.MMALBuffer, index);
 #endif
+#if defined(HAS_IMXVPU) || defined(HAS_LIBAMCODEC) || defined(HAS_RKSTF)
   else if (pic.format == RENDER_FMT_BYPASS)
     m_pRenderer->AddProcessor(pic.render_ctx, index);
+#endif
 
   m_pRenderer->ReleaseImage(index, false);
 
