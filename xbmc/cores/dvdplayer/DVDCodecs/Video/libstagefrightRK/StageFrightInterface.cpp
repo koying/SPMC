@@ -19,65 +19,54 @@
  */
 
 #include "StageFrightInterface.h"
-#include "StageFrightVideo.h"
+#include "RkStagefrightVideo.h"
 
 void* create_stf(CDVDCodecInterface* interface)
 {
-  return (void*)new CStageFrightVideo(interface);
+  return (void*)new CRkStageFrightVideo(interface);
 }
 
 void destroy_stf(void* stf)
 {
-  delete (CStageFrightVideo*)stf;
+  delete (CRkStageFrightVideo*)stf;
 }
 
 bool stf_Open(void* stf, CDVDStreamInfo &hints)
 {
-  return ((CStageFrightVideo*)stf)->Open(hints);
+  return ((CRkStageFrightVideo*)stf)->Open(hints);
 }
 
 void stf_Dispose(void* stf)
 {
-  ((CStageFrightVideo*)stf)->Dispose();
+  ((CRkStageFrightVideo*)stf)->Dispose();
 }
 
 int  stf_Decode(void* stf, uint8_t *pData, int iSize, double dts, double pts)
 {
-  return ((CStageFrightVideo*)stf)->Decode(pData, iSize, dts, pts);
+  return ((CRkStageFrightVideo*)stf)->Decode(pData, iSize, dts, pts);
 }
 
 void stf_Reset(void* stf)
 {
-  ((CStageFrightVideo*)stf)->Reset();
+  ((CRkStageFrightVideo*)stf)->Reset();
 }
 
 bool stf_GetPicture(void* stf, DVDVideoPicture *pDvdVideoPicture)
 {
-  return ((CStageFrightVideo*)stf)->GetPicture(pDvdVideoPicture);
+  return ((CRkStageFrightVideo*)stf)->GetPicture(pDvdVideoPicture);
 }
 
 bool stf_ClearPicture(void* stf, DVDVideoPicture* pDvdVideoPicture)
 {
-  return ((CStageFrightVideo*)stf)->ClearPicture(pDvdVideoPicture);
+  return ((CRkStageFrightVideo*)stf)->ClearPicture(pDvdVideoPicture);
 }
 
 void stf_SetDropState(void* stf, bool bDrop)
 {
-  ((CStageFrightVideo*)stf)->SetDropState(bDrop);
+  ((CRkStageFrightVideo*)stf)->SetDropState(bDrop);
 }
 
 void stf_SetSpeed(void* stf, int iSpeed)
 {
-  ((CStageFrightVideo*)stf)->SetSpeed(iSpeed);
+  ((CRkStageFrightVideo*)stf)->SetSpeed(iSpeed);
 }
-
-void stf_LockBuffer(void* stf, CDVDVideoCodecStageFrightBuffer* buf)
-{
-  ((CStageFrightVideo*)stf)->LockBuffer(buf);
-}
-
-void stf_ReleaseBuffer(void* stf, CDVDVideoCodecStageFrightBuffer* buf)
-{
-  ((CStageFrightVideo*)stf)->ReleaseBuffer(buf);
-}
-

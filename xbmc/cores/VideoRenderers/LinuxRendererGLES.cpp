@@ -103,9 +103,6 @@ CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   cvBufferRef = NULL;
 #endif
-#ifdef HAS_LIBSTAGEFRIGHT
-  stfbuf = NULL;
-#endif
 #if defined(TARGET_ANDROID)
   mediacodec = NULL;
 #endif
@@ -645,7 +642,6 @@ unsigned int CLinuxRendererGLES::PreInit()
 #endif
 #ifdef HAS_LIBSTAGEFRIGHT
   m_formats.push_back(RENDER_FMT_EGLIMG);
-  m_formats.push_back(RENDER_FMT_STFBUF);
 #endif
 #if defined(TARGET_ANDROID)
   m_formats.push_back(RENDER_FMT_MEDIACODEC);
@@ -746,10 +742,6 @@ void CLinuxRendererGLES::LoadShaders(int field)
         m_renderMethod = RENDER_EGLIMG;
         break;
       }
-      else if (m_format == RENDER_FMT_STFBUF)
-      {
-        CLog::Log(LOGNOTICE, "GL: Using STF buffer render method");
-      }
       else if (m_format == RENDER_FMT_MEDIACODEC)
       {
         CLog::Log(LOGNOTICE, "GL: Using MediaCodec render method");
@@ -835,12 +827,6 @@ void CLinuxRendererGLES::LoadShaders(int field)
     m_textureUpload = &CLinuxRendererGLES::UploadEGLIMGTexture;
     m_textureCreate = &CLinuxRendererGLES::CreateEGLIMGTexture;
     m_textureDelete = &CLinuxRendererGLES::DeleteEGLIMGTexture;
-  }
-  else if (m_format == RENDER_FMT_STFBUF)
-  {
-    m_textureUpload = &CLinuxRendererGLES::UploadStfBufTexture;
-    m_textureCreate = &CLinuxRendererGLES::CreateStfBufTexture;
-    m_textureDelete = &CLinuxRendererGLES::DeleteNV12Texture;
   }
   else if (m_format == RENDER_FMT_MEDIACODEC)
   {
@@ -2164,62 +2150,6 @@ void CLinuxRendererGLES::UploadNV12Texture(int source)
   return;
 }
 
-void CLinuxRendererGLES::UploadStfBufTexture(int source)
-{
-#ifdef HAS_LIBSTAGEFRIGHT
-  YUVBUFFER& buf    =  m_buffers[source];
-  CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
-  YV12Image* im     = &buf.image;
-  YUVFIELDS& fields =  buf.fields;
-
-#ifdef DEBUG_VERBOSE
-  unsigned int time = XbmcThreads::SystemClockMillis();
-  CLog::Log(LOGDEBUG, "UploadRkVpuTexture %d: buf:%p\n", source, stfbuf);
-#endif
-
-  if (!stfbuf || !stfbuf->IsValid())
-    return;
-
-  if (im->width != stfbuf->frameWidth || im->height != stfbuf->frameHeight)
-    CreateStfBufTexture(source);
-
-  if (!(im->flags & IMAGE_FLAG_READY))
-    return;
-
-  bool deinterlacing;
-  if (m_currentField == FIELD_FULL)
-    deinterlacing = false;
-  else
-    deinterlacing = true;
-
-  glEnable(m_textureTarget);
-  VerifyGLState();
-
-  glPixelStorei(GL_UNPACK_ALIGNMENT, im->bpp);
-
-  // Load Y plane
-  LoadPlane( fields[FIELD_FULL][0], GL_LUMINANCE, buf.flipindex
-      , im->width, im->height
-      , stfbuf->frameWidth, im->bpp, (void *)stfbuf->buffer );
-
-  // Load UV plane
-  LoadPlane( fields[FIELD_FULL][1], GL_LUMINANCE_ALPHA, buf.flipindex
-      , im->width >> im->cshift_x, im->height >> im->cshift_y
-                                                 , stfbuf->frameWidth, im->bpp, (void*)((long)stfbuf->buffer + (stfbuf->frameWidth * stfbuf->frameHeight)) );
-
-  VerifyGLState();
-
-  CalculateTextureSourceRects(source, 3);
-
-  glDisable(m_textureTarget);
-
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, ">>>> tm:%d\n", XbmcThreads::SystemClockMillis() - time);
-#endif
-  return;
-#endif
-}
-
 bool CLinuxRendererGLES::CreateNV12Texture(int index)
 {
   // since we also want the field textures, pitch must be texture aligned
@@ -2337,130 +2267,6 @@ bool CLinuxRendererGLES::CreateNV12Texture(int index)
   return true;
 }
 
-bool CLinuxRendererGLES::CreateStfBufTexture(int index)
-{
-#ifdef HAS_LIBSTAGEFRIGHT
-  YUVBUFFER& buf    =  m_buffers[index];
-  CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
-
-  // since we also want the field textures, pitch must be texture aligned
-  YV12Image &im     = m_buffers[index].image;
-  YUVFIELDS &fields = m_buffers[index].fields;
-
-  if (stfbuf)
-  {
-    im.height = stfbuf->frameHeight;
-    im.width  = stfbuf->frameWidth;
-  }
-  else
-  {
-    im.height = m_sourceHeight;
-    im.width  = m_sourceWidth;
-  }
-  im.cshift_x = 1;
-  im.cshift_y = 1;
-  im.bpp = 1;
-
-  im.stride[0] = im.width;
-  im.stride[1] = im.width;
-  im.stride[2] = 0;
-
-  im.plane[0] = NULL;
-  im.plane[1] = NULL;
-  im.plane[2] = NULL;
-
-  // Y plane
-  im.planesize[0] = im.stride[0] * im.height;
-  // packed UV plane
-  im.planesize[1] = im.stride[1] * im.height / 2;
-  // third plane is not used
-  im.planesize[2] = 0;
-
-  glEnable(m_textureTarget);
-  for(int f = 0;f<MAX_FIELDS;f++)
-  {
-    for(int p = 0;p<2;p++)
-    {
-      if (!glIsTexture(fields[f][p].id))
-      {
-        glGenTextures(1, &fields[f][p].id);
-        VerifyGLState();
-      }
-    }
-    fields[f][2].id = fields[f][1].id;
-  }
-
-  // YUV
-  for (int f = FIELD_FULL; f<=FIELD_BOT ; f++)
-  {
-    int fieldshift = (f==FIELD_FULL) ? 0 : 1;
-    YUVPLANES &planes = fields[f];
-
-    planes[0].texwidth  = im.width;
-    planes[0].texheight = im.height >> fieldshift;
-
-    if (m_renderMethod & RENDER_SW)
-    {
-      planes[1].texwidth  = 0;
-      planes[1].texheight = 0;
-      planes[2].texwidth  = 0;
-      planes[2].texheight = 0;
-    }
-    else
-    {
-      planes[1].texwidth  = planes[0].texwidth  >> im.cshift_x;
-      planes[1].texheight = planes[0].texheight >> im.cshift_y;
-      planes[2].texwidth  = planes[1].texwidth;
-      planes[2].texheight = planes[1].texheight;
-    }
-
-    for (int p = 0; p < 3; p++)
-    {
-      planes[p].pixpertex_x = 1;
-      planes[p].pixpertex_y = 1;
-    }
-
-    if(m_renderMethod & RENDER_POT)
-    {
-      for(int p = 0; p < 3; p++)
-      {
-        planes[p].texwidth  = NP2(planes[p].texwidth);
-        planes[p].texheight = NP2(planes[p].texheight);
-      }
-    }
-
-    for(int p = 0; p < 2; p++)
-    {
-      YUVPLANE &plane = planes[p];
-      if (plane.texwidth * plane.texheight == 0)
-        continue;
-
-      glBindTexture(m_textureTarget, plane.id);
-      if (m_renderMethod & RENDER_SW)
-      {
-        glTexImage2D(m_textureTarget, 0, GL_RGBA, plane.texwidth, plane.texheight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
-      }
-      else
-      {
-        if (p == 1)
-          glTexImage2D(m_textureTarget, 0, GL_LUMINANCE_ALPHA, plane.texwidth, plane.texheight, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, NULL);
-        else
-          glTexImage2D(m_textureTarget, 0, GL_LUMINANCE, plane.texwidth, plane.texheight, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL);
-      }
-
-      glTexParameteri(m_textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(m_textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(m_textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      VerifyGLState();
-    }
-  }
-  glDisable(m_textureTarget);
-
-#endif
-  return true;
-}
-
 void CLinuxRendererGLES::DeleteNV12Texture(int index)
 {
   YV12Image &im     = m_buffers[index].image;
@@ -2495,10 +2301,6 @@ void CLinuxRendererGLES::DeleteNV12Texture(int index)
       im.plane[p] = NULL;
     }
   }
-#ifdef HAS_LIBSTAGEFRIGHT
-  if (m_format == RENDER_FMT_STFBUF)
-    SAFE_RELEASE(m_buffers[index].stfbuf);
-#endif
 }
 
 //********************************************************************************************************
@@ -2660,14 +2462,14 @@ void CLinuxRendererGLES::UploadEGLIMGTexture(int index)
 #endif
 
   YUVBUFFER& buf    =  m_buffers[index];
-  CDVDVideoCodecStageFrightBuffer* stfbuf      = buf.stfbuf;
-  if(stfbuf && stfbuf->IsValid() && stfbuf->buffer != EGL_NO_IMAGE_KHR)
+  EGLImageKHR img   = (EGLImageKHR)buf.render_ctx;
+  if(img != EGL_NO_IMAGE_KHR)
   {
     YUVPLANE &plane = m_buffers[index].fields[0][0];
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(m_textureTarget, plane.id);
-    glEGLImageTargetTexture2DOES(m_textureTarget, (EGLImageKHR)m_buffers[index].stfbuf->buffer);
+    glEGLImageTargetTexture2DOES(m_textureTarget, img);
     glBindTexture(m_textureTarget, 0);
 
     plane.flipindex = m_buffers[index].flipindex;
@@ -2689,8 +2491,6 @@ void CLinuxRendererGLES::DeleteEGLIMGTexture(int index)
   if(plane.id && glIsTexture(plane.id))
     glDeleteTextures(1, &plane.id);
   plane.id = 0;
-
-  buf.stfbuf = NULL;
 #endif
 }
 bool CLinuxRendererGLES::CreateEGLIMGTexture(int index)
@@ -3073,26 +2873,6 @@ void CLinuxRendererGLES::AddProcessor(struct __CVBuffer *cvBufferRef, int index)
   CVBufferRetain(buf.cvBufferRef);
 }
 #endif
-#ifdef HAS_LIBSTAGEFRIGHT
-void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecStageFrightBuffer* stfbuf, int index)
-{
-#ifdef DEBUG_VERBOSE
-  unsigned int time = XbmcThreads::SystemClockMillis();
-#endif
-
-  YUVBUFFER &buf = m_buffers[index];
-  SAFE_RELEASE(buf.stfbuf);
-  if (stfbuf)
-    stfbuf->Lock();
-
-  buf.stfbuf = stfbuf;
-
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "AddProcessor %d: img:%p: tm:%d\n", index, eglimg, XbmcThreads::SystemClockMillis() - time);
-#endif
-}
-#endif
-
 #if defined(TARGET_ANDROID)
 void CLinuxRendererGLES::AddProcessor(CDVDMediaCodecInfo *mediacodec, int index)
 {
