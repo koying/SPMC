@@ -22,17 +22,17 @@
 #if defined(HAS_LIBSTAGEFRIGHT)
 
 #include "DVDVideoCodec.h"
-#include "utils/BitstreamConverter.h"
+#include "DVDStreamInfo.h"
 
 class DllLibStageFrightCodec;
-class CDVDVideoCodecStageFright;
+class CDVDVideoCodecRKStageFright;
 class CBitstreamConverter;
 
-class CDVDVideoCodecStageFright : public CDVDVideoCodec
+class CDVDVideoCodecRKStageFright : public CDVDVideoCodec
 {
 public:
-  CDVDVideoCodecStageFright();
-  virtual ~CDVDVideoCodecStageFright();
+  CDVDVideoCodecRKStageFright();
+  virtual ~CDVDVideoCodecRKStageFright();
 
   // Required overrides
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
@@ -48,14 +48,11 @@ public:
   virtual int GetDataSize(void);
   virtual double GetTimeSize(void);
 
-  void Lock();
-  long Release();
-  bool IsValid();
-
 protected:
 
   bool              m_convert_bitstream;
   CBitstreamConverter   *m_converter;
+  CDVDStreamInfo    m_hints;
   
   std::string              m_pFormatName;
   static DllLibStageFrightCodec*     m_stf_dll;
