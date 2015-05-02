@@ -3,8 +3,8 @@ ARCH=@ARCH@
 INCLUDES+=-I@abs_top_srcdir@/xbmc/cores/dvdplayer
 INCLUDES+=-I..
 
-SRCS += StageFrightInterface.cpp
-SRCS += StageFrightVideo.cpp
+SRCS = StageFrightInterface.cpp
+SRCS += RkStagefrightVideo.cpp
 SRCS += StageFrightVideoPrivate.cpp
 INCLUDES += -I${prefix}/opt/android-source/frameworks/base/include
 INCLUDES += -I${prefix}/opt/android-source/frameworks/base/native/include
@@ -31,17 +31,8 @@ STFCXXFLAGS = $(CXXFLAGS) -Wno-multichar -fno-rtti -fPIC
 $(LIB_SHARED): $(OBJS)
 	$(CXX) $(STFCXXFLAGS) $(LDFLAGS) -shared -Wl,-no-undefined -g -o $(LIB_SHARED) $(OBJS) $(LIBS)
 
-StageFrightVideo.o: StageFrightVideo.cpp
+%.o : %.cpp
 	$(CXX) -MF $*.d -MD -c $(STFCXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
-
-StageFrightVideoPrivate.o: StageFrightVideoPrivate.cpp
-	$(CXX) -MF $*.d -MD -c $(STFCXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
-
-Surface.o: Surface.cpp
-	$(CXX) -MF $*.d -MD -c $(JNICXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
-
-SurfaceTexture.o: SurfaceTexture.cpp
-	$(CXX) -MF $*.d -MD -c $(JNICXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
 
 CLEAN_FILES = \
 	$(LIB_SHARED) \

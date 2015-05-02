@@ -45,14 +45,15 @@ public:
   void SetDropState(bool bDrop);
   virtual void SetSpeed(int iSpeed);
 
-  void LockBuffer(CDVDVideoCodecStageFrightBuffer *buf);
-  void ReleaseBuffer(CDVDVideoCodecStageFrightBuffer *buf);
+  void LockBuffer(EGLImageKHR eglimg);
+  bool ReleaseBuffer(EGLImageKHR eglimg);
 
 private:
   CStageFrightVideoPrivate* p;
 
-  void LockBuffer(EGLImageKHR eglimg);
-  bool ReleaseBuffer(EGLImageKHR eglimg);
+  static void RenderLockCallBack(const void *ctx, const void *render_ctx);
+  static void RenderReleaseCallBack(const void *ctx, const void *render_ctx);
+
 };
 
 // defined(HAS_LIBSTAGEFRIGHT)
