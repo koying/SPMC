@@ -124,5 +124,22 @@ bool SysfsUtils::HasRW(const std::string &path)
     close(fd);
     return true;
   }
+  else
+    CLog::Log(LOGERROR, "%s: error opening %s(%d)",__FUNCTION__, path.c_str(), errno);
+
   return false;
+}
+
+bool SysfsUtils::Su(const std::string &cmd)
+{
+  std::string su = StringUtils::Format("su -c '%s'", cmd.c_str());
+  system(su.c_str());
+  return true;
+}
+
+bool SysfsUtils::Chmod(const std::string &path)
+{
+  std::string cmd = StringUtils::Format("chmod 666 %s", path.c_str());
+  SysfsUtils::Su(cmd);
+  return true;
 }
