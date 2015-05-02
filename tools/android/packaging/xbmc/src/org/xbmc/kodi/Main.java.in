@@ -33,6 +33,8 @@ public class Main extends NativeActivity
     getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
 
     thisView = getWindow().getDecorView();
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
+
       thisView
           .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
