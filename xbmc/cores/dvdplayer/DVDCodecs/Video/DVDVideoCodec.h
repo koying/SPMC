@@ -93,10 +93,6 @@ struct DVDVideoPicture
     };
 
     struct {
-      CDVDVideoCodecStageFrightBuffer* stfbuf;
-    };
-
-    struct {
       CDVDMediaCodecInfo *mediacodec;
     };
 

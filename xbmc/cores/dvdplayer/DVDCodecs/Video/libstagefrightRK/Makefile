@@ -1,6 +1,6 @@
-ARCH=@ARCH@
+ARCH=arm
 
-INCLUDES+=-I@abs_top_srcdir@/xbmc/cores/dvdplayer
+INCLUDES+=-I/src/spmc-isengard/xbmc/cores/dvdplayer
 INCLUDES+=-I..
 
 SRCS = StageFrightInterface.cpp
@@ -16,13 +16,13 @@ INCLUDES += -I${prefix}/opt/rkvpu/src/common
 INCLUDES += -I${prefix}/opt/rkvpu/src/common/include
 
 LIBNAME=libXBMCvcodec_stagefrightRK
-LIB_SHARED=@abs_top_srcdir@/system/players/dvdplayer/$(LIBNAME)-$(ARCH).so
+LIB_SHARED=/src/spmc-isengard/system/players/dvdplayer/$(LIBNAME)-$(ARCH).so
 
-LIBS += -landroid -lEGL -lGLESv2 -L${prefix}/opt/android-libs -L${prefix}/opt/rkvpu/lib -lstdc++ -lutils -lcutils -lstagefright -lbinder -lui -lgui -lvpu -L@abs_top_srcdir@ -l@APP_NAME_LC@
+LIBS += -landroid -lEGL -lGLESv2 -L${prefix}/opt/android-libs -L${prefix}/opt/rkvpu/lib -lstdc++ -lutils -lcutils -lstagefright -lbinder -lui -lgui -lvpu -L/src/spmc-isengard -lspmc15
 
 all: $(LIB_SHARED)
 
-include @abs_top_srcdir@/Makefile.include
+include /src/spmc-isengard/Makefile.include
 -include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))
 
 JNICXXFLAGS = $(CXXFLAGS) -std=gnu++0x -Wextra
