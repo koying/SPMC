@@ -270,6 +270,7 @@ public:
   VpuDecRetCode ReleaseFramebuffer(VpuDecHandle *handle);
   CDVDVideoCodecIMXBuffer *GetPreviousBuffer() const { return m_previousBuffer; }
   VpuFieldType GetFieldType() const { return m_fieldType; }
+  int GetMVCView() const { return m_nMVCViewID; }
 
 private:
   // private because we are reference counted
@@ -284,6 +285,7 @@ private:
   double                   m_pts;
   double                   m_dts;
   VpuFieldType             m_fieldType;
+  int                      m_nMVCViewID;
   VpuFrameBuffer          *m_frameBuffer;
   bool                     m_rendered;
   CDVDVideoCodecIMXBuffer *m_previousBuffer; // Holds the reference counted previous buffer
