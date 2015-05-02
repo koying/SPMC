@@ -789,10 +789,22 @@ void CXBMCRenderManager::RegisterRenderUpdateCallBack(const void *ctx, RenderUpd
     m_pRenderer->RegisterRenderUpdateCallBack(ctx, fn);
 }
 
+void CXBMCRenderManager::RegisterRenderCaptureCallBack(const void *ctx, RenderCaptureCallBackFn fn)
+{
+  if (m_pRenderer)
+    m_pRenderer->RegisterRenderCaptureCallBack(ctx, fn);
+}
+
 void CXBMCRenderManager::RegisterRenderFeaturesCallBack(const void *ctx, RenderFeaturesCallBackFn fn)
 {
   if (m_pRenderer)
     m_pRenderer->RegisterRenderFeaturesCallBack(ctx, fn);
+}
+
+void CXBMCRenderManager::RegisterDeinterlaceMethodsCallBack(const void *ctx, DeinterlaceMethodsCallBackFn fn)
+{
+  if (m_pRenderer)
+    m_pRenderer->RegisterDeinterlaceMethodsCallBack(ctx, fn);
 }
 
 void CXBMCRenderManager::RegisterRenderLockCallBack(const void *ctx, RenderLockCallBackFn fn)
@@ -1038,10 +1050,6 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
 #if defined(TARGET_ANDROID)
   else if(pic.format == RENDER_FMT_MEDIACODEC)
     m_pRenderer->AddProcessor(pic.mediacodec, index);
-#endif
-#ifdef HAS_IMXVPU
-  else if(pic.format == RENDER_FMT_IMXMAP)
-    m_pRenderer->AddProcessor(pic.IMXBuffer, index);
 #endif
 #ifdef HAS_MMAL
   else if(pic.format == RENDER_FMT_MMAL)
