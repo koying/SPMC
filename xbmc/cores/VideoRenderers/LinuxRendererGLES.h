@@ -178,6 +178,7 @@ public:
 #ifdef HAS_IMXVPU
   virtual void         AddProcessor(CDVDVideoCodecIMXBuffer *codecinfo, int index);
 #endif
+  virtual void         AddProcessor(void *render_ctx, int index);
 
 protected:
   virtual void Render(DWORD flags, int index);
@@ -290,6 +291,7 @@ protected:
     YV12Image image;
     unsigned  flipindex; /* used to decide if this has been uploaded */
 
+    void* render_ctx;
 #ifdef HAVE_LIBOPENMAX
     OpenMaxVideoBufferHolder *openMaxBufferHolder;
 #endif
