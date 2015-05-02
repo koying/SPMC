@@ -21,6 +21,7 @@
  */
 
 #include <vector>
+#include "PlatformDefs.h"
 
 #include "guilib/Resolution.h"
 #include "guilib/Geometry.h"
@@ -67,8 +68,12 @@ enum RenderMethods
   RENDER_OVERLAYS        = 99   // to retain compatibility
 };
 
-typedef void (*RenderUpdateCallBackFn)(const void *ctx, const CRect &SrcRect, const CRect &DestRect);
+typedef void (*RenderUpdateCallBackFn)(const void *ctx, const CRect &SrcRect, const CRect &DestRect, DWORD flags, const void* render_ctx);
+typedef void (*RenderCaptureCallBackFn)(const void *ctx, const CRect &SrcRect, const void* render_ctx);
 typedef void (*RenderFeaturesCallBackFn)(const void *ctx, Features &renderFeatures);
+typedef void (*DeinterlaceMethodsCallBackFn)(const void *ctx, Features &renderFeatures);
+typedef void (*RenderLockCallBackFn)(const void *ctx, const void* render_ctx);
+typedef void (*RenderReleaseCallBackFn)(const void *ctx, const void* render_ctx);
 
 struct DVDVideoPicture;
 
@@ -108,7 +113,11 @@ public:
   std::vector<ERenderFormat> SupportedFormats()  { return std::vector<ERenderFormat>(); }
 
   virtual void RegisterRenderUpdateCallBack(const void *ctx, RenderUpdateCallBackFn fn);
+  virtual void RegisterRenderCaptureCallBack(const void *ctx, RenderCaptureCallBackFn fn);
   virtual void RegisterRenderFeaturesCallBack(const void *ctx, RenderFeaturesCallBackFn fn);
+  virtual void RegisterDeinterlaceMethodsCallBack(const void *ctx, DeinterlaceMethodsCallBackFn fn);
+  virtual void RegisterRenderLockCallBack(const void *ctx, RenderLockCallBackFn fn);
+  virtual void RegisterRenderReleaseCallBack(const void *ctx, RenderReleaseCallBackFn fn);
 
   static void SettingOptionsRenderMethodsFiller(const CSetting *setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
 
@@ -154,6 +163,18 @@ protected:
   const void* m_RenderUpdateCallBackCtx;
   RenderUpdateCallBackFn m_RenderUpdateCallBackFn;
 
+  const void* m_RenderCaptureCallBackCtx;
+  RenderCaptureCallBackFn m_RenderCaptureCallBackFn;
+
   const void* m_RenderFeaturesCallBackCtx;
   RenderFeaturesCallBackFn m_RenderFeaturesCallBackFn;
+
+  const void* m_DeinterlaceMethodsCallBackCtx;
+  DeinterlaceMethodsCallBackFn m_DeinterlaceMethodsCallBackFn;
+
+  const void* m_RenderLockCallBackCtx;
+  RenderLockCallBackFn m_RenderLockCallBackFn;
+
+  const void* m_RenderReleaseCallBackCtx;
+  RenderReleaseCallBackFn m_RenderReleaseCallBackFn;
 };
