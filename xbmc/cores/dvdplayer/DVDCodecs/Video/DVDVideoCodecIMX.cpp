@@ -1092,6 +1092,8 @@ bool CDVDVideoCodecIMX::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   previous = current;
 #endif
 
+  CLog::Log(LOGDEBUG, "%s  mvc view: %d\n", __FUNCTION__, m_currentBuffer->GetMVCView());
+
   m_frameCounter++;
 
   pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
@@ -1276,6 +1278,7 @@ void CDVDVideoCodecIMXBuffer::Queue(VpuDecOutFrameInfo *frameInfo,
   pVirtAddr   = m_frameBuffer->pbufVirtY;
   pPhysAddr   = (int)m_frameBuffer->pbufY;
   m_fieldType = frameInfo->eFieldType;
+  m_nMVCViewID = frameInfo->nMVCViewID;
 }
 
 VpuDecRetCode CDVDVideoCodecIMXBuffer::ReleaseFramebuffer(VpuDecHandle *handle)
