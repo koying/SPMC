@@ -100,6 +100,7 @@ CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
   memset(&fields, 0, sizeof(fields));
   memset(&image , 0, sizeof(image));
   flipindex = 0;
+  render_ctx = NULL;
 #ifdef HAVE_LIBOPENMAX
   openMaxBufferHolder = NULL;
 #endif
@@ -261,6 +262,13 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
       // after setting up m_renderFeatures, we are done with the callback
       m_RenderFeaturesCallBackFn = NULL;
       m_RenderFeaturesCallBackCtx = NULL;
+    }
+    if (m_DeinterlaceMethodsCallBackFn)
+    {
+      (*m_DeinterlaceMethodsCallBackFn)(m_DeinterlaceMethodsCallBackCtx, m_deinterlaceMethods);
+      // after setting up m_deinterlaceMethods, we are done with the callback
+      m_DeinterlaceMethodsCallBackFn = NULL;
+      m_DeinterlaceMethodsCallBackCtx = NULL;
     }
     g_application.m_pPlayer->GetRenderFeatures(m_renderFeatures);
     g_application.m_pPlayer->GetDeinterlaceMethods(m_deinterlaceMethods);
@@ -525,7 +533,7 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
   if (!m_bImageReady) return;
 
   int index = m_iYV12RenderBuffer;
-  YUVBUFFER& buf =  m_buffers[index];
+  YUVBUFFER& buf = m_buffers[index];
 
   if (m_format != RENDER_FMT_OMXEGL && m_format != RENDER_FMT_EGLIMG && m_format != RENDER_FMT_MEDIACODEC)
   {
@@ -584,13 +592,16 @@ void CLinuxRendererGLES::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
   if (IsGuiLayer())
     return;
 
+  int index = m_iYV12RenderBuffer;
+  YUVBUFFER& buf =  m_buffers[index];
+
   if (m_renderMethod & RENDER_BYPASS)
   {
     ManageDisplay();
     // if running bypass, then the player might need the src/dst rects
     // for sizing video playback on a layer other than the gles layer.
     if (m_RenderUpdateCallBackFn)
-      (*m_RenderUpdateCallBackFn)(m_RenderUpdateCallBackCtx, m_sourceRect, m_destRect);
+      (*m_RenderUpdateCallBackFn)(m_RenderUpdateCallBackCtx, m_sourceRect, m_destRect, flags, buf.render_ctx);
 
     return;
   }
@@ -1048,14 +1059,13 @@ void CLinuxRendererGLES::ReleaseBuffer(int idx)
   if (m_renderMethod & RENDER_IMXMAP)
     SAFE_RELEASE(buf.IMXBuffer);
 #endif
+  if (m_RenderReleaseCallBackFn)
+    (*m_RenderReleaseCallBackFn)(m_RenderReleaseCallBackCtx, buf.render_ctx);
+  buf.render_ctx = NULL;
 }
 
 void CLinuxRendererGLES::Render(DWORD flags, int index)
 {
-  // If rendered directly by the hardware
-  if (m_renderMethod & RENDER_BYPASS)
-    return;
-
   // obtain current field, if interlaced
   if( flags & RENDER_FLAG_TOP)
     m_currentField = FIELD_TOP;
@@ -1114,7 +1124,7 @@ void CLinuxRendererGLES::Render(DWORD flags, int index)
     RenderIMXMAPTexture(index, m_currentField);
     VerifyGLState();
   }
-  else
+  else if (!(m_renderMethod & RENDER_BYPASS))
   {
     RenderSoftware(index, m_currentField);
     VerifyGLState();
@@ -3111,6 +3121,18 @@ void CLinuxRendererGLES::AddProcessor(CDVDVideoCodecIMXBuffer *buffer, int index
     buffer->Lock();
 }
 #endif
+
+void CLinuxRendererGLES::AddProcessor(void* render_ctx, int index)
+{
+  YUVBUFFER &buf = m_buffers[index];
+
+  if (m_RenderReleaseCallBackFn && buf.render_ctx)
+    (*m_RenderReleaseCallBackFn)(m_RenderReleaseCallBackCtx, buf.render_ctx);
+  if (m_RenderLockCallBackFn && render_ctx)
+    (*m_RenderLockCallBackFn)(m_RenderLockCallBackCtx, render_ctx);
+
+  buf.render_ctx = render_ctx;
+}
 
 bool CLinuxRendererGLES::IsGuiLayer()
 {

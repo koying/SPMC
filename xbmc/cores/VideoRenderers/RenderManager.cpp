@@ -797,6 +797,18 @@ void CXBMCRenderManager::RegisterRenderFeaturesCallBack(const void *ctx, RenderF
     m_pRenderer->RegisterRenderFeaturesCallBack(ctx, fn);
 }
 
+void CXBMCRenderManager::RegisterRenderLockCallBack(const void *ctx, RenderLockCallBackFn fn)
+{
+  if (m_pRenderer)
+    m_pRenderer->RegisterRenderLockCallBack(ctx, fn);
+}
+
+void CXBMCRenderManager::RegisterRenderReleaseCallBack(const void *ctx, RenderReleaseCallBackFn fn)
+{
+  if (m_pRenderer)
+    m_pRenderer->RegisterRenderReleaseCallBack(ctx, fn);
+}
+
 void CXBMCRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
 {
   CSharedLock lock(m_sharedSection);
@@ -1031,6 +1043,8 @@ int CXBMCRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   else if(pic.format == RENDER_FMT_MMAL)
     m_pRenderer->AddProcessor(pic.MMALBuffer, index);
 #endif
+  else if (pic.format == RENDER_FMT_BYPASS)
+    m_pRenderer->AddProcessor(pic.render_ctx, index);
 
   m_pRenderer->ReleaseImage(index, false);
 
