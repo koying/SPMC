@@ -124,6 +124,7 @@ fi
 mkdir ffmpeg-${VERSION}
 cd ffmpeg-${VERSION} || exit 2
 tar --strip-components=1 -xf ../${ARCHIVE}
+patch -p1 < ../ffmpeg_MVC.patch
 
 CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" \
 ./configure --prefix=$FFMPEG_PREFIX \
