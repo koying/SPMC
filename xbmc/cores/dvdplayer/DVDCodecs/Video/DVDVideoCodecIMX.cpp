@@ -528,8 +528,17 @@ bool CDVDVideoCodecIMX::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
       CLog::Log(LOGNOTICE, "i.MX6 VPU is not able to decode AVC profile %d level %d", m_hints.profile, m_hints.level);
       return false;
     }
-    m_decOpenParam.CodecFormat = VPU_V_AVC;
-    m_pFormatName = "iMX-h264";
+
+    if (m_hints.codec_tag == AV_CODEC_ID_H264MVC)
+    {
+      m_decOpenParam.CodecFormat = VPU_V_AVC_MVC;
+      m_pFormatName = "iMX-h264mvc";
+    }
+    else
+    {
+      m_decOpenParam.CodecFormat = VPU_V_AVC;
+      m_pFormatName = "iMX-h264";
+    }
     if (hints.extradata)
     {
       if ( *(char*)hints.extradata == 1 )
