@@ -19,7 +19,7 @@ DEPENDS = \
 
 FFMPEG_DEPENDS = gnutls
 
-ifeq ($(ENABLE_GPLV3),yes)
+ifeq ($(ENABLE_GPLV3),1)
   DEPENDS+=samba-gplv3 libcdio-gplv3
 else
   DEPENDS+=samba libcdio
