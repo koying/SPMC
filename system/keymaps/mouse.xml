@@ -31,7 +31,7 @@
   </SlideShow>
   <FullscreenVideo>
     <mouse>
-      <leftclick>Stop</leftclick>
+      <rightclick>Stop</rightclick>
     </mouse>
   </FullscreenVideo>
 </keymap>
