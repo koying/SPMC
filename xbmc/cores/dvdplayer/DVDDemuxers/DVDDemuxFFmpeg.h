@@ -153,6 +153,9 @@ protected:
   double   m_currentPts; // used for stream length estimation
   bool     m_bMatroska;
   bool     m_bAVI;
+  bool     m_bMVC;
+  int      m_iMVClastid;
+  int      m_iMVCnb;
   int      m_speed;
   unsigned m_program;
   XbmcThreads::EndTime  m_timeout;

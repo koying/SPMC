@@ -169,6 +169,9 @@ CDVDDemuxFFmpeg::CDVDDemuxFFmpeg() : CDVDDemux()
   m_currentPts = DVD_NOPTS_VALUE;
   m_bMatroska = false;
   m_bAVI = false;
+  m_bMVC = false;
+  m_iMVCnb = 0;
+  m_iMVClastid = -1;
   m_speed = DVD_PLAYSPEED_NORMAL;
   m_program = UINT_MAX;
   m_pkt.result = -1;
@@ -762,6 +765,18 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         if(m_pkt.pkt.pts == 0)
           m_pkt.pkt.pts = AV_NOPTS_VALUE;
 
+        if (m_bMVC)
+        {
+          CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::Read() MVC packet: 0x%x; pts: %lld dts: %lld", m_iMVClastid, m_pkt.pkt.pts, m_pkt.pkt.dts);
+          if (stream->id != m_iMVClastid)
+          {
+            if (m_iMVClastid != -1)
+              CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::Read() >>> MVC packet: 0x%x; cnt: %d", m_iMVClastid, m_iMVCnb);
+            m_iMVClastid = stream->id;
+            m_iMVCnb = 0;
+          }
+        }
+
         if(m_bMatroska && stream->codec && stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
         { // matroska can store different timestamps
           // for different formats, for native stored
@@ -1168,6 +1183,17 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
           CLog::Log(LOGDEBUG, "%s - fps may be unreliable since ffmpeg decoded only %d frame(s)", __FUNCTION__, pStream->codec_info_nb_frames);
           st->iFpsRate  = 0;
           st->iFpsScale = 0;
+        }
+
+        if (pStream->codec->codec_id == AV_CODEC_ID_H264 && pStream->id == 0x1102)
+        {
+          // right-eye of a BD3D ssif; mark file as MVC
+          m_bMVC = true;
+        }
+        if (m_bMVC)
+        {
+          // Mark all streams as MVC
+          pStream->codec->codec_tag = AV_CODEC_ID_H264MVC;
         }
 
         st->iWidth = pStream->codec->width;
