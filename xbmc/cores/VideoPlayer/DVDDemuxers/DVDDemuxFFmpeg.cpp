@@ -165,6 +165,7 @@ CDVDDemuxFFmpeg::CDVDDemuxFFmpeg() : CDVDDemux()
   m_currentPts = DVD_NOPTS_VALUE;
   m_bMatroska = false;
   m_bAVI = false;
+  m_bSSIF = false;
   m_speed = DVD_PLAYSPEED_NORMAL;
   m_program = UINT_MAX;
   m_pkt.result = -1;
@@ -563,6 +564,12 @@ void CDVDDemuxFFmpeg::Dispose()
     av_free(m_ioContext);
   }
 
+  while (!m_SSIFqueue.empty())
+  {
+    CDVDDemuxUtils::FreeDemuxPacket(m_SSIFqueue.front());
+    m_SSIFqueue.pop();
+  }
+
   m_ioContext = NULL;
   m_pFormatContext = NULL;
   m_speed = DVD_PLAYSPEED_NORMAL;
@@ -859,7 +866,9 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
     {
       Flush();
     }
-    else if (IsProgramChange())
+    // libavformat is confused by the interleaved SSIF.
+    // Disable program management for those
+    else if (!m_bSSIF && IsProgramChange())
     {
       // update streams
       CreateStreams(m_program);
@@ -896,7 +905,9 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
 
       if (IsVideoReady())
       {
-        if (m_program != UINT_MAX)
+        // libavformat is confused by the interleaved SSIF.
+        // Disable program management for those
+        if ( !m_bSSIF && m_program != UINT_MAX )
         {
           /* check so packet belongs to selected program */
           for (unsigned int i = 0; i < m_pFormatContext->programs[m_program]->nb_stream_indexes; i++)
@@ -1036,6 +1047,71 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
       {
         // content has changed
         stream = AddStream(pPacket->iStreamId);
+      }
+      if (m_bSSIF && stream->iPhysicalId == 0x1011)
+      {
+        // Here, we recreate a h264 MVC packet from the base one + buffered MVC NALU's
+        if (m_SSIFqueue.size() <= 0)
+          CLog::Log(LOGERROR, "!!! MVC error: no mvc packet: pts(%f) dts(%f) - %lld", pPacket->pts, pPacket->dts, m_pkt.pkt.pts);
+        else
+        {
+          DemuxPacket* mvcpkt = m_SSIFqueue.front();
+          double tsA = (pPacket->dts != AV_NOPTS_VALUE ? pPacket->dts : pPacket->pts);
+          double tsB = (mvcpkt->dts != AV_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
+          while (tsB < tsA)
+          {
+            m_SSIFqueue.pop();
+            if (m_SSIFqueue.empty())
+            {
+              tsB = AV_NOPTS_VALUE;
+              break;
+            }
+            mvcpkt = m_SSIFqueue.front();
+            tsB = (mvcpkt->dts != AV_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
+          }
+          if (tsA == tsB)
+          {
+            m_SSIFqueue.pop();
+            DemuxPacket* newpkt = CDVDDemuxUtils::AllocateDemuxPacket(pPacket->iSize + mvcpkt->iSize);
+            newpkt->pts = pPacket->pts;
+            newpkt->dts = pPacket->dts;
+            newpkt->duration = pPacket->duration;
+            newpkt->iGroupId = pPacket->iGroupId;
+            newpkt->iStreamId = pPacket->iStreamId;
+            newpkt->iSize = pPacket->iSize + mvcpkt->iSize;
+            memcpy(newpkt->pData, pPacket->pData, pPacket->iSize);
+            memcpy(newpkt->pData + pPacket->iSize, mvcpkt->pData, mvcpkt->iSize);
+            //CLog::Log(LOGDEBUG, ">>> MVC merged packet: %d+%d, pts(%f/%f) dts (%f/%f)", pPacket->iSize, mvcpkt->iSize, pPacket->pts, mvcpkt->pts, pPacket->dts, mvcpkt->dts);
+
+            CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+            CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
+            pPacket = newpkt;
+          }
+          else
+          {
+            CLog::Log(LOGERROR, "!!! MVC error: missing mvc packet: pts(%f) dts(%f) - %lld", pPacket->pts, pPacket->dts, m_pkt.pkt.pts);
+          }
+        }
+      }
+    }
+    else if (stream->type == STREAM_DATA)
+    {
+      if (m_bSSIF && stream->iPhysicalId == 0x1012)
+      {
+        // Buffer the MVC NALU's for later merging with the base h264 packet
+        // This works because the MVC stream is guaranteed to come first
+        DemuxPacket* newpkt = CDVDDemuxUtils::AllocateDemuxPacket(pPacket->iSize);
+        newpkt->iSize = pPacket->iSize;
+        newpkt->pts = pPacket->pts;
+        newpkt->dts = pPacket->dts;
+        newpkt->duration = pPacket->duration;
+        newpkt->iGroupId = pPacket->iGroupId;
+        newpkt->iStreamId = pPacket->iStreamId;
+        memcpy(newpkt->pData, pPacket->pData, newpkt->iSize);
+        m_SSIFqueue.push(newpkt);
+        CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+        pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
+        pPacket->iSize = 0;
       }
     }
     if (!stream)
@@ -1366,6 +1442,12 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
           st->iFpsScale = 0;
         }
 
+        if (m_bSSIF && pStream->id == 0x1011)
+        {
+          // Mark stream as MVC
+          pStream->codec->codec_tag = AV_CODEC_ID_H264MVC;
+        }
+
         st->iWidth = pStream->codec->width;
         st->iHeight = pStream->codec->height;
         st->fAspect = SelectAspect(pStream, st->bForcedAspect) * pStream->codec->width / pStream->codec->height;
@@ -1408,6 +1490,17 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
       {
         stream = new CDemuxStream();
         stream->type = STREAM_DATA;
+        if (pStream->id == 0x1012)
+        {
+          // This is the MVC stream of a SSIF file
+          // SSIF's are 2 M2TS streams interleaved:
+          // - 1 base M2TS with base h264 + audio
+          // - 1 "extension" M2TS only containing the MVC NALU's of the h264 MVC stream
+          // The base h264 is always stream 0x1011 and the mvc one is always 0x1012
+          // The mvc stream always comes first
+          m_bSSIF = true;
+          pStream->need_parsing = AVSTREAM_PARSE_NONE;
+        }
         break;
       }
     case AVMEDIA_TYPE_SUBTITLE:
