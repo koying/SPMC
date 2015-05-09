@@ -231,6 +231,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       CLog::Log(LOGNOTICE, "Using Rockchip hacked Passthrough");
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
     }
+    /* Currently doesn't work because we have to decapsulate first
+    else if (CJNIBuild::SDK_INT >= 21)
+    {
+      encoding = CJNIAudioFormat::ENCODING_AC3;
+    } */
   }
   else
     m_passthrough = false;
