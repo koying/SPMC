@@ -28,6 +28,7 @@ class CJNIAudioFormat
     static void PopulateStaticFields();
 
     static int ENCODING_PCM_16BIT;
+    static int ENCODING_AC3;
 
     static int CHANNEL_OUT_STEREO;
     static int CHANNEL_OUT_5POINT1;
