@@ -3080,7 +3080,7 @@
     <ClCompile Include="..\..\xbmc\music\CueInfoLoader.cpp">
       <Filter>music</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\NFSDirectory.cpp" />
+    <ClCompile Include="..\..\xbmc\filesystem\NFSDirectory.cpp" >
       <Filter>filesystem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\test\TestUtil.cpp">
