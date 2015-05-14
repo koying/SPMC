@@ -1641,6 +1641,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   // vcodec is open, update speed if it was
   // changed before dvdplayer called OpenDecoder.
   SetSpeed(m_speed);
+  ShowMainVideo(true);
 
   return true;
 }
@@ -2191,11 +2192,7 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   }
 
   if (!update)
-  {
-    // mainvideo 'should' be showing already if we get here, make sure.
-    ShowMainVideo(true);
     return;
-  }
 
   CRect gui, display;
   gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
@@ -2294,10 +2291,6 @@ void CAMLCodec::SetVideoRect(const CRect &SrcRect, const CRect &DestRect)
   SysfsUtils::SetString("/sys/class/video/axis", video_axis);
   // make sure we are in 'full stretch' so we can stretch
   SysfsUtils::SetInt("/sys/class/video/screen_mode", 1);
-
-  // we only get called once gui has changed to something
-  // that would show video playback, so show it.
-  ShowMainVideo(true);
 }
 
 void CAMLCodec::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect)
