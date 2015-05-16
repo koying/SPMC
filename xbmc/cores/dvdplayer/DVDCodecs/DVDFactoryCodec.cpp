@@ -273,6 +273,13 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
   }
 #endif
 
+#if defined(HAS_RKSTF)
+    if (!hint.software && CSettings::Get().HasCondition("have_rklibstagefrightdecoder") && CSettings::Get().GetBool("videoplayer.userkstagefright"))
+    {
+      if ( (pCodec = OpenCodec(new CDVDVideoCodecRockchip(), hint, options)) ) return pCodec;
+    }
+#endif
+
 #if defined(TARGET_ANDROID)
     if (!hint.software && CSettings::Get().GetBool("videoplayer.usemediacodec"))
     {
@@ -300,13 +307,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
       {
         if ( (pCodec = OpenCodec(new CMMALVideo(), hint, options)) ) return pCodec;
       }
-    }
-#endif
-
-#if defined(HAS_RKSTF)
-    if (!hint.software && CSettings::Get().HasCondition("have_rklibstagefrightdecoder") && CSettings::Get().GetBool("videoplayer.userkstagefright"))
-    {
-      if ( (pCodec = OpenCodec(new CDVDVideoCodecRockchip(), hint, options)) ) return pCodec;
     }
 #endif
 

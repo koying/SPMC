@@ -2560,7 +2560,7 @@ OUTPUT_FILES="$OUTPUT_FILES xbmc/linux/sse4/Makefile"
 fi
 
 if test "$use_codec_rkstf" = "yes"; then
-OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/dvdplayer/DVDCodecs/Video/libRKCodec/Makefile"
+OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK/Makefile"
 fi
 
 OUTPUT_FILES="$OUTPUT_FILES \
