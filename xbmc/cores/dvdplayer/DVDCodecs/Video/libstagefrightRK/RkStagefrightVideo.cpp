@@ -1146,7 +1146,7 @@ void CRkStageFrightVideo::RenderFeaturesCallBack(const void *ctx, Features &rend
   renderFeatures.push_back(RENDERFEATURE_PIXEL_RATIO);
 }
 
-void CRkStageFrightVideo::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, const void* render_ctx)
+void CRkStageFrightVideo::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, DWORD flags, const void* render_ctx)
 {
   CRkStageFrightVideo *codec = (CRkStageFrightVideo*)ctx;
   if (codec)

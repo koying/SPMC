@@ -127,7 +127,7 @@ protected:
 
 private:
   static void RenderFeaturesCallBack(const void *ctx, Features &renderFeatures);
-  static void RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, const void* render_ctx);
+  static void RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, DWORD flags, const void* render_ctx);
   static void RenderLockCallBack(const void *ctx, const void *render_ctx);
   static void RenderReleaseCallBack(const void *ctx, const void *render_ctx);
 };
