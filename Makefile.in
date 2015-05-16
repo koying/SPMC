@@ -16,7 +16,7 @@ DVDPCODECS_DIRS= \
 ifeq (@USE_LIBSTAGEFRIGHT@,1)
 DVDPCODECS_DIRS += xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS
 ifeq (@USE_RKSTF@,1)
-DVDPCODECS_DIRS += xbmc/cores/dvdplayer/DVDCodecs/Video/libRKCodec
+DVDPCODECS_DIRS += xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK
 endif
 endif
 
@@ -393,7 +393,7 @@ ifeq (@USE_LIBSTAGEFRIGHT@,1)
 dvdpextcodecs: lib@APP_NAME_LC@.so
 	$(MAKE) -C xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS
 ifeq (@USE_RKSTF@,1)
-	$(MAKE) -C xbmc/cores/dvdplayer/DVDCodecs/Video/libRKCodec
+	$(MAKE) -C xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightRK
 endif
 else
 dvdpextcodecs:
