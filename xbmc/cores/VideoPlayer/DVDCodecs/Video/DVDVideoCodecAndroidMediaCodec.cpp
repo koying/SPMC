@@ -959,7 +959,6 @@ void CDVDVideoCodecAndroidMediaCodec::FlushInternal()
     m_inflight[i]->Release();
   }
   m_inflight.clear();
-
 }
 
 bool CDVDVideoCodecAndroidMediaCodec::ConfigureMediaCodec(void)
@@ -1114,9 +1113,6 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
       CJNIByteBuffer buffer = m_codec->getOutputBuffer(index);;
       if (!buffer.isDirect())
         CLog::Log(LOGWARNING, "CDVDVideoCodecAndroidMediaCodec:: buffer.isDirect == false");
-
-      if (!buffer.isDirect())
-        CLog::Log(LOGWARNING, "CDVDVideoCodecAndroidMediaCodec:: m_output[index].isDirect == false");
 
       if (size && buffer.capacity())
       {
