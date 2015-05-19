@@ -116,6 +116,8 @@ public:
 
   bool Aborted();
 
+  bool RenumberStreamIds(unsigned int offset);
+
   AVFormatContext* m_pFormatContext;
   CDVDInputStream* m_pInput;
 
@@ -148,7 +150,7 @@ protected:
 
   CCriticalSection m_critSection;
   std::map<int, CDemuxStream*> m_streams;
-  std::vector<std::map<int, CDemuxStream*>::iterator> m_stream_index;
+  std::map<int, std::map<int, CDemuxStream*>::iterator> m_stream_index;
 
   AVIOContext* m_ioContext;
 
@@ -174,5 +176,7 @@ protected:
 
   bool m_streaminfo;
   bool m_checkvideo;
+
+  unsigned int m_streamIdOffset = 0;
 };
 

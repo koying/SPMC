@@ -1223,10 +1223,11 @@ int CDVDDemuxFFmpeg::GetStreamLength()
  */
 CDemuxStream* CDVDDemuxFFmpeg::GetStream(int iStreamId)
 {
-  if(iStreamId >= 0 && (size_t)iStreamId < m_stream_index.size())
-    return m_stream_index[iStreamId]->second;
-  else
+  auto it = m_stream_index.find(iStreamId);
+  if (it == m_stream_index.end())
     return NULL;
+  else
+    return it->second->second;
 }
 
 /**
@@ -1597,12 +1598,12 @@ void CDVDDemuxFFmpeg::AddStream(int iId, CDemuxStream* stream)
 {
   std::pair<std::map<int, CDemuxStream*>::iterator, bool> res;
 
-  res = m_streams.insert(std::make_pair(iId, stream));
+  res = m_streams.insert(std::make_pair(m_streamIdOffset + iId, stream));
   if(res.second)
   {
     /* was new stream */
-    stream->iId = m_stream_index.size();
-    m_stream_index.push_back(res.first);
+    stream->iId = m_streamIdOffset + m_stream_index.size();
+    m_stream_index[stream->iId] = res.first;
   }
   else
   {
@@ -1613,7 +1614,7 @@ void CDVDDemuxFFmpeg::AddStream(int iId, CDemuxStream* stream)
     res.first->second = stream;
   }
   if(g_advancedSettings.m_logLevel > LOG_LEVEL_NORMAL)
-    CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::AddStream(%d, ...) -> %d", iId, stream->iId);
+    CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::AddStream(%d, ...) -> %d", (m_streamIdOffset + iId), stream->iId);
 }
 
 
@@ -2023,3 +2024,18 @@ void CDVDDemuxFFmpeg::GetL16Parameters(int &channels, int &samplerate)
     }
   }
 }
+
+bool CDVDDemuxFFmpeg::RenumberStreamIds(unsigned int offset)
+{
+  m_streamIdOffset = offset;
+
+  std::map<int, std::map<int, CDemuxStream*>::iterator> temp;
+  for (auto iter : m_stream_index)
+  {
+    unsigned int newIndex = offset + iter.first;
+    iter.second->second->iId = newIndex;
+    temp[newIndex] =  iter.second;
+  }
+  m_stream_index = temp;
+  return true;
+};
