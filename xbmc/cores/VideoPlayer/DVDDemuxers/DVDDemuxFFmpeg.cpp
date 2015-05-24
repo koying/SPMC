@@ -1062,7 +1062,11 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
       {
         // Here, we recreate a h264 MVC packet from the base one + buffered MVC NALU's
         if (m_SSIFqueue.size() <= 0)
-          CLog::Log(LOGERROR, "!!! MVC error: no mvc packet: pts(%f) dts(%f) - %lld", pPacket->pts, pPacket->dts, m_pkt.pkt.pts);
+        {
+          CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+          pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
+          pPacket->iSize = 0;
+        }
         else
         {
           DemuxPacket* mvcpkt = m_SSIFqueue.front();
