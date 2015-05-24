@@ -255,19 +255,9 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
     m_deinterlaceMethods.clear();
 
     if (m_RenderFeaturesCallBackFn)
-    {
       (*m_RenderFeaturesCallBackFn)(m_RenderFeaturesCallBackCtx, m_renderFeatures);
-      // after setting up m_renderFeatures, we are done with the callback
-      m_RenderFeaturesCallBackFn = NULL;
-      m_RenderFeaturesCallBackCtx = NULL;
-    }
     if (m_DeinterlaceMethodsCallBackFn)
-    {
       (*m_DeinterlaceMethodsCallBackFn)(m_DeinterlaceMethodsCallBackCtx, m_deinterlaceMethods);
-      // after setting up m_deinterlaceMethods, we are done with the callback
-      m_DeinterlaceMethodsCallBackFn = NULL;
-      m_DeinterlaceMethodsCallBackCtx = NULL;
-    }
     g_application.m_pPlayer->GetRenderFeatures(m_renderFeatures);
     g_application.m_pPlayer->GetDeinterlaceMethods(m_deinterlaceMethods);
     g_application.m_pPlayer->GetDeinterlaceModes(m_deinterlaceModes);
@@ -2895,8 +2885,8 @@ bool CLinuxRendererGLES::Supports(EDEINTERLACEMODE mode)
   // Player controls render, let it dictate available deinterlace modes
   if((m_renderMethod & RENDER_BYPASS))
   {
-    Features::iterator itr = std::find(m_deinterlaceModes.begin(),m_deinterlaceModes.end(), mode);
-    return itr != m_deinterlaceModes.end();
+    if (m_deinterlaceMethods.empty())
+      return false;
   }
 
   if (mode == VS_DEINTERLACEMODE_OFF)
