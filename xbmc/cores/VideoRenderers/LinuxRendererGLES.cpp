@@ -2885,7 +2885,12 @@ bool CLinuxRendererGLES::Supports(EDEINTERLACEMODE mode)
   // Player controls render, let it dictate available deinterlace modes
   if((m_renderMethod & RENDER_BYPASS))
   {
-    if (m_deinterlaceMethods.empty())
+    if (!m_deinterlaceModes.empty())
+    {
+      Features::iterator itr = std::find(m_deinterlaceModes.begin(),m_deinterlaceModes.end(), mode);
+      return itr != m_deinterlaceModes.end();
+    }
+    else if (m_deinterlaceMethods.empty())
       return false;
   }
 
