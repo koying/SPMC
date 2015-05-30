@@ -41,6 +41,7 @@ class CJNIAudioTrack : public CJNIBase
     int   write(char* audioData, int offsetInBytes, int sizeInBytes);
     int   getPlayState();
     int   getPlaybackHeadPosition();
+    int   setPlaybackRate(int sampleRateInHz);
 
     static int  MODE_STREAM;
     static int  PLAYSTATE_PLAYING;

@@ -266,17 +266,24 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     m_format.m_channelLayout  = AUDIOTRACKChannelMaskToAEChannelMap(atChannelMask);
     m_format.m_frameSize      = m_format.m_channelLayout.Count() *
                                 (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
-    int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
+    int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( 48000,
                                                                   atChannelMask,
                                                                   encoding);
+    min_buffer_size           = int((double)m_format.m_sampleRate / 48000 * min_buffer_size);
     m_sink_frameSize          = m_format.m_channelLayout.Count() *
                                 (CAEUtil::DataFormatToBits(AE_FMT_S16LE) / 8);
     m_min_frames              = min_buffer_size / m_sink_frameSize;
     m_audiotrackbuffer_sec    = (double)m_min_frames / (double)m_format.m_sampleRate;
 
-    m_at_jni                  = CreateAudioTrack(stream, m_format.m_sampleRate,
+    m_at_jni                  = CreateAudioTrack(stream, 48000,
                                                  atChannelMask, encoding,
                                                  min_buffer_size);
+    if (m_at_jni->setPlaybackRate(m_format.m_sampleRate))
+    {
+      CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - invalid sample rate: %d", m_format.m_sampleRate);
+      m_at_jni->release();
+      return false;
+    }
 
     if (!m_at_jni)
     {
@@ -436,16 +443,12 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   int test_sample[] = { 44100, 48000, 96000, 192000 };
   int test_sample_sz = sizeof(test_sample) / sizeof(int);
   for (int i=0; i<test_sample_sz; ++i)
-  {
-    if (IsSupported(test_sample[i], CJNIAudioFormat::CHANNEL_OUT_STEREO, CJNIAudioFormat::ENCODING_PCM_16BIT))
-    {
-      m_info.m_sampleRates.push_back(test_sample[i]);
-      CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
-    }
-  }
+    m_info.m_sampleRates.push_back(test_sample[i]);
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
   m_info.m_dataFormats.push_back(AE_FMT_AC3);
   m_info.m_dataFormats.push_back(AE_FMT_DTS);
+  m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
+  m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
 #if 0 //defined(__ARM_NEON__)
   if (g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_NEON)
     m_info.m_dataFormats.push_back(AE_FMT_FLOAT);
