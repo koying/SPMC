@@ -136,7 +136,3 @@ int CJNIAudioTrack::getNativeOutputSampleRate(int streamType)
                                   streamType);
 }
 
-int CJNIAudioTrack::setPlaybackRate(int sampleRateInHz)
-{
-  return call_method<int>(m_object, "setPlaybackRate", "(I)I", sampleRateInHz);
-}
