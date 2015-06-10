@@ -691,9 +691,17 @@ void OMXPlayerVideo::SetVideoRect(const CRect &InSrcRect, const CRect &InDestRec
   CRect display(0, 0, CDisplaySettings::GetInstance().GetResolutionInfo(res).iScreenWidth, CDisplaySettings::GetInstance().GetResolutionInfo(res).iScreenHeight);
 
   if (display_stereo_mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
-    DestRect.x2 *= 2.0f;
+  {
+    float width = DestRect.x2 - DestRect.x1;
+    DestRect.x1 *= 2.0f;
+    DestRect.x2 = DestRect.x1 + 2.0f * width;
+  }
   else if (display_stereo_mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
-    DestRect.y2 *= 2.0f;
+  {
+    float height = DestRect.y2 - DestRect.y1;
+    DestRect.y1 *= 2.0f;
+    DestRect.y2 = DestRect.y1 + 2.0f * height;
+  }
 
   if (gui != display)
   {
