@@ -196,7 +196,6 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   m_audiotrackbuffer_sec = 0.0;
   m_at_jni = NULL;
   m_frames_written = 0;
-  m_volume = CXBMCApp::GetSystemVolume();
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
@@ -213,6 +212,7 @@ bool CAESinkAUDIOTRACK::IsSupported(int sampleRateInHz, int channelConfig, int e
 bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
   m_format      = format;
+  m_volume      = -1;
 
   int stream = CJNIAudioManager::STREAM_MUSIC;
   int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
@@ -304,16 +304,21 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   format                    = m_format;
 
   // Force volume to 100% for passthrough
-  float volume = m_volume;
   if (m_passthrough)
-    volume = 1.0;
-  CXBMCApp::SetSystemVolume(volume);
+  {
+    m_volume = CXBMCApp::GetSystemVolume();
+    CXBMCApp::SetSystemVolume(1.0);
+  }
 
   return true;
 }
 
 void CAESinkAUDIOTRACK::Deinitialize()
 {
+  // Restore volume
+  if (m_volume != -1)
+    CXBMCApp::SetSystemVolume(m_volume);
+
   if (!m_at_jni)
     return;
 
@@ -325,9 +330,6 @@ void CAESinkAUDIOTRACK::Deinitialize()
 
   delete m_at_jni;
   m_at_jni = NULL;
-
-  // Restore volume
-  CXBMCApp::SetSystemVolume(m_volume);
 }
 
 void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
@@ -410,8 +412,7 @@ void  CAESinkAUDIOTRACK::SetVolume(float scale)
   if (!m_at_jni)
     return;
 
-  m_volume = scale;
-  CXBMCApp::SetSystemVolume(m_volume);
+  CXBMCApp::SetSystemVolume(scale);
 }
 
 void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
