@@ -9670,3 +9670,4 @@ xbmc/cores/dvdplayer/DVDCodecs/Video/libRKCodec/StageFrightInterface.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Video/libRKCodec/StageFrightInterface.h
 xbmc/windowing/egl/EGLNativeTypeTegraAndroid.h
 xbmc/windowing/egl/EGLNativeTypeTegraAndroid.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java.in
