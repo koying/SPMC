@@ -47,6 +47,7 @@ public:
   virtual void         Drain           ();
   virtual bool         HasVolume       ();
   virtual void         SetVolume       (float scale);
+  virtual bool         WantsIEC61937   (AEDataFormat format);
   static void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
 protected:
