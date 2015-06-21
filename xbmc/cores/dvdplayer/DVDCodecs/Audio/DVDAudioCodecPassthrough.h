@@ -53,5 +53,7 @@ private:
   CAEBitstreamPacker m_packer;
   uint8_t*           m_buffer;
   unsigned int       m_bufferSize;
+  uint8_t*           m_outBuf;
+  unsigned int       m_outBufSize;
 };
 

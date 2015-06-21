@@ -73,6 +73,12 @@ static void pa_sconv_s16le_from_f32ne_neon(unsigned n, const float32_t *a, int16
  */
 #define LIMIT_TO_STEREO_AND_5POINT1_AND_7POINT1 1
 
+/* Size of a frame for passthrough output. */
+#define AOUT_SPDIF_SIZE 6144
+
+/* Number of samples in an A/52 frame. */
+#define A52_FRAME_NB 1536
+
 static const AEChannel KnownChannels[] = { AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_LFE, AE_CH_SL, AE_CH_SR, AE_CH_BL, AE_CH_BR, AE_CH_BC, AE_CH_BLOC, AE_CH_BROC, AE_CH_NULL };
 
 static bool Has71Support()
@@ -230,11 +236,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       CLog::Log(LOGNOTICE, "Using Rockchip hacked Passthrough");
       stream = CJNIAudioManager::STREAM_VOICE_CALL;
     }
-    /* Currently doesn't work because we have to decapsulate first
-    else if (CJNIBuild::SDK_INT >= 21)
+    else if (!WantsIEC61937(m_format.m_dataFormat))
     {
       encoding = CJNIAudioFormat::ENCODING_AC3;
-    } */
+    }
   }
   else
     m_passthrough = false;
@@ -246,9 +251,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
   int atChannelMask = AEChannelMapToAUDIOTRACKChannelMask(m_format.m_channelLayout);
 
-  // default to 44100, all android devices support it.
-  // then check if we can support the requested rate.
-  unsigned int sampleRate = 44100;
+  unsigned int sampleRate = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
   for (size_t i = 0; i < m_info.m_sampleRates.size(); i++)
   {
     if (m_format.m_sampleRate == m_info.m_sampleRates[i])
@@ -263,13 +266,15 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   while (!m_at_jni)
   {
     m_format.m_channelLayout  = AUDIOTRACKChannelMaskToAEChannelMap(atChannelMask);
-    m_format.m_frameSize      = m_format.m_channelLayout.Count() *
-                                (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
     int min_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_format.m_sampleRate,
                                                                   atChannelMask,
                                                                   encoding);
-    m_sink_frameSize          = m_format.m_channelLayout.Count() *
-                                (CAEUtil::DataFormatToBits(AE_FMT_S16LE) / 8);
+    if (encoding == CJNIAudioFormat::ENCODING_AC3)
+      m_format.m_frameSize      = 4;
+    else
+      m_format.m_frameSize      = m_format.m_channelLayout.Count() *
+                                  (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
+    m_sink_frameSize          = m_format.m_frameSize;
     m_min_frames              = min_buffer_size / m_sink_frameSize;
     m_audiotrackbuffer_sec    = (double)m_min_frames / (double)m_format.m_sampleRate;
 
@@ -413,6 +418,16 @@ void  CAESinkAUDIOTRACK::SetVolume(float scale)
     return;
 
   CXBMCApp::SetSystemVolume(scale);
+}
+
+bool CAESinkAUDIOTRACK::WantsIEC61937(AEDataFormat format)
+{
+  /*
+  if (format == AE_FMT_AC3 && CJNIAudioManager::GetSDKVersion() >= 21)
+    return false;
+  */
+
+  return true;
 }
 
 void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)

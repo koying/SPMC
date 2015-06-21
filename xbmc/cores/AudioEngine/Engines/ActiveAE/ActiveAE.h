@@ -232,6 +232,7 @@ public:
   virtual bool SupportsSilenceTimeout();
   virtual bool HasStereoAudioChannelCount();
   virtual bool HasHDAudioChannelCount();
+  virtual bool WantsIEC61937(AEDataFormat format);
   virtual bool SupportsQualityLevel(enum AEQuality level);
   virtual bool IsSettingVisible(const std::string &settingId);
   virtual void KeepConfiguration(unsigned int millis);
