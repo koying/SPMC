@@ -26,6 +26,7 @@ using namespace jni;
 
 int CJNIAudioFormat::ENCODING_PCM_16BIT = 0x00000002;
 int CJNIAudioFormat::ENCODING_AC3       = 0x00000005;
+int CJNIAudioFormat::ENCODING_E_AC3     = 0x00000006;
 
 int CJNIAudioFormat::CHANNEL_OUT_STEREO  = 0x0000000c;
 int CJNIAudioFormat::CHANNEL_OUT_5POINT1 = 0x000000fc;
@@ -77,6 +78,7 @@ void CJNIAudioFormat::PopulateStaticFields()
     else if (sdk >= 21)
     {
       CJNIAudioFormat::ENCODING_AC3 = get_static_field<int>(c, "ENCODING_AC3");
+      CJNIAudioFormat::ENCODING_E_AC3 = get_static_field<int>(c, "ENCODING_E_AC3");
     }
 
     // OUYA-specific

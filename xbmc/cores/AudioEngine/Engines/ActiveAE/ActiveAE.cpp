@@ -2267,6 +2267,11 @@ bool CActiveAE::HasHDAudioChannelCount()
   return numChannels > AE_CH_LAYOUT_5_1;
 }
 
+bool CActiveAE::WantsIEC61937(AEDataFormat format)
+{
+  return m_sink.WantsIEC61937(format);
+}
+
 bool CActiveAE::SupportsQualityLevel(enum AEQuality level)
 {
   if (level == AE_QUALITY_LOW || level == AE_QUALITY_MID || level == AE_QUALITY_HIGH)

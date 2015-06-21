@@ -28,7 +28,9 @@
 
 CDVDAudioCodecPassthrough::CDVDAudioCodecPassthrough(void) :
   m_buffer    (NULL),
-  m_bufferSize(0)
+  m_bufferSize(0),
+  m_outBuf(NULL),
+  m_outBufSize(0)
 {
 }
 
@@ -136,15 +138,39 @@ int CDVDAudioCodecPassthrough::Decode(uint8_t* pData, int iSize)
 
   /* if we have a frame */
   if (size)
-    m_packer.Pack(m_info, m_buffer, size);
+  {
+    if (CAEFactory::WantsIEC61937(GetDataFormat()))
+    {
+      m_packer.Pack(m_info, m_buffer, size);
+    }
+    else
+    {
+      if (m_outBufSize < size)
+      {
+        delete[] m_outBuf;
+        m_outBuf = new uint8_t[size];
+      }
+      m_outBufSize = size;
+      memcpy(m_outBuf, m_buffer, size);
+    }
+  }
 
   return used;
 }
 
 int CDVDAudioCodecPassthrough::GetData(uint8_t** dst)
 {
-  int size = m_packer.GetSize();
-  *dst     = m_packer.GetBuffer();
+  int size = 0;
+  if (CAEFactory::WantsIEC61937(GetDataFormat()))
+  {
+    size = m_packer.GetSize();
+    *dst     = m_packer.GetBuffer();
+  }
+  else
+  {
+    size = m_outBufSize;
+    *dst = m_outBuf;
+  }
   return size;
 }
 
