@@ -289,7 +289,7 @@ bool CWinSystemEGL::CreateNewWindow(const std::string& name, bool fullScreen, RE
     m_stereo_mode == stereo_mode)
   {
     CLog::Log(LOGDEBUG, "CWinSystemEGL::CreateNewWindow: No need to create a new window");
-    return true;
+//xxx    return true;
   }
 
   int delay = CSettings::GetInstance().GetInt("videoscreen.delayrefreshchange");
