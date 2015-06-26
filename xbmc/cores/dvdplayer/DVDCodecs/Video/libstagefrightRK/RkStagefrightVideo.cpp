@@ -31,7 +31,6 @@
 #include "guilib/GraphicContext.h"
 #include "DVDClock.h"
 #include "utils/log.h"
-#include "utils/fastmemcpy.h"
 #include "utils/StringUtils.h"
 #include "threads/Thread.h"
 #include "threads/Event.h"
@@ -658,11 +657,11 @@ int  CRkStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double p
       m2vheader.SliceType = 0;
       m2vheader.SliceNum = 0;
 
-      fast_memcpy(frame->medbuf->data(), &m2vheader, sizeof(VPU_BITSTREAM));
-      fast_memcpy((void*)((long)frame->medbuf->data() + sizeof(VPU_BITSTREAM)), demuxer_content, demuxer_bytes);
+      memcpy(frame->medbuf->data(), &m2vheader, sizeof(VPU_BITSTREAM));
+      memcpy((void*)((long)frame->medbuf->data() + sizeof(VPU_BITSTREAM)), demuxer_content, demuxer_bytes);
     }
     else
-      fast_memcpy(frame->medbuf->data(), demuxer_content, demuxer_bytes);
+      memcpy(frame->medbuf->data(), demuxer_content, demuxer_bytes);
     frame->medbuf->meta_data()->clear();
     frame->medbuf->meta_data()->setInt64(kKeyTime, frame->pts);
     
