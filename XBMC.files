@@ -9671,3 +9671,16 @@ xbmc/cores/dvdplayer/DVDCodecs/Video/libRKCodec/StageFrightInterface.h
 xbmc/windowing/egl/EGLNativeTypeTegraAndroid.h
 xbmc/windowing/egl/EGLNativeTypeTegraAndroid.cpp
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java.in
+xbmc/input/KeyboardLayoutManager.h
+xbmc/input/Key.h
+xbmc/input/InputManager.h
+xbmc/input/InputCodingTableFactory.h
+xbmc/input/InputCodingTableBasePY.h
+xbmc/input/InputCodingTableBaiduPY.h
+xbmc/input/InputCodingTable.h
+xbmc/input/KeyboardLayoutManager.cpp
+xbmc/input/Key.cpp
+xbmc/input/InputManager.cpp
+xbmc/input/InputCodingTableFactory.cpp
+xbmc/input/InputCodingTableBasePY.cpp
+xbmc/input/InputCodingTableBaiduPY.cpp
