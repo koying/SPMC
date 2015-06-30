@@ -692,6 +692,10 @@ void CMMALRenderer::SetVideoRect(const CRect& InSrcRect, const CRect& InDestRect
   bool stereo_invert                   = (m_iFlags & CONF_FLAGS_STEREO_CADANCE_RIGHT_LEFT) ? true : false;
   RENDER_STEREO_MODE display_stereo_mode = g_graphicsContext.GetStereoMode();
 
+  // ignore video stereo mode when 3D display mode is disabled
+  if (display_stereo_mode == RENDER_STEREO_MODE_OFF)
+    video_stereo_mode = RENDER_STEREO_MODE_OFF;
+
   // fix up transposed video
   if (m_renderOrientation == 90 || m_renderOrientation == 270)
   {
