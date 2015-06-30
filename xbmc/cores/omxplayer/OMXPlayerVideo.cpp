@@ -659,6 +659,10 @@ void OMXPlayerVideo::SetVideoRect(const CRect &InSrcRect, const CRect &InDestRec
   bool stereo_invert                   = (flags & CONF_FLAGS_STEREO_CADANCE_RIGHT_LEFT) ? true : false;
   RENDER_STEREO_MODE display_stereo_mode = g_graphicsContext.GetStereoMode();
 
+  // ignore video stereo mode when 3D display mode is disabled
+  if (display_stereo_mode == RENDER_STEREO_MODE_OFF)
+    video_stereo_mode = RENDER_STEREO_MODE_OFF;
+
   // fix up transposed video
   if (m_hints.orientation == 90 || m_hints.orientation == 270)
   {
