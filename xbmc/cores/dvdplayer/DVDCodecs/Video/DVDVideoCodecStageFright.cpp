@@ -84,6 +84,8 @@ bool CDVDVideoCodecStageFright::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
     {
       case AV_CODEC_ID_H264:
         m_pFormatName = "stf-h264";
+        if ((m_hints.profile == 110)) //hi10p: no known working decoder
+          return false;
         if (m_hints.extradata)
         {
           m_converter     = new CBitstreamConverter();

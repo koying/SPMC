@@ -371,6 +371,8 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_AVS:
     case AV_CODEC_ID_CAVS:
     case AV_CODEC_ID_H264:
+      if ((m_hints.profile == 110)) //hi10p: no known working decoder
+        return false;
       use_codec = codec_config["useAVCcodec"];
       if (use_codec == "0"
           || (use_codec == "sd" && m_hints.width > 800)
