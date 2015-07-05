@@ -9684,3 +9684,13 @@ xbmc/input/InputManager.cpp
 xbmc/input/InputCodingTableFactory.cpp
 xbmc/input/InputCodingTableBasePY.cpp
 xbmc/input/InputCodingTableBaiduPY.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java.in
+tools/android/packaging/xbmc/res/layout/activity_splash.xml
+tools/android/packaging/xbmc/res/layout/activity_main.xml
+tools/android/packaging/xbmc/res/layout/activity_main.xml.in
+tools/android/packaging/Makefile.in
+xbmc/android/activity/JNIMainActivity.h
+xbmc/android/activity/JNIMainActivity.cpp
+xbmc/android/activity/Makefile.in
+tools/android/packaging/xbmc/strings.xml.in
+tools/android/packaging/xbmc/activity_main.xml.in
