@@ -87,3 +87,21 @@ void CJNIMainActivity::unregisterMediaButtonEventReceiver()
   call_method<void>(m_context,
                     "unregisterMediaButtonEventReceiver", "()V");
 }
+
+CJNISurface CJNIMainActivity::getVideoViewSurface()
+{
+  return call_method<jhobject>(m_context,
+                               "getVideoViewSurface", "()Landroid/view/Surface;");
+}
+
+void CJNIMainActivity::clearVideoView()
+{
+  call_method<void>(m_context,
+                    "clearVideoView", "()V");
+}
+
+void CJNIMainActivity::setVideoViewSurfaceRect(int l, int t, int r, int b)
+{
+  call_method<void>(m_context,
+                    "setVideoViewSurfaceRect", "(IIII)V", l, t, r, b);
+}
