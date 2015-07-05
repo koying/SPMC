@@ -39,6 +39,10 @@ public:
   static void registerMediaButtonEventReceiver();
   static void unregisterMediaButtonEventReceiver();
 
+  CJNISurface getVideoViewSurface();
+  void clearVideoView();
+  void setVideoViewSurfaceRect(int l, int t, int r, int b);
+
 private:
   static CJNIMainActivity *m_appInstance;
 
