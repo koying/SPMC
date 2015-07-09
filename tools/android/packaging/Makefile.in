@@ -8,7 +8,7 @@ OBJS = libcurl.so \
   libbluray.so libsmbclient.so
 
 PLATFORM_OBJS =
-EXCLUDED_ADDONS = screensaver.rsxs.euphoria visualization.dxspectrum visualization.milkdrop visualization.projectm service.xbmc.versioncheck
+EXCLUDED_ADDONS = screensaver.rsxs.euphoria visualization.dxspectrum visualization.milkdrop visualization.projectm visualization.vortex service.xbmc.versioncheck
 
 XBMCROOT = $(shell cd $(CURDIR)/../../..; pwd)
 COPYDIRS = system addons media
