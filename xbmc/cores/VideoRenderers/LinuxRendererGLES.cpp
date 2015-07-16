@@ -970,7 +970,7 @@ void CLinuxRendererGLES::ReleaseBuffer(int idx)
     }
   }
 #endif
-  if (m_renderMethod & RENDER_BYPASS)
+  if (m_renderMethod & RENDER_BYPASS || m_renderMethod & RENDER_EGLIMG)
   {
     if (m_RenderReleaseCallBackFn && buf.render_ctx)
       (*m_RenderReleaseCallBackFn)(m_RenderReleaseCallBackCtx, buf.render_ctx);
