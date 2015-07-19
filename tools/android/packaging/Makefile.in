@@ -85,6 +85,12 @@ apk-noobb: apk-clean package apk-sign
 xbmc/assets:
 	mkdir -p xbmc/assets
 
+symbols: libs
+ifeq (1,@xxUSE_BREAKPAD@)
+	for f in xbmc/obj/local/$(CPU)/*.so; do sh ./make_symbols.sh $$f; done
+	tar -cjf @APP_NAME@.symbols-$(CPU)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
+endif
+
 shared:
 	mkdir -p assets
 	cp -rfp $(PREFIX)/share/@APP_NAME_LC@/* ./assets
