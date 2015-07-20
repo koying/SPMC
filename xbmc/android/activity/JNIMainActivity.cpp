@@ -76,3 +76,14 @@ void CJNIMainActivity::_onAudioFocusChange(JNIEnv *env, jobject context, jint fo
     m_appInstance->onAudioFocusChange(focusChange);
 }
 
+void CJNIMainActivity::registerMediaButtonEventReceiver()
+{
+  call_method<void>(m_context,
+                    "registerMediaButtonEventReceiver", "()V");
+}
+
+void CJNIMainActivity::unregisterMediaButtonEventReceiver()
+{
+  call_method<void>(m_context,
+                    "unregisterMediaButtonEventReceiver", "()V");
+}
