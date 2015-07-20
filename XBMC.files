@@ -9694,3 +9694,6 @@ xbmc/android/activity/JNIMainActivity.cpp
 xbmc/android/activity/Makefile.in
 tools/android/packaging/xbmc/strings.xml.in
 tools/android/packaging/xbmc/activity_main.xml.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java.in
+xbmc/android/jni/KeyEvent.h
+xbmc/android/jni/KeyEvent.cpp
