@@ -374,7 +374,6 @@ CStageFrightVideo::CStageFrightVideo(CDVDCodecInterface* interface)
 #endif
   p = new CStageFrightVideoPrivate;
   p->m_g_application = interface->GetApplication();
-  p->m_g_applicationMessenger = interface->GetApplicationMessenger();
   p->m_g_Windowing = (CWinSystemEGL*)interface->GetWindowSystem();
   p->m_g_advancedSettings = interface->GetAdvancedSettings();
   p->m_g_renderManager = interface->GetRenderManager();

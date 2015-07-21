@@ -23,7 +23,6 @@
 #include "utils/GlobalsHandling.h"
 
 class CApplication;
-class CApplicationMessenger;
 class CWinSystemBase;
 class CAdvancedSettings;
 class CXBMCRenderManager;
@@ -36,7 +35,6 @@ public:
 
 public:
   CApplication *GetApplication() const;
-  CApplicationMessenger *GetApplicationMessenger() const;
   CWinSystemBase *GetWindowSystem() const;
   CAdvancedSettings *GetAdvancedSettings() const;
   CXBMCRenderManager *GetRenderManager() const;
