@@ -42,7 +42,6 @@ class CBaseTexture;
 namespace Shaders { class BaseYUV2RGBShader; }
 namespace Shaders { class BaseVideoFilterShader; }
 class COpenMaxVideo;
-class CDVDMediaCodecInfo;
 typedef std::vector<int>     Features;
 
 
@@ -90,7 +89,6 @@ enum RenderMethod
   RENDER_CVREF  = 0x080,
   RENDER_BYPASS = 0x100,
   RENDER_EGLIMG = 0x200,
-  RENDER_MEDIACODEC = 0x400,
 };
 
 enum RenderQuality
@@ -163,10 +161,6 @@ public:
 #ifdef HAVE_VIDEOTOOLBOXDECODER
   virtual void         AddProcessor(struct __CVBuffer *cvBufferRef, int index);
 #endif
-#if defined(TARGET_ANDROID)
-  // mediaCodec
-  virtual void         AddProcessor(CDVDMediaCodecInfo *mediacodec, int index);
-#endif
   virtual void         AddProcessor(void *render_ctx, int index);
 
 protected:
@@ -205,10 +199,6 @@ protected:
   void DeleteEGLIMGTexture(int index);
   bool CreateEGLIMGTexture(int index);
 
-  void UploadSurfaceTexture(int index);
-  void DeleteSurfaceTexture(int index);
-  bool CreateSurfaceTexture(int index);
-
   void UploadOpenMaxTexture(int index);
   void DeleteOpenMaxTexture(int index);
   bool CreateOpenMaxTexture(int index);
@@ -222,7 +212,6 @@ protected:
   void RenderOpenMax(int index, int field);       // OpenMAX rgb texture
   void RenderEglImage(int index, int field);       // Android OES texture
   void RenderCoreVideoRef(int index, int field);  // CoreVideo reference
-  void RenderSurfaceTexture(int index, int field);// MediaCodec rendering using SurfaceTexture
 
   CFrameBufferObject m_fbo;
 
@@ -281,10 +270,6 @@ protected:
 #endif
 #ifdef HAVE_VIDEOTOOLBOXDECODER
     struct __CVBuffer *cvBufferRef;
-#endif
-#if defined(TARGET_ANDROID)
-    // mediacodec
-    CDVDMediaCodecInfo *mediacodec;
 #endif
   };
 
