@@ -55,7 +55,6 @@ class COpenMaxVideo;
 struct OpenMaxVideoBufferHolder;
 class CDVDVideoCodecStageFright;
 class CDVDVideoCodecStageFrightBuffer;
-class CDVDMediaCodecInfo;
 class CMMALVideoBuffer;
 
 // should be entirely filled by all codecs
@@ -90,10 +89,6 @@ struct DVDVideoPicture
 
     struct {
       struct __CVBuffer *cvBufferRef;
-    };
-
-    struct {
-      CDVDMediaCodecInfo *mediacodec;
     };
 
     struct {
