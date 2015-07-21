@@ -21,7 +21,6 @@
 #include "DVDCodecInterface.h"
 
 #include "Application.h"
-#include "ApplicationMessenger.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
 #include "cores/VideoRenderers/RenderManager.h"
@@ -34,11 +33,6 @@ CDVDCodecInterface::CDVDCodecInterface()
 CApplication* CDVDCodecInterface::GetApplication() const
 {
   return &g_application;
-}
-
-CApplicationMessenger* CDVDCodecInterface::GetApplicationMessenger() const
-{
-  return &CApplicationMessenger::Get();
 }
 
 CWinSystemBase* CDVDCodecInterface::GetWindowSystem() const

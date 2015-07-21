@@ -33,7 +33,6 @@
 #include "DVDVideoCodecRKStageFright.h"
 #include "utils/log.h"
 #include "Application.h"
-#include "ApplicationMessenger.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
 #include "android/jni/Build.h"
