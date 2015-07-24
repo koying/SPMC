@@ -32,6 +32,7 @@ public:
   ~CJNIActivity();
 
   static bool moveTaskToBack(bool nonRoot);
+  static bool requestVisibleBehind(bool visible);
 
 private:
   CJNIActivity();
