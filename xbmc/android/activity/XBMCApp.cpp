@@ -179,8 +179,10 @@ void CXBMCApp::onPause()
   if (g_application.m_pPlayer->IsPlaying())
   {
     registerMediaButtonEventReceiver();
-    if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
-      CApplicationMessenger::Get().SendAction(CAction(ACTION_PAUSE), WINDOW_INVALID, true);
+    if (g_application.m_pPlayer->IsPlayingVideo()) {
+      if (!requestVisibleBehind(true) && !g_application.m_pPlayer->IsPaused())
+        CApplicationMessenger::Get().SendAction(CAction(ACTION_PAUSE), WINDOW_INVALID, true);
+    }
   }
 
 #if defined(HAS_LIBAMCODEC)
