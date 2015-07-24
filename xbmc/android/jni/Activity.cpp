@@ -38,6 +38,14 @@ CJNIActivity::~CJNIActivity()
 bool CJNIActivity::moveTaskToBack(bool nonRoot)
 {
   return call_method<jboolean>(jhobject(m_context),
-    "moveTaskToBack", "(Z)Z",
-    nonRoot);
+    "moveTaskToBack", "(Z)Z", nonRoot);
+}
+
+bool CJNIActivity::requestVisibleBehind(bool visible)
+{
+  if (CJNIBase::GetSDKVersion() < 21)
+    return false;
+
+  return call_method<jboolean>(jhobject(m_context),
+    "requestVisibleBehind", "(Z)Z", visible);
 }
