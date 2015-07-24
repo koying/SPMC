@@ -91,11 +91,11 @@ public class Main extends NativeActivity
     System.loadLibrary("@APP_NAME_LC@");
 
     super.onCreate(savedInstanceState);
-    getWindow().setFormat(PixelFormat.TRANSLUCENT);
+    getWindow().setFormat(PixelFormat.TRANSPARENT);
 
     setContentView(R.layout.activity_main);
     mVideoView = (XBMCVideoView)findViewById(R.id.VideoView1);
-    mVideoView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+    mVideoView.getHolder().setFormat(PixelFormat.TRANSPARENT);
     mVideoLayout = (RelativeLayout) findViewById(R.id.VideoLayout);
     Log.d(TAG, "mVideoPlayView = " + mVideoView);
 
@@ -163,7 +163,6 @@ public class Main extends NativeActivity
   public void onStart()
   {
     super.onStart();
-    getWindow().setFormat(PixelFormat.TRANSPARENT);
   }
 
   @Override
