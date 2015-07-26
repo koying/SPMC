@@ -132,27 +132,28 @@ int CDVDAudioCodecPassthrough::Decode(uint8_t* pData, int iSize)
 {
   if (iSize <= 0) return 0;
 
-  unsigned int size = m_bufferSize;
-  unsigned int used = m_info.AddData(pData, iSize, &m_buffer, &size);
-  m_bufferSize = std::max(m_bufferSize, size);
+  unsigned int used = 0;
 
-  /* if we have a frame */
-  if (size)
+  if (CAEFactory::WantsIEC61937(GetDataFormat()))
   {
-    if (CAEFactory::WantsIEC61937(GetDataFormat()))
-    {
+    unsigned int size = m_bufferSize;
+    used = m_info.AddData(pData, iSize, &m_buffer, &size);
+    m_bufferSize = std::max(m_bufferSize, size);
+
+    /* if we have a frame */
+    if (size)
       m_packer.Pack(m_info, m_buffer, size);
-    }
-    else
+  }
+  else
+  {
+    if (m_outBufSize < iSize)
     {
-      if (m_outBufSize < size)
-      {
-        delete[] m_outBuf;
-        m_outBuf = new uint8_t[size];
-      }
-      m_outBufSize = size;
-      memcpy(m_outBuf, m_buffer, size);
+      delete[] m_outBuf;
+      m_outBuf = new uint8_t[iSize];
     }
+    m_outBufSize = iSize;
+    memcpy(m_outBuf, pData, iSize);
+    used = iSize;
   }
 
   return used;
