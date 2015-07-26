@@ -24,6 +24,7 @@
 
 #include "jutils/jutils-details.hpp"
 
+#include "android/activity/JNIMainActivity.h"
 #include <algorithm>
 
 using namespace jni;
@@ -103,7 +104,7 @@ CJNIAudioManagerAudioFocusChangeListener* CJNIAudioManagerAudioFocusChangeListen
 CJNIAudioManagerAudioFocusChangeListener::CJNIAudioManagerAudioFocusChangeListener()
 : CJNIBase("com/semperpax/spmc/XBMCOnAudioFocusChangeListener")
 {
-  CJNIApplicationMainActivity *appInstance = CJNIApplicationMainActivity::GetAppInstance();
+  CJNIMainActivity *appInstance = CJNIMainActivity::GetAppInstance();
   if (!appInstance)
     return;
 
