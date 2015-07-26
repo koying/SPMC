@@ -2,9 +2,11 @@
 #include "Activity.h"
 #include "ClassLoader.h"
 
+#include "jutils/jutils-details.hpp"
+
+#include "android/activity/JNIMainActivity.h"
 #include <string>
 
-#include "jutils/jutils-details.hpp"
 
 using namespace jni;
 
@@ -153,7 +155,7 @@ void CJNINotification::PopulateStaticFields()
 CJNINotification::CJNINotification()
 : CJNIBase(CJNINotification::m_classname)
 {
-  CJNIApplicationMainActivity *appInstance = CJNIApplicationMainActivity::GetAppInstance();
+  CJNIMainActivity *appInstance = CJNIMainActivity::GetAppInstance();
   if (!appInstance)
     return;
 
