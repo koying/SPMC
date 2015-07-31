@@ -72,16 +72,6 @@
       </group>
     </category>
     <category id="audiooutput">
-      <group id="1">
-        <setting id="audiooutput.processquality">
-          <default>101</default> <!-- AE_QUALITY_GPU -->
-        </setting>
-        <setting id="audiooutput.supportdtshdcpudecoding" type="boolean" label="38120" help="38121">
-          <level>2</level>
-          <default>false</default>
-          <control type="toggle" />
-        </setting>
-      </group>
       <group id="3">
         <setting id="audiooutput.ac3transcode" help="37024">
         </setting>

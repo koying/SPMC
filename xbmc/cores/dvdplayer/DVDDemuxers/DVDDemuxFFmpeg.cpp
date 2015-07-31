@@ -440,9 +440,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
 
   if (m_streaminfo)
   {
-#if defined(TARGET_RASPBERRY_PI) || defined(HAS_IMXVPU)
     if (CSettings::Get().GetBool("audiooutput.supportdtshdcpudecoding"))
-#endif
     {
       for (unsigned int i = 0; i < m_pFormatContext->nb_streams; i++)
       {
