@@ -90,6 +90,16 @@ public class Main extends NativeActivity
     catch (UnsatisfiedLinkError e) {}
     System.loadLibrary("@APP_NAME_LC@");
 
+    // HACK: workaroung dload path issues on API < 18
+    //       preload libs depending on libkodi
+    if (android.os.Build.VERSION.SDK_INT < 18)
+    {
+      // PIL
+      System.loadLibrary("_imaging");
+      System.loadLibrary("_imagingft");
+      System.loadLibrary("_imagingmath");
+    }
+
     super.onCreate(savedInstanceState);
     getWindow().setFormat(PixelFormat.TRANSPARENT);
 
