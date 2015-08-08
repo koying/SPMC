@@ -460,7 +460,7 @@ bool CInputManager::OnEvent(XBMC_Event& newEvent)
   {
     m_Keyboard.ProcessKeyDown(newEvent.key.keysym);
     CKey key = m_Keyboard.TranslateKey(newEvent.key.keysym);
-    if (!CButtonTranslator::GetInstance().IsPossibleLonpress(g_windowManager.GetActiveWindowID(), key))
+    if (!CButtonTranslator::GetInstance().HasLonpressMapping(g_windowManager.GetActiveWindowID(), key))
     {
       m_LastKey.Reset();
       OnKey(key);
