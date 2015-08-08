@@ -175,14 +175,11 @@ void CXBMCApp::onResume()
 void CXBMCApp::onPause()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
-  // Only send the PAUSE action if we are pausing XBMC and video is currently playing
   if (g_application.m_pPlayer->IsPlaying())
   {
     registerMediaButtonEventReceiver();
-    if (g_application.m_pPlayer->IsPlayingVideo()) {
-      if (!requestVisibleBehind(true) && !g_application.m_pPlayer->IsPaused())
-        CApplicationMessenger::Get().SendAction(CAction(ACTION_PAUSE), WINDOW_INVALID, true);
-    }
+    if (g_application.m_pPlayer->IsPlayingVideo() && !requestVisibleBehind(true))
+      CApplicationMessenger::Get().SendAction(CAction(ACTION_STOP), WINDOW_INVALID, true);
   }
 
 #if defined(HAS_LIBAMCODEC)
