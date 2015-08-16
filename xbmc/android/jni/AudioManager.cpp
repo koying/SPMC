@@ -86,15 +86,15 @@ int CJNIAudioManager::abandonAudioFocus(const CJNIAudioManagerAudioFocusChangeLi
 bool CJNIAudioManager::isBluetoothA2dpOn()
 {
   return call_method<jboolean>(m_object,
-                          "isBluetoothA2dpOn",
-                          "()Z");
+                               "isBluetoothA2dpOn",
+                               "()Z");
 }
 
 bool CJNIAudioManager::isWiredHeadsetOn()
 {
   return call_method<jboolean>(m_object,
-                          "isWiredHeadsetOn",
-                          "()Z");
+                               "isWiredHeadsetOn",
+                               "()Z");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
