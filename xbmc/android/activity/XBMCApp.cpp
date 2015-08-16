@@ -724,7 +724,7 @@ void CXBMCApp::onReceive(CJNIIntent intent)
     if (action == "android.intent.action.HEADSET_PLUG")
       newstate = (intent.getIntExtra("state", 0) != 0);
     else
-      newstate = (intent.getIntExtra("android.bluetooth.profile.extra.STATE", 0) == 2);
+      newstate = (intent.getIntExtra("android.bluetooth.profile.extra.STATE", 0) == 2 /* STATE_CONNECTED */);
 
     if (newstate != m_headsetPlugged)
     {
