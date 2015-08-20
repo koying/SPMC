@@ -1450,7 +1450,7 @@ CAMLCodec::CAMLCodec() : CThread("CAMLCodec")
   memset(am_private, 0, sizeof(am_private_t));
   m_dll = new DllLibAmCodec;
   m_dll->Load();
-  m_dll_has_video_delay = m_dll->LoadVideoDelayFunctions();
+  m_dll_has_video_delay = false /*m_dll->LoadVideoDelayFunctions()*/;
   am_private->m_dll = m_dll;
 }
 
@@ -1883,9 +1883,7 @@ int CAMLCodec::Decode(uint8_t *pData, size_t iSize, double dts, double pts)
     }
   }
 
-  // we must return VC_BUFFER or VC_PICTURE,
-  // default to VC_BUFFER.
-  int rtn = VC_BUFFER;
+  int rtn = 0;
   if (m_dll_has_video_delay)
   {
     // we must wait here or we can consume
@@ -1927,19 +1925,18 @@ int CAMLCodec::Decode(uint8_t *pData, size_t iSize, double dts, double pts)
     {
       m_old_pictcnt++;
       rtn = VC_PICTURE;
-      // we got a new pict, try and keep hw buffered demux above 2 seconds.
-      // this, combined with the above 1 second check, keeps hw buffered demux between 1 and 2 seconds.
-      // we also check to make sure we keep from filling hw buffer.
-      if (GetTimeSize() < 2.0 && GetDataSize() < m_vbufsize/3)
-        rtn |= VC_BUFFER;
     }
+    // Try and keep hw buffered demux above 2 seconds.
+    // this, combined with the above 1 second check, keeps hw buffered demux between 1 and 2 seconds.
+    // we also check to make sure we keep from filling hw buffer.
+    if (GetTimeSize() < 2.0 && GetDataSize() < m_vbufsize/3)
+      rtn |= VC_BUFFER;
   }
 
-/*
   CLog::Log(LOGDEBUG, "CAMLCodec::Decode: "
     "rtn(%d), m_cur_pictcnt(%lld), m_cur_pts(%f), lastpts(%f), GetTimeSize(%f), GetDataSize(%d)",
     rtn, m_cur_pictcnt, (float)m_cur_pts/PTS_FREQ, (float)am_private->am_pkt.lastpts/PTS_FREQ, GetTimeSize(), GetDataSize());
-*/
+
   return rtn;
 }
 
