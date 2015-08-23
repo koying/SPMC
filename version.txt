@@ -1,6 +1,6 @@
-APP_NAME spmc
-COMPANY_NAME Semperpax
-WEBSITE http://spmc.semperpax.com
+APP_NAME xbmc
+COMPANY_NAME Minix
+WEBSITE http://www.minix.com.hk/
 VERSION_MAJOR 15
 VERSION_MINOR 2
 VERSION_TAG RC1

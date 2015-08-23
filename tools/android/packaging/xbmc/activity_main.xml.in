@@ -4,10 +4,10 @@
   android:layout_height="match_parent"
   android:background="@android:color/transparent" >
 
-  <com.semperpax.@APP_NAME_LC@.XBMCVideoView
+  <hk.minix.@APP_NAME_LC@.XBMCVideoView
     android:id="@+id/VideoView1"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:background="@android:color/transparent" />
 
 </RelativeLayout>

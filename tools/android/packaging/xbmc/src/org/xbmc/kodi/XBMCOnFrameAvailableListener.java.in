@@ -1,4 +1,4 @@
-package com.semperpax.@APP_NAME_LC@;
+package hk.minix.@APP_NAME_LC@;
 
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
