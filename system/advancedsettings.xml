@@ -1,0 +1,10 @@
+<advancedsettings>
+  <network>
+    <buffermode>1</buffermode>
+    <cachemembuffersize>157286400</cachemembuffersize>
+    <readbufferfactor>40</readbufferfactor>
+    <curlclienttimeout>500</curlclienttimeout> 
+    <curllowspeedtime>500</curllowspeedtime> 
+  </network>
+</advancedsettings>
+
