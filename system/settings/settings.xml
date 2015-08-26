@@ -44,7 +44,7 @@
         </setting>
         <setting id="lookandfeel.font" type="string" parent="lookandfeel.skin" label="13303" help="36107">
           <level>1</level>
-          <default>Default</default>
+          <default>Arial</default>
           <constraints>
             <options>skinfonts</options>
           </constraints>
