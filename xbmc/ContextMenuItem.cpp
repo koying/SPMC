@@ -27,8 +27,6 @@
 #include "interfaces/python/ContextItemAddonInvoker.h"
 #include "interfaces/python/XBPython.h"
 #include "utils/StringUtils.h"
-#include <boost/lexical_cast.hpp>
-
 
 std::string CContextMenuItem::GetLabel() const
 {
@@ -36,7 +34,7 @@ std::string CContextMenuItem::GetLabel() const
     return "";
 
   if (StringUtils::IsNaturalNumber(m_label))
-    return m_addon->GetString(boost::lexical_cast<int>(m_label.c_str()));
+    return m_addon->GetString(std::stoi(m_label));
 
   return m_label;
 }
