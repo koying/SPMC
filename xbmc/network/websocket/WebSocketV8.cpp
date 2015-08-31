@@ -20,7 +20,6 @@
 
 #include <string>
 #include <sstream>
-#include "sha1.hpp"
 
 #include "WebSocketV8.h"
 #include "WebSocket.h"
@@ -29,6 +28,7 @@
 #include "utils/HttpParser.h"
 #include "utils/HttpResponse.h"
 #include "utils/log.h"
+#include "utils/sha1.hpp"
 #include "utils/StringUtils.h"
 
 #define WS_HTTP_METHOD          "GET"
@@ -191,7 +191,7 @@ std::string CWebSocketV8::calculateKey(const std::string &key)
   std::string acceptKey = key;
   acceptKey.append(WS_KEY_MAGICSTRING);
 
-  boost::uuids::detail::sha1 hash;
+  uuids::sha1 hash;
   hash.process_bytes(acceptKey.c_str(), acceptKey.size());
 
   unsigned int digest[5];

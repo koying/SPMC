@@ -4880,6 +4880,7 @@
 		F52CC5EF1713AAA200113454 /* DirectoryNodeGrouped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryNodeGrouped.h; sourceTree = "<group>"; };
 		F52CC6A81713BD2B00113454 /* DirectoryNodeGrouped.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DirectoryNodeGrouped.cpp; sourceTree = "<group>"; };
 		F52CC6A91713BD2B00113454 /* DirectoryNodeGrouped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryNodeGrouped.h; sourceTree = "<group>"; };
+		F536166E1B94E61200BD5776 /* sha1.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sha1.hpp; sourceTree = "<group>"; };
 		F5364D33155B3B270016D00B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		F5364E04155B3CAF0016D00B /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = /System/Library/Frameworks/IOSurface.framework; sourceTree = "<absolute>"; };
 		F548786B0FE060FF00E506FD /* DVDSubtitleParserMPL2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDSubtitleParserMPL2.h; sourceTree = "<group>"; };
@@ -8902,6 +8903,7 @@
 				7C4458BC161E203800A905F6 /* Screenshot.h */,
 				7C1A492115A962EE004AF4A4 /* SeekHandler.cpp */,
 				7C1A492215A962EE004AF4A4 /* SeekHandler.h */,
+				F536166E1B94E61200BD5776 /* sha1.hpp */,
 				36A9443F15821E7C00727135 /* SortUtils.cpp */,
 				36A9444015821E7C00727135 /* SortUtils.h */,
 				397877D11AAAF87700F98A45 /* Speed.cpp */,
