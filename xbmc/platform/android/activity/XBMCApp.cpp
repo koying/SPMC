@@ -105,6 +105,7 @@ CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
 int CXBMCApp::m_batteryLevel = 0;
 bool CXBMCApp::m_hasFocus = false;
+bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
 IInputDeviceCallbacks* CXBMCApp::m_inputDeviceCallbacks = nullptr;
 IInputDeviceEventHandler* CXBMCApp::m_inputDeviceEventHandler = nullptr;
@@ -337,6 +338,9 @@ bool CXBMCApp::AcquireAudioFocus()
   if (!m_xbmcappinstance)
     return false;
 
+  if (m_hasAudioFocus)
+    return true;
+
   CJNIAudioManager audioManager(getSystemService("audio"));
 
   // Request audio focus for playback
@@ -351,6 +355,7 @@ bool CXBMCApp::AcquireAudioFocus()
     CXBMCApp::android_printf("Audio Focus request failed");
     return false;
   }
+  m_hasAudioFocus = true;
   return true;
 }
 
@@ -358,6 +363,9 @@ bool CXBMCApp::ReleaseAudioFocus()
 {
   if (!m_xbmcappinstance)
     return false;
+
+  if (!m_hasAudioFocus)
+    return true;
 
   CJNIAudioManager audioManager(getSystemService("audio"));
 
@@ -368,6 +376,7 @@ bool CXBMCApp::ReleaseAudioFocus()
     CXBMCApp::android_printf("Audio Focus abandon failed");
     return false;
   }
+  m_hasAudioFocus = false;
   return true;
 }
 
@@ -834,6 +843,7 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
   CXBMCApp::android_printf("Audio Focus changed: %d", focusChange);
   if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS)
   {
+    m_hasAudioFocus = false;
     unregisterMediaButtonEventReceiver();
 
     if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
