@@ -142,6 +142,7 @@ private:
   static CJNIWakeLock *m_wakeLock;
   static int m_batteryLevel;
   static bool m_hasFocus;
+  static bool m_hasAudioFocus;
   static bool m_headsetPlugged;
   bool m_firstrun;
   bool m_exiting;
