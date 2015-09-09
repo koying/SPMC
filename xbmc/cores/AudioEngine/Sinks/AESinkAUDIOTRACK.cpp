@@ -301,6 +301,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   // Force volume to 100% for passthrough
   if (m_passthrough)
   {
+    CXBMCApp::AcquireAudioFocus();
     m_volume = CXBMCApp::GetSystemVolume();
     CXBMCApp::SetSystemVolume(1.0);
   }
@@ -312,7 +313,10 @@ void CAESinkAUDIOTRACK::Deinitialize()
 {
   // Restore volume
   if (m_volume != -1)
+  {
     CXBMCApp::SetSystemVolume(m_volume);
+    CXBMCApp::ReleaseAudioFocus();
+  }
 
   if (!m_at_jni)
     return;
