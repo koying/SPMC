@@ -64,7 +64,6 @@ public:
   virtual ~CXBMCApp();
   virtual void onReceive(CJNIIntent intent);
   virtual void onNewIntent(CJNIIntent intent);
-  virtual void onVolumeChanged(int volume);
   virtual void onAudioFocusChange(int focusChange);
 
   bool isValid() { return m_activity != NULL; }

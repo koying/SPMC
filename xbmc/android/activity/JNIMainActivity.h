@@ -31,7 +31,6 @@ public:
   static CJNIMainActivity* GetAppInstance() { return m_appInstance; }
 
   static void _onNewIntent(JNIEnv *env, jobject context, jobject intent);
-  static void _onVolumeChanged(JNIEnv *env, jobject context, jint volume);
   static void _onAudioFocusChange(JNIEnv *env, jobject context, jint focusChange);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
@@ -48,6 +47,5 @@ private:
 
 protected:
   virtual void onNewIntent(CJNIIntent intent)=0;
-  virtual void onVolumeChanged(int volume)=0;
   virtual void onAudioFocusChange(int focusChange)=0;
 };
