@@ -60,14 +60,6 @@ void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVarian
                     "runNativeOnUiThread", "(JJ)V", (jlong)callback, (jlong)variant);
 }
 
-void CJNIMainActivity::_onVolumeChanged(JNIEnv *env, jobject context, jint volume)
-{
-  (void)env;
-  (void)context;
-  if(m_appInstance)
-    m_appInstance->onVolumeChanged(volume);
-}
-
 void CJNIMainActivity::_onAudioFocusChange(JNIEnv *env, jobject context, jint focusChange)
 {
   (void)env;

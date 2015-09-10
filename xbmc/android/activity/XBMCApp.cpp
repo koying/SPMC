@@ -782,11 +782,6 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
   }
 }
 
-void CXBMCApp::onVolumeChanged(int volume)
-{
-  CApplicationMessenger::Get().SendAction(CAction(ACTION_VOLUME_SET, (float)volume), WINDOW_INVALID, false);
-}
-
 void CXBMCApp::onAudioFocusChange(int focusChange)
 {
   CXBMCApp::android_printf("Audio Focus changed: %d", focusChange);

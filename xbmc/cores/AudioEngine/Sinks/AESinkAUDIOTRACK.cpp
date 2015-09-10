@@ -407,23 +407,6 @@ void CAESinkAUDIOTRACK::Drain()
   m_frames_written = 0;
 }
 
-bool CAESinkAUDIOTRACK::HasVolume()
-{
-  return true;
-}
-
-void  CAESinkAUDIOTRACK::SetVolume(float scale)
-{
-  // Ignore in passthrough
-  if (m_passthrough)
-    return;
-
-  if (!m_at_jni)
-    return;
-
-  CXBMCApp::SetSystemVolume(scale);
-}
-
 bool CAESinkAUDIOTRACK::WantsIEC61937(AEDataFormat format)
 {
   /*

@@ -134,17 +134,6 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     env->RegisterNatives(cFrameAvailableListener, &mOnFrameAvailable, 1);
   }
 
-  jclass cSettingsObserver = env->FindClass(settingsObserver.c_str());
-  if(cSettingsObserver)
-  {
-    JNINativeMethod mOnVolumeChanged = {
-      "_onVolumeChanged",
-      "(I)V",
-      (void*)&CJNIMainActivity::_onVolumeChanged
-    };
-    env->RegisterNatives(cSettingsObserver, &mOnVolumeChanged, 1);
-  }
-
   jclass cAudioFocusChangeListener = env->FindClass(audioFocusChangeListener.c_str());
   if(cAudioFocusChangeListener)
   {
