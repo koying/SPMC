@@ -479,8 +479,26 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
       return false;
       mimetype = "video/x-vnd.on2.vp8";
       break;
-    case AV_CODEC_ID_VC1:
+    case AV_CODEC_ID_VP9:
+      use_codec = codec_config["useVPXcodec"];
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
+        return false;
+      return false;
+      mimetype = "video/x-vnd.on2.vp9";
+      break;
     case AV_CODEC_ID_WMV3:
+      use_codec = codec_config["useVC1codec"];
+      if (use_codec == "0"
+          || (use_codec == "sd" && hints.width > 800)
+          || (use_codec == "hd" && hints.width <= 800)
+          || (use_codec == "uhd" && hints.width <= 2000))
+        return false;
+      mimetype = "video/x-ms-wmv";
+      break;
+    case AV_CODEC_ID_VC1:
       use_codec = codec_config["useVC1codec"];
       if (use_codec == "0"
           || (use_codec == "sd" && hints.width > 800)
