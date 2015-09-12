@@ -1,5 +1,5 @@
 LIBNAME=ffmpeg
 BASE_URL=https://github.com/koying/FFmpeg/archive
-VERSION=current
+VERSION=current-J
 ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
 
