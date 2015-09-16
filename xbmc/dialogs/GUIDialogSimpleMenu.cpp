@@ -95,6 +95,27 @@ bool CGUIDialogSimpleMenu::ShowPlaySelection(CFileItem& item, const std::string&
     return true;
   }
 
+  /*  RK 3D Select Item */
+  CURL url3("udf://");
+  url3.SetHostName(item.GetPath());
+  url3.SetFileName("BDMV/STREAM/SSIF");
+  CFileItemList _3ditems;
+  XFILE::CDirectory::GetDirectory(url3, _3ditems, XFILE::CDirectory::CHints(), true);
+  if (!_3ditems.IsEmpty())
+  {
+    _3ditems.Sort(SortByTrackNumber,  SortOrderDescending);
+    _3ditems.Sort(SortBySize, SortOrderDescending);
+    printf("%s: %s\n", __func__, _3ditems[0]->GetPath().c_str());
+    CFileItemPtr _3ditem(new CFileItem("", false));
+    _3ditem->SetPath(_3ditems[0]->GetPath());
+    _3ditem->m_bIsFolder = false;
+    _3ditem->m_strTitle = "Play with 3d mode";
+    _3ditem->SetLabel("Play with 3d mode");
+    _3ditem->SetIconImage("DefaultVideo.png");
+    items.Add(_3ditem);
+  }
+  _3ditems.Clear();
+  /******************/
   CGUIDialogSelect* dialog = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
   while (true)
   {
@@ -114,9 +135,14 @@ bool CGUIDialogSimpleMenu::ShowPlaySelection(CFileItem& item, const std::string&
     if (item_new->m_bIsFolder == false)
     {
       std::string original_path = item.GetPath();
+      std::string start_percent = item.GetProperty("StartPercent").asString();
+      int start_offset = item.m_lStartOffset;
       item.Reset();
       item = *item_new;
       item.SetProperty("original_listitem_url", original_path);
+      item.SetProperty("StartPercent", start_percent);
+      item.m_lStartOffset = start_offset;
+      items.Clear();
       return true;
     }
 
@@ -128,5 +154,6 @@ bool CGUIDialogSimpleMenu::ShowPlaySelection(CFileItem& item, const std::string&
     }
   }
 
+  items.Clear();
   return false;
 }
