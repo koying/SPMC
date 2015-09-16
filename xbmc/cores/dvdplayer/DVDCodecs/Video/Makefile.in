@@ -4,6 +4,8 @@ SRCS  = DVDVideoCodec.cpp
 SRCS += DVDVideoCodecFFmpeg.cpp
 SRCS += DVDVideoCodecLibMpeg2.cpp
 SRCS += DVDVideoPPFFmpeg.cpp
+SRCS += DVDVideoCodecRK.cpp
+SRCS += RKCodec.cpp
 
 ifeq (@USE_VDPAU@,1)
 SRCS += VDPAU.cpp

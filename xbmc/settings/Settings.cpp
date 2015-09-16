@@ -799,6 +799,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert("audiocds.settings");
   settingSet.insert("videoscreen.guicalibration");
   settingSet.insert("videoscreen.testpattern");
+  settingSet.insert("videoplayer.userkcodec");
   settingSet.insert("videoplayer.useamcodec");
   settingSet.insert("videoplayer.usemediacodec");
   m_settingsManager->RegisterCallback(&g_application, settingSet);

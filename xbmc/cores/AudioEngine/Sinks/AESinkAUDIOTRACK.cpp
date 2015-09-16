@@ -27,6 +27,8 @@
 #if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
 #endif
+
+#include "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecRK.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
@@ -249,6 +251,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     aml_set_audio_passthrough(m_passthrough);
 #endif
 
+#ifdef HAS_LIBRKCODEC
+  if (CSettings::Get().GetBool("videoplayer.userkcodec"))
+    rk_set_audio_passthrough(m_passthrough);
+#endif
+
   int atChannelMask = AEChannelMapToAUDIOTRACKChannelMask(m_format.m_channelLayout);
 
   unsigned int sampleRate = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
@@ -453,6 +460,11 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
     }
     m_info.m_dataFormats.push_back(AE_FMT_AC3);
     m_info.m_dataFormats.push_back(AE_FMT_DTS);
+#ifdef HAS_LIBRKCODEC
+    m_info.m_dataFormats.push_back(AE_FMT_EAC3);
+    m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
+    m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
+#endif
   }
 #if 0 //defined(__ARM_NEON__)
   if (g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_NEON)

@@ -37,6 +37,15 @@
           </updates>
           <control type="toggle" />
         </setting>
+        <setting id="videoplayer.userkcodec" type="boolean" label="13440">
+          <visible>true</visible>
+          <level>2</level>
+          <default>true</default>
+          <updates>
+            <update type="change" />
+          </updates>
+          <control type="toggle" />
+        </setting>
       </group>
     </category>
   </section>
