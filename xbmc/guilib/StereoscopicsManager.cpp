@@ -45,6 +45,7 @@
 #include "utils/Variant.h"
 #include "windowing/WindowingFactory.h"
 #include "guiinfo/GUIInfoLabels.h"
+#include "utils/URIUtils.h"
 
 using namespace KODI::MESSAGING;
 
@@ -166,6 +167,12 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
   std::string stereoMode = "mono";
   std::string searchString(needle);
   CRegExp re(true);
+
+  if (URIUtils::HasExtension(needle, ".ssif"))
+  {
+    stereoMode = "left_right";
+    return stereoMode;
+  }
 
   if (!re.RegComp(g_advancedSettings.m_stereoscopicregex_3d.c_str()))
   {
