@@ -379,6 +379,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     std::string m_stereoscopicregex_3d;
     std::string m_stereoscopicregex_sbs;
     std::string m_stereoscopicregex_tab;
+    std::string m_stereoscopicregex_mvc;
 
     bool m_useDisplayControlHWStereo;
 
