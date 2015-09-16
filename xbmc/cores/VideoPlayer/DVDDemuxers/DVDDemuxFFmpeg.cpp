@@ -1080,6 +1080,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
               tsB = AV_NOPTS_VALUE;
               break;
             }
+            CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
             mvcpkt = m_SSIFqueue.front();
             tsB = (mvcpkt->dts != AV_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
           }

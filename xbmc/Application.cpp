@@ -3320,6 +3320,8 @@ PlayBackRet CApplication::PlayFile(CFileItem item, const std::string& player, bo
           path = item.GetVideoInfoTag()->m_strFileNameAndPath;
         else if (item.HasProperty("original_listitem_url") && URIUtils::IsPlugin(item.GetProperty("original_listitem_url").asString()))
           path = item.GetProperty("original_listitem_url").asString();
+        else if (item.HasProperty("original_listitem_url") && URIUtils::HasExtension(item.GetProperty("original_listitem_url").asString(), ".iso|.img"))
+          path = item.GetProperty("original_listitem_url").asString();
         if(dbs.GetResumeBookMark(path, bookmark))
         {
           options.starttime = bookmark.timeInSeconds;
