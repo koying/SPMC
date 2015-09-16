@@ -43,6 +43,7 @@
 #include "utils/RegExp.h"
 #include "utils/StringUtils.h"
 #include "windowing/WindowingFactory.h"
+#include "utils/URIUtils.h"
 
 
 struct StereoModeMap
@@ -167,6 +168,12 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
   std::string stereoMode = "mono";
   std::string searchString(needle);
   CRegExp re(true);
+
+  if (URIUtils::HasExtension(needle, ".ssif"))
+  {
+    stereoMode = "left_right";
+    return stereoMode;
+  }
 
   if (!re.RegComp(g_advancedSettings.m_stereoscopicregex_3d.c_str()))
   {
