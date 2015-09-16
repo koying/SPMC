@@ -392,6 +392,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     std::string m_stereoscopicregex_3d;
     std::string m_stereoscopicregex_sbs;
     std::string m_stereoscopicregex_tab;
+    std::string m_stereoscopicregex_mvc;
 
     /*!< @brief position behavior of ass subtitiles when setting "subtitle position on screen" set to "fixed"
     True to show at the fixed position set in video calibration
