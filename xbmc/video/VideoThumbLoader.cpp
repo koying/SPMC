@@ -95,9 +95,6 @@ bool CThumbExtractor::DoWork()
   ||  m_item.IsSSIF())
     return false;
 
-  ||  m_item.IsPlayList())
-    return false;
-
   // For HTTP/FTP we only allow extraction when on a LAN
   if (URIUtils::IsRemote(m_item.GetPath()) &&
      !URIUtils::IsOnLAN(m_item.GetPath())  &&

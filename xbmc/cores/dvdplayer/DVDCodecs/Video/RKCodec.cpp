@@ -453,7 +453,7 @@ void CRKCodec::SetVideo3dMode(const int mode)
 	}
 }
 
-void CRKCodec::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect)
+void CRKCodec::RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, DWORD flags, const void*)
 {
 	((CRKCodec*)ctx)->UpdateRenderRect(SrcRect,DestRect);
 }

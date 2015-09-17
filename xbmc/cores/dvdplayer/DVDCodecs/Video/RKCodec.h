@@ -79,7 +79,7 @@ public:
 
 	void 		  UpdateRenderRect(const CRect &SrcRect, const CRect &DestRect);
 
-	static void   RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect);
+  static void   RenderUpdateCallBack(const void *ctx, const CRect &SrcRect, const CRect &DestRect, DWORD flags, const void*);
 	
 protected:
 	virtual void  	Process();
