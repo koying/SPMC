@@ -145,6 +145,7 @@ static float currentRefreshRate()
     float preferredRate = window.getAttributes().getpreferredRefreshRate();
     if (preferredRate > 1.0)
     {
+      CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: Preferred refresh rate: %f", preferredRate);
       return preferredRate;
     }
     CJNIView view(window.getDecorView());
@@ -153,6 +154,7 @@ static float currentRefreshRate()
       if (display)
       {
         float reportedRate = display.getRefreshRate();
+        CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: Current display refresh rate: %f", reportedRate);
         return reportedRate;
       }
     }
@@ -190,13 +192,13 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
   res->iScreenHeight = res->iHeight;
   res->strMode       = StringUtils::Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
                                            res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
-  CLog::Log(LOGNOTICE,"Current resolution: %s\n",res->strMode.c_str());
+  CLog::Log(LOGNOTICE,"CEGLNativeTypeAndroid: Current resolution: %s\n",res->strMode.c_str());
   return true;
 }
 
 bool CEGLNativeTypeAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
 {
-  CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: SetNativeResolution: %dx%d", m_width, m_height);
+  CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: SetNativeResolution: %dx%d@%f", m_width, m_height, res.fRefreshRate);
   if (m_width && m_height)
     CXBMCApp::SetBuffersGeometry(m_width, m_height, 0);
 
