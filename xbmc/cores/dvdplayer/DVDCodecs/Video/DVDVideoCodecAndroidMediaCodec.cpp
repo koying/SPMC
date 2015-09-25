@@ -50,10 +50,14 @@
 #include "android/jni/SurfaceTexture.h"
 #include "android/activity/AndroidFeatures.h"
 
+#include "utils/StringUtils.h"
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
 #include <cassert>
+
+#define DEBUG_EXTRADATA 1
 
 static bool CanSurfaceRenderBlackList(const std::string &name)
 {
@@ -339,6 +343,23 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       return false;
       break;
   }
+
+#ifdef DEBUG_EXTRADATA
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec: Extradata size: %d", m_hints.extrasize);
+  if (m_hints.extrasize)
+  {
+    std::string line;
+    for (unsigned int y=0; y*8 < m_hints.extrasize; ++y)
+    {
+      line = "";
+      for (unsigned int x=0; x<8 && y*8 + x < m_hints.extrasize; ++x)
+      {
+        line += StringUtils::Format("%02x ", ((char *)m_hints.extradata)[y*8+x]);
+      }
+      CLog::Log(LOGDEBUG, "%s", line.c_str());
+    }
+  }
+#endif
 
   // CJNIMediaCodec::createDecoderByXXX doesn't handle errors nicely,
   // it crashes if the codec isn't found. This is fixed in latest AOSP,
