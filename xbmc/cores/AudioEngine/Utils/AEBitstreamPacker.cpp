@@ -53,6 +53,12 @@ CAEBitstreamPacker::~CAEBitstreamPacker()
 
 void CAEBitstreamPacker::Pack(CAEStreamInfo &info, uint8_t* data, int size)
 {
+  if (!info.GetWantsIEC61937())
+  {
+    m_dataSize = CAEPackIEC61937::NoPack(data, size, m_packedBuffer);
+    return;
+  }
+
   switch (info.GetDataType())
   {
     case CAEStreamInfo::STREAM_TYPE_TRUEHD:

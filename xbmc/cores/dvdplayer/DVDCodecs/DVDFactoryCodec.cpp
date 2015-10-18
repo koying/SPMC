@@ -70,6 +70,8 @@
 #include "settings/VideoSettings.h"
 #include "utils/StringUtils.h"
 
+#include "cores/AudioEngine/AEFactory.h"
+
 CDVDVideoCodec* CDVDFactoryCodec::OpenCodec(CDVDVideoCodec* pCodec, CDVDStreamInfo &hints, CDVDCodecOptions &options )
 {
   try

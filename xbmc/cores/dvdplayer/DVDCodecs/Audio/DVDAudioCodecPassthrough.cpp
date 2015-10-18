@@ -21,6 +21,7 @@
 #include "DVDAudioCodecPassthrough.h"
 #include "DVDCodecs/DVDCodecs.h"
 #include "DVDStreamInfo.h"
+#include "utils/log.h"
 
 #include <algorithm>
 
@@ -40,13 +41,29 @@ CDVDAudioCodecPassthrough::~CDVDAudioCodecPassthrough(void)
 bool CDVDAudioCodecPassthrough::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
   bool bSupportsAC3Out    = CAEFactory::SupportsRaw(AE_FMT_AC3, hints.samplerate);
-  bool bSupportsEAC3Out   = CAEFactory::SupportsRaw(AE_FMT_EAC3, 192000);
   bool bSupportsDTSOut    = CAEFactory::SupportsRaw(AE_FMT_DTS, hints.samplerate);
-  bool bSupportsTrueHDOut = CAEFactory::SupportsRaw(AE_FMT_TRUEHD, 192000);
-  bool bSupportsDTSHDOut  = CAEFactory::SupportsRaw(AE_FMT_DTSHD, 192000);
+  bool bSupportsEAC3Out   = false;
+  bool bSupportsTrueHDOut = false;
+  bool bSupportsDTSHDOut  = false;
 
   /* only get the dts core from the parser if we don't support dtsHD */
   m_info.SetCoreOnly(!bSupportsDTSHDOut);
+  if (CAEFactory::WantsIEC61937())
+  {
+    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthrough::Open Wanting IEC61937");
+    m_info.SetWantsIEC61937(true);
+    bSupportsEAC3Out   = CAEFactory::SupportsRaw(AE_FMT_EAC3, 192000);
+    bSupportsTrueHDOut = CAEFactory::SupportsRaw(AE_FMT_TRUEHD, 192000);
+    bSupportsDTSHDOut  = CAEFactory::SupportsRaw(AE_FMT_DTSHD, 192000);
+  }
+  else
+  {
+    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthrough::Open Not wanting IEC61937");
+    m_info.SetWantsIEC61937(false);
+    bSupportsEAC3Out   = CAEFactory::SupportsRaw(AE_FMT_EAC3, hints.samplerate);
+    bSupportsTrueHDOut = CAEFactory::SupportsRaw(AE_FMT_TRUEHD, hints.samplerate);
+    bSupportsDTSHDOut  = CAEFactory::SupportsRaw(AE_FMT_DTSHD, hints.samplerate);
+  }
   m_bufferSize = 0;
 
   /* 32kHz E-AC-3 passthrough requires 128kHz IEC 60958 stream
@@ -61,6 +78,37 @@ bool CDVDAudioCodecPassthrough::Open(CDVDStreamInfo &hints, CDVDCodecOptions &op
   }
 
   return false;
+}
+
+void CDVDAudioCodecPassthrough::GetData(DVDAudioFrame &frame)
+{
+  frame.nb_frames = 0;
+  frame.data_format           = GetDataFormat();
+  frame.channel_count         = GetChannels();
+  if (CAEFactory::WantsIEC61937())
+  {
+    frame.bits_per_sample       = CAEUtil::DataFormatToBits(frame.data_format);
+    frame.framesize             = (CAEUtil::DataFormatToBits(frame.data_format) >> 3) * frame.channel_count;
+  }
+  else
+  {
+    frame.bits_per_sample       = 8;
+    frame.framesize             = 1;
+  }
+  frame.nb_frames             = GetData(frame.data)/frame.framesize;
+  frame.channel_layout        = GetChannelMap();
+  frame.channel_count         = GetChannels();
+  frame.planes                = AE_IS_PLANAR(frame.data_format) ? frame.channel_count : 1;
+  frame.encoded_channel_count = GetEncodedChannels();
+  frame.sample_rate           = GetSampleRate();
+  frame.encoded_sample_rate   = GetEncodedSampleRate();
+  frame.passthrough           = NeedPassthrough();
+  frame.pts                   = DVD_NOPTS_VALUE;
+  // compute duration.
+  if (frame.sample_rate)
+    frame.duration = ((double)frame.nb_frames * DVD_TIME_BASE) / frame.sample_rate;
+  else
+    frame.duration = 0.0;
 }
 
 int CDVDAudioCodecPassthrough::GetSampleRate()

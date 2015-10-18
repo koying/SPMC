@@ -218,6 +218,13 @@ bool CAEFactory::HasHDAudioChannelCount()
   return false;
 }
 
+bool CAEFactory::WantsIEC61937()
+{
+  if(AE)
+    return AE->WantsIEC61937();
+  return true;
+}
+
 /**
   * Returns true if current AudioEngine supports at lest two basic quality levels
   * @return true if quality setting is supported, otherwise false

@@ -53,6 +53,8 @@ public:
   int AddData(uint8_t *data, unsigned int size, uint8_t **buffer = NULL, unsigned int *bufferSize = 0);
 
   void                      SetCoreOnly      (bool value) { m_coreOnly = value; }
+  void                      SetWantsIEC61937 (bool value) { m_wantsIEC61937 = value; }
+  bool                      GetWantsIEC61937 () { return m_wantsIEC61937; }
   unsigned int              IsValid          () { return m_hasSync       ; }
   unsigned int              GetSampleRate    () { return m_sampleRate    ; }
   unsigned int              GetOutputRate    () { return m_outputRate    ; }
@@ -75,6 +77,7 @@ private:
   typedef unsigned int (CAEStreamInfo::*ParseFunc)(uint8_t *data, unsigned int size);
 
   bool                      m_coreOnly;
+  bool                      m_wantsIEC61937;
   unsigned int              m_needBytes;
   ParseFunc                 m_syncFunc;
   bool                      m_hasSync;

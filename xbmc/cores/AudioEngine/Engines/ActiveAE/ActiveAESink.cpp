@@ -139,6 +139,14 @@ bool CActiveAESink::SupportsFormat(const std::string &device, AEDataFormat forma
   return false;
 }
 
+bool CActiveAESink::WantsIEC61937()
+{
+  if (m_sink)
+    return m_sink->WantsIEC61937();
+
+  return true;
+}
+
 enum SINK_STATES
 {
   S_TOP = 0,                      // 0

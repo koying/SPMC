@@ -41,6 +41,7 @@ class CAEPackIEC61937
 public:
   typedef int (*PackFunc)(uint8_t *data, unsigned int size, uint8_t *dest);
 
+  static int NoPack      (uint8_t *data, unsigned int size, uint8_t *dest);
   static int PackAC3     (uint8_t *data, unsigned int size, uint8_t *dest);
   static int PackEAC3    (uint8_t *data, unsigned int size, uint8_t *dest);
   static int PackDTS_512 (uint8_t *data, unsigned int size, uint8_t *dest, bool littleEndian);

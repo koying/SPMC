@@ -31,6 +31,12 @@ inline void SwapEndian(uint16_t *dst, uint16_t *src, unsigned int size)
     *dst = ((*src & 0xFF00) >> 8) | ((*src & 0x00FF) << 8);
 }
 
+int CAEPackIEC61937::NoPack(uint8_t *data, unsigned int size, uint8_t *dest)
+{
+  memcpy(dest, data, size);
+  return size;
+}
+
 int CAEPackIEC61937::PackAC3(uint8_t *data, unsigned int size, uint8_t *dest)
 {
   assert(size <= OUT_FRAMESTOBYTES(AC3_FRAME_SIZE));

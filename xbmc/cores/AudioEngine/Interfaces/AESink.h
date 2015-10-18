@@ -86,5 +86,10 @@ public:
     This method sets the volume control, volume ranges from 0.0 to 1.0.
   */
   virtual void  SetVolume(float volume) {};
+
+  /*
+    Does the sink wants encapsulated bitstream
+  */
+  virtual bool  WantsIEC61937() {return true;};
 };
 

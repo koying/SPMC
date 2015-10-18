@@ -69,6 +69,7 @@ CAEStreamInfo::CAEStreamInfo() :
   m_bufferSize    (0),
   m_skipBytes     (0),
   m_coreOnly      (false),
+  m_wantsIEC61937 (true),
   m_needBytes     (0),
   m_syncFunc      (&CAEStreamInfo::DetectType),
   m_hasSync       (false),
@@ -335,8 +336,8 @@ unsigned int CAEStreamInfo::SyncAC3(uint8_t *data, unsigned int size)
       switch (fscod)
       {
         case 0: framesize = bitRate * 2; break;
-        case 1: framesize = (320 * bitRate / 147 + (frmsizecod & 1 ? 1 : 0)); break;
-        case 2: framesize = bitRate * 4; break;
+        case 1: framesize = (320 * bitRate / 147 + (frmsizecod & 1)); break;
+        case 2: framesize = bitRate * 3; break;
       }
 
       m_fsize = framesize << 1;

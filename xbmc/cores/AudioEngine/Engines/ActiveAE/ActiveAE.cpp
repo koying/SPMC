@@ -2267,6 +2267,11 @@ bool CActiveAE::HasHDAudioChannelCount()
   return numChannels > AE_CH_LAYOUT_5_1;
 }
 
+bool CActiveAE::WantsIEC61937()
+{
+  return m_sink.WantsIEC61937();
+}
+
 bool CActiveAE::SupportsQualityLevel(enum AEQuality level)
 {
   if (level == AE_QUALITY_LOW || level == AE_QUALITY_MID || level == AE_QUALITY_HIGH)
@@ -2312,8 +2317,8 @@ bool CActiveAE::IsSettingVisible(const std::string &settingId)
   }
   else if (settingId == "audiooutput.eac3passthrough")
   {
-    if (m_sink.SupportsFormat(CSettings::Get().GetString("audiooutput.passthroughdevice"), AE_FMT_EAC3, 192000) &&
-        CSettings::Get().GetInt("audiooutput.config") != AE_CONFIG_FIXED)
+//    if (m_sink.SupportsFormat(CSettings::Get().GetString("audiooutput.passthroughdevice"), AE_FMT_EAC3, 192000) &&
+//        CSettings::Get().GetInt("audiooutput.config") != AE_CONFIG_FIXED)
       return true;
   }
   else if (settingId == "audiooutput.stereoupmix")

@@ -47,6 +47,7 @@ public:
   virtual void         Drain           ();
   virtual bool         HasVolume       ();
   virtual void         SetVolume       (float scale);
+  virtual bool         WantsIEC61937   ();
   static void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
 protected:
@@ -56,13 +57,15 @@ private:
   jni::CJNIAudioTrack  *m_at_jni;
   // m_frames_written must wrap at UINT32_MAX
   uint32_t              m_frames_written;
+  uint32_t              m_lastHeadPosition;
+  uint32_t              m_ptOffset;
 
   static CAEDeviceInfo m_info;
   AEAudioFormat      m_format;
   double             m_volume;
-  volatile int       m_min_frames;
   int16_t           *m_alignedS16;
   unsigned int       m_sink_frameSize;
   bool               m_passthrough;
   double             m_audiotrackbuffer_sec;
+  int                m_encoding;
 };
