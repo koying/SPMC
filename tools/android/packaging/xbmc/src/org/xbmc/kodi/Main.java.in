@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.Choreographer;
 import android.view.View;
 import android.view.Surface;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -77,6 +79,12 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     AudioManager manager = (AudioManager) getSystemService(AUDIO_SERVICE);
     manager.unregisterMediaButtonEventReceiver(new ComponentName(getPackageName(), XBMCBroadcastReceiver.class.getName()));
+  }
+
+  public void screenOn()
+  {
+    Window window = getWindow();
+    window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
   }
 
   @Override
@@ -168,6 +176,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onResume()
   {
     super.onResume();
+
+    Window window = getWindow();
+    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     if (android.os.Build.VERSION.SDK_INT >= 19) {
       // Immersive mode

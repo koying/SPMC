@@ -140,3 +140,9 @@ void CJNIMainActivity::unregisterMediaButtonEventReceiver()
   call_method<void>(m_context,
                     "unregisterMediaButtonEventReceiver", "()V");
 }
+
+void CJNIMainActivity::screenOn()
+{
+  call_method<void>(m_context,
+                    "screenOn", "()V");
+}
