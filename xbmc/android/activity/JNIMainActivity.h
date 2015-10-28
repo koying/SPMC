@@ -38,6 +38,7 @@ public:
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
   static void registerMediaButtonEventReceiver();
   static void unregisterMediaButtonEventReceiver();
+  static void screenOn();
 
   CJNISurface getVideoViewSurface();
   void clearVideoView();
