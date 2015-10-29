@@ -26,6 +26,7 @@ public class Main extends NativeActivity
   private RelativeLayout mVideoLayout = null;
   private View thisView = null;
   private Handler handler = new Handler();
+  private Intent mNewIntent = null;
 
   native void _onNewIntent(Intent intent);
 
@@ -149,11 +150,8 @@ public class Main extends NativeActivity
   protected void onNewIntent(Intent intent)
   {
     super.onNewIntent(intent);
-    try {
-      _onNewIntent(intent);
-    } catch (UnsatisfiedLinkError e) {
-      Log.e("Main", "Native not registered");
-    }
+    // Delay until after Resume
+    mNewIntent = intent;
   }
 
   @Override
@@ -206,6 +204,18 @@ public class Main extends NativeActivity
         }.start();
       }
 
+    }
+    
+    // New intent ?
+    if (mNewIntent != null)
+    {
+      try {
+        _onNewIntent(mNewIntent);
+      } catch (UnsatisfiedLinkError e) {
+        Log.e("Main", "Native not registered");
+      } finally {
+        mNewIntent = null;
+      }
     }
   }
 
