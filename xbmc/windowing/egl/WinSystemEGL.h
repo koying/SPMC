@@ -60,6 +60,8 @@ public:
   virtual bool  Restore() ;
   virtual bool  Hide();
   virtual bool  Show(bool raise = true);
+  virtual bool  BringToFront();
+
   virtual void  Register(IDispResource *resource);
   virtual void  Unregister(IDispResource *resource);
 
