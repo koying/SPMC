@@ -107,6 +107,7 @@ CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
 int CXBMCApp::m_batteryLevel = 0;
 bool CXBMCApp::m_hasFocus = false;
+bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
 IInputDeviceCallbacks* CXBMCApp::m_inputDeviceCallbacks = nullptr;
@@ -193,6 +194,7 @@ void CXBMCApp::onResume()
     CSingleLock lock(m_applicationsMutex);
     m_applications.clear();
   }
+  m_isResumed = true;
 }
 
 void CXBMCApp::onPause()
@@ -218,6 +220,7 @@ void CXBMCApp::onPause()
 #endif
 
   EnableWakeLock(false);
+  m_isResumed = false;
 }
 
 void CXBMCApp::onStop()
@@ -529,6 +532,15 @@ int CXBMCApp::android_printf(const char *format, ...)
   int result = __android_log_vprint(ANDROID_LOG_VERBOSE, "Kodi", format, args);
   va_end(args);
   return result;
+}
+
+void CXBMCApp::BringToFront()
+{
+  if (!m_isResumed)
+  {
+    CLog::Log(LOGERROR, "CXBMCApp::BringToFront");
+    StartActivity(getPackageName());
+  }
 }
 
 int CXBMCApp::GetDPI()
