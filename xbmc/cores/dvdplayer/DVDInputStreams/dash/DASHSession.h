@@ -34,7 +34,7 @@
 class CDASHSession: public IDASHFragmentObserver
 {
 public:
-  CDASHSession(const char *strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path);
+  CDASHSession(const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path);
   virtual ~CDASHSession();
   bool initialize();
   CDASHFragmentedSampleReader *GetNextSample();

@@ -2,7 +2,6 @@
 
 /*
  *      Copyright (C) 2016 Christian Browet
- *      Copyright (C) 2016-2016 peak3d
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
