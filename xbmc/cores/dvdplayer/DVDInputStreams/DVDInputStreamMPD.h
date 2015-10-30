@@ -33,11 +33,11 @@ class CDVDInputStreamMPD
     , public CDVDInputStream::ISeekTime
 {
 public:
-  CDVDInputStreamMPD();
+  CDVDInputStreamMPD(CFileItem& fileitem);
   virtual ~CDVDInputStreamMPD();
 
   /* CDVDInputStream */
-  virtual bool Open(const char* strFile, const std::string &content, bool contentLookup);
+  virtual bool Open();
   virtual void Close();
   virtual int Read(uint8_t* buf, int buf_size) { return -1; }
   virtual int64_t Seek(int64_t offset, int whence) { return -1; }

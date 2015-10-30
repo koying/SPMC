@@ -36,8 +36,8 @@
 ********************************************************/
 
 
-CDVDInputStreamMPD::CDVDInputStreamMPD()
-  : CDVDInputStream(DVDSTREAM_TYPE_MPD)
+CDVDInputStreamMPD::CDVDInputStreamMPD(CFileItem& fileitem)
+  : CDVDInputStream(DVDSTREAM_TYPE_MPD, fileitem)
   , m_AP4session(nullptr)
 {
   CLog::Log(LOGDEBUG, "CDVDInputStreamMPD::%s", __FUNCTION__);
@@ -49,7 +49,7 @@ CDVDInputStreamMPD::~CDVDInputStreamMPD()
   Close();
 }
 
-bool CDVDInputStreamMPD::Open(const char* strFile, const std::string& content, bool contentLookup)
+bool CDVDInputStreamMPD::Open()
 {
   // Find larger possible resolution
   RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
@@ -75,7 +75,7 @@ bool CDVDInputStreamMPD::Open(const char* strFile, const std::string& content, b
   }
 #endif
   CLog::Log(LOGINFO, "CDVDInputStreamMPD - matching against %d x %d", res_info.iWidth, res_info.iHeight);
-  m_AP4session.reset(new CDASHSession(strFile, res_info.iWidth, res_info.iHeight, "", "", "special://profile/"));
+  m_AP4session.reset(new CDASHSession(m_item.GetPath(), res_info.iWidth, res_info.iHeight, "", "", "special://profile/"));
 
   if (!m_AP4session->initialize())
   {

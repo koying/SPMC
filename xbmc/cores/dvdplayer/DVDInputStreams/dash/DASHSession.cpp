@@ -29,7 +29,7 @@
 #include "utils/StringUtils.h"
 #include "filesystem/File.h"
 
-CDASHSession::CDASHSession(const char *strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
+CDASHSession::CDASHSession(const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
   :single_sample_decryptor_(0)
   , mpdFileURL_(strURL)
   , license_type_(strLicType)
