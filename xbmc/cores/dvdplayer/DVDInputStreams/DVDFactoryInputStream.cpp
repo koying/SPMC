@@ -22,6 +22,7 @@
 #include "DVDFactoryInputStream.h"
 #include "DVDInputStream.h"
 #include "DVDInputStreamFile.h"
+#include "DVDInputStreamMpegDash.h"
 #include "DVDInputStreamNavigator.h"
 #include "DVDInputStreamFFmpeg.h"
 #include "DVDInputStreamPVRManager.h"
@@ -93,6 +94,8 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
   else if (item.IsType(".bdmv") || item.IsType(".mpls") || file.substr(0, 7) == "bluray:")
     return new CDVDInputStreamBluray(pPlayer);
 #endif
+  else if (item.IsType(".mpd"))
+     return new CDVDInputStreamMpegDash();
   else if(file.substr(0, 6) == "rtp://"
        || file.substr(0, 7) == "rtsp://"
        || file.substr(0, 6) == "sdp://"
