@@ -1501,7 +1501,7 @@ void CDVDDemuxFFmpeg::AddStream(int iId, CDemuxStream* stream)
     res.first->second = stream;
   }
   if(g_advancedSettings.m_logLevel > LOG_LEVEL_NORMAL)
-    CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::AddStream(%d, ...) -> %d (%d)", iId, stream->iId, stream->orig_type);
+    CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::AddStream(%d, ...) -> %d", iId, stream->iId);
 }
 
 
