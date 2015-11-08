@@ -54,6 +54,7 @@ CGUIDialogLockSettings::CGUIDialogLockSettings()
       m_details(true),
       m_conditionalDetails(false),
       m_getUser(false),
+      m_getModule(false),
       m_saveUserDetails(NULL),
       m_buttonLabel(20091)
 { }
@@ -94,7 +95,7 @@ bool CGUIDialogLockSettings::ShowAndGetLock(CProfile::CLock &locks, int buttonLa
   return true;
 }
 
-bool CGUIDialogLockSettings::ShowAndGetUserAndPassword(std::string &user, std::string &password, const std::string &url, bool *saveUserDetails)
+bool CGUIDialogLockSettings::ShowAndGetUserAndPassword(std::string &user, std::string &password, const std::string &url, bool *saveUserDetails, bool module /* = false */)
 {
   CGUIDialogLockSettings *dialog = static_cast<CGUIDialogLockSettings*>(g_windowManager.GetWindow(WINDOW_DIALOG_LOCK_SETTINGS));
   if (dialog == NULL)
@@ -104,7 +105,9 @@ bool CGUIDialogLockSettings::ShowAndGetUserAndPassword(std::string &user, std::s
   dialog->m_locks.code = password;
   dialog->m_user = user;
   dialog->m_url = url;
-  dialog->m_saveUserDetails = saveUserDetails;
+  dialog->m_getModule = module;
+  if (!module)
+    dialog->m_saveUserDetails = saveUserDetails;
   dialog->Open();
 
   if (!dialog->m_changed)
@@ -222,7 +225,12 @@ void CGUIDialogLockSettings::SetupView()
   
   // set the title
   if (m_getUser)
-    SetHeading(StringUtils::Format(g_localizeStrings.Get(20152).c_str(), CURL::Decode(m_url).c_str()));
+  {
+    int string = 20152;
+    if (m_getModule)
+      string = 24149;
+    SetHeading(StringUtils::Format(g_localizeStrings.Get(string).c_str(), CURL::Decode(m_url).c_str()));
+  }
   else
   {
     SetHeading(20066);

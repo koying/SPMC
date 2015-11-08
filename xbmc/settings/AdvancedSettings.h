@@ -28,6 +28,7 @@
 #include "settings/lib/ISettingCallback.h"
 #include "settings/lib/ISettingsHandler.h"
 #include "utils/GlobalsHandling.h"
+#include "utils/JobManager.h"
 
 class CVariant;
 
@@ -116,7 +117,7 @@ struct StagefrightConfig
 
 typedef std::vector<TVShowRegexp> SETTINGS_TVSHOWLIST;
 
-class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
+class CAdvancedSettings : public ISettingCallback, public ISettingsHandler, CJobQueue
 {
   public:
     CAdvancedSettings();
@@ -268,7 +269,6 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     std::string m_fanartImages;
 
     int m_iMusicLibraryRecentlyAddedItems;
-    int m_iMusicLibraryDateAdded;
     bool m_bMusicLibraryAllItemsOnBottom;
     bool m_bMusicLibraryCleanOnUpdate;
     std::string m_strMusicLibraryAlbumFormat;
@@ -403,6 +403,8 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
 
     std::string m_userAgent;
 
+    static bool IsSettingVisible(const std::string &condition, const std::string &value, const CSetting *setting, void *data);
+    void setInetrnalMYSQL(const bool enable, const bool init);
   private:
     std::string m_musicExtensions;
     void setExtraLogLevel(const std::vector<CVariant> &components);

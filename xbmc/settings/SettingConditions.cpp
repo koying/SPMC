@@ -21,6 +21,7 @@
 #include "system.h"
 #include "SettingConditions.h"
 #include "Application.h"
+#include "AdvancedSettings.h"
 #include "GUIPassword.h"
 #include "Util.h"
 #include "addons/AddonManager.h"
@@ -289,6 +290,7 @@ void CSettingConditions::Initialize()
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("profilelockmode",               ProfileLockMode));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("aesettingvisible",              CAEFactory::IsSettingVisible));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("codecoptionvisible",            CDVDVideoCodec::IsSettingVisible));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("enablemysqlgui",  CAdvancedSettings::IsSettingVisible));
 }
 
 bool CSettingConditions::Check(const std::string &condition, const std::string &value /* = "" */, const CSetting *setting /* = NULL */)
