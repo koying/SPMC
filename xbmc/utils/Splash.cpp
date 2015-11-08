@@ -32,11 +32,15 @@ using namespace XFILE;
 CSplash::CSplash()
   : m_image(nullptr)
 {
+  m_messageLayout = NULL;
+  m_image = NULL;
+  m_layoutWasLoading = false;
 }
 
 CSplash::~CSplash()
 {
   delete m_image;
+  delete m_messageLayout;
 }
 
 CSplash& CSplash::GetInstance()
@@ -46,6 +50,11 @@ CSplash& CSplash::GetInstance()
 }
 
 void CSplash::Show()
+{
+  Show("");
+}
+
+void CSplash::Show(const std::string& message)
 {
   if (!m_image)
   {
@@ -70,6 +79,33 @@ void CSplash::Show()
   m_image->Render();
   m_image->FreeResources();
 
+  // render message
+  if (!message.empty())
+  {
+    if (!m_layoutWasLoading)
+    {
+      // load arial font, white body, no shadow, size: 20, no additional styling
+      CGUIFont *messageFont = g_fontManager.LoadTTF("__splash__", "arial.ttf", 0xFFFFFFFF, 0, 20, FONT_STYLE_NORMAL, false, 1.0f, 1.0f, &res);
+      if (messageFont)
+        m_messageLayout = new CGUITextLayout(messageFont, true, 0);
+      m_layoutWasLoading = true;
+    }
+    if (m_messageLayout)
+    {
+      m_messageLayout->Update(message, 1150, false, true);
+      float textWidth, textHeight;
+      m_messageLayout->GetTextExtent(textWidth, textHeight);
+      
+      int width = g_graphicsContext.GetWidth();
+      int height = g_graphicsContext.GetHeight();
+      
+      // ideally place text in center of empty area below splash image
+      float y = 480 + m_image->GetTextureHeight() / 4 - textHeight / 2;
+      if (y + textHeight > height) // make sure entire text is visible
+        y = height - textHeight - 30; // -30 for safe viewing area
+      m_messageLayout->RenderOutline(width/2, y, 0, 0xFF000000, XBFONT_CENTER_X, width);
+    }
+  }
   //show it on screen
   g_Windowing.EndRender();
   CDirtyRegionList dirty;
