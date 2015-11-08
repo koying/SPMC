@@ -425,6 +425,14 @@ const std::string CSettings::SETTING_SOURCE_MUSIC = "source.music";
 const std::string CSettings::SETTING_SOURCE_PICTURES = "source.pictures";
 const std::string CSettings::SETTING_THUMBNAILS_CLEANUP = "thumbnails.cleanup";
 
+const std::string CSettings::SETTING_MYSQL_ENABLED = "mysql.enabled";
+const std::string CSettings::SETTING_MYSQL_HOST = "mysql.host";
+const std::string CSettings::SETTING_MYSQL_PORT = "mysql.port";
+const std::string CSettings::SETTING_MYSQL_USER = "mysql.user";
+const std::string CSettings::SETTING_MYSQL_PASS = "mysql.pass";
+const std::string CSettings::SETTING_MYSQL_VIDEO = "mysql.video";
+const std::string CSettings::SETTING_MYSQL_MUSIC = "mysql.music";
+
 CSettings::CSettings()
   : m_initialized(false)
 {
@@ -1068,6 +1076,13 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_DEBUG_SHOWLOGINFO);
   settingSet.insert(CSettings::SETTING_DEBUG_EXTRALOGGING);
   settingSet.insert(CSettings::SETTING_DEBUG_SETEXTRALOGLEVEL);
+  settingSet.insert(CSettings::SETTING_MYSQL_ENABLED);
+  settingSet.insert(CSettings::SETTING_MYSQL_HOST);
+  settingSet.insert(CSettings::SETTING_MYSQL_PORT);
+  settingSet.insert(CSettings::SETTING_MYSQL_USER);
+  settingSet.insert(CSettings::SETTING_MYSQL_PASS);
+  settingSet.insert(CSettings::SETTING_MYSQL_VIDEO);
+  settingSet.insert(CSettings::SETTING_MYSQL_MUSIC);
   m_settingsManager->RegisterCallback(&g_advancedSettings, settingSet);
 
   settingSet.clear();

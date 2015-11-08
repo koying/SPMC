@@ -4177,7 +4177,41 @@ msgctxt "#1260"
 msgid "Announce services to other systems"
 msgstr ""
 
-#empty strings from id 1261 to 1267
+#: system/settings/settings.xml
+msgctxt "#1261"
+msgid "MySQL"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1262"
+msgid "Setup remote MySQL database connection"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1263"
+msgid "Enable/Disable MySQL setup"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1264"
+msgid "Define server port"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1265"
+msgid "Define video database name"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1266"
+msgid "Define music database name"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1267"
+msgid "Name to be used to connect to or create new database"
+msgstr ""
+
 
 #: system/settings/settings.xml
 msgctxt "#1268"
@@ -5453,7 +5487,12 @@ msgctxt "#12373"
 msgid "Settings & file manager"
 msgstr ""
 
-#empty strings from id 12374 to 12375
+#: unknown
+msgctxt "#12374"
+msgid "Loading database, please wait"
+msgstr ""
+
+#empty strings from id 12375
 
 #: xbmc\settings\dialogs\GUIDialogAudioDSPSettings.cpp
 #: xbmc\video\dialogs\GUIDialogAudioSubtitleSettings.cpp
@@ -16339,7 +16378,15 @@ msgctxt "#36012"
 msgid "Couldn't initialise the CEC adapter. Please check your settings."
 msgstr ""
 
-#empty strings from id 36013 to 36014
+#: xbmc/peripherals/devices/peripheralcecadapter.cpp
+msgctxt "#36013"
+msgid "User,password and host must be set,"
+msgstr ""
+
+#: xbmc/peripherals/devices/peripheralcecadapter.cpp
+msgctxt "#36014"
+msgid "disabling MYSQL configuration"
+msgstr ""
 
 #: system/peripherals.xml
 msgctxt "#36015"
