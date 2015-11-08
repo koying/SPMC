@@ -1950,6 +1950,87 @@
         </setting>
       </group>
     </category>
+    <category id="mysql" label="1261" help="1262">
+      <group id="1">
+        <setting id="mysql.enabled" type="boolean" label="24022" help="1263">
+        <dependencies>
+            <dependency type="enable">
+                <condition on="property" operator="!is" name="enablemysqlgui" />
+            </dependency>
+          </dependencies>
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="mysql.host" type="string" label="706" help="1016">
+        <dependencies>
+            <dependency type="enable">
+                <condition on="property" operator="!is" name="enablemysqlgui" />
+            </dependency>
+          </dependencies>
+          <level>1</level>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mysql.port" type="string" label="730" help="1264">
+        <dependencies>
+            <dependency type="enable">
+                <condition on="property" operator="!is" name="enablemysqlgui" />
+            </dependency>
+          </dependencies>	
+          <level>1</level>
+          <default>3306</default>
+          <constraints>
+            <minimum>1</minimum>
+            <step>1</step>
+            <maximum>65535</maximum>
+          </constraints>
+          <control type="edit" format="integer" />
+        </setting>
+        <setting id="mysql.user" type="string" label="20142" help="1019">
+        <dependencies>
+            <dependency type="enable">
+                <condition on="property" operator="!is" name="enablemysqlgui" />
+            </dependency>
+          </dependencies> 	
+          <level>1</level>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting> 
+        <setting id="mysql.pass" type="string" label="15052" help="12326">
+        <dependencies>
+            <dependency type="enable">
+                <condition on="property" operator="!is" name="enablemysqlgui" />
+            </dependency>
+          </dependencies>	
+          <level>1</level>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>                        
+      </group>
+      <group id="2">
+        <setting id="mysql.video" type="string" label="1265" help="1267">
+          <level>1</level>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting> 
+        <setting id="mysql.music" type="string" label="1266" help="1267">
+          <level>1</level>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting> 
+      </group>	
+    </category>
     <category id="smb" label="1200" help="36346">
       <requirement>HAS_FILESYSTEM_SMB</requirement>
       <group id="1" label="16000">
