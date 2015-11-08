@@ -21,6 +21,7 @@
 #include "system.h"
 #include "SettingConditions.h"
 #include "Application.h"
+#include "AdvancedSettings.h"
 #include "GUIPassword.h"
 #include "Util.h"
 #include "addons/AddonManager.h"
