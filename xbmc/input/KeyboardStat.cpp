@@ -94,7 +94,7 @@ CKey CKeyboardStat::TranslateKey(XBMC_keysym& keysym) const
   if (keysym.mod & XBMCKMOD_META)
     modifiers |= CKey::MODIFIER_META;
 
-  CLog::Log(LOGDEBUG, "Keyboard: scancode: 0x%02x, sym: 0x%04x, unicode: 0x%04x, modifier: 0x%x, ts: %u", keysym.scancode, keysym.sym, keysym.unicode, keysym.mod, XbmcThreads::SystemClockMillis());
+  CLog::Log(LOGDEBUG, "Keyboard: scancode: 0x%02x, sym: 0x%04x, unicode: 0x%04x, modifier: 0x%x", keysym.scancode, keysym.sym, keysym.unicode, keysym.mod);
 
   // The keysym.unicode is usually valid, even if it is zero. A zero
   // unicode just means this is a non-printing keypress. The ascii and
