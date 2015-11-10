@@ -36,6 +36,8 @@
 #include "settings/lib/ISettingCallback.h"
 #include "threads/CriticalSection.h"
 
+#include "threads/Timer.h"
+
 class CKey;
 
 namespace KEYBOARD
@@ -43,13 +45,13 @@ namespace KEYBOARD
   class IKeyboardHandler;
 }
 
-class CInputManager : public ISettingCallback
+class CInputManager : public ISettingCallback, private ITimerCallback
 {
 private:
-  CInputManager() { }
+  CInputManager();
   CInputManager(const CInputManager&);
   CInputManager const& operator=(CInputManager const&);
-  virtual ~CInputManager() { };
+  virtual ~CInputManager();
 
 public:
   /*! \brief static method to get the current instance of the class. Creates a new instance the first time it's called.
@@ -257,9 +259,13 @@ private:
   */
   bool ExecuteInputAction(const CAction &action);
 
+  // implementation of ITimerCallback
+  virtual void OnTimeout();
+
   CKeyboardStat m_Keyboard;
   CMouseStat m_Mouse;
   CKey m_LastKey;
+  CTimer *m_keyholdTimer;
 
 #if defined(HAS_LIRC) || defined(HAS_IRSERVERSUITE)
   CRemoteControl m_RemoteControl;
