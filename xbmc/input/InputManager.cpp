@@ -24,6 +24,7 @@
 #include "InputManager.h"
 #include "input/Key.h"
 #include "messaging/ApplicationMessenger.h"
+#include "windowing/WinEvents.h"
 #include "guilib/Geometry.h"
 #include "guilib/GUIAudioManager.h"
 #include "guilib/GUIControl.h"
@@ -69,12 +70,24 @@
 #define MEASURE_FUNCTION
 #endif
 
+#define KEYUP_TIMEOUT  300
+
 #ifdef HAS_EVENT_SERVER
 using EVENTSERVER::CEventServer;
 #endif
 
 using namespace KODI::MESSAGING;
 using PERIPHERALS::CPeripherals;
+
+CInputManager::CInputManager()
+{
+  m_keyholdTimer = new CTimer(this);
+}
+
+CInputManager::~CInputManager()
+{
+  delete m_keyholdTimer;
+}
 
 CInputManager& CInputManager::GetInstance()
 {
@@ -468,6 +481,16 @@ bool CInputManager::OnEvent(XBMC_Event& newEvent)
     }
     else
     {
+      if (m_keyholdTimer->IsRunning())
+      {
+        CLog::Log(LOGDEBUG, "CInputManager::reStartTimer");
+        m_keyholdTimer->Restart();
+      }
+      else
+      {
+        CLog::Log(LOGDEBUG, "CInputManager::StartTimer");
+        m_keyholdTimer->Start(KEYUP_TIMEOUT);
+      }
       if (key.GetButtonCode() != m_LastKey.GetButtonCode() && key.GetButtonCode() & CKey::MODIFIER_LONG)
       {
         m_LastKey = key;  // OnKey is reentrant; need to do this before entering
@@ -478,10 +501,14 @@ bool CInputManager::OnEvent(XBMC_Event& newEvent)
     break;
   }
   case XBMC_KEYUP:
-    m_Keyboard.ProcessKeyUp();
-    if (m_LastKey.GetButtonCode() != KEY_INVALID && !(m_LastKey.GetButtonCode() & CKey::MODIFIER_LONG))
-      OnKey(m_LastKey);
-    m_LastKey.Reset();
+    if (!m_keyholdTimer->IsRunning())
+    {
+      CLog::Log(LOGDEBUG, "CInputManager::XBMC_KEYUP");
+      m_Keyboard.ProcessKeyUp();
+      if (m_LastKey.GetButtonCode() != KEY_INVALID && !(m_LastKey.GetButtonCode() & CKey::MODIFIER_LONG))
+        OnKey(m_LastKey);
+      m_LastKey.Reset();
+    }
     break;
   case XBMC_MOUSEBUTTONDOWN:
   case XBMC_MOUSEBUTTONUP:
@@ -730,6 +757,17 @@ bool CInputManager::ExecuteInputAction(const CAction &action)
     bResult = g_application.OnAction(action);
   }
   return bResult;
+}
+
+void CInputManager::OnTimeout()
+{
+  CLog::Log(LOGDEBUG, "CInputManager::OnTimeout");
+
+  XBMC_Event newEvent;
+  memset(&newEvent, 0, sizeof(newEvent));
+  newEvent.type = XBMC_KEYUP;
+  newEvent.key.type = XBMC_KEYUP;
+  CWinEvents::MessagePush(&newEvent);
 }
 
 int CInputManager::ExecuteBuiltin(const std::string& execute, const std::vector<std::string>& params)
