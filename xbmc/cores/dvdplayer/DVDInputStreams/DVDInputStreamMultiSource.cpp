@@ -92,7 +92,7 @@ bool CDVDInputStreamMultiSource::IsEOF()
   return true;
 }
 
-bool CDVDInputStreamMultiSource::Open(const char* strFile, const std::string& content)
+bool CDVDInputStreamMultiSource::Open(const char* strFile, const std::string& content, bool contentLookup)
 {
   if (!m_pPlayer || m_filenames.empty())
     return false;
@@ -110,7 +110,7 @@ bool CDVDInputStreamMultiSource::Open(const char* strFile, const std::string& co
     else
       inputstream->SetFileItem(fileitem);
 
-    if (!inputstream->Open(m_filenames[i].c_str(), filemimetype))
+    if (!inputstream->Open(m_filenames[i].c_str(), filemimetype, fileitem.ContentLookup()))
     {
       CLog::Log(LOGERROR, "CDVDPlayer::OpenInputStream - error opening file [%s]", m_filenames[i].c_str());
       continue;
