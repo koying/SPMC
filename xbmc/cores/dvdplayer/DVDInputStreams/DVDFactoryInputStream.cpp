@@ -49,6 +49,7 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
     std::vector<std::string> filenames;
     filenames.push_back(file);
     CUtil::ScanForExternalAudio(file, filenames);
+    filenames.erase(unique(filenames.begin(), filenames.end()), filenames.end());
     if (filenames.size() >= 2)
     {
       return CreateInputStream(pPlayer, filenames);
