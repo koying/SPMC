@@ -22,6 +22,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "settings/Settings.h"
 #include "utils/URIUtils.h"
+#include "utils/Log.h"
 
 CDVDInputStreamMpegDashComponent::CDVDInputStreamMpegDashComponent(const std::vector<std::string>& segments)
   : CDVDInputStreamFile(), m_segments(segments)
@@ -102,7 +103,7 @@ bool CDVDInputStreamMpegDashComponent::Pause(double dTime)
 }
 
 CDVDInputStreamMpegDash::CDVDInputStreamMpegDash()
-  : CDVDInputStream(DVDSTREAM_TYPE_DASH)
+  : IDVDInputStreamMultiStreams(DVDSTREAM_TYPE_DASH)
 {
 }
 
@@ -200,9 +201,9 @@ bool CDVDInputStreamMpegDash::Open(const char* strFile, const std::string& conte
               return a.first < b.first;
             });
 
-  std::cout << "Found MPD with base path: " << m_mpd.base << std::endl;
+  CLog::Log(LOGDEBUG, "Found MPD with base path: %s",m_mpd.base);
   for (auto& it : bw)
-    std::cout << "\t Representation with bw " << it.first << std::endl;
+    CLog::Log(LOGDEBUG, "Representation with bw %i", it.first);
 //               << ", segment duration " << m_mpd.sets[it.second].first().duration
 //               << ", " << m_mpd.sets[it.second].first().segments.size() << " segments" << std::endl;
 
@@ -211,27 +212,27 @@ bool CDVDInputStreamMpegDash::Open(const char* strFile, const std::string& conte
     maxbw = bw.back().first+1;
 
   m_crepId = 0;
-  std::cout << "maxbw is " << maxbw << std::endl;
+  CLog::Log(LOGDEBUG, "maxbw is %i", maxbw);
   while (bw[m_crepId].first < maxbw && m_crepId+1 < bw.size()) {
-    std::cout << "skipping since bw is " << bw[m_crepId].first << std::endl;
+    CLog::Log(LOGDEBUG, "skipping since bw is %i", bw[m_crepId].first);
     ++m_crepId;
   }
 
-  std::cout << "Using representation " << m_crepId << ", bandwidth "
-            << bw[m_crepId].first << std::endl;
+  CLog::Log(LOGDEBUG, "Using representation %i, bandwidth %i", m_crepId, bw[m_crepId].first);
 
-  std::cout << "we got " << m_mpd.sets.size() << std::endl;
-  for (size_t i=1; i < m_mpd.sets[bw[m_crepId].second].size();++i)
+  CLog::Log(LOGDEBUG, "we got %i", m_mpd.sets.size());
+  auto name = m_mpd.sets[bw[m_crepId].second];
+  for (size_t i=1; i < name.size();++i)
   {
     std::shared_ptr<CDVDInputStreamMpegDashComponent> 
-      comp(new CDVDInputStreamMpegDashComponent(m_mpd.sets[bw[m_crepId].second][i].segments));
+      comp(new CDVDInputStreamMpegDashComponent(name[i].segments));
 
     if (!comp->Open(m_mpd.base.c_str(),content,contentLookup))
     {
-      m_streams.clear();
+      m_InputStreams.clear();
       return false;
     }
-    m_streams.push_back(comp);
+    m_InputStreams.push_back(comp);
   }
 
   return true;
@@ -240,7 +241,7 @@ bool CDVDInputStreamMpegDash::Open(const char* strFile, const std::string& conte
 // close file and reset everything
 void CDVDInputStreamMpegDash::Close()
 {
-  for (auto& it : m_streams)
+  for (auto& it : m_InputStreams)
     it->Close();
   m_mpd.base.clear();
   m_mpd.sets.clear();
@@ -248,23 +249,23 @@ void CDVDInputStreamMpegDash::Close()
 
 int CDVDInputStreamMpegDash::Read(uint8_t* buf, int buf_size)
 {
-  if (m_streams.empty())
+  if (m_InputStreams.empty())
     return -1;
-  return m_streams.front()->Read(buf, buf_size); // TODO
+  return m_InputStreams.front()->Read(buf, buf_size); // TODO
 }
 
 int64_t CDVDInputStreamMpegDash::Seek(int64_t offset, int whence)
 {
-  if (m_streams.empty())
+  if (m_InputStreams.empty())
     return -1;
-  return m_streams.front()->Seek(offset, whence);
+  return m_InputStreams.front()->Seek(offset, whence);
 }
 
 bool CDVDInputStreamMpegDash::SeekTime(int iTimeInMsec)
 {
-  if (m_streams.empty())
+  if (m_InputStreams.empty())
     return false;
-  return m_streams.front()->SeekTime(iTimeInMsec);
+  //return m_InputStreams.front()->SeekTime(iTimeInMsec);
 }
 
 int64_t CDVDInputStreamMpegDash::GetLength()

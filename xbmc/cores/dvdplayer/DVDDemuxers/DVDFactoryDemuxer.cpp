@@ -131,7 +131,8 @@ CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool
   }
 
   // Try to open the MultiFiles demuxer
-  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_MULTIFILES))
+  if ( pInputStream->IsStreamType(DVDSTREAM_TYPE_MULTIFILES)
+    || pInputStream->IsStreamType(DVDSTREAM_TYPE_DASH))
   {
     std::unique_ptr<CDVDDemuxMultiSource> demuxer(new CDVDDemuxMultiSource());
     if (demuxer->Open(pInputStream))

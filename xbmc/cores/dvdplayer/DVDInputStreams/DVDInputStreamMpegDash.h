@@ -20,6 +20,7 @@
  */
 
 #include "DVDInputStreamFile.h"
+#include "DVDInputStreamMultiStreams.h"
 #include "filesystem/File.h"
 
 //! \brief Wraps a multi-segment stream from MPEG DASH.
@@ -69,7 +70,7 @@ class CDVDInputStreamMpegDashComponent : public CDVDInputStreamFile
 
 //! \brief Input stream class for MPEG DASH.
 class CDVDInputStreamMpegDash
-  : public CDVDInputStream
+  : public IDVDInputStreamMultiStreams
   , public CDVDInputStream::ISeekTime
   , public CDVDInputStream::ISeekable
 {
@@ -123,5 +124,5 @@ protected:
 
   MPD        m_mpd; //!< In-memory representation of opened MPD file
   size_t     m_crepId; //!< Current representation ID used.
-  std::vector<std::shared_ptr<CDVDInputStreamMpegDashComponent>> m_streams; //!< Input streams for current representation.
+  //std::vector<std::shared_ptr<CDVDInputStreamMpegDashComponent>> m_streams; //!< Input streams for current representation.
 };
