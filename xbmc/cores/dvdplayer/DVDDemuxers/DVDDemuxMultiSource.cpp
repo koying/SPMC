@@ -104,21 +104,21 @@ int CDVDDemuxMultiSource::GetStreamLength()
 
 bool CDVDDemuxMultiSource::Open(CDVDInputStream* pInput)
 {
-  if (!pInput || !pInput->IsStreamType(DVDSTREAM_TYPE_MULTIFILES))
+  if (!pInput)
     return false;
 
-  m_pInput = dynamic_cast<CDVDInputStreamMultiSource*>(pInput);
+  m_pInput = dynamic_cast<IDVDInputStreamMultiStreams*>(pInput);
 
   if (!m_pInput)
     return false;
 
-  auto iter = m_pInput->m_pInputStreams.begin();
-  while (iter != m_pInput->m_pInputStreams.end())
+  auto iter = m_pInput->m_InputStreams.begin();
+  while (iter != m_pInput->m_InputStreams.end())
   {
     DemuxPtr demuxer = DemuxPtr(CDVDFactoryDemuxer::CreateDemuxer(iter->get()));
     if (!demuxer)
     {
-      iter = m_pInput->m_pInputStreams.erase(iter);
+      iter = m_pInput->m_InputStreams.erase(iter);
     }
     else
     {
@@ -127,7 +127,7 @@ bool CDVDDemuxMultiSource::Open(CDVDInputStream* pInput)
       m_DemuxerStreamsOffset[demuxer] = offset;
       if (!UpdateStreamMap(demuxer))
       {
-        iter = m_pInput->m_pInputStreams.erase(iter);
+        iter = m_pInput->m_InputStreams.erase(iter);
         m_DemuxerStreamsOffset.erase(demuxer);
         continue;
       }

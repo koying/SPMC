@@ -29,7 +29,8 @@
 
 using namespace XFILE;
 
-CDVDInputStreamMultiSource::CDVDInputStreamMultiSource(IDVDPlayer* pPlayer, const std::vector<std::string>& filenames) : CDVDInputStream(DVDSTREAM_TYPE_MULTIFILES),
+CDVDInputStreamMultiSource::CDVDInputStreamMultiSource(IDVDPlayer* pPlayer, const std::vector<std::string>& filenames) :
+  IDVDInputStreamMultiStreams(DVDSTREAM_TYPE_MULTIFILES),
   m_pPlayer(pPlayer),
   m_filenames(filenames)
 {
@@ -42,13 +43,13 @@ CDVDInputStreamMultiSource::~CDVDInputStreamMultiSource()
 
 void CDVDInputStreamMultiSource::Abort()
 {
-  for (auto iter : m_pInputStreams)
+  for (auto iter : m_InputStreams)
     iter->Abort();
 }
 
 void CDVDInputStreamMultiSource::Close()
 {
-  m_pInputStreams.clear();
+  m_InputStreams.clear();
   CDVDInputStream::Close();
 }
 
@@ -70,7 +71,7 @@ bool CDVDInputStreamMultiSource::GetCacheStatus(XFILE::SCacheStatus *status)
 int64_t CDVDInputStreamMultiSource::GetLength()
 {
   int64_t length = 0;
-  for (auto iter : m_pInputStreams)
+  for (auto iter : m_InputStreams)
   {
     length = std::max(length, iter->GetLength());
   }
@@ -80,10 +81,10 @@ int64_t CDVDInputStreamMultiSource::GetLength()
 
 bool CDVDInputStreamMultiSource::IsEOF()
 {
-  if (m_pInputStreams.empty())
+  if (m_InputStreams.empty())
     return true;
 
-  for (auto iter : m_pInputStreams)
+  for (auto iter : m_InputStreams)
   {
     if (!(iter->IsEOF()))
       return false;
@@ -115,9 +116,9 @@ bool CDVDInputStreamMultiSource::Open(const char* strFile, const std::string& co
       CLog::Log(LOGERROR, "CDVDPlayer::OpenInputStream - error opening file [%s]", m_filenames[i].c_str());
       continue;
     }
-    m_pInputStreams.push_back(inputstream);
+    m_InputStreams.push_back(inputstream);
   }
-  return !m_pInputStreams.empty();
+  return !m_InputStreams.empty();
 }
 
 int CDVDInputStreamMultiSource::Read(uint8_t* buf, int buf_size)
@@ -132,6 +133,6 @@ int64_t CDVDInputStreamMultiSource::Seek(int64_t offset, int whence)
 
 void CDVDInputStreamMultiSource::SetReadRate(unsigned rate)
 {
-  for (auto iter : m_pInputStreams)
+  for (auto iter : m_InputStreams)
     iter->SetReadRate(rate);
 }

@@ -63,7 +63,7 @@ private:
   bool RebuildStreamMap();
   bool UpdateStreamMap(DemuxPtr demuxer);
   
-  CDVDInputStreamMultiSource* m_pInput = NULL;
+  IDVDInputStreamMultiStreams* m_pInput = NULL;
   std::vector<DemuxPtr> m_pDemuxers;
   DemuxPtr m_currentDemuxer = NULL;
   std::map<DemuxPtr, InputStreamPtr> m_DemuxerToInputStreamMap;

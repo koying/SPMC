@@ -6279,6 +6279,9 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMultiSource.h">
       <Filter>cores\dvdplayer\DVDDemuxers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMultiStreams.h">
+      <Filter>cores\dvdplayer\DVDInputStreams</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\VideoDatabaseFile.h">
       <Filter>filesystem</Filter>
     </ClInclude>
