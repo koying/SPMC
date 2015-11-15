@@ -145,6 +145,7 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 ifeq (@CMAKE_BUILD_TYPE@,Release)
 	$(STRIP) --strip-unneeded xbmc/lib/$(CPU)/*.so
 endif
+	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/libs
 	install -p $(GDBPATH) ./xbmc/libs/$(CPU)/gdbserver
 	echo "set solib-search-path ./obj/local/$(CPU)" > ./xbmc/libs/$(CPU)/gdb.setup
 	echo "directory $(TOOLCHAIN)/sysroot/usr/include $(NDKROOT)/sources/android/native_app_glue" \
@@ -153,9 +154,9 @@ endif
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/org/xbmc/@APP_NAME_LC@/*.java
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/@APP_NAME_LC@/*.java
-	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/org/xbmc/@APP_NAME_LC@/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/@APP_NAME_LC@/*.java
+	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/libs
 
 package: libs python xbmc/classes.dex
 	@echo "Creating package..."
