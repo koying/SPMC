@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.xbmc.@APP_NAME_LC@"
+    package="org.xbmc.kodi"
     android:installLocation="auto"
-    android:versionCode="@APP_VERSION_CODE@"
-    android:versionName="@APP_VERSION@" >
+    android:versionCode="159801"
+    android:versionName="16.0-BETA1" >
 
     <uses-sdk android:minSdkVersion="17" android:targetSdkVersion="22" />
 
@@ -82,7 +82,7 @@
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="@APP_NAME_LC@" />
+                android:value="kodi" />
         </activity>
 
         <receiver android:name=".XBMCBroadcastReceiver" >
@@ -95,7 +95,7 @@
         </receiver>
 
         <provider android:name=".XBMCContentProvider"
-            android:authorities="org.xbmc.@APP_NAME_LC@.image"
+            android:authorities="org.xbmc.kodi.image"
             android:exported="true" />
 
     </application>

@@ -92,7 +92,8 @@ public:
   
   static int GetBatteryLevel();
   static bool EnableWakeLock(bool on);
-  static bool HasFocus();
+  static bool HasFocus() { return m_hasFocus; }
+  static bool IsResumed() { return m_isResumed; }
   static bool IsHeadsetPlugged();
 
   static bool StartActivity(const std::string &package, const std::string &intent = std::string(), const std::string &dataType = std::string(), const std::string &dataURI = std::string());
@@ -142,6 +143,7 @@ private:
   static CJNIWakeLock *m_wakeLock;
   static int m_batteryLevel;
   static bool m_hasFocus;
+  static bool m_isResumed;
   static bool m_hasAudioFocus;
   static bool m_headsetPlugged;
   bool m_firstrun;
