@@ -2234,9 +2234,9 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/strings.xml \
     "
 
-if test "$target_platform" = "target_android" ; then
-OUTPUT_FILES="$OUTPUT_FILES $OUTPUT_FILES_JAVA_DROID"
-fi
+# if test "$target_platform" = "target_android" ; then
+# OUTPUT_FILES="$OUTPUT_FILES $OUTPUT_FILES_JAVA_DROID"
+# fi
 
 if test "$use_webserver" = "yes"; then
 OUTPUT_FILES="$OUTPUT_FILES xbmc/network/httprequesthandler/python/Makefile"
