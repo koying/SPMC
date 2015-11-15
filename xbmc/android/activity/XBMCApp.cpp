@@ -101,6 +101,7 @@ CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
 int CXBMCApp::m_batteryLevel = 0;
 bool CXBMCApp::m_hasFocus = false;
+bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
 CCriticalSection CXBMCApp::m_applicationsMutex;
@@ -180,11 +181,14 @@ void CXBMCApp::onResume()
     CSingleLock lock(m_applicationsMutex);
     m_applications.clear();
   }
+  
+  m_isResumed = true;
 }
 
 void CXBMCApp::onPause()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
+  
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
@@ -203,6 +207,7 @@ void CXBMCApp::onPause()
 #endif
 
   EnableWakeLock(false);
+  m_isResumed = false;
 }
 
 void CXBMCApp::onStop()
@@ -378,11 +383,6 @@ bool CXBMCApp::ReleaseAudioFocus()
   }
   m_hasAudioFocus = false;
   return true;
-}
-
-bool CXBMCApp::HasFocus()
-{
-  return m_hasFocus;
 }
 
 bool CXBMCApp::IsHeadsetPlugged()
@@ -806,9 +806,11 @@ void CXBMCApp::onReceive(CJNIIntent intent)
 void CXBMCApp::onNewIntent(CJNIIntent intent)
 {
   std::string action = intent.getAction();
+  CXBMCApp::android_printf("Got Intent: %s", action.c_str());
   if (action == "android.intent.action.VIEW")
   {
     std::string playFile = GetFilenameFromIntent(intent);
+    CXBMCApp::android_printf("-- playfile: %s", playFile.c_str());
     CFileItem* item = new CFileItem(playFile, false);
     if (item->IsVideoDb() && !item->HasVideoInfoTag())
       *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
