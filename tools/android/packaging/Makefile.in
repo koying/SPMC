@@ -115,8 +115,8 @@ python: | xbmc/assets
 	cd xbmc/assets/python2.7/lib/python2.7/; rm -rf test config lib-dynload
 
 res:
-	mkdir -p xbmc/res xbmc/res/raw xbmc/res/values images
-	@echo "native_arch=$(CPU)" > xbmc/res/raw/xbmc.properties
+	mkdir -p xbmc/gen/org/xbmc/kodi xbmc/res xbmc/res/raw xbmc/res/values images
+	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(CORE_SOURCE_DIR)/media/Splash.png xbmc/res/drawable/splash.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
 	cp -fp media/drawable-ldpi/ic_launcher.png xbmc/res/drawable-ldpi/ic_launcher.png
@@ -129,7 +129,7 @@ res:
 	cp xbmc/colors.xml xbmc/res/values/
 	cp xbmc/activity_main.xml xbmc/res/layout/
 	mkdir -p tmp/res; $(AAPT) c -S xbmc/res -C tmp/res; cp -r -n xbmc/res tmp/ || true
-	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME_LC@app-debug-skeleton.apk -J xbmc/src
+	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME_LC@app-debug-skeleton.apk -J xbmc/gen/org/xbmc/@APP_NAME_LC@
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
@@ -153,8 +153,8 @@ endif
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/*.java $(JAVAC_EXTRA_ARGS)
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java $(JAVAC_EXTRA_ARGS)
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/org/xbmc/@APP_NAME_LC@/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/@APP_NAME_LC@/*.java
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj
 
 package: libs python xbmc/classes.dex
@@ -176,6 +176,8 @@ $(SRCLIBS):
 
 apk-clean:
 	rm -rf images
+	rm -rf symbols
+	rm -rf xbmc/gen
 	rm -rf xbmc/lib
 	rm -rf xbmc/libs
 	rm -rf xbmc/assets
@@ -184,7 +186,6 @@ apk-clean:
 	rm -rf xbmc/res/values
 	rm -rf tmp
 	rm -f xbmc/res/drawable/splash.png
-	rm -f xbmc/src/R.java
 	rm -f xbmc/classes.dex
 	rm -rf assets
 
