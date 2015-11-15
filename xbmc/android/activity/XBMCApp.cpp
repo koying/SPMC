@@ -46,6 +46,7 @@
 #include "messaging/ApplicationMessenger.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "utils/URIUtils.h"
 #include "AppParamParser.h"
 #include "XbmcContext.h"
 #include <android/bitmap.h>
@@ -101,6 +102,7 @@ CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
 int CXBMCApp::m_batteryLevel = 0;
 bool CXBMCApp::m_hasFocus = false;
+bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
 CCriticalSection CXBMCApp::m_applicationsMutex;
@@ -180,11 +182,14 @@ void CXBMCApp::onResume()
     CSingleLock lock(m_applicationsMutex);
     m_applications.clear();
   }
+  
+  m_isResumed = true;
 }
 
 void CXBMCApp::onPause()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
+  
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
@@ -203,6 +208,7 @@ void CXBMCApp::onPause()
 #endif
 
   EnableWakeLock(false);
+  m_isResumed = false;
 }
 
 void CXBMCApp::onStop()
@@ -378,11 +384,6 @@ bool CXBMCApp::ReleaseAudioFocus()
   }
   m_hasAudioFocus = false;
   return true;
-}
-
-bool CXBMCApp::HasFocus()
-{
-  return m_hasFocus;
 }
 
 bool CXBMCApp::IsHeadsetPlugged()
@@ -806,13 +807,28 @@ void CXBMCApp::onReceive(CJNIIntent intent)
 void CXBMCApp::onNewIntent(CJNIIntent intent)
 {
   std::string action = intent.getAction();
+  CXBMCApp::android_printf("Got Intent: %s", action.c_str());
+  std::string targetFile = GetFilenameFromIntent(intent);
+  CXBMCApp::android_printf("-- targetFile: %s", targetFile.c_str());
   if (action == "android.intent.action.VIEW")
   {
-    std::string playFile = GetFilenameFromIntent(intent);
-    CFileItem* item = new CFileItem(playFile, false);
-    if (item->IsVideoDb() && !item->HasVideoInfoTag())
+    CFileItem* item = new CFileItem(targetFile, false);
+    if (item->IsVideoDb())
+    {
       *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
+      item->SetPath(XFILE::CVideoDatabaseFile::TranslateUrl(CURL(item->GetPath())));
+    }
     CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PLAY, 0, 0, static_cast<void*>(item));
+  }
+  else if (action == "android.intent.action.GET_CONTENT")
+  {
+    if (URIUtils::IsVideoDb(targetFile))
+    {
+      std::vector<std::string> params;
+      params.push_back(targetFile);
+      params.push_back("return");
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
+    }
   }
 }
 

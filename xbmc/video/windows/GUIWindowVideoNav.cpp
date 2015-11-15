@@ -26,6 +26,7 @@
 #include "GUIPassword.h"
 #include "filesystem/MultiPathDirectory.h"
 #include "filesystem/VideoDatabaseDirectory.h"
+#include "filesystem/VideoDatabaseFile.h"
 #include "dialogs/GUIDialogOK.h"
 #include "PartyModeManager.h"
 #include "music/MusicDatabase.h"
@@ -128,14 +129,28 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
 
       if (message.GetStringParam(0) != "")
       {
-        for (int i = 0; i < m_vecItems->Size(); i++)
+        int i = 0;
+        for (; i < m_vecItems->Size(); i++)
         {
           CFileItemPtr pItem = m_vecItems->Get(i);
           if (pItem->GetPath() == message.GetStringParam(0))
           {
             m_viewControl.SetSelectedItem(i);
+            ADDON::ScraperPtr scrapper;
+            OnItemInfo(pItem.get(), scrapper);
             break;
           }
+        }
+        if (i == m_vecItems->Size())
+        {
+          CFileItem* item = new CFileItem(message.GetStringParam(0), false);
+          if (item->IsVideoDb())
+          {
+            *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
+            item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
+          }
+          ADDON::ScraperPtr scrapper;
+          OnItemInfo(item, scrapper);
         }
       }
 
