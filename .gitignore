@@ -316,6 +316,11 @@ lib/cpluff/stamp-h1
 
 #/tools/android
 /tools/android/packaging/Makefile
+/tools/android/packaging/assets/
+/tools/android/packaging/xbmc/bin/
+/tools/android/packaging/xbmc/gen/
+/tools/android/packaging/xbmc/res/raw/
+/tools/android/packaging/xbmc/res/values/
 /tools/android/packaging/xbmc/activity_main.xml
 /tools/android/packaging/xbmc/AndroidManifest.xml
 /tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java
