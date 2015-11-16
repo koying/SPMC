@@ -70,10 +70,8 @@ protected:
   double m_timeOfPts;
   CCriticalSection m_critSection;
 
-  enum AEDataFormat m_DataFormat;
-  int m_iBitrate;
+  unsigned int m_sampeRate;
   int m_iBitsPerSample;
-  double m_SecondsPerByte;
   bool m_bPassthrough;
   CAEChannelInfo m_channelLayout;
   bool m_bPaused;
