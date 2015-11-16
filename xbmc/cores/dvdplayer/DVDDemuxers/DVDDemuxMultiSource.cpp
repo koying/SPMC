@@ -176,9 +176,11 @@ DemuxPacket* CDVDDemuxMultiSource::Read()
   if (packet)
   {
     // new stream?
-    if (m_streamIdToDemuxerMap.find(packet->iStreamId) == m_streamIdToDemuxerMap.end())
+    if (packet->iStreamId >=0 &&
+        m_streamIdToDemuxerMap.find(packet->iStreamId) == m_streamIdToDemuxerMap.end())
     {
-      //UpdateStreamMap()
+      CLog::Log(LOGDEBUG, "new stream");
+      //UpdateStreamMap(m_currentDemuxer);
     }
   }
   else
@@ -188,7 +190,8 @@ DemuxPacket* CDVDDemuxMultiSource::Read()
     return packet;
   }
 
-  m_demuxerQueue.push(std::make_pair(packet->dts != DVD_NOPTS_VALUE ? packet->dts : packet->pts, m_currentDemuxer));
+  if (! (packet->iStreamId == DMX_SPECIALID_STREAMCHANGE))
+    m_demuxerQueue.push(std::make_pair(packet->dts != DVD_NOPTS_VALUE ? packet->dts : packet->pts, m_currentDemuxer));
 
   return packet;
 }
