@@ -134,6 +134,8 @@ CDemuxStreamAudio* CDVDDemux::GetStreamFromAudioId(int iAudioIndex)
   for (int i = 0; i < GetNrOfStreams(); i++)
   {
     CDemuxStream* pStream = GetStream(i);
+    if (!pStream)
+      continue;
 
     if (pStream->type == STREAM_AUDIO) counter++;
     if (iAudioIndex == counter)

@@ -479,6 +479,8 @@ void CSelectionStreams::Update(CDVDInputStream* input, CDVDDemux* demuxer, std::
     for(int i=0;i<count;i++)
     {
       CDemuxStream* stream = demuxer->GetStream(i);
+      if (!stream)
+        continue;
       /* skip streams with no type */
       if (stream->type == STREAM_NONE)
         continue;
