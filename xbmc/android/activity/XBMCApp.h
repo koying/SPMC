@@ -155,8 +155,6 @@ private:
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;
 
-  void XBMC_Pause(bool pause);
-  void XBMC_Stop();
   bool XBMC_DestroyDisplay();
   bool XBMC_SetupDisplay();
 };
