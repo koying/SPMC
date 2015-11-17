@@ -223,7 +223,7 @@ void CXBMCApp::onDestroy()
   // been destroyed.
   if (!m_exiting)
   {
-    XBMC_Stop();
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
     pthread_join(m_thread, NULL);
     android_printf(" => XBMC finished");
   }
@@ -260,7 +260,6 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
   if(!m_firstrun)
   {
     XBMC_SetupDisplay();
-    XBMC_Pause(false);
   }
 }
 
@@ -281,7 +280,6 @@ void CXBMCApp::onDestroyWindow()
   {
     XBMC_DestroyDisplay();
     m_window = NULL;
-    XBMC_Pause(true);
   }
 }
 
@@ -434,16 +432,6 @@ void CXBMCApp::run()
   // onPause(), onLostFocus(), onDestroyWindow(), onStop(), onDestroy().
   ANativeActivity_finish(m_activity);
   m_exiting=true;
-}
-
-void CXBMCApp::XBMC_Pause(bool pause)
-{
-  android_printf("XBMC_Pause(%s)", pause ? "true" : "false");
-}
-
-void CXBMCApp::XBMC_Stop()
-{
-  CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
 }
 
 bool CXBMCApp::XBMC_SetupDisplay()
