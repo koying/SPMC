@@ -431,16 +431,15 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
 
   if (m_passthrough && !WantsIEC61937())
   {
-    if (m_format.m_dataFormat == AE_FMT_DTSHD_RAW || m_format.m_dataFormat == AE_FMT_TRUEHD_RAW)  // Decapsulate
+    // Decapsulate
+    size = ((int*)(buffer))[0];
+    out_buf = buffer + sizeof(int);
+    if (!size)
     {
-      size = ((int*)(buffer))[0];
-      out_buf = buffer + sizeof(int);
-      if (!size)
-      {
-        size = 1;  // keepalive
-        m_silenceframes += frames;
-      }
+      size = 1;  // keepalive
+      m_silenceframes += frames;
     }
+
     // Test and ignore silence packets
     else if (out_buf[0] == 0 && !memcmp(out_buf, out_buf+1, size-1))
     {
