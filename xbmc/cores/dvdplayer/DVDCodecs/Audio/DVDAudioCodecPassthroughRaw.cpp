@@ -238,12 +238,12 @@ int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
   if (m_hints.codec == AV_CODEC_ID_DTS && (iSize > 2013 || m_hints.channels > 6)) // 2013 = max DTS packet size
     m_codec = AE_FMT_DTSHD_RAW;
 
-  // HD audio has variable bitrate; Do pseudo-encapsulation to make it constant
+  // Do pseudo-encapsulation to make bitrate constant
   int constant_size = 0;
-  if (m_codec == AE_FMT_DTSHD_RAW)
-    constant_size = CONSTANT_BUFFER_SIZE_DTSHD;
-  else if (m_codec == AE_FMT_TRUEHD_RAW)
+  if (m_codec == AE_FMT_TRUEHD_RAW)
     constant_size = CONSTANT_BUFFER_SIZE_TRUEHD;
+  else
+    constant_size = CONSTANT_BUFFER_SIZE_DTSHD;
 
   if (constant_size)
   {
