@@ -526,6 +526,9 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   if (!CXBMCApp::IsHeadsetPlugged())
   {
     m_info.m_deviceType = AE_DEVTYPE_HDMI;
+    m_info.m_dataFormats.push_back(AE_FMT_AC3);
+    m_info.m_dataFormats.push_back(AE_FMT_DTS);
+#ifndef HAS_LIBAMCODEC
     int test_sample[] = { 32000, 44100, 48000, 96000, 192000 };
     int test_sample_sz = sizeof(test_sample) / sizeof(int);
     int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
@@ -539,9 +542,6 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
         CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
       }
     }
-    std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
-    m_info.m_dataFormats.push_back(AE_FMT_AC3);
-    m_info.m_dataFormats.push_back(AE_FMT_DTS);
     if (CJNIAudioManager::GetSDKVersion() >= 21
 #if defined(HAS_LIBAMCODEC)
         && !aml_present()
@@ -562,11 +562,9 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
         m_info.m_dataFormats.push_back(AE_FMT_TRUEHD_RAW);
       }
     }
-  }
-#if 0 //defined(__ARM_NEON__)
-  if (g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_NEON)
-    m_info.m_dataFormats.push_back(AE_FMT_FLOAT);
 #endif
+    std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
+  }
 
   list.push_back(m_info);
 }
