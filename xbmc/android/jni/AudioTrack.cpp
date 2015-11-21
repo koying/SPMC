@@ -89,6 +89,11 @@ void CJNIAudioTrack::play()
   call_method<void>(m_object, "play", "()V");
 }
 
+void CJNIAudioTrack::pause()
+{
+  call_method<void>(m_object, "pause", "()V");
+}
+
 void CJNIAudioTrack::stop()
 {
   call_method<void>(m_object, "stop", "()V");

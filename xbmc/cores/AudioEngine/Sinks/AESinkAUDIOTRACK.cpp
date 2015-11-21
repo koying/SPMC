@@ -191,7 +191,6 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
   m_format      = format;
   m_volume      = -1;
-  m_silenceframes = 0;
 
   CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Initialize requested: sampleRate %u; format: %s; channels: %d", format.m_sampleRate, CAEUtil::DataFormatToStr(format.m_dataFormat), format.m_channelLayout.Count());
 
@@ -396,7 +395,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     head_pos += m_ptOffset;
     m_lastHeadPosition = head_pos;
 
-    delay = ((double)(m_frames_written - m_silenceframes) / m_format.m_sampleRate) - ((double)head_pos / m_sink_sampleRate);
+    delay = ((double)m_frames_written / m_format.m_sampleRate) - ((double)head_pos / m_sink_sampleRate);
 #ifdef DEBUG_VERBOSE
     CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_frames_written/head_pos %u(%u)/%u %f", m_frames_written - m_silenceframes, m_frames_written, head_pos, delay);
 #endif
@@ -436,15 +435,17 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     out_buf = buffer + sizeof(int);
     if (!size)
     {
-      size = 1;  // keepalive
-      m_silenceframes += frames;
+      if (m_at_jni->getPlayState() == CJNIAudioTrack::PLAYSTATE_PLAYING)
+        m_at_jni->pause();
+      return frames;
     }
 
     // Test and ignore silence packets
     else if (out_buf[0] == 0 && !memcmp(out_buf, out_buf+1, size-1))
     {
-      size = 1;  // keepalive
-      m_silenceframes += frames;
+      if (m_at_jni->getPlayState() == CJNIAudioTrack::PLAYSTATE_PLAYING)
+        m_at_jni->pause();
+      return frames;
     }
   }
 
