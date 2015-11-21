@@ -246,7 +246,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       default:
         m_encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
         m_format.m_dataFormat   = AE_FMT_S16LE;
-        m_sink_sampleRate       = m_format.m_encodedRate;
+        m_sink_sampleRate       = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
         break;
     }
   }
@@ -495,7 +495,7 @@ void CAESinkAUDIOTRACK::Drain()
 
 bool CAESinkAUDIOTRACK::WantsIEC61937()
 {
-  return !(m_format.m_dataFormat >= AE_FMT_AC3_RAW && m_format.m_dataFormat <= AE_FMT_DTSHD_RAW);
+  return !(AE_IS_RAW_RAW(m_format.m_dataFormat));
 }
 
 void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
