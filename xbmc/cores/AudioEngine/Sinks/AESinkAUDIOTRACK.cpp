@@ -397,7 +397,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
 
     delay = ((double)m_frames_written / m_format.m_sampleRate) - ((double)head_pos / m_sink_sampleRate);
 #ifdef DEBUG_VERBOSE
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_frames_written/head_pos %u(%u)/%u %f", m_frames_written - m_silenceframes, m_frames_written, head_pos, delay);
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_frames_written/head_pos %u/%u %f", m_frames_written, head_pos, delay);
 #endif
   }
   else
