@@ -570,7 +570,7 @@ void CDVDPlayerAudio::Process()
     }
 
     // Zero out the frame data if we are supposed to silence the audio
-    if (m_silence || (m_syncclock && !audioframe.passthrough))
+    if (m_silence || (m_syncclock && !AE_IS_RAW_RAW(audioframe.data_format)))
     {
       int size = audioframe.nb_frames * audioframe.framesize / audioframe.planes;
       for (unsigned int i=0; i<audioframe.planes; i++)
@@ -766,7 +766,7 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
     // during this stage audio is muted
     if (error > DVD_MSEC_TO_TIME(10))
     {
-      if (audioframe.passthrough)
+      if (AE_IS_RAW_RAW(audioframe.data_format))
       {
         // Force clock sync to audio
         m_dvdAudio.AddPackets(audioframe);
@@ -803,7 +803,7 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
     }
     else if (error < -DVD_MSEC_TO_TIME(32))
     {
-      if (audioframe.passthrough)
+      if (AE_IS_RAW_RAW(audioframe.data_format))
       {
         // Force clock sync to audio
         m_dvdAudio.AddPackets(audioframe);
