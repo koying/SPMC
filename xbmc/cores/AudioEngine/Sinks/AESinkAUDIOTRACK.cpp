@@ -528,41 +528,40 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
     m_info.m_deviceType = AE_DEVTYPE_HDMI;
     m_info.m_dataFormats.push_back(AE_FMT_AC3);
     m_info.m_dataFormats.push_back(AE_FMT_DTS);
-#ifndef HAS_LIBAMCODEC
-    int test_sample[] = { 32000, 44100, 48000, 96000, 192000 };
-    int test_sample_sz = sizeof(test_sample) / sizeof(int);
-    int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
-    if (CJNIAudioManager::GetSDKVersion() >= 21)
-      encoding = CJNIAudioFormat::ENCODING_PCM_FLOAT;
-    for (int i=0; i<test_sample_sz; ++i)
-    {
-      if (IsSupported(test_sample[i], CJNIAudioFormat::CHANNEL_OUT_STEREO, encoding))
-      {
-        m_sink_sampleRates.insert(test_sample[i]);
-        CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
-      }
-    }
-    if (CJNIAudioManager::GetSDKVersion() >= 21
 #if defined(HAS_LIBAMCODEC)
-        && !aml_present()
+    if (!aml_present())
 #endif
-        )
     {
-      m_info.m_dataFormats.push_back(AE_FMT_AC3_RAW);
-      m_info.m_dataFormats.push_back(AE_FMT_EAC3_RAW);
-      if (CJNIAudioManager::GetSDKVersion() >= 23)
+      int test_sample[] = { 32000, 44100, 48000, 96000, 192000 };
+      int test_sample_sz = sizeof(test_sample) / sizeof(int);
+      int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
+      if (CJNIAudioManager::GetSDKVersion() >= 21)
+        encoding = CJNIAudioFormat::ENCODING_PCM_FLOAT;
+      for (int i=0; i<test_sample_sz; ++i)
       {
-        m_info.m_dataFormats.push_back(AE_FMT_DTS_RAW);
-        m_info.m_dataFormats.push_back(AE_FMT_DTSHD_RAW);
+        if (IsSupported(test_sample[i], CJNIAudioFormat::CHANNEL_OUT_STEREO, encoding))
+        {
+          m_sink_sampleRates.insert(test_sample[i]);
+          CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
+        }
       }
-      if (StringUtils::StartsWithNoCase(CJNIBuild::DEVICE, "foster")) // SATV is ahead of API
+      if (CJNIAudioManager::GetSDKVersion() >= 21)
       {
-        m_info.m_dataFormats.push_back(AE_FMT_DTS_RAW);
-        m_info.m_dataFormats.push_back(AE_FMT_DTSHD_RAW);
-        m_info.m_dataFormats.push_back(AE_FMT_TRUEHD_RAW);
+        m_info.m_dataFormats.push_back(AE_FMT_AC3_RAW);
+        m_info.m_dataFormats.push_back(AE_FMT_EAC3_RAW);
+        if (CJNIAudioManager::GetSDKVersion() >= 23)
+        {
+          m_info.m_dataFormats.push_back(AE_FMT_DTS_RAW);
+          m_info.m_dataFormats.push_back(AE_FMT_DTSHD_RAW);
+        }
+        if (StringUtils::StartsWithNoCase(CJNIBuild::DEVICE, "foster")) // SATV is ahead of API
+        {
+          m_info.m_dataFormats.push_back(AE_FMT_DTS_RAW);
+          m_info.m_dataFormats.push_back(AE_FMT_DTSHD_RAW);
+          m_info.m_dataFormats.push_back(AE_FMT_TRUEHD_RAW);
+        }
       }
     }
-#endif
     std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
   }
 
