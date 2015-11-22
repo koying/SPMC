@@ -123,15 +123,15 @@ void CDVDAudioCodecPassthroughRaw::GetData(DVDAudioFrame &frame)
   frame.channel_layout        = GetChannelMap();
   frame.channel_count         = GetChannels();
 
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::GetData samplerate: %d", frame.sample_rate);
-#endif
-
   // compute duration.
   if (frame.sample_rate)
     frame.duration = ((double)frame.nb_frames * DVD_TIME_BASE) / frame.sample_rate;
   else
     frame.duration = 0.0;
+
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::GetData samplerate: %d; duration: %f", frame.sample_rate, frame.duration);
+#endif
 }
 
 int CDVDAudioCodecPassthroughRaw::GetSampleRate()
