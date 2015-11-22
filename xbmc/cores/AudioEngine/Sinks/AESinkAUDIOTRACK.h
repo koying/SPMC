@@ -62,6 +62,8 @@ private:
 
   static CAEDeviceInfo m_info;
   static std::set<unsigned int>       m_sink_sampleRates;
+  std::vector<double>                 m_smoothedDelayVec;
+  int                                 m_smoothedDelayCount;
   AEAudioFormat      m_format;
   double             m_volume;
   int16_t           *m_alignedS16;
