@@ -49,6 +49,7 @@ using namespace jni;
 #define LIMIT_TO_STEREO_AND_5POINT1_AND_7POINT1 1
 
 #define TRUEHD_UNIT 960
+#define SMOOTHED_DELAY_MAX 10
 
 static const AEChannel KnownChannels[] = { AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_LFE, AE_CH_SL, AE_CH_SR, AE_CH_BL, AE_CH_BR, AE_CH_BC, AE_CH_BLOC, AE_CH_BROC, AE_CH_NULL };
 
@@ -191,6 +192,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
   m_format      = format;
   m_volume      = -1;
+  m_smoothedDelayCount = 0;
+  m_smoothedDelayVec.clear();
 
   CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Initialize requested: sampleRate %u; format: %s; channels: %d", format.m_sampleRate, CAEUtil::DataFormatToStr(format.m_dataFormat), format.m_channelLayout.Count());
 
@@ -396,14 +399,26 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     m_lastHeadPosition = head_pos;
 
     delay = ((double)m_frames_written / m_format.m_sampleRate) - ((double)head_pos / m_sink_sampleRate);
-#ifdef DEBUG_VERBOSE
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_frames_written/head_pos %u/%u %f", m_frames_written, head_pos, delay);
-#endif
   }
   else
     delay = (double)(m_frames_written - head_pos) / m_sink_sampleRate;
 
-  status.SetDelay(delay);
+  m_smoothedDelayVec.push_back(delay);
+  if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
+    m_smoothedDelayCount++;
+  else
+    m_smoothedDelayVec.erase(m_smoothedDelayVec.begin());
+
+  double smootheDelay = 0;
+  for (double d : m_smoothedDelayVec)
+    smootheDelay += d;
+  smootheDelay /= m_smoothedDelayCount;
+
+#ifdef DEBUG_VERBOSE
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_frames_written/head_pos %u/%u %f", m_frames_written, head_pos, smootheDelay);
+#endif
+
+    status.SetDelay(smootheDelay);
 }
 
 double CAESinkAUDIOTRACK::GetLatency()
