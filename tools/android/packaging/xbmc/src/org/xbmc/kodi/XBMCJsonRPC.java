@@ -171,7 +171,7 @@ public class XBMCJsonRPC
 
         final XBMCRecommendationBuilder notificationBuilder = builder
             .setBackground(
-                XBMCContentProvider.GetImageUri(
+                XBMCImageContentProvider.GetImageUri(
                     getBitmapUrl(movie.getString("fanart"))).toString())
             .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
             .setTitle(movie.getString("title"))
