@@ -36,7 +36,7 @@ import android.util.Log;
  * http://developer.android.com/reference/android/content/ContentProvider.html
  * 
  */
-public class XBMCContentProvider extends ContentProvider
+public class XBMCImageContentProvider extends ContentProvider
 {
   private static String TAG = "kodi";
   
