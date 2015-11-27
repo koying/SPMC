@@ -35,16 +35,15 @@ public class XBMCSearchableActivity extends Activity
     String query = intent.getStringExtra(SearchManager.QUERY);
     Log.d(TAG, "NEW INTENT: " + intent.getAction() + "; Q=" + query);
 
-    String movieId = intent.getData().getLastPathSegment();
     Cursor c = getContentResolver()
         .query(
-            Uri.parse("content://net.floating_systems.kodiplay.VideoContentProvider/id/"
-                + movieId), null, null, null, null);
+            Uri.parse("content://org.xbmc.kodi.media/search/"
+                + query), null, null, null, null);
 
     if (c.getCount() > 0)
     {
       c.moveToFirst();
-      String moviePath = c.getString(c.getColumnIndex("COLUMN_FULL_PATH"));
+      String moviePath = c.getString(c.getColumnIndex(XBMCJsonRPC.COLUMN_FULL_PATH));
 
       c.close();
 
