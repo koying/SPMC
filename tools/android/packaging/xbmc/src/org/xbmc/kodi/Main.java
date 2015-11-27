@@ -195,8 +195,7 @@ public class Main extends NativeActivity
             try
             {
               sleep(10000);
-              mJsonRPC.updateLeanback(Main.this,
-                  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", \"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, \"limits\": { \"start\" : 0, \"end\": 3}, \"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"1\"}");
+              mJsonRPC.updateLeanback(Main.this);
             } catch (Exception e)
             {
               e.printStackTrace();
