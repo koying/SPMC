@@ -23,16 +23,42 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 public class XBMCJsonRPC
 {
+  public final static String APP_NAME = "Kodi Search";
+  public final static String COLUMN_FULL_PATH = "COLUMN_FULL_PATH";
+  public final static String COLUMN_BASE_PATH = "COLUMN_BASE_PATH";
+  public final static String COLUMN_FILENAME = "COLUMN_FILENAME";
+  public final static String COLUMN_TITLE = "COLUMN_TITLE";
+  public final static String COLUMN_IMAGE = "COLUMN_IMAGE";
+  public final static String COLUMN_ID = "COLUMN_ID";
+  public final static String COLUMN_VIEW_PROGRESS = "COLUMN_VIEW_PROGRESS";
+  public final static String COLUMN_RECOMMENDATION_REASON = "COLUMN_RECOMMENDATION_REASON";
+
   private static String TAG = "kodi";
   private String m_jsonURL = "http://localhost:8080";
-  private static final int MAX_RECOMMENDATIONS = 3;
+  private int MAX_RECOMMENDATIONS = 3;
+  private String RECOMMENDATION_JSON = 
+		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
+		  + "\"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, "
+		  + "\"limits\": { \"start\" : 0, \"end\": 3}, "
+		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
+		  + "\"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, "
+		  + "\"id\": \"1\"}";
+  private String SEARCH_MOVIES_JSON = 
+		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
+		  + "\"params\": { \"filter\": {%s}, "
+		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
+		  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
+		  + "\"id\": \"1\"}";
 
   private NotificationManager mNotificationManager;
   
@@ -141,8 +167,59 @@ public class XBMCJsonRPC
       return null;
     }
   }
+
+  public Cursor search(String query)
+  {
+      String[] menuCols = new String[] {
+              BaseColumns._ID,
+              COLUMN_TITLE,
+              COLUMN_IMAGE,
+              COLUMN_FULL_PATH,
+      };
+      MatrixCursor mc = new MatrixCursor(menuCols);
+
+      try
+      {
+        JSONObject req = request(String.format(SEARCH_MOVIES_JSON, "\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\""));
+        if (req == null)
+          return null;
+
+        JSONObject results = req.getJSONObject("result");
+        JSONArray movies = results.getJSONArray("movies");
+
+        int count = 0;
+        for (int i = 0; i < movies.length(); ++i)
+        {
+          JSONObject movie = movies.getJSONObject(i);
+          int id = Integer.parseInt(movie.getString("imdbnumber").replace("tt",
+              ""));
+/*
+          final XBMCRecommendationBuilder notificationBuilder = builder
+              .setBackground(
+                  XBMCImageContentProvider.GetImageUri(
+                      getBitmapUrl(movie.getString("fanart"))).toString())
+              .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
+              .setTitle(movie.getString("title"))
+              .setDescription(movie.getString("tagline"))
+              .setIntent(buildPendingIntent(ctx, movie));
+
+          Bitmap bitmap = getBitmap(movie.getString("thumbnail"));
+          notificationBuilder.setBitmap(bitmap);
+          Notification notification = notificationBuilder.build();
+          mNotificationManager.notify(id, notification);
+          */
+          ++count;
+        }
+      } catch (Exception e)
+      {
+        e.printStackTrace();
+        return null;
+      }
+      
+      return mc;
+  }
   
-  public void updateLeanback(Context ctx, String jsonRequest)
+  public void updateLeanback(Context ctx)
   {
     if (mNotificationManager == null)
     {
@@ -153,7 +230,7 @@ public class XBMCJsonRPC
         .setContext(ctx)
         .setSmallIcon(R.drawable.notif_icon);
 
-    JSONObject rep = request(jsonRequest);
+    JSONObject rep = request(RECOMMENDATION_JSON);
     if (rep == null)
       return;
 
@@ -208,4 +285,6 @@ public class XBMCJsonRPC
         return null;
       }
     }
+    
+    
 }

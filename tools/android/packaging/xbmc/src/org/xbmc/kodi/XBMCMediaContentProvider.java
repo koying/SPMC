@@ -44,10 +44,13 @@ public class XBMCMediaContentProvider extends ContentProvider
   }
 
   @Override
-  public Cursor query(Uri arg0, String[] arg1, String arg2, String[] arg3,
-      String arg4)
-  {
-    // TODO Auto-generated method stub
+  public Cursor query(Uri uri, String[] projection, String selection,
+          String[] selectionArgs, String sortOrder)
+  {	  
+    if(uri.toString().contains("/search"))
+  	{
+  	}
+
     return null;
   }
 
