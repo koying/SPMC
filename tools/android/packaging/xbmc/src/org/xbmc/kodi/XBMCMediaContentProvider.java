@@ -1,18 +1,35 @@
 package org.xbmc.kodi;
 
+import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 public class XBMCMediaContentProvider extends ContentProvider
 {
-  private static String TAG = "kodi";
+  private static String TAG = "kodimediaprovider";
   
-  public static String AUTHORITY = "org.xbmc.kodi";
-  public static String AUTHORITY_IMAGE = AUTHORITY + ".media";
+  public static final String AUTHORITY = "org.xbmc.kodi";
+  public static final String AUTHORITY_MEDIA = AUTHORITY + ".media";
+  public static final String SUGGEST_PATH = "suggestions";
+
+  // UriMatcher stuff
+  private static final int SEARCH_SUGGEST = 0;
+  private static final int REFRESH_SHORTCUT = 1;
+  private static final UriMatcher URI_MATCHER = buildUriMatcher();
 
   private XBMCJsonRPC mJsonRPC = null;
+
+  private static UriMatcher buildUriMatcher()
+  {
+    UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+    matcher.addURI(AUTHORITY_MEDIA, SUGGEST_PATH + "/" + SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGEST);
+    matcher.addURI(AUTHORITY_MEDIA, SUGGEST_PATH + "/" + SearchManager.SUGGEST_URI_PATH_QUERY + "/*", SEARCH_SUGGEST);
+    return matcher;
+  }
 
   @Override
   public int delete(Uri arg0, String arg1, String[] arg2)
@@ -46,12 +63,18 @@ public class XBMCMediaContentProvider extends ContentProvider
   @Override
   public Cursor query(Uri uri, String[] projection, String selection,
           String[] selectionArgs, String sortOrder)
-  {	  
-    if(uri.toString().contains("/search"))
-  	{
-  	}
-
-    return null;
+  {
+    Log.d(TAG, "query: " + uri.toString());
+    
+    switch (URI_MATCHER.match(uri))
+    {
+    case SEARCH_SUGGEST:
+      String query = uri.getLastPathSegment().toLowerCase();
+      return mJsonRPC.getSuggestions(query);
+      
+    default:
+      throw new IllegalArgumentException("Unknown Uri: " + uri);
+    }
   }
 
   @Override

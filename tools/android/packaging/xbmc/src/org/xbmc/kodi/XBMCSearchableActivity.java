@@ -6,65 +6,78 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.SearchManager;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
+import android.widget.ListView;
 
 public class XBMCSearchableActivity extends Activity
 {
 
   private static final String TAG = "KodiSearch";
 
+  private ListView mListView;
+  
   public void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
-    this.setContentView(R.layout.search_result_layout);
+    this.setContentView(R.layout.search_result);
+
+    mListView = (ListView) findViewById(R.id.searchList);
 
     handleIntent(getIntent());
   }
 
   public void onNewIntent(Intent intent)
   {
-    if (Intent.ACTION_SEARCH.equals(intent.getAction())) 
-    {
-      setIntent(intent);
-      handleIntent(intent);
-    }
+    setIntent(intent);
+    handleIntent(getIntent());
   }
+
+  private void search(String query)
+  {
+    Cursor c = getContentResolver().query(
+        Uri.parse("content://org.xbmc.kodi.media/search/" + query), null, null,
+        null, null);
+
+    // Specify the columns we want to display in the result
+    String[] from = new String[]
+    { XBMCJsonRPC.COLUMN_TITLE, XBMCJsonRPC.COLUMN_TAGLINE };
+
+    // Specify the corresponding layout elements where we want the columns to go
+    int[] to = new int[]
+    { R.id.title, R.id.tagline };
+
+    // Create a simple cursor adapter for the definitions and apply them to the
+    // ListView
+    SimpleCursorAdapter words = new SimpleCursorAdapter(this, R.layout.result,
+        c, from, to);
+    mListView.setAdapter(words);
+  }
+  
+  private void showResult(Uri data)
+  {
+    Log.d(TAG, "LAUNCH: " + data.toString());
+    Intent intent = new Intent(Intent.ACTION_VIEW, data);
+    intent.setDataAndType(data, "video/*");
+    intent.setClass(this, org.xbmc.kodi.Main.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+    startActivity(intent);
+    finish();
+}
 
   private void handleIntent(Intent intent)
   {
-    String query = intent.getStringExtra(SearchManager.QUERY);
-    Log.d(TAG, "NEW INTENT: " + intent.getAction() + "; Q=" + query);
+    Log.d(TAG, "NEW INTENT: " + intent.getAction() + "; DATA=" + intent.getData().toString());
 
-    Cursor c = getContentResolver()
-        .query(
-            Uri.parse("content://org.xbmc.kodi.media/search/"
-                + query), null, null, null, null);
-
-    if (c.getCount() > 0)
+    if (Intent.ACTION_SEARCH.equals(intent.getAction())) 
     {
-      c.moveToFirst();
-      String moviePath = c.getString(c.getColumnIndex(XBMCJsonRPC.COLUMN_FULL_PATH));
-
-      c.close();
-
-      try
-      {
-        Intent intent2 = new Intent(Intent.ACTION_VIEW, Uri.parse(moviePath));
-        Uri videoUri = Uri.parse(moviePath);
-
-        intent2.setDataAndType(videoUri, "video/*");
-
-        // intent2.putExtra("playoffset",600.0f); //DOESNTWORK
-
-        intent2.setPackage("org.xbmc.kodi");
-        startActivity(intent2);
-      } catch (Exception e)
-      {
-        Log.e(TAG, "ERROR EXECUTING KODI", e);
-      }
-
-      finish();
+      search(intent.getStringExtra(SearchManager.QUERY));
     }
-
+    else if (Intent.ACTION_VIEW.equals(intent.getAction()))
+    {
+      // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+      Uri data = intent.getData();
+      showResult(data);
+    }
   }
 }

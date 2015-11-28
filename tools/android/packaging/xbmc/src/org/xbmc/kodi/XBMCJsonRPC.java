@@ -20,7 +20,7 @@ import org.json.JSONObject;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -38,12 +38,15 @@ public class XBMCJsonRPC
   public final static String COLUMN_BASE_PATH = "COLUMN_BASE_PATH";
   public final static String COLUMN_FILENAME = "COLUMN_FILENAME";
   public final static String COLUMN_TITLE = "COLUMN_TITLE";
-  public final static String COLUMN_IMAGE = "COLUMN_IMAGE";
+  public final static String COLUMN_TAGLINE = "COLUMN_TAGLINE";
+  public final static String COLUMN_THUMB = "COLUMN_THUMB";
+  public final static String COLUMN_FANART = "COLUMN_FANART";
   public final static String COLUMN_ID = "COLUMN_ID";
   public final static String COLUMN_VIEW_PROGRESS = "COLUMN_VIEW_PROGRESS";
   public final static String COLUMN_RECOMMENDATION_REASON = "COLUMN_RECOMMENDATION_REASON";
 
-  private static String TAG = "kodi";
+  private static String TAG = "kodijson";
+  
   private String m_jsonURL = "http://localhost:8080";
   private int MAX_RECOMMENDATIONS = 3;
   private String RECOMMENDATION_JSON = 
@@ -173,8 +176,9 @@ public class XBMCJsonRPC
       String[] menuCols = new String[] {
               BaseColumns._ID,
               COLUMN_TITLE,
-              COLUMN_IMAGE,
-              COLUMN_FULL_PATH,
+              COLUMN_TAGLINE,
+              COLUMN_THUMB,
+              COLUMN_FANART,
       };
       MatrixCursor mc = new MatrixCursor(menuCols);
 
@@ -187,28 +191,10 @@ public class XBMCJsonRPC
         JSONObject results = req.getJSONObject("result");
         JSONArray movies = results.getJSONArray("movies");
 
-        int count = 0;
         for (int i = 0; i < movies.length(); ++i)
         {
           JSONObject movie = movies.getJSONObject(i);
-          int id = Integer.parseInt(movie.getString("imdbnumber").replace("tt",
-              ""));
-/*
-          final XBMCRecommendationBuilder notificationBuilder = builder
-              .setBackground(
-                  XBMCImageContentProvider.GetImageUri(
-                      getBitmapUrl(movie.getString("fanart"))).toString())
-              .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
-              .setTitle(movie.getString("title"))
-              .setDescription(movie.getString("tagline"))
-              .setIntent(buildPendingIntent(ctx, movie));
-
-          Bitmap bitmap = getBitmap(movie.getString("thumbnail"));
-          notificationBuilder.setBitmap(bitmap);
-          Notification notification = notificationBuilder.build();
-          mNotificationManager.notify(id, notification);
-          */
-          ++count;
+          mc.addRow(new Object[]{movie.getString("movieid"), movie.getString("title"), movie.getString("tagline"), movie.getString("thumbnail"), movie.getString("fanart")});
         }
       } catch (Exception e)
       {
@@ -217,6 +203,52 @@ public class XBMCJsonRPC
       }
       
       return mc;
+  }
+  
+  public Cursor getSuggestions(String query)
+  {
+    Log.d(TAG, "query: " + query);
+
+    String[] menuCols = new String[]
+    { 
+        BaseColumns._ID, 
+        SearchManager.SUGGEST_COLUMN_TEXT_1,
+        SearchManager.SUGGEST_COLUMN_TEXT_2,
+        SearchManager.SUGGEST_COLUMN_ICON_1,
+        SearchManager.SUGGEST_COLUMN_INTENT_DATA,
+    };
+    MatrixCursor mc = new MatrixCursor(menuCols);
+
+    try
+    {
+      JSONObject req = request(String.format(SEARCH_MOVIES_JSON,
+          "\"operator\": \"contains\", \"field\": \"title\", \"value\": \""
+              + query + "\""));
+      if (req == null)
+        return null;
+
+      JSONObject results = req.getJSONObject("result");
+      JSONArray movies = results.getJSONArray("movies");
+
+      for (int i = 0; i < movies.length(); ++i)
+      {
+        JSONObject movie = movies.getJSONObject(i);
+        mc.addRow(new Object[]
+        { 
+            movie.getString("movieid"),
+            movie.getString("title"),
+            movie.getString("tagline"),
+            XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
+            Uri.parse("videodb://movies/" + movie.getString("movieid")),
+        });
+      }
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+
+    return mc;
   }
   
   public void updateLeanback(Context ctx)
