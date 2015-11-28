@@ -497,7 +497,7 @@ int CXBMCApp::android_printf(const char *format, ...)
 
 void CXBMCApp::BringToFront()
 {
-  if (!m_hasFocus)
+  if (!m_isResumed)
   {
     CLog::Log(LOGERROR, "CXBMCApp::BringToFront");
     StartActivity(getPackageName());
