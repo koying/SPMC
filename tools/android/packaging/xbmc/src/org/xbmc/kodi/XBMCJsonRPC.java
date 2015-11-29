@@ -52,13 +52,14 @@ public class XBMCJsonRPC
   private String RECOMMENDATION_JSON = 
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, "
-		  + "\"limits\": { \"start\" : 0, \"end\": 3}, "
+		  + "\"limits\": { \"start\" : 0, \"end\": %d}, "
 		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
 		  + "\"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, "
 		  + "\"id\": \"1\"}";
   private String SEARCH_MOVIES_JSON = 
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {%s}, "
+      + "\"limits\": { \"start\" : 0, \"end\": %d}, "
 		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
 		  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
 		  + "\"id\": \"1\"}";
@@ -184,7 +185,14 @@ public class XBMCJsonRPC
 
       try
       {
-        JSONObject req = request(String.format(SEARCH_MOVIES_JSON, "\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\""));
+        int limit = 10;
+        JSONObject req = request(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
+        "\"or\": [" +
+        "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}, " +
+        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}]"
+        , limit));
+        
         if (req == null)
           return null;
 
@@ -205,10 +213,11 @@ public class XBMCJsonRPC
       return mc;
   }
   
-  public Cursor getSuggestions(String query)
+  public Cursor getSuggestions(String query, int limit)
   {
     Log.d(TAG, "query: " + query);
 
+    int totCount = 0;
     String[] menuCols = new String[]
     { 
         BaseColumns._ID, 
@@ -221,16 +230,19 @@ public class XBMCJsonRPC
 
     try
     {
-      JSONObject req = request(String.format(SEARCH_MOVIES_JSON,
-          "\"operator\": \"contains\", \"field\": \"title\", \"value\": \""
-              + query + "\""));
+      JSONObject req = request(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
+      "\"or\": [" +
+      "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}, " +
+      "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+      "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}]"
+      , limit));
       if (req == null)
         return null;
 
       JSONObject results = req.getJSONObject("result");
       JSONArray movies = results.getJSONArray("movies");
 
-      for (int i = 0; i < movies.length(); ++i)
+      for (int i = 0; i < movies.length() && totCount < limit; ++i)
       {
         JSONObject movie = movies.getJSONObject(i);
         mc.addRow(new Object[]
@@ -241,6 +253,7 @@ public class XBMCJsonRPC
             XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
             Uri.parse("videodb://movies/" + movie.getString("movieid")),
         });
+        totCount++;
       }
     } catch (Exception e)
     {
@@ -262,7 +275,7 @@ public class XBMCJsonRPC
         .setContext(ctx)
         .setSmallIcon(R.drawable.notif_icon);
 
-    JSONObject rep = request(RECOMMENDATION_JSON);
+    JSONObject rep = request(String.format(RECOMMENDATION_JSON, MAX_RECOMMENDATIONS));
     if (rep == null)
       return;
 
