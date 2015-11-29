@@ -70,7 +70,11 @@ public class XBMCMediaContentProvider extends ContentProvider
     {
     case SEARCH_SUGGEST:
       String query = uri.getLastPathSegment().toLowerCase();
-      return mJsonRPC.getSuggestions(query);
+      int limit = 10;
+      try {
+        limit = Integer.parseInt(uri.getQueryParameter("limit"));
+      } catch (Exception e) {}
+      return mJsonRPC.getSuggestions(query, limit);
       
     default:
       throw new IllegalArgumentException("Unknown Uri: " + uri);

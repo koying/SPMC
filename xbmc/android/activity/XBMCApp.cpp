@@ -46,6 +46,7 @@
 #include "messaging/ApplicationMessenger.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "utils/URIUtils.h"
 #include "AppParamParser.h"
 #include "XbmcContext.h"
 #include <android/bitmap.h>
@@ -804,14 +805,26 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
 {
   std::string action = intent.getAction();
   CXBMCApp::android_printf("Got Intent: %s", action.c_str());
+  std::string targetFile = GetFilenameFromIntent(intent);
+  CXBMCApp::android_printf("-- targetFile: %s", targetFile.c_str());
   if (action == "android.intent.action.VIEW")
   {
-    std::string playFile = GetFilenameFromIntent(intent);
-    CXBMCApp::android_printf("-- playfile: %s", playFile.c_str());
-    CFileItem* item = new CFileItem(playFile, false);
-    if (item->IsVideoDb() && !item->HasVideoInfoTag())
+    CFileItem* item = new CFileItem(targetFile, false);
+    if (item->IsVideoDb())
+    {
       *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
+      item->SetPath(XFILE::CVideoDatabaseFile::TranslateUrl(CURL(item->GetPath())));
+    }
     CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PLAY, 0, 0, static_cast<void*>(item));
+  }
+  else if (action == "android.intent.action.GET_CONTENT")
+  {
+    if (URIUtils::IsVideoDb(targetFile))
+    {
+      std::vector<std::string> params;
+      params.push_back(targetFile);
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
+    }
   }
 }
 
