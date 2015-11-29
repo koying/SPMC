@@ -6,7 +6,7 @@
     android:searchSuggestAuthority="org.xbmc.kodi.media"
     android:searchSuggestPath="suggestions"
     
-    android:searchSuggestIntentAction="android.intent.action.VIEW"
+    android:searchSuggestIntentAction="android.intent.action.GET_CONTENT"
     android:searchSuggestIntentData="content://org.xbmc.kodi.media/intent"
     
     android:includeInGlobalSearch="true"
