@@ -841,7 +841,7 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
     if (item->IsVideoDb())
     {
       *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
-      item->SetPath(XFILE::CVideoDatabaseFile::TranslateUrl(CURL(item->GetPath())));
+      item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
     }
     CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PLAY, 0, 0, static_cast<void*>(item));
   }
