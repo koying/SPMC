@@ -54,14 +54,16 @@ public class XBMCSearchableActivity extends Activity
     mListView.setAdapter(words);
   }
   
-  private void showResult(Uri data)
+  private void doAction(Intent origIntent)
   {
+    Uri data = origIntent.getData();
     Log.d(TAG, "LAUNCH: " + data.toString());
-    Intent intent = new Intent(Intent.ACTION_VIEW, data);
-    intent.setDataAndType(data, "video/*");
-    intent.setClass(this, org.xbmc.kodi.Main.class);
-    intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
-    startActivity(intent);
+
+    Intent newIntent = new Intent(origIntent.getAction(), data);
+    newIntent.setDataAndType(data, "video/*");
+    newIntent.setClass(this, org.xbmc.kodi.Main.class);
+    newIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
+    startActivity(newIntent);
     finish();
 }
 
@@ -73,11 +75,10 @@ public class XBMCSearchableActivity extends Activity
     {
       search(intent.getStringExtra(SearchManager.QUERY));
     }
-    else if (Intent.ACTION_VIEW.equals(intent.getAction()))
+    else if (Intent.ACTION_VIEW.equals(intent.getAction()) || Intent.ACTION_GET_CONTENT.equals(intent.getAction()))
     {
       // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
-      Uri data = intent.getData();
-      showResult(data);
+      doAction(intent);
     }
   }
 }
