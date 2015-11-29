@@ -105,7 +105,7 @@ bool CGUIDialogSimpleMenu::ShowPlaySelection(CFileItem& item, const std::string&
   {
     _3ditems.Sort(SortByTrackNumber,  SortOrderDescending);
     _3ditems.Sort(SortBySize, SortOrderDescending);
-    printf("%s: %s\n", __func__, _3ditems[0]->GetPath().c_str());
+    //printf("%s: %s\n", __func__, _3ditems[0]->GetPath().c_str());
     CFileItemPtr _3ditem(new CFileItem("", false));
     _3ditem->SetPath(_3ditems[0]->GetPath());
     _3ditem->m_bIsFolder = false;
