@@ -130,6 +130,19 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
       if (!CGUIWindowVideoBase::OnMessage(message))
         return false;
 
+      if (message.GetStringParam(0) != "")
+      {
+        for (int i = 0; i < m_vecItems->Size(); i++)
+        {
+          CFileItemPtr pItem = m_vecItems->Get(i);
+          if (pItem->GetPath() == message.GetStringParam(0))
+          {
+            m_viewControl.SetSelectedItem(i);
+            break;
+          }
+        }
+      }
+
       return true;
     }
     break;
