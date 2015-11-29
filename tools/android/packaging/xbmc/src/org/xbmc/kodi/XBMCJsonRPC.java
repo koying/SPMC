@@ -251,7 +251,7 @@ public class XBMCJsonRPC
             movie.getString("title"),
             movie.getString("tagline"),
             XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
-            Uri.parse("videodb://movies/" + movie.getString("movieid")),
+            Uri.parse("videodb://movies/titles/" + movie.getString("movieid")),
         });
         totCount++;
       }
@@ -319,7 +319,7 @@ public class XBMCJsonRPC
       {
         Intent detailsIntent = new Intent(ctx, Splash.class);
         detailsIntent.setAction(Intent.ACTION_VIEW);
-        detailsIntent.setData(Uri.parse("videodb://movies/" + movie.getString("movieid")));
+        detailsIntent.setData(Uri.parse("videodb://movies/titles/" + movie.getString("movieid")));
         //detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
         //detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
   
