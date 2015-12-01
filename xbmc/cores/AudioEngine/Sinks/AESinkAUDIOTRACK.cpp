@@ -209,6 +209,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   if (AE_IS_RAW(m_format.m_dataFormat) && !CXBMCApp::IsHeadsetPlugged())
   {
     m_passthrough = true;
+
+    m_encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
+    m_sink_sampleRate       = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
+
     switch (m_format.m_dataFormat)
     {
       case AE_FMT_AC3_RAW:
@@ -246,10 +250,40 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         m_sink_sampleRate       = m_format.m_encodedRate;
         break;
 
+#if defined(HAS_LIBAMCODEC)
+      case AE_FMT_AC3:
+        if (aml_present())
+          m_encoding              = CJNIAudioFormat::ENCODING_AC3;
+        break;
+
+      case AE_FMT_EAC3:
+        if (aml_present())
+          m_encoding              = CJNIAudioFormat::ENCODING_E_AC3;
+        break;
+
+      case AE_FMT_DTS:
+        if (aml_present())
+          m_encoding              = CJNIAudioFormat::ENCODING_DTS;
+        break;
+
+      case AE_FMT_DTSHD:
+        if (aml_present())
+        {
+          m_encoding              = CJNIAudioFormat::ENCODING_DTS_HD;
+          m_sink_sampleRate       = 192000;;
+        }
+        break;
+
+      case AE_FMT_TRUEHD:
+        if (aml_present())
+        {
+          m_encoding              = CJNIAudioFormat::ENCODING_DOLBY_TRUEHD;
+          m_sink_sampleRate       = 192000;;
+        }
+        break;
+#endif
       default:
-        m_encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
         m_format.m_dataFormat   = AE_FMT_S16LE;
-        m_sink_sampleRate       = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
         break;
     }
   }
@@ -544,7 +578,17 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
     m_info.m_dataFormats.push_back(AE_FMT_AC3);
     m_info.m_dataFormats.push_back(AE_FMT_DTS);
 #if defined(HAS_LIBAMCODEC)
-    if (!aml_present())
+    if (aml_present())
+    {
+      // passthrough
+      m_sink_sampleRates.insert(44100);
+      m_sink_sampleRates.insert(48000);
+      m_sink_sampleRates.insert(192000);   // For HD audio
+      m_info.m_dataFormats.push_back(AE_FMT_EAC3);
+//      m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
+//      m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
+    }
+    else
 #endif
     {
       int test_sample[] = { 32000, 44100, 48000, 96000, 192000 };
