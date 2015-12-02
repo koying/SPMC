@@ -205,17 +205,24 @@ public class Main extends NativeActivity
       }
 
     }
-    
+
     // New intent ?
     if (mNewIntent != null)
     {
-      try {
-        _onNewIntent(mNewIntent);
-      } catch (UnsatisfiedLinkError e) {
-        Log.e("Main", "Native not registered");
-      } finally {
-        mNewIntent = null;
-      }
+      handler.postDelayed(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            try {
+              _onNewIntent(mNewIntent);
+            } catch (UnsatisfiedLinkError e) {
+              Log.e("Main", "Native not registered");
+            } finally {
+              mNewIntent = null;
+            }
+          }
+        }, 500);
     }
   }
 
