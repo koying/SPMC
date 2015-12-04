@@ -51,6 +51,11 @@ class CJNIAudioFormat
     static int CHANNEL_OUT_BACK_RIGHT;
 
     static int CHANNEL_INVALID;
+
+    // AML
+    static int ENCODING_DTSHD;
+    static int ENCODING_DTSHD_MA;
+    static int ENCODING_TRUEHD;
 };
 
 };
