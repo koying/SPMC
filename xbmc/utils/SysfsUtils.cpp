@@ -70,17 +70,22 @@ int SysfsUtils::GetString(const std::string& path, std::string& valstr)
 int SysfsUtils::SetInt(const std::string& path, const int val)
 {
   int fd = open(path.c_str(), O_RDWR, 0644);
-  int ret = 0;
+  int ret = -1;
   if (fd >= 0)
   {
     char bcmd[16];
     sprintf(bcmd, "%d", val);
     if (write(fd, bcmd, strlen(bcmd)) < 0)
+    {
+      CLog::Log(LOGERROR, "%s: error writing %s",__FUNCTION__, path.c_str());
       ret = -1;
+    }
+    else
+      ret = 0;
     close(fd);
   }
   if (ret)
-    CLog::Log(LOGERROR, "%s: error writing %s",__FUNCTION__, path.c_str());
+    CLog::Log(LOGERROR, "%s: error opening %s",__FUNCTION__, path.c_str());
 
   return ret;
 }
