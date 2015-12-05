@@ -35,7 +35,7 @@
 #include "android/jni/AudioTrack.h"
 #include "android/jni/Build.h"
 
-#define DEBUG_VERBOSE 1
+//#define DEBUG_VERBOSE 1
 
 using namespace jni;
 
@@ -252,43 +252,53 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
 #if defined(HAS_LIBAMCODEC)
       case AE_FMT_AC3:
-        if (aml_present())
+        if (aml_present() && HasAmlHD())
         {
           m_encoding              = CJNIAudioFormat::ENCODING_AC3;
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
         }
+        else
+          m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
       case AE_FMT_EAC3:
-        if (aml_present())
+        if (aml_present() && HasAmlHD())
         {
           m_encoding              = CJNIAudioFormat::ENCODING_E_AC3;
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
         }
+        else
+          m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
       case AE_FMT_DTS:
-        if (aml_present())
+        if (aml_present() && HasAmlHD())
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DTS;
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
         }
+        else
+          m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
       case AE_FMT_DTSHD:
-        if (aml_present())
-        {
-          m_encoding              = CJNIAudioFormat::ENCODING_DTSHD_MA;
-          m_sink_sampleRate       = 192000;
-        }
-        break;
-
-      case AE_FMT_TRUEHD:
-        if (aml_present())
+        if (aml_present() && HasAmlHD())
         {
           m_encoding              = CJNIAudioFormat::ENCODING_TRUEHD;
           m_sink_sampleRate       = 192000;
         }
+        else
+          m_format.m_dataFormat   = AE_FMT_S16LE;
+        break;
+
+      case AE_FMT_TRUEHD:
+        if (aml_present() && HasAmlHD())
+        {
+          m_encoding              = CJNIAudioFormat::ENCODING_TRUEHD;
+          m_sink_sampleRate       = 192000;
+        }
+        else
+          m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 #endif
       default:
@@ -308,7 +318,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   m_format.m_channelLayout  = AUDIOTRACKChannelMaskToAEChannelMap(atChannelMask);
 
 #if defined(HAS_LIBAMCODEC)
-  if (aml_present() && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEAMCODEC))
+  if (aml_present())
     aml_set_audio_passthrough(m_passthrough);
   if (m_passthrough)
     atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
@@ -553,6 +563,11 @@ bool CAESinkAUDIOTRACK::WantsIEC61937()
   return !(AE_IS_RAW_RAW(m_format.m_dataFormat));
 }
 
+bool CAESinkAUDIOTRACK::HasAmlHD()
+{
+  return (CJNIAudioFormat::ENCODING_TRUEHD != -1);
+}
+
 void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 {
   m_info.m_channels.Reset();
@@ -587,18 +602,12 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
       // passthrough
       m_sink_sampleRates.insert(44100);
       m_sink_sampleRates.insert(48000);
-      m_info.m_dataFormats.push_back(AE_FMT_EAC3);
-      if (CJNIAudioManager::GetSDKVersion() >= 21)
+      if (HasAmlHD())
       {
         m_sink_sampleRates.insert(192000);   // For HD audio
-        if (CJNIAudioFormat::ENCODING_TRUEHD == -1)
-          CLog::Log(LOGERROR, "AML: No ENCODING_TRUEHD");
-        else
-          m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
-        if (CJNIAudioFormat::ENCODING_DTSHD == -1)
-          CLog::Log(LOGERROR, "AML: No ENCODING_DTSHD");
-        else
-          m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
+        m_info.m_dataFormats.push_back(AE_FMT_EAC3);
+        m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
+        m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
       }
     }
     else
