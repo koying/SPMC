@@ -823,6 +823,7 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
     {
       std::vector<std::string> params;
       params.push_back(targetFile);
+      params.push_back("return");
       CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
     }
   }
