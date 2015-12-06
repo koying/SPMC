@@ -119,9 +119,9 @@ bool aml_supports_stereo(const int mode)
 
   if (mode == RENDER_STEREO_MODE_INTERLACED && disp_cap_3d.find("FramePacking") != std::string::npos)
     last_rtn = true;
-  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL && disp_cap_3d.find("TopBottom") != std::string::npos)
+  else if (mode == RENDER_STEREO_MODE_SPLIT_HORIZONTAL)
     last_rtn = true;
-  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL && disp_cap_3d.find("SidebySide") != std::string::npos)
+  else if (mode == RENDER_STEREO_MODE_SPLIT_VERTICAL)
     last_rtn = true;
 
   last_mode = mode;
