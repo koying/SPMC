@@ -318,9 +318,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   m_format.m_channelLayout  = AUDIOTRACKChannelMaskToAEChannelMap(atChannelMask);
 
 #if defined(HAS_LIBAMCODEC)
-  if (aml_present())
-    aml_set_audio_passthrough(m_passthrough);
-  if (m_passthrough)
+  if (aml_present() && m_passthrough)
     atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
 #endif
 
@@ -393,9 +391,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
 void CAESinkAUDIOTRACK::Deinitialize()
 {
-#ifdef DEBUG_VERBOSE
+//#ifdef DEBUG_VERBOSE
   CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Deinitialize");
-#endif
+//#endif
   // Restore volume
   if (m_volume != -1)
   {
@@ -408,6 +406,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
 
   if (IsInitialized())
   {
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::stopiing audiotrack");
     m_at_jni->stop();
     m_at_jni->flush();
   }
