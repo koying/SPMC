@@ -465,9 +465,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
 void CAESinkAUDIOTRACK::Deinitialize()
 {
-#ifdef DEBUG_VERBOSE
+//#ifdef DEBUG_VERBOSE
   CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Deinitialize");
-#endif
+//#endif
   // Restore volume
   if (m_volume != -1)
   {
@@ -480,6 +480,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
 
   if (IsInitialized())
   {
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::stopiing audiotrack");
     m_at_jni->stop();
     m_at_jni->flush();
   }
