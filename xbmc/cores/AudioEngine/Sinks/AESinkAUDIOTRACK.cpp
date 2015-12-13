@@ -294,7 +294,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       case AE_FMT_TRUEHD:
         if (aml_present() && HasAmlHD())
         {
-          m_encoding              = CJNIAudioFormat::ENCODING_TRUEHD;
+          m_encoding              = CJNIAudioFormat::ENCODING_DTSHD_MA;
           m_sink_sampleRate       = 192000;
         }
         else
