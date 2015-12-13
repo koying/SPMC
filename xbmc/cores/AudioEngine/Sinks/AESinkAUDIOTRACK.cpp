@@ -599,7 +599,6 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
     if (aml_present())
     {
       // passthrough
-      m_sink_sampleRates.insert(44100);
       m_sink_sampleRates.insert(48000);
       if (HasAmlHD())
       {
