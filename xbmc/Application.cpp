@@ -564,7 +564,7 @@ bool CApplication::Create()
   CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
 #endif
 
-#if defined(__arm__)
+#if defined(__arm__) || defined(__aarch64__)
   if (g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_NEON)
     CLog::Log(LOGNOTICE, "ARM Features: Neon enabled");
   else
