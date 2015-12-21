@@ -40,6 +40,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -p0 < ../Python-no-export-path.patch
 	cd $(PLATFORM); patch -p0 < ../fix-ffi.patch
 ifeq ($(OS),ios)
+	cd $(PLATFORM); patch -p0 < ../make-fork-optional.patch
 	cd $(PLATFORM); patch -p0 < ../Python-2.6.5-urllib.diff
 	cd $(PLATFORM); sed -ie 's|MACHDEP="unknown"|MACHDEP="darwin"|' configure.ac
 endif
