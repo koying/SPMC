@@ -19,6 +19,8 @@
  *
  */
 
+#include "jutils/jutils-details.hpp"
+
 namespace jni
 {
 
@@ -56,6 +58,9 @@ class CJNIAudioFormat
     static int ENCODING_DTSHD;
     static int ENCODING_DTSHD_MA;
     static int ENCODING_TRUEHD;
+
+protected:
+    static void GetStaticValue(jhclass &c, int &field, char *value);
 };
 
 };
