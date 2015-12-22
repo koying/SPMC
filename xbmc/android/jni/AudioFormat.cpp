@@ -26,11 +26,11 @@ using namespace jni;
 
 int CJNIAudioFormat::ENCODING_PCM_16BIT = 0x00000002;
 int CJNIAudioFormat::ENCODING_PCM_FLOAT = 0x00000004;
-int CJNIAudioFormat::ENCODING_AC3       = 0x00000005;
-int CJNIAudioFormat::ENCODING_E_AC3     = 0x00000006;
-int CJNIAudioFormat::ENCODING_DTS       = 0x00000007;
-int CJNIAudioFormat::ENCODING_DTS_HD    = 0x00000008;
-int CJNIAudioFormat::ENCODING_DOLBY_TRUEHD    = 0x00000009;
+int CJNIAudioFormat::ENCODING_AC3       = -1;
+int CJNIAudioFormat::ENCODING_E_AC3     = -1;
+int CJNIAudioFormat::ENCODING_DTS       = -1;
+int CJNIAudioFormat::ENCODING_DTS_HD    = -1;
+int CJNIAudioFormat::ENCODING_DOLBY_TRUEHD    = -1;
 
 int CJNIAudioFormat::CHANNEL_OUT_STEREO  = 0x0000000c;
 int CJNIAudioFormat::CHANNEL_OUT_5POINT1 = 0x000000fc;
@@ -53,6 +53,15 @@ int CJNIAudioFormat::CHANNEL_INVALID                   = 0x00000000;
 int CJNIAudioFormat::ENCODING_DTSHD       = -1;
 int CJNIAudioFormat::ENCODING_DTSHD_MA    = -1;
 int CJNIAudioFormat::ENCODING_TRUEHD      = -1;
+
+void CJNIAudioFormat::GetStaticValue(jhclass& c, int& field, char* value)
+{
+  jfieldID id = get_static_field_id<jclass>(c, value, "I");
+  if (id != NULL)
+    field = get_static_field<int>(c, value);
+  else
+    xbmc_jnienv()->ExceptionClear();
+}
 
 void CJNIAudioFormat::PopulateStaticFields()
 {
@@ -81,36 +90,19 @@ void CJNIAudioFormat::PopulateStaticFields()
         CJNIAudioFormat::CHANNEL_OUT_SIDE_LEFT = get_static_field<int>(c, "CHANNEL_OUT_SIDE_LEFT");
         CJNIAudioFormat::CHANNEL_OUT_SIDE_RIGHT = get_static_field<int>(c, "CHANNEL_OUT_SIDE_RIGHT");
 
-        CJNIAudioFormat::ENCODING_PCM_FLOAT = get_static_field<int>(c, "ENCODING_PCM_FLOAT");
-        CJNIAudioFormat::ENCODING_AC3 = get_static_field<int>(c, "ENCODING_AC3");
-        CJNIAudioFormat::ENCODING_E_AC3 = get_static_field<int>(c, "ENCODING_E_AC3");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_AC3, "ENCODING_AC3");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_E_AC3, "ENCODING_E_AC3");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_DTS, "ENCODING_DTS");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_DTS_HD, "ENCODING_DTS_HD");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_DOLBY_TRUEHD, "ENCODING_DOLBY_TRUEHD");
 
-        if (sdk >= 23)
-        {
-          CJNIAudioFormat::ENCODING_DTS = get_static_field<int>(c, "ENCODING_DTS");
-          CJNIAudioFormat::ENCODING_DTS_HD = get_static_field<int>(c, "ENCODING_DTS_HD");
-        }
+        // AML specific
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_TRUEHD, "ENCODING_TRUEHD");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_DTSHD, "ENCODING_DTSHD");
+        GetStaticValue(c, CJNIAudioFormat::ENCODING_DTSHD_MA, "ENCODING_DTSHD_MA");
       }
     }
 
-    // AML specific
-    jfieldID id = get_static_field_id<jclass>(c, "ENCODING_TRUEHD", "I");
-    if (id != NULL)
-      CJNIAudioFormat::ENCODING_TRUEHD = get_static_field<int>(c, "ENCODING_TRUEHD");
-    else
-      xbmc_jnienv()->ExceptionClear();
-
-    id = get_static_field_id<jclass>(c, "ENCODING_DTSHD", "I");
-    if (id != NULL)
-      CJNIAudioFormat::ENCODING_DTSHD = get_static_field<int>(c, "ENCODING_DTSHD");
-    else
-      xbmc_jnienv()->ExceptionClear();
-
-    id = get_static_field_id<jclass>(c, "ENCODING_DTSHD_MA", "I");
-    if (id != NULL)
-      CJNIAudioFormat::ENCODING_DTSHD_MA = get_static_field<int>(c, "ENCODING_DTSHD_MA");
-    else
-      xbmc_jnienv()->ExceptionClear();
   }
 }
 
