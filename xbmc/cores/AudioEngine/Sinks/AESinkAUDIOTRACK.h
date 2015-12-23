@@ -56,8 +56,7 @@ protected:
 
 private:
   jni::CJNIAudioTrack  *m_at_jni;
-  // m_frames_written must wrap at UINT32_MAX
-  uint32_t              m_frames_written;
+  double                m_duration_written;
   uint32_t              m_lastHeadPosition;
   uint32_t              m_ptOffset;
 
@@ -73,4 +72,5 @@ private:
   bool               m_passthrough;
   double             m_audiotrackbuffer_sec;
   int                m_encoding;
+  unsigned int       m_buffer_size;
 };
