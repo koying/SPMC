@@ -47,7 +47,7 @@ public:
   virtual enum AEDataFormat GetDataFormat();
   virtual bool NeedPassthrough           () { return true;          }
   virtual const char* GetName            () { return "passthroughraw"; }
-  virtual int  GetBufferSize();
+
 private:
   CDVDStreamInfo     m_hints;
   uint8_t*           m_buffer;
