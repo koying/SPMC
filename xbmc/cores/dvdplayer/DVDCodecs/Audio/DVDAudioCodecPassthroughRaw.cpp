@@ -312,8 +312,3 @@ int CDVDAudioCodecPassthroughRaw::GetData(uint8_t** dst)
 void CDVDAudioCodecPassthroughRaw::Reset()
 {
 }
-
-int CDVDAudioCodecPassthroughRaw::GetBufferSize()
-{
-  return (int)m_bufferUsed;
-}
