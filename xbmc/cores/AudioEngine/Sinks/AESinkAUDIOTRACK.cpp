@@ -35,6 +35,8 @@
 #include "android/jni/AudioTrack.h"
 #include "android/jni/Build.h"
 
+#include <algorithm>
+
 //#define DEBUG_VERBOSE 1
 
 using namespace jni;
@@ -175,6 +177,7 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   m_duration_written = 0;
   m_lastHeadPosition = 0;
   m_ptOffset = 0;
+  m_buffer_duration = 0;
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
@@ -364,7 +367,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     {
       m_format.m_frameSize      = 1;
       m_sink_frameSize          = m_format.m_frameSize;
-      m_buffer_size            *= 4;
+      if (m_encoding == CJNIAudioFormat::ENCODING_DTS_HD || m_encoding == CJNIAudioFormat::ENCODING_DOLBY_TRUEHD)
+        m_buffer_size           = std::max(m_buffer_size, (unsigned int)61440);
     }
     else
     {
@@ -448,6 +452,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_duration_written = 0;
   m_lastHeadPosition = 0;
   m_ptOffset = 0;
+  m_buffer_duration = 0;
 
   delete m_at_jni;
   m_at_jni = NULL;
@@ -470,6 +475,15 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   // return a 32bit "int" that you should "interpret as unsigned."  As such,
   // for wrap saftey, we need to do all ops on it in 32bit integer math.
   uint32_t head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
+  if (!head_pos)
+  {
+    status.SetDelay(0);
+    return;
+  }
+  else if (!m_buffer_duration)
+  {
+    m_buffer_duration = m_duration_written - ((double)head_pos / m_sink_sampleRate);
+  }
 
   if (m_passthrough && !WantsIEC61937())
   {
@@ -480,7 +494,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     m_lastHeadPosition = head_pos;
   }
 
-  double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
+  double delay = (m_duration_written - m_buffer_duration) - ((double)head_pos / m_sink_sampleRate);
 
   m_smoothedDelayVec.push_back(delay);
   if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
@@ -617,7 +631,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_channels = KnownChannels;
 #endif
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
-  
+
   m_sink_sampleRates.clear();
   m_sink_sampleRates.insert(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
 
