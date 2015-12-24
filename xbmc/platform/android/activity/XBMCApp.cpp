@@ -176,6 +176,7 @@ void CXBMCApp::onResume()
   intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
   intentFilter.addAction("android.intent.action.SCREEN_ON");
   intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+  intentFilter.addAction("android.intent.action.SCREEN_OFF");
   registerReceiver(*this, intentFilter);
 
   if (!g_application.IsInScreenSaver())
@@ -783,6 +784,11 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   {
     if (HasFocus())
       g_application.WakeUpScreenSaverAndDPMS();
+  }
+  else if (action == "android.intent.action.SCREEN_OFF")
+  {
+    if (g_application.m_pPlayer->IsPlayingVideo())
+      CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
   }
   else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
   {
