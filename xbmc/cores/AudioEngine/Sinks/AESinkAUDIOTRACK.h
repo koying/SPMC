@@ -73,4 +73,5 @@ private:
   double             m_audiotrackbuffer_sec;
   int                m_encoding;
   unsigned int       m_buffer_size;
+  double             m_buffer_duration;
 };
