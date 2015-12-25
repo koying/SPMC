@@ -36,7 +36,7 @@ static enum AEChannel OutputMaps[2][9] = {
 #define AC3_DIVISOR 1536
 #define DTS_DIVISOR 512
 #define TRUEHD_DIVISOR 960
-#define CONSTANT_BUFFER_SIZE_SD 4096
+#define CONSTANT_BUFFER_SIZE_SD 16384
 #define CONSTANT_BUFFER_SIZE_HD 61440
 
 CDVDAudioCodecPassthroughRaw::CDVDAudioCodecPassthroughRaw(void) :
@@ -93,7 +93,7 @@ void CDVDAudioCodecPassthroughRaw::GetData(DVDAudioFrame &frame)
   frame.encoded_sample_rate   = GetEncodedSampleRate();
   frame.nb_frames             = GetData(frame.data)/frame.framesize;
 
-  float unscaledbitrate = (float)(frame.nb_frames*frame.framesize) * frame.encoded_sample_rate;
+  float unscaledbitrate = (float)(frame.nb_frames*frame.framesize) * 48000;
   switch(m_codec)
   {
     case AE_FMT_AC3_RAW:
@@ -240,10 +240,10 @@ int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
 
   // Do pseudo-encapsulation to make bitrate constant
   int constant_size = 0;
-  if (m_codec == AE_FMT_TRUEHD_RAW || m_codec == AE_FMT_DTSHD_RAW)
-    constant_size = CONSTANT_BUFFER_SIZE_HD;
-  else
+  if (m_codec == AE_FMT_AC3_RAW || m_codec == AE_FMT_DTS_RAW)
     constant_size = CONSTANT_BUFFER_SIZE_SD;
+  else
+    constant_size = CONSTANT_BUFFER_SIZE_HD;
 
   if (constant_size)
   {
