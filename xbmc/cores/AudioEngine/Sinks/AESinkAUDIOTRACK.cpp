@@ -177,7 +177,6 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   m_duration_written = 0;
   m_lastHeadPosition = 0;
   m_ptOffset = 0;
-  m_buffer_duration = 0;
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
@@ -223,8 +222,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_AC3;
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          m_format.m_frames       = AC3_FRAME_SIZE * m_format.m_sampleRate / m_format.m_encodedRate;
-          m_sink_sampleRate       = m_format.m_encodedRate;
+          m_format.m_frames       = AC3_FRAME_SIZE * m_format.m_sampleRate / 48000;
+          m_sink_sampleRate       = 48000;
         }
         else
           m_format.m_dataFormat   = AE_FMT_S16LE;
@@ -235,8 +234,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_E_AC3;
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          m_format.m_frames       = AC3_FRAME_SIZE * m_format.m_sampleRate / m_format.m_encodedRate;
-          m_sink_sampleRate       = m_format.m_encodedRate;
+          m_format.m_frames       = AC3_FRAME_SIZE * m_format.m_sampleRate / 48000;
+          m_sink_sampleRate       = 48000;
         }
         else
           m_format.m_dataFormat   = AE_FMT_S16LE;
@@ -247,8 +246,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DTS;
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          m_format.m_frames       = DTS1_FRAME_SIZE * m_format.m_sampleRate / m_format.m_encodedRate;
-          m_sink_sampleRate       = m_format.m_encodedRate;
+          m_format.m_frames       = DTS1_FRAME_SIZE * m_format.m_sampleRate / 48000;
+          m_sink_sampleRate       = 48000;
         }
         else
           m_format.m_dataFormat   = AE_FMT_S16LE;
@@ -259,8 +258,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DTS_HD;
           m_format.m_channelLayout = AE_CH_LAYOUT_7_1;
-          m_format.m_frames       = DTS1_FRAME_SIZE * m_format.m_sampleRate / m_format.m_encodedRate;
-          m_sink_sampleRate       = m_format.m_encodedRate;
+          m_format.m_frames       = DTS1_FRAME_SIZE * m_format.m_sampleRate / 48000;
+          m_sink_sampleRate       = 48000;
         }
         else
           m_format.m_dataFormat   = AE_FMT_S16LE;
@@ -271,8 +270,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DOLBY_TRUEHD;
           m_format.m_channelLayout = AE_CH_LAYOUT_7_1;
-          m_format.m_frames       = TRUEHD_UNIT * m_format.m_sampleRate / m_format.m_encodedRate;
-          m_sink_sampleRate       = m_format.m_encodedRate;
+          m_format.m_frames       = TRUEHD_UNIT * m_format.m_sampleRate / 48000;
+          m_sink_sampleRate       = 48000;
         }
         else
           m_format.m_dataFormat   = AE_FMT_S16LE;
@@ -367,8 +366,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     {
       m_format.m_frameSize      = 1;
       m_sink_frameSize          = m_format.m_frameSize;
-      if (m_encoding == CJNIAudioFormat::ENCODING_DTS_HD || m_encoding == CJNIAudioFormat::ENCODING_DOLBY_TRUEHD)
-        m_buffer_size           = std::max(m_buffer_size, (unsigned int)61440);
+      if (m_encoding == CJNIAudioFormat::ENCODING_AC3 || m_encoding == CJNIAudioFormat::ENCODING_DTS)
+        m_buffer_size           *= 2;
+      else
+        m_buffer_size           *= 4;
     }
     else
     {
@@ -452,7 +453,6 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_duration_written = 0;
   m_lastHeadPosition = 0;
   m_ptOffset = 0;
-  m_buffer_duration = 0;
 
   delete m_at_jni;
   m_at_jni = NULL;
@@ -475,15 +475,6 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   // return a 32bit "int" that you should "interpret as unsigned."  As such,
   // for wrap saftey, we need to do all ops on it in 32bit integer math.
   uint32_t head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
-  if (!head_pos)
-  {
-    status.SetDelay(0);
-    return;
-  }
-  else if (!m_buffer_duration)
-  {
-    m_buffer_duration = m_duration_written - ((double)head_pos / m_sink_sampleRate);
-  }
 
   if (m_passthrough && !WantsIEC61937())
   {
@@ -494,13 +485,18 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     m_lastHeadPosition = head_pos;
   }
 
-  double delay = (m_duration_written - m_buffer_duration) - ((double)head_pos / m_sink_sampleRate);
+  double delay = m_duration_written - ((double)head_pos / m_format.m_encodedRate);
+  if (m_duration_written != m_last_duration_written)
+  {
 
-  m_smoothedDelayVec.push_back(delay);
-  if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
-    m_smoothedDelayCount++;
-  else
-    m_smoothedDelayVec.erase(m_smoothedDelayVec.begin());
+    m_smoothedDelayVec.push_back(delay);
+    if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
+      m_smoothedDelayCount++;
+    else
+      m_smoothedDelayVec.erase(m_smoothedDelayVec.begin());
+
+    m_last_duration_written = m_duration_written;
+  }
 
   double smootheDelay = 0;
   for (double d : m_smoothedDelayVec)
@@ -508,6 +504,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   smootheDelay /= m_smoothedDelayCount;
 
 #ifdef DEBUG_VERBOSE
+  if (m_passthrough)
     CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_duration_written/head_pos %f/%u %f(%f)", m_duration_written, head_pos, smootheDelay, delay);
 #endif
 
@@ -547,14 +544,6 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
         m_at_jni->pause();
       return frames;
     }
-
-    // Test and ignore silence packets
-    else if (out_buf[0] == 0 && !memcmp(out_buf, out_buf+1, size-1))
-    {
-      if (m_at_jni->getPlayState() == CJNIAudioTrack::PLAYSTATE_PLAYING)
-        m_at_jni->pause();
-      return frames;
-    }
   }
 
   // write as many frames of audio as we can fit into our internal buffer.
@@ -566,26 +555,27 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     // writing into its buffer.
     if (m_at_jni->getPlayState() != CJNIAudioTrack::PLAYSTATE_PLAYING)
       m_at_jni->play();
-    written = m_at_jni->write((char*)out_buf, 0, size);
-    if (written == size)
-      written = frames * m_format.m_frameSize;     // Be sure to report to AE everything has been written
-    else if (written < 0)
+    unsigned int toWrite = size;
+    while (toWrite > 0)
     {
-      CLog::Log(LOGERROR, "CAESinkAUDIOTRACK::AddPackets write returned error:  %d", written);
-      return INT_MAX;
+      int bsize = std::min(toWrite, m_buffer_size);
+      int len = m_at_jni->write((char*)(&out_buf[written]), 0, bsize);
+      if (len < 0)
+      {
+        CLog::Log(LOGERROR, "CAESinkAUDIOTRACK::AddPackets write returned error:  %d", written);
+        return INT_MAX;
+      }
+      written += len;
+      toWrite -= len;
     }
-    else
-    {
-      CLog::Log(LOGWARNING, "CAESinkAUDIOTRACK::AddPackets incomplete write:  %d vs. %d", written, size);
-      if (m_passthrough && !WantsIEC61937())
-        return 0;  // Resend full packet
-    }
+    written = frames * m_format.m_frameSize;     // Be sure to report to AE everything has been written
 
     m_duration_written += ((double)written / m_sink_frameSize) / m_format.m_sampleRate;
   }
 
 #ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d", written);
+  if (m_passthrough)
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d)", written, size);
 #endif
 
   return (unsigned int)(written/m_format.m_frameSize);
@@ -599,7 +589,7 @@ void CAESinkAUDIOTRACK::Drain()
   // TODO: does this block until last samples played out?
   // we should not return from drain as long the device is in playing state
   m_at_jni->stop();
-  m_duration_written = 0;
+//  m_duration_written = 0;
 }
 
 bool CAESinkAUDIOTRACK::WantsIEC61937()
@@ -631,6 +621,8 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   m_info.m_channels = KnownChannels;
 #endif
   m_info.m_dataFormats.push_back(AE_FMT_S16LE);
+  if (CJNIAudioManager::GetSDKVersion() >= 21)
+    m_info.m_dataFormats.push_back(AE_FMT_FLOAT);
 
   m_sink_sampleRates.clear();
   m_sink_sampleRates.insert(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));

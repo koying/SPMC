@@ -768,10 +768,12 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
     {
       if (AE_IS_RAW_RAW(audioframe.data_format))
       {
+        double correction = int(std::min(DVD_MSEC_TO_TIME(100), error) / audioframe.duration) * audioframe.duration;
+
         // Force clock sync to audio
+        CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket forcing clock sync for passthrough - dup error(%f), clock(%f), correction(%f)", error, clock, correction);
+        m_pClock->Update(clock+correction, absolute, 0.0, "CDVDPlayerAudio::OutputPacket");
         m_dvdAudio.AddPackets(audioframe);
-        m_pClock->Update(clock+error, absolute, 0.0, "CDVDPlayerAudio::OutputPacket");
-        CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket forcing clock sync for passthrough (%f)", error);
       }
       else
       {
@@ -805,10 +807,11 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
     {
       if (AE_IS_RAW_RAW(audioframe.data_format))
       {
+        double correction = audioframe.duration;
         // Force clock sync to audio
+        CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket forcing clock sync for passthrough - skip error(%f), clock(%f), correction(%f)", error, clock, correction);
+        m_pClock->Update(clock-correction, absolute, 0.0, "CDVDPlayerAudio::OutputPacket");
         m_dvdAudio.AddPackets(audioframe);
-        m_pClock->Update(clock+error, absolute, 0.0, "CDVDPlayerAudio::OutputPacket");
-        CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket forcing clock sync for passthrough (%f)", error);
       }
       else
       {
