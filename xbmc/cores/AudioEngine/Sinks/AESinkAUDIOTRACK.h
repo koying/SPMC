@@ -57,6 +57,7 @@ protected:
 private:
   jni::CJNIAudioTrack  *m_at_jni;
   double                m_duration_written;
+  double                m_last_duration_written;
   uint32_t              m_lastHeadPosition;
   uint32_t              m_ptOffset;
 
@@ -73,5 +74,4 @@ private:
   double             m_audiotrackbuffer_sec;
   int                m_encoding;
   unsigned int       m_buffer_size;
-  double             m_buffer_duration;
 };
