@@ -367,9 +367,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       m_format.m_frameSize      = 1;
       m_sink_frameSize          = m_format.m_frameSize;
       if (m_encoding == CJNIAudioFormat::ENCODING_AC3 || m_encoding == CJNIAudioFormat::ENCODING_DTS)
-        m_buffer_size           *= 2;
+        m_buffer_size           = std::max((unsigned int) 4096, m_buffer_size);
       else
-        m_buffer_size           *= 4;
+        m_buffer_size           = std::max((unsigned int) 16384, m_buffer_size);
     }
     else
     {
