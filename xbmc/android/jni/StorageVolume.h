@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2012-2013 Team XBMC
+ *      Copyright (C) 2015 Team Kodi
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,27 +19,33 @@
  *
  */
 
-#include "storage/IStorageProvider.h"
+#include "JNIBase.h"
 
-class CAndroidStorageProvider : public IStorageProvider
+#include "Context.h"
+
+class CJNIStorageVolume : public CJNIBase
 {
 public:
-  CAndroidStorageProvider();
-  virtual ~CAndroidStorageProvider() { }
+  CJNIStorageVolume(const jni::jhobject &object) : CJNIBase(object) {};
+  ~CJNIStorageVolume() {};
 
-  virtual void Initialize() { }
-  virtual void Stop() { }
-  virtual bool Eject(const std::string& mountpath) { return false; }
+  std::string getPath();
+  std::string getDescription(const CJNIContext& context);
+  int getDescriptionId();
 
-  virtual void GetLocalDrives(VECSOURCES &localDrives);
-  virtual void GetRemovableDrives(VECSOURCES &removableDrives);
-  virtual std::vector<std::string> GetDiskUsage();
+  bool isPrimary();
+  bool isRemovable();
+  bool isEmulated();
 
-  virtual bool PumpDriveChangeEvents(IStorageEventsCallback *callback);
+  int64_t getMaxFileSize();
+  std::string getUuid();
+  int getFatVolumeId();
+
+  std::string getUserLabel();
+  std::string getState();
 
 private:
-  std::string unescape(const std::string& str);
-  unsigned int m_removableLength;
-
-  void GetRemovableDrivesLinux(VECSOURCES &removableDrives);
+  CJNIStorageVolume();
 };
+
+typedef std::vector<CJNIStorageVolume> CJNIStorageVolumes;
