@@ -29,4 +29,5 @@ public:
   ~CJNIFile(){};
 
   std::string getAbsolutePath();
+  int64_t getUsableSpace();
 };
