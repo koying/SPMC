@@ -170,13 +170,11 @@ std::set<unsigned int> CAESinkAUDIOTRACK::m_sink_sampleRates;
 ////////////////////////////////////////////////////////////////////////////////////////////
 CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
 {
-  m_alignedS16 = NULL;
   m_sink_frameSize = 0;
   m_audiotrackbuffer_sec = 0.0;
   m_at_jni = NULL;
   m_duration_written = 0;
-  m_lastHeadPosition = 0;
-  m_ptOffset = 0;
+  m_sink_delay = 0;
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
@@ -451,8 +449,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_at_jni->release();
 
   m_duration_written = 0;
-  m_lastHeadPosition = 0;
-  m_ptOffset = 0;
+  m_sink_delay = 0;
 
   delete m_at_jni;
   m_at_jni = NULL;
@@ -471,21 +468,23 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
+  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
+  {
+    status.SetDelay(m_sink_delay);
+    return;
+  }
+
   // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
   // return a 32bit "int" that you should "interpret as unsigned."  As such,
   // for wrap saftey, we need to do all ops on it in 32bit integer math.
   uint32_t head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
-
-  if (m_passthrough && !WantsIEC61937())
+  if (!head_pos)
   {
-    if (!head_pos && m_at_jni->getPlayState() == CJNIAudioTrack::PLAYSTATE_PAUSED)
-      m_ptOffset = m_lastHeadPosition;
-
-    head_pos += m_ptOffset;
-    m_lastHeadPosition = head_pos;
+    status.SetDelay(0);
+    return;
   }
 
-  double delay = m_duration_written - ((double)head_pos / m_format.m_encodedRate);
+  double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
   if (m_duration_written != m_last_duration_written)
   {
 
@@ -502,6 +501,9 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   for (double d : m_smoothedDelayVec)
     smootheDelay += d;
   smootheDelay /= m_smoothedDelayCount;
+
+  if (m_passthrough && !WantsIEC61937() && m_smoothedDelayCount == SMOOTHED_DELAY_MAX && !m_sink_delay)
+    m_sink_delay = smootheDelay;
 
 #ifdef DEBUG_VERBOSE
   if (m_passthrough)
@@ -589,7 +591,8 @@ void CAESinkAUDIOTRACK::Drain()
   // TODO: does this block until last samples played out?
   // we should not return from drain as long the device is in playing state
   m_at_jni->stop();
-//  m_duration_written = 0;
+  m_duration_written = 0;
+  m_sink_delay = 0;
 }
 
 bool CAESinkAUDIOTRACK::WantsIEC61937()
