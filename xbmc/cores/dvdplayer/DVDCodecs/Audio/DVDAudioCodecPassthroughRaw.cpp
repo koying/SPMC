@@ -59,7 +59,7 @@ bool CDVDAudioCodecPassthroughRaw::Open(CDVDStreamInfo &hints, CDVDCodecOptions 
 {
   m_hints = hints;
 
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Open codec: %d; ch:%d; birate:%d; blk;%d; bits:%d", m_hints.codec, m_hints.channels, m_hints.bitrate, m_hints.blockalign, m_hints.bitspersample);
+  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Open codec: %d; ch:%d; birate:%d; blk;%d; bits:%d; profile:%d", m_hints.codec, m_hints.channels, m_hints.bitrate, m_hints.blockalign, m_hints.bitspersample, m_hints.profile);
 
   bool bSupportsAC3Out    = CAEFactory::SupportsRaw(AE_FMT_AC3_RAW, hints.samplerate);
   bool bSupportsDTSOut    = CAEFactory::SupportsRaw(AE_FMT_DTS_RAW, hints.samplerate);
@@ -69,9 +69,9 @@ bool CDVDAudioCodecPassthroughRaw::Open(CDVDStreamInfo &hints, CDVDCodecOptions 
 
   if ((hints.codec == AV_CODEC_ID_AC3 && bSupportsAC3Out) ||
       (hints.codec == AV_CODEC_ID_EAC3 && bSupportsEAC3Out) ||
-      ((hints.codec == AV_CODEC_ID_DTS && hints.channels == 2) && bSupportsDTSOut) ||
+      ((hints.codec == AV_CODEC_ID_DTS && hints.profile < 50) && bSupportsDTSOut) ||
       (hints.codec == AV_CODEC_ID_TRUEHD && bSupportsTrueHDOut) ||
-      ((hints.codec == AV_CODEC_ID_DTS && hints.channels > 2) && bSupportsDTSHDOut) )
+      ((hints.codec == AV_CODEC_ID_DTS && hints.profile >= 50) && bSupportsDTSHDOut) )
   {
     GetDataFormat();
     return true;
@@ -159,7 +159,7 @@ enum AEDataFormat CDVDAudioCodecPassthroughRaw::GetDataFormat()
       break;
 
     case AV_CODEC_ID_DTS:
-      if (m_hints.channels > 6)
+      if (m_hints.profile >= 50)
         m_codec = AE_FMT_DTSHD_RAW;
       else
         m_codec = AE_FMT_DTS_RAW;
@@ -234,9 +234,6 @@ int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
   CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode %d", iSize);
 #endif
   if (iSize <= 0) return 0;
-
-  if (m_hints.codec == AV_CODEC_ID_DTS && (iSize > 2013 || m_hints.channels > 6)) // 2013 = max DTS packet size
-    m_codec = AE_FMT_DTSHD_RAW;
 
   // Do pseudo-encapsulation to make bitrate constant
   int constant_size = 0;
