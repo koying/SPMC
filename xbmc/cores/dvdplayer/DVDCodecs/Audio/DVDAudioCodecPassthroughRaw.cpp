@@ -69,9 +69,9 @@ bool CDVDAudioCodecPassthroughRaw::Open(CDVDStreamInfo &hints, CDVDCodecOptions 
 
   if ((hints.codec == AV_CODEC_ID_AC3 && bSupportsAC3Out) ||
       (hints.codec == AV_CODEC_ID_EAC3 && bSupportsEAC3Out) ||
-      ((hints.codec == AV_CODEC_ID_DTS && hints.profile < 50) && bSupportsDTSOut) ||
+      ((hints.codec == AV_CODEC_ID_DTS && hints.profile < FF_PROFILE_DTS_HD_HRA) && bSupportsDTSOut) ||
       (hints.codec == AV_CODEC_ID_TRUEHD && bSupportsTrueHDOut) ||
-      ((hints.codec == AV_CODEC_ID_DTS && hints.profile >= 50) && bSupportsDTSHDOut) )
+      ((hints.codec == AV_CODEC_ID_DTS && hints.profile >= FF_PROFILE_DTS_HD_HRA) && bSupportsDTSHDOut) )
   {
     GetDataFormat();
     return true;
@@ -159,7 +159,7 @@ enum AEDataFormat CDVDAudioCodecPassthroughRaw::GetDataFormat()
       break;
 
     case AV_CODEC_ID_DTS:
-      if (m_hints.profile >= 50)
+      if (m_hints.profile >= FF_PROFILE_DTS_HD_HRA)
         m_codec = (AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS);
       else
         m_codec = (AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS);
