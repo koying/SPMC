@@ -294,7 +294,7 @@ public:
 #define CODEC_TAG_jpeg  (0x6765706a)
 #define CODEC_TAG_mjpa  (0x61706a6d)
 
-#define RW_WAIT_TIME    (20 * 1000) // 20ms
+#define RW_WAIT_TIME    (5 * 1000) // 20ms
 
 #define P_PRE           (0x02000000)
 #define F_PRE           (0x03000000)
