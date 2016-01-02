@@ -19,6 +19,7 @@
  */
 
 #include "JNIBase.h"
+#include "jutils/jutils-details.hpp"
 
 #include <algorithm>
 
@@ -59,4 +60,18 @@ const std::string CJNIBase::GetDotClassName()
   std::string dotClassName = m_className;
   std::replace(dotClassName.begin(), dotClassName.end(), '/', '.');
   return dotClassName;
+}
+
+const std::string CJNIBase::ExceptionToString()
+{
+  JNIEnv* jenv = xbmc_jnienv();
+  jhthrowable exception = (jhthrowable)jenv->ExceptionOccurred();
+  if (!exception)
+    return "";
+
+  jenv->ExceptionClear();
+  jhclass excClass = find_class(jenv, "java/lang/Throwable");
+  jmethodID toStrMethod = get_method_id(jenv, excClass, "toString", "()Ljava/lang/String;");
+  jhstring msg = call_method<jhstring>(exception, toStrMethod);
+  return (jcast<std::string>(msg));
 }
