@@ -9730,3 +9730,5 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java
+xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecAndroidMediaCodec.cpp
+xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecAndroidMediaCodec.h
