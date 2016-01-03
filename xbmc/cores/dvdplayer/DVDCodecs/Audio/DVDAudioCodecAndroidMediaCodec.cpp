@@ -135,6 +135,16 @@ bool CDVDAudioCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
 
       break;
 
+    case AV_CODEC_ID_AC3:
+      m_mime = "audio/ac3";
+      m_formatname = "amc-ac3";
+      break;
+
+    case AV_CODEC_ID_EAC3:
+      m_mime = "audio/eac3";
+      m_formatname = "amc-eac3";
+      break;
+
     default:
       CLog::Log(LOGNOTICE, "CDVDAudioCodecAndroidMediaCodec:: Unknown hints.codec(%d)", hints.codec);
       return false;
@@ -530,7 +540,7 @@ void CDVDAudioCodecAndroidMediaCodec::ConfigureOutputFormat(CJNIMediaFormat* med
   if (mediaformat->containsKey("channel-count"))
     m_channels     = mediaformat->getInteger("channel-count");
 
-#ifdef DEBUG_VERBOSE
+#if 1 //defined(DEBUG_VERBOSE)
   CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec:: "
     "sample_rate(%d), channel_count(%d)",
     m_samplerate, m_channels);
