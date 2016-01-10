@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2014 Team XBMC
+ *      Copyright (C) 2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,22 +20,18 @@
  */
 
 #include "JNIBase.h"
-#include "Context.h"
-#include "Intent.h"
 
-class CVariant;
-struct ANativeActivity;
+#include "URI.h"
 
-class CJNIActivity : public CJNIContext
+class CJNIURIPermission : public CJNIBase
 {
 public:
-  CJNIActivity(const ANativeActivity *nativeActivity);
-  ~CJNIActivity();
+  CJNIURIPermission(const jni::jhobject &uri) : CJNIBase(uri) {};
+  ~CJNIURIPermission() {};
 
-  static bool moveTaskToBack(bool nonRoot);
-  static void startActivityForResult(const CJNIIntent &intent, int requestCode);
+  std::string toString()  const;
+  CJNIURI getUri()   const;
 
 private:
-  CJNIActivity();
+  CJNIURIPermission();
 };
-

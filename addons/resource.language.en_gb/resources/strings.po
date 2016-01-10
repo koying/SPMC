@@ -11195,7 +11195,10 @@ msgctxt "#20072"
 msgid "Make sure the selected folder is writable and that the new folder name is valid"
 msgstr ""
 
-#empty string with id 20073
+#: xbmc/windows/GUIWindowFileManager.cpp
+msgctxt "#20073"
+msgid "Android content"
+msgstr ""
 
 #: xbmc/playlists/SmartPlaylist.cpp
 msgctxt "#20074"

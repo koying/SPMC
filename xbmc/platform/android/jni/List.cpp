@@ -23,6 +23,7 @@
 #include "ScanResult.h"
 #include "WifiConfiguration.h"
 #include "ApplicationInfo.h"
+#include "URIPermission.h"
 
 #include "jutils/jutils-details.hpp"
 
@@ -47,3 +48,4 @@ template class CJNIList<CJNIScanResult>;
 template class CJNIList<CJNIWifiConfiguration>;
 template class CJNIList<CJNIApplicationInfo>;
 template class CJNIList<CJNIViewInputDeviceMotionRange>;
+template class CJNIList<CJNIURIPermission>;
