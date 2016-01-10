@@ -57,4 +57,5 @@ public:
 
   static void PopulateStaticFields();
   static std::string EXTRA_KEY_EVENT;
+  static std::string ACTION_OPEN_DOCUMENT_TREE;
 };

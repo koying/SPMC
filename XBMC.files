@@ -9732,3 +9732,8 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java
 xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecAndroidMediaCodec.cpp
 xbmc/cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodecAndroidMediaCodec.h
+xbmc/android/jni/URIPermission.h
+xbmc/android/jni/URIPermission.cpp
+xbmc/filesystem/AndroidContentDirectory.cpp
+xbmc/filesystem/AndroidContentDirectory.h
+xbmc/filesystem/Makefile.in
