@@ -45,5 +45,17 @@ CJNICursor CJNIContentResolver::query(const CJNIURI &uri, const std::vector<std:
 {
   return (CJNICursor)(call_method<jhobject>(m_object,
     "query","(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;",
-    uri.get_raw(), jcast<jhobjectArray>(projection), jcast<jhstring>(selection), jcast<jhobjectArray>(selectionArgs), jcast<jhstring>(sortOrder)));
+                                            uri.get_raw(), jcast<jhobjectArray>(projection), jcast<jhstring>(selection), jcast<jhobjectArray>(selectionArgs), jcast<jhstring>(sortOrder)));
+}
+
+void CJNIContentResolver::takePersistableUriPermission(const CJNIURI &uri, int modeFlags)
+{
+  call_method<void>(m_object,
+                    "takePersistableUriPermission", "(Landroid/net/Uri;I)V", uri.get_raw(), modeFlags);
+}
+
+CJNIList<CJNIURIPermission> CJNIContentResolver::getPersistedUriPermissions()
+{
+  return call_method<jhobject>(m_object,
+    "getPersistedUriPermissions", "()Ljava/util/List;");
 }
