@@ -54,6 +54,8 @@
 #include "stdint.h"
 #endif
 
+//#define DEBUG_VERBOSE 1
+
 extern "C" {
 #include "libavutil/dict.h"
 #include "libavutil/opt.h"
@@ -1069,20 +1071,31 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         }
         else
         {
-          DemuxPacket* mvcpkt = m_SSIFqueue.front();
-          double tsA = (pPacket->dts != AV_NOPTS_VALUE ? pPacket->dts : pPacket->pts);
-          double tsB = (mvcpkt->dts != AV_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
-          while (tsB < tsA)
+          double tsA = (pPacket->dts != DVD_NOPTS_VALUE ? pPacket->dts : pPacket->pts);
+          double tsB = DVD_NOPTS_VALUE;
+
+          DemuxPacket* mvcpkt = NULL;
+          if (!m_SSIFqueue.empty())
           {
-            m_SSIFqueue.pop();
-            if (m_SSIFqueue.empty())
-            {
-              tsB = AV_NOPTS_VALUE;
-              break;
-            }
-            CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
             mvcpkt = m_SSIFqueue.front();
-            tsB = (mvcpkt->dts != AV_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
+            tsB = (mvcpkt->dts != DVD_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
+            while (tsB < tsA)
+            {
+#if defined(DEBUG_VERBOSE)
+              CLog::Log(LOGERROR, "!!! MVC error: missing h264 packet: pts(%f) dts(%f) sz(%d) - %f", mvcpkt->pts, mvcpkt->dts, mvcpkt->iSize, tsA);
+#endif
+              CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
+              mvcpkt = NULL;
+
+              m_SSIFqueue.pop();
+              if (m_SSIFqueue.empty())
+              {
+                tsB = DVD_NOPTS_VALUE;
+                break;
+              }
+              mvcpkt = m_SSIFqueue.front();
+              tsB = (mvcpkt->dts != DVD_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
+            }
           }
           if (tsA == tsB)
           {
@@ -1096,15 +1109,55 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
             newpkt->iSize = pPacket->iSize + mvcpkt->iSize;
             memcpy(newpkt->pData, pPacket->pData, pPacket->iSize);
             memcpy(newpkt->pData + pPacket->iSize, mvcpkt->pData, mvcpkt->iSize);
-            //CLog::Log(LOGDEBUG, ">>> MVC merged packet: %d+%d, pts(%f/%f) dts (%f/%f)", pPacket->iSize, mvcpkt->iSize, pPacket->pts, mvcpkt->pts, pPacket->dts, mvcpkt->dts);
+
+#if defined(DEBUG_VERBOSE)
+            CLog::Log(LOGDEBUG, ">>> MVC merged packet: %d+%d, pts(%f/%f) dts (%f/%f)", pPacket->iSize, mvcpkt->iSize, pPacket->pts, mvcpkt->pts, pPacket->dts, mvcpkt->dts);
+#endif
 
             CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+            pPacket = NULL;
             CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
+            mvcpkt = NULL;
+
+            if (!m_SSIFqueue.empty())
+            {
+              mvcpkt = m_SSIFqueue.front();
+              while (mvcpkt->dts == DVD_NOPTS_VALUE && mvcpkt->pts == DVD_NOPTS_VALUE)
+              {
+                // Append leftover
+                DemuxPacket* oldpkt = newpkt;
+
+                newpkt = CDVDDemuxUtils::AllocateDemuxPacket(oldpkt->iSize + mvcpkt->iSize);
+                newpkt->iSize = oldpkt->iSize;
+                newpkt->pts = oldpkt->pts;
+                newpkt->dts = oldpkt->dts;
+                newpkt->duration = oldpkt->duration;
+                newpkt->iGroupId = oldpkt->iGroupId;
+                newpkt->iStreamId = oldpkt->iStreamId;
+
+                memcpy(newpkt->pData, oldpkt->pData, oldpkt->iSize);
+                memcpy(newpkt->pData + oldpkt->iSize, mvcpkt->pData, mvcpkt->iSize);
+                newpkt->iSize += mvcpkt->iSize;
+
+#if defined(DEBUG_VERBOSE)
+                CLog::Log(LOGDEBUG, ">>> MVC merged leftover: %d+%d, pts(%f) dts (%f)", oldpkt->iSize, mvcpkt->iSize, newpkt->pts, newpkt->dts);
+#endif
+
+                CDVDDemuxUtils::FreeDemuxPacket(oldpkt);
+                m_SSIFqueue.pop();
+                if (m_SSIFqueue.empty())
+                  break;
+                mvcpkt = m_SSIFqueue.front();
+              }
+            }
+
             pPacket = newpkt;
           }
           else
           {
-            //CLog::Log(LOGERROR, "!!! MVC error: missing mvc packet: pts(%f) dts(%f) - %lld", pPacket->pts, pPacket->dts, m_pkt.pkt.pts);
+#if defined(DEBUG_VERBOSE)
+            CLog::Log(LOGERROR, "!!! MVC error: missing mvc packet: pts(%f) dts(%f) sz(%d) - %f", pPacket->pts, pPacket->dts, pPacket->iSize, tsB);
+#endif
             // Ignore packets without MVC part; solves seeking
             CDVDDemuxUtils::FreeDemuxPacket(pPacket);
             pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
