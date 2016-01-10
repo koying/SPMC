@@ -62,6 +62,7 @@ SRCS      += Notification.cpp
 SRCS      += Settings.cpp
 SRCS      += StorageManager.cpp
 SRCS      += StorageVolume.cpp
+SRCS      += URIPermission.cpp
 
 LIB        = jni.a
 

@@ -1,6 +1,5 @@
-#pragma once
 /*
- *      Copyright (C) 2014 Team XBMC
+ *      Copyright (C) 2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,23 +18,19 @@
  *
  */
 
-#include "JNIBase.h"
-#include "Context.h"
-#include "Intent.h"
+#include "URIPermission.h"
+#include "jutils/jutils-details.hpp"
 
-class CVariant;
-struct ANativeActivity;
+using namespace jni;
 
-class CJNIActivity : public CJNIContext
+std::string CJNIURIPermission::toString() const
 {
-public:
-  CJNIActivity(const ANativeActivity *nativeActivity);
-  ~CJNIActivity();
+  return jcast<std::string>(call_method<jhstring>(m_object,
+    "toString", "()Ljava/lang/String;"));
+}
 
-  static bool moveTaskToBack(bool nonRoot);
-  static void startActivityForResult(const CJNIIntent &intent, int requestCode);
-
-private:
-  CJNIActivity();
-};
-
+CJNIURI CJNIURIPermission::getUri() const
+{
+  return (CJNIURI)call_method<jhobject>(m_object,
+    "getUri", "()Landroid/net/Uri;");
+}
