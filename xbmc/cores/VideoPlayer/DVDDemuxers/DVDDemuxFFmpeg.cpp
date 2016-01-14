@@ -168,6 +168,7 @@ CDVDDemuxFFmpeg::CDVDDemuxFFmpeg() : CDVDDemux()
   m_bMatroska = false;
   m_bAVI = false;
   m_bSSIF = false;
+  m_bSSIFSyncing = false;
   m_speed = DVD_PLAYSPEED_NORMAL;
   m_program = UINT_MAX;
   m_pkt.result = -1;
@@ -544,11 +545,17 @@ void CDVDDemuxFFmpeg::Dispose()
 {
   m_pkt.result = -1;
   av_packet_unref(&m_pkt.pkt);
-  while (!m_SSIFqueue.empty())
+  while (!m_H264queue.empty())
   {
-    CDVDDemuxUtils::FreeDemuxPacket(m_SSIFqueue.front());
-    m_SSIFqueue.pop();
+    CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+    m_H264queue.pop();
   }
+  while (!m_MVCqueue.empty())
+  {
+    CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+    m_MVCqueue.pop();
+  }
+  m_bSSIFSyncing = true;
 
   if (m_pFormatContext)
   {
@@ -596,16 +603,22 @@ void CDVDDemuxFFmpeg::Flush()
   m_currentPts = DVD_NOPTS_VALUE;
 
   m_pkt.result = -1;
-  av_packet_unref(&m_pkt.pkt);
 
   m_displayTime = 0;
   m_dtsAtDisplayTime = DVD_NOPTS_VALUE;
 
-  while (!m_SSIFqueue.empty())
+  av_packet_unref(&m_pkt.pkt);
+  while (!m_H264queue.empty())
   {
-    CDVDDemuxUtils::FreeDemuxPacket(m_SSIFqueue.front());
-    m_SSIFqueue.pop();
+    CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+    m_H264queue.pop();
   }
+  while (!m_MVCqueue.empty())
+  {
+    CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+    m_MVCqueue.pop();
+  }
+  m_bSSIFSyncing = true;
 }
 
 void CDVDDemuxFFmpeg::Abort()
@@ -838,6 +851,131 @@ double CDVDDemuxFFmpeg::ConvertTimestamp(int64_t pts, int den, int num)
   return timestamp*DVD_TIME_BASE;
 }
 
+DemuxPacket* mergePacket(DemuxPacket* &srcPkt, DemuxPacket* &appendPkt)
+{
+  DemuxPacket* newpkt = NULL;
+  newpkt = CDVDDemuxUtils::AllocateDemuxPacket(srcPkt->iSize + appendPkt->iSize);
+  newpkt->iSize = srcPkt->iSize + appendPkt->iSize;
+
+  newpkt->pts = srcPkt->pts;
+  newpkt->dts = srcPkt->dts;
+  newpkt->duration = srcPkt->duration;
+  newpkt->iGroupId = srcPkt->iGroupId;
+  newpkt->iStreamId = srcPkt->iStreamId;
+  memcpy(newpkt->pData, srcPkt->pData, srcPkt->iSize);
+  memcpy(newpkt->pData + srcPkt->iSize, appendPkt->pData, appendPkt->iSize);
+
+  CDVDDemuxUtils::FreeDemuxPacket(srcPkt);
+  srcPkt = NULL;
+  CDVDDemuxUtils::FreeDemuxPacket(appendPkt);
+  appendPkt = NULL;
+
+  return newpkt;
+}
+
+DemuxPacket* movePacket(DemuxPacket* &srcPkt)
+{
+  DemuxPacket* newpkt = NULL;
+  newpkt = CDVDDemuxUtils::AllocateDemuxPacket(srcPkt->iSize);
+  newpkt->iSize = srcPkt->iSize;
+
+  newpkt->pts = srcPkt->pts;
+  newpkt->dts = srcPkt->dts;
+  newpkt->duration = srcPkt->duration;
+  newpkt->iGroupId = srcPkt->iGroupId;
+  newpkt->iStreamId = srcPkt->iStreamId;
+  memcpy(newpkt->pData, srcPkt->pData, srcPkt->iSize);
+
+  CDVDDemuxUtils::FreeDemuxPacket(srcPkt);
+  srcPkt = NULL;
+
+  return newpkt;
+}
+
+DemuxPacket* CDVDDemuxFFmpeg::GetMVCPacket()
+{
+  // Here, we recreate a h264 MVC packet from the base one + buffered MVC NALU's
+  DemuxPacket* newpkt = NULL;
+
+  double tsH264 = DVD_NOPTS_VALUE;
+  DemuxPacket* h264pkt = NULL;
+  if (!m_H264queue.empty())
+  {
+    h264pkt = m_H264queue.front();
+    tsH264 = (h264pkt->dts != DVD_NOPTS_VALUE ? h264pkt->dts : h264pkt->pts);
+    CLog::Log(LOGDEBUG, ">>> MVC h264 packet: %d, pts(%f) dts (%f)", h264pkt->iSize, h264pkt->pts, h264pkt->dts);
+  }
+
+  double tsMVC = DVD_NOPTS_VALUE;
+  DemuxPacket* mvcpkt = NULL;
+  if (!m_MVCqueue.empty())
+  {
+    mvcpkt = m_MVCqueue.front();
+    tsMVC = (mvcpkt->dts != DVD_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
+    CLog::Log(LOGDEBUG, ">>> MVC mvc packet: %d, pts(%f) dts (%f)", mvcpkt->iSize, mvcpkt->pts, mvcpkt->dts);
+  }
+
+  if (tsH264 == tsMVC)
+  {
+    m_bSSIFSyncing = false;
+    m_H264queue.pop();
+    m_MVCqueue.pop();
+#if defined(DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, ">>> MVC merge packet: %d+%d, pts(%f/%f) dts (%f/%f)", h264pkt->iSize, mvcpkt->iSize, h264pkt->pts, mvcpkt->pts, h264pkt->dts, mvcpkt->dts);
+#endif
+    newpkt = mergePacket(h264pkt, mvcpkt);
+    if (!m_MVCqueue.empty())
+    {
+      mvcpkt = m_MVCqueue.front();
+      while (mvcpkt->dts == DVD_NOPTS_VALUE && mvcpkt->pts == DVD_NOPTS_VALUE)
+      {
+        // Append leftover
+#if defined(DEBUG_VERBOSE)
+        CLog::Log(LOGDEBUG, ">>> MVC merge leftover: %d+%d, pts(%f) dts (%f)", newpkt->iSize, mvcpkt->iSize, newpkt->pts, newpkt->dts);
+#endif
+        newpkt = mergePacket(newpkt, mvcpkt);
+        m_MVCqueue.pop();
+        if (m_MVCqueue.empty())
+          break;
+        mvcpkt = m_MVCqueue.front();
+      }
+    }
+  }
+  else if (tsH264 > tsMVC)
+  {
+#if defined(DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, ">>> MVC missing mvc: %d, pts(%f) dts (%f)", h264pkt->iSize, h264pkt->pts, h264pkt->dts);
+#endif
+    if (m_bSSIFSyncing)
+    {
+      if (!m_H264queue.empty())
+      {
+        CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+        m_H264queue.pop();
+      }
+      while (!m_MVCqueue.empty())
+      {
+        CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+        m_MVCqueue.pop();
+      }
+    }
+    newpkt = CDVDDemuxUtils::AllocateDemuxPacket(0);
+    newpkt->iSize = 0;
+  }
+  else
+  {
+    if (m_bSSIFSyncing && !m_H264queue.empty())
+    {
+      CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+      m_H264queue.pop();
+    }
+    newpkt = CDVDDemuxUtils::AllocateDemuxPacket(0);
+    newpkt->iSize = 0;
+  }
+
+  return newpkt;
+}
+
 DemuxPacket* CDVDDemuxFFmpeg::Read()
 {
   DemuxPacket* pPacket = NULL;
@@ -903,10 +1041,10 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
 
       m_pkt.result = -1;
       av_packet_unref(&m_pkt.pkt);
-      while (!m_SSIFqueue.empty())
+      while (!m_MVCqueue.empty())
       {
-        CDVDDemuxUtils::FreeDemuxPacket(m_SSIFqueue.front());
-        m_SSIFqueue.pop();
+        CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+        m_MVCqueue.pop();
       }
     }
     else
@@ -1062,129 +1200,22 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
       }
       if (m_bSSIF && stream->iPhysicalId == 0x1011)
       {
-        // Here, we recreate a h264 MVC packet from the base one + buffered MVC NALU's
-        if (m_SSIFqueue.size() <= 0)
-        {
-          CDVDDemuxUtils::FreeDemuxPacket(pPacket);
-          pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
-          pPacket->iSize = 0;
-        }
-        else
-        {
-          double tsA = (pPacket->dts != DVD_NOPTS_VALUE ? pPacket->dts : pPacket->pts);
-          double tsB = DVD_NOPTS_VALUE;
+        DemuxPacket* newpkt = movePacket(pPacket);
+        m_H264queue.push(newpkt);
 
-          DemuxPacket* mvcpkt = NULL;
-          if (!m_SSIFqueue.empty())
-          {
-            mvcpkt = m_SSIFqueue.front();
-            tsB = (mvcpkt->dts != DVD_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
-            while (tsB < tsA)
-            {
-#if defined(DEBUG_VERBOSE)
-              CLog::Log(LOGERROR, "!!! MVC error: missing h264 packet: pts(%f) dts(%f) sz(%d) - %f", mvcpkt->pts, mvcpkt->dts, mvcpkt->iSize, tsA);
-#endif
-              CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
-              mvcpkt = NULL;
-
-              m_SSIFqueue.pop();
-              if (m_SSIFqueue.empty())
-              {
-                tsB = DVD_NOPTS_VALUE;
-                break;
-              }
-              mvcpkt = m_SSIFqueue.front();
-              tsB = (mvcpkt->dts != DVD_NOPTS_VALUE ? mvcpkt->dts : mvcpkt->pts);
-            }
-          }
-          if (tsA == tsB)
-          {
-            m_SSIFqueue.pop();
-            DemuxPacket* newpkt = CDVDDemuxUtils::AllocateDemuxPacket(pPacket->iSize + mvcpkt->iSize);
-            newpkt->pts = pPacket->pts;
-            newpkt->dts = pPacket->dts;
-            newpkt->duration = pPacket->duration;
-            newpkt->iGroupId = pPacket->iGroupId;
-            newpkt->iStreamId = pPacket->iStreamId;
-            newpkt->iSize = pPacket->iSize + mvcpkt->iSize;
-            memcpy(newpkt->pData, pPacket->pData, pPacket->iSize);
-            memcpy(newpkt->pData + pPacket->iSize, mvcpkt->pData, mvcpkt->iSize);
-
-#if defined(DEBUG_VERBOSE)
-            CLog::Log(LOGDEBUG, ">>> MVC merged packet: %d+%d, pts(%f/%f) dts (%f/%f)", pPacket->iSize, mvcpkt->iSize, pPacket->pts, mvcpkt->pts, pPacket->dts, mvcpkt->dts);
-#endif
-
-            CDVDDemuxUtils::FreeDemuxPacket(pPacket);
-            pPacket = NULL;
-            CDVDDemuxUtils::FreeDemuxPacket(mvcpkt);
-            mvcpkt = NULL;
-
-            if (!m_SSIFqueue.empty())
-            {
-              mvcpkt = m_SSIFqueue.front();
-              while (mvcpkt->dts == DVD_NOPTS_VALUE && mvcpkt->pts == DVD_NOPTS_VALUE)
-              {
-                // Append leftover
-                DemuxPacket* oldpkt = newpkt;
-
-                newpkt = CDVDDemuxUtils::AllocateDemuxPacket(oldpkt->iSize + mvcpkt->iSize);
-                newpkt->iSize = oldpkt->iSize;
-                newpkt->pts = oldpkt->pts;
-                newpkt->dts = oldpkt->dts;
-                newpkt->duration = oldpkt->duration;
-                newpkt->iGroupId = oldpkt->iGroupId;
-                newpkt->iStreamId = oldpkt->iStreamId;
-
-                memcpy(newpkt->pData, oldpkt->pData, oldpkt->iSize);
-                memcpy(newpkt->pData + oldpkt->iSize, mvcpkt->pData, mvcpkt->iSize);
-                newpkt->iSize += mvcpkt->iSize;
-
-#if defined(DEBUG_VERBOSE)
-                CLog::Log(LOGDEBUG, ">>> MVC merged leftover: %d+%d, pts(%f) dts (%f)", oldpkt->iSize, mvcpkt->iSize, newpkt->pts, newpkt->dts);
-#endif
-
-                CDVDDemuxUtils::FreeDemuxPacket(oldpkt);
-                m_SSIFqueue.pop();
-                if (m_SSIFqueue.empty())
-                  break;
-                mvcpkt = m_SSIFqueue.front();
-              }
-            }
-
-            pPacket = newpkt;
-          }
-          else
-          {
-#if defined(DEBUG_VERBOSE)
-            CLog::Log(LOGERROR, "!!! MVC error: missing mvc packet: pts(%f) dts(%f) sz(%d) - %f", pPacket->pts, pPacket->dts, pPacket->iSize, tsB);
-#endif
-            // Ignore packets without MVC part; solves seeking
-            CDVDDemuxUtils::FreeDemuxPacket(pPacket);
-            pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
-            pPacket->iSize = 0;
-          }
-        }
+        pPacket = GetMVCPacket();
       }
     }
     else if (stream->type == STREAM_DATA)
     {
       if (m_bSSIF && stream->iPhysicalId == 0x1012)
       {
-        // Buffer the MVC NALU's for later merging with the base h264 packet
-        // This works because the MVC stream is guaranteed to come first
-        DemuxPacket* newpkt = CDVDDemuxUtils::AllocateDemuxPacket(pPacket->iSize);
-        newpkt->iSize = pPacket->iSize;
-        newpkt->pts = pPacket->pts;
-        newpkt->dts = pPacket->dts;
-        newpkt->duration = pPacket->duration;
-        newpkt->iGroupId = pPacket->iGroupId;
-        newpkt->iStreamId = pPacket->iStreamId;
-        memcpy(newpkt->pData, pPacket->pData, newpkt->iSize);
-        m_SSIFqueue.push(newpkt);
-        
-        CDVDDemuxUtils::FreeDemuxPacket(pPacket);
-        pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
-        pPacket->iSize = 0;
+        DemuxPacket* newpkt = movePacket(pPacket);
+        m_MVCqueue.push(newpkt);
+
+        pPacket = GetMVCPacket();
+        if (pPacket->iSize)
+          stream = GetStreamInternal(pPacket->iStreamId);
       }
     }
     if (!stream)
@@ -1215,11 +1246,17 @@ bool CDVDDemuxFFmpeg::SeekTime(int time, bool backwords, double *startpts)
 
   m_pkt.result = -1;
   av_packet_unref(&m_pkt.pkt);
-  while (!m_SSIFqueue.empty())
+  while (!m_H264queue.empty())
   {
-    CDVDDemuxUtils::FreeDemuxPacket(m_SSIFqueue.front());
-    m_SSIFqueue.pop();
+    CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+    m_H264queue.pop();
   }
+  while (!m_MVCqueue.empty())
+  {
+    CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+    m_MVCqueue.pop();
+  }
+  m_bSSIFSyncing = true;
 
   CDVDInputStream::IPosTime* ist = m_pInput->GetIPosTime();
   if (ist)
@@ -1303,11 +1340,17 @@ bool CDVDDemuxFFmpeg::SeekByte(int64_t pos)
 
   m_pkt.result = -1;
   av_packet_unref(&m_pkt.pkt);
-  while (!m_SSIFqueue.empty())
+  while (!m_H264queue.empty())
   {
-    CDVDDemuxUtils::FreeDemuxPacket(m_SSIFqueue.front());
-    m_SSIFqueue.pop();
+    CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+    m_H264queue.pop();
   }
+  while (!m_MVCqueue.empty())
+  {
+    CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+    m_MVCqueue.pop();
+  }
+  m_bSSIFSyncing = true;
 
   return (ret >= 0);
 }
