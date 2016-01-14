@@ -133,6 +133,7 @@ protected:
   void ParsePacket(AVPacket *pkt);
   bool IsVideoReady();
   void ResetVideoStreams();
+  DemuxPacket* GetMVCPacket();
 
   AVDictionary *GetFFMpegOptionsFromURL(const CURL &url);
   double ConvertTimestamp(int64_t pts, int den, int num);
@@ -155,7 +156,9 @@ protected:
   bool     m_bMatroska;
   bool     m_bAVI;
   bool     m_bSSIF;
-  std::queue<DemuxPacket*> m_SSIFqueue;
+  bool     m_bSSIFSyncing;
+  std::queue<DemuxPacket*> m_H264queue;
+  std::queue<DemuxPacket*> m_MVCqueue;
   int      m_speed;
   unsigned m_program;
   XbmcThreads::EndTime  m_timeout;
