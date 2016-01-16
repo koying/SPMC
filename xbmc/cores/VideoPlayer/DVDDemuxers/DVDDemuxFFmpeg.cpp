@@ -943,6 +943,7 @@ DemuxPacket* CDVDDemuxFFmpeg::GetMVCPacket()
   }
   else if (tsH264 > tsMVC)
   {
+    // H264 before MVC ?
 #if defined(DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, ">>> MVC missing mvc: %d, pts(%f) dts (%f)", h264pkt->iSize, h264pkt->pts, h264pkt->dts);
 #endif
@@ -959,6 +960,12 @@ DemuxPacket* CDVDDemuxFFmpeg::GetMVCPacket()
         m_MVCqueue.pop();
       }
     }
+    else if (!m_MVCqueue.empty())
+    {
+      // pop or we are stuck
+      CDVDDemuxUtils::FreeDemuxPacket(m_MVCqueue.front());
+      m_MVCqueue.pop();
+    }
     newpkt = CDVDDemuxUtils::AllocateDemuxPacket(0);
     newpkt->iSize = 0;
   }
@@ -966,6 +973,16 @@ DemuxPacket* CDVDDemuxFFmpeg::GetMVCPacket()
   {
     if (m_bSSIFSyncing && !m_H264queue.empty())
     {
+      CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
+      m_H264queue.pop();
+    }
+    else if (!m_H264queue.empty())
+    {
+      // missing an MVC packets
+#if defined(DEBUG_VERBOSE)
+      CLog::Log(LOGDEBUG, ">>> MVC missing mvc2: %d, pts(%f) dts (%f)", h264pkt->iSize, h264pkt->pts, h264pkt->dts);
+#endif
+      // pop or we are stuck
       CDVDDemuxUtils::FreeDemuxPacket(m_H264queue.front());
       m_H264queue.pop();
     }
