@@ -20,9 +20,8 @@
 
 #include "system.h"
 
-#if defined(TARGET_ANDROID)
 #include "AndroidContentDirectory.h"
-#include "xbmc/android/activity/XBMCApp.h"
+#include "android/activity/XBMCApp.h"
 #include "FileItem.h"
 #include "File.h"
 #include "utils/URIUtils.h"
@@ -33,6 +32,13 @@
 #include "CompileInfo.h"
 
 #include "android/jni/Intent.h"
+#include "android/jni/URI.h"
+#include "android/jni/DocumentsContract.h"
+#include "android/jni/Document.h"
+#include "android/jni/ContentResolver.h"
+#include "android/jni/Cursor.h"
+
+#define ACTION_OPEN_DOCUMENT_TREE_REQID 421
 
 using namespace XFILE;
 
@@ -46,18 +52,63 @@ CAndroidContentDirectory::~CAndroidContentDirectory(void)
 
 bool CAndroidContentDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
-  std::string dirname = url.GetFileName();
-  URIUtils::RemoveSlashAtEnd(dirname);
-  CLog::Log(LOGDEBUG, "CAndroidContentDirectory::GetDirectory: %s",dirname.c_str());
+  CLog::Log(LOGDEBUG, "CAndroidContentDirectory::GetDirectory: %s", url.Get().c_str());
 
-  if (dirname.empty())
+  CJNIURI childrenUri = CJNIURI::parse(url.Get());
+  if (childrenUri.getPath().empty())
   {
     CJNIIntent intent = CJNIIntent(CJNIIntent::ACTION_OPEN_DOCUMENT_TREE);
-    CXBMCApp::startActivityForResult(intent, 421);
+    CJNIIntent result;
+    if (CXBMCApp::WaitForActivityResult(intent, ACTION_OPEN_DOCUMENT_TREE_REQID, result))
+    {
+      CJNIURI rooturi = result.getData();
+      childrenUri = CJNIDocumentsContract::buildChildDocumentsUriUsingTree(rooturi, CJNIDocumentsContract::getTreeDocumentId(rooturi));
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "CAndroidContentDirectory::GetDirectory Failed to open %s", url.Get().c_str());
+      return false;
+    }
   }
+  else
+  {
+    std::string doc_id = CJNIDocumentsContract::getDocumentId(childrenUri);
+    childrenUri = CJNIDocumentsContract::buildChildDocumentsUri(url.GetHostName(), doc_id);
+    CLog::Log(LOGDEBUG, ">>> doc_id(%s)", doc_id.c_str());
+  }
+  CLog::Log(LOGDEBUG, "CAndroidContentDirectory::GetDirectory opened succesfully: %s", childrenUri.toString().c_str());
 
-  CLog::Log(LOGERROR, "CAndroidContentDirectory::GetDirectory Failed to open %s", url.Get().c_str());
-  return false;
+  std::vector<std::string> columns;
+  columns.push_back(CJNIDocument::COLUMN_DISPLAY_NAME);
+  columns.push_back(CJNIDocument::COLUMN_MIME_TYPE);
+  columns.push_back(CJNIDocument::COLUMN_DOCUMENT_ID);
+  columns.push_back(CJNIDocument::COLUMN_SIZE);
+  CJNICursor docCursor = CXBMCApp::getContentResolver().query(childrenUri, columns, std::string(), std::vector<std::string>(), std::string());
+  while (docCursor.moveToNext())
+  {
+    int columnIndex = docCursor.getColumnIndex(columns[0]);
+    std::string disp_name = docCursor.getString(columnIndex);
+    columnIndex = docCursor.getColumnIndex(columns[1]);
+    std::string mime_type = docCursor.getString(columnIndex);
+    columnIndex = docCursor.getColumnIndex(columns[2]);
+    std::string doc_id = docCursor.getString(columnIndex);
+    columnIndex = docCursor.getColumnIndex(columns[3]);
+    int64_t size = docCursor.getLong(columnIndex);
+
+    CFileItemPtr pItem(new CFileItem(disp_name));
+    pItem->m_dwSize = size;
+    if ((pItem->m_bIsFolder = (mime_type == CJNIDocument::MIME_TYPE_DIR)))
+      pItem->m_dwSize = -1;
+    CJNIURI uri = CJNIDocumentsContract::buildDocumentUriUsingTree(childrenUri, doc_id);
+
+    pItem->SetPath(uri.toString());
+    pItem->SetLabel(disp_name);
+    //        pItem->SetArt("thumb", path+".png");
+    items.Add(pItem);
+
+    CLog::Log(LOGDEBUG, "CAndroidContentDirectory::GetDirectory added: %s(%s | %s)", disp_name.c_str(), doc_id.c_str(), uri.toString().c_str());
+  }
+  docCursor.close();
+
+  return true;
 }
-
-#endif
