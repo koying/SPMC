@@ -65,6 +65,8 @@ SRCS      += Os.cpp
 SRCS      += Notification.cpp
 SRCS      += Settings.cpp
 SRCS      += URIPermission.cpp
+SRCS      += DocumentsContract.cpp
+SRCS      += Document.cpp
 
 LIB        = jni.a
 

@@ -162,7 +162,7 @@ IDirectory* CDirectoryFactory::Create(const CURL& url)
 #if defined(TARGET_ANDROID)
   if (url.IsProtocol("androidapp")) return new CAndroidAppDirectory();
   if (url.IsProtocol("androidsetting")) return new CAndroidSettingDirectory();
-  if (url.IsProtocol("androidcontent")) return new CAndroidContentDirectory();
+  if (url.IsProtocol("content")) return new CAndroidContentDirectory();
 #endif
 #ifdef HAVE_LIBBLURAY
   if (url.IsProtocol("bluray")) return new CBlurayDirectory();

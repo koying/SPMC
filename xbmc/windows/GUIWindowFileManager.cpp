@@ -490,7 +490,7 @@ bool CGUIWindowFileManager::Update(int iList, const std::string &strDirectory)
   if (strDirectory.empty())
   {
 #ifdef TARGET_ANDROID
-    CFileItemPtr pContentItem(new CFileItem("androidcontent:///", true));
+    CFileItemPtr pContentItem(new CFileItem("content:///", true));
     pContentItem->SetLabel(g_localizeStrings.Get(20073));
     pContentItem->SetArt("thumb", "DefaultFolder.png");
     pContentItem->SetLabelPreformated(true);

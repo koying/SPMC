@@ -49,6 +49,7 @@
 #include "Intent.h"
 #include "KeyEvent.h"
 #include "Settings.h"
+#include "Document.h"
 
 #include <android/native_activity.h>
 
@@ -93,6 +94,7 @@ void CJNIContext::PopulateStaticFields()
   CJNIKeyEvent::PopulateStaticFields();
   CJNIViewInputDevice::PopulateStaticFields();
   CJNISettings::PopulateStaticFields();
+  CJNIDocument::PopulateStaticFields();
 }
 
 CJNIPackageManager CJNIContext::GetPackageManager()
