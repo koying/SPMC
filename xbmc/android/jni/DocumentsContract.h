@@ -1,5 +1,6 @@
+#pragma once
 /*
- *      Copyright (C) 2012-2013 Team XBMC
+ *      Copyright (C) 2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -18,23 +19,22 @@
  *
  */
 
-#pragma once
+#include "JNIBase.h"
 
-#include "IDirectory.h"
-#include "FileItem.h"
-namespace XFILE
-{
+class CJNIURI;
 
-class CAndroidContentDirectory :
-      public IDirectory
+class CJNIDocumentsContract : public CJNIBase
 {
 public:
-  CAndroidContentDirectory(void);
-  virtual ~CAndroidContentDirectory(void);
-  virtual bool GetDirectory(const CURL& url, CFileItemList &items);
-  virtual bool Exists(const CURL& url) { return true; };
-  virtual bool AllowAll() const { return true; };
-  virtual DIR_CACHE_TYPE GetCacheType(const std::string& strPath) const { return DIR_CACHE_NEVER; }
-};
-}
+  static void PopulateStaticFields();
 
+  static std::string getTreeDocumentId (const CJNIURI& documentUri);
+  static std::string getDocumentId (const CJNIURI& documentUri);
+  static CJNIURI buildChildDocumentsUriUsingTree (const CJNIURI& treeUri, const std::string& parentDocumentId);
+  static CJNIURI buildChildDocumentsUri (const std::string& authority, const std::string& parentDocumentId);
+  static CJNIURI buildDocumentUriUsingTree  (const CJNIURI& treeUri, const std::string& parentDocumentId);
+
+protected:
+  CJNIDocumentsContract();
+  ~CJNIDocumentsContract(){}
+};
