@@ -29,6 +29,7 @@ public class Main extends NativeActivity
   private Intent mNewIntent = null;
 
   native void _onNewIntent(Intent intent);
+  native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
 
   public Main()
   {
@@ -226,6 +227,13 @@ public class Main extends NativeActivity
     }
   }
 
+  @Override
+  public void onActivityResult(int requestCode, int resultCode,
+      Intent resultData)
+  {
+    _onActivityResult(requestCode, resultCode, resultData);
+  }
+  
   @Override
   public void onDestroy()
   {
