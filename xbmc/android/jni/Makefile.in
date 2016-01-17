@@ -63,6 +63,8 @@ SRCS      += Settings.cpp
 SRCS      += StorageManager.cpp
 SRCS      += StorageVolume.cpp
 SRCS      += URIPermission.cpp
+SRCS      += DocumentsContract.cpp
+SRCS      += Document.cpp
 
 LIB        = jni.a
 
