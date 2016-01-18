@@ -72,9 +72,7 @@ bool CAndroidContentDirectory::GetDirectory(const CURL& url, CFileItemList &item
   }
   else
   {
-    std::string doc_id = CJNIDocumentsContract::getDocumentId(childrenUri);
-    childrenUri = CJNIDocumentsContract::buildChildDocumentsUri(url.GetHostName(), doc_id);
-    CLog::Log(LOGDEBUG, ">>> doc_id(%s)", doc_id.c_str());
+    childrenUri = CJNIDocumentsContract::buildChildDocumentsUriUsingTree(childrenUri, CJNIDocumentsContract::getDocumentId(childrenUri));
   }
   CLog::Log(LOGDEBUG, "CAndroidContentDirectory::GetDirectory opened succesfully: %s", childrenUri.toString().c_str());
 
