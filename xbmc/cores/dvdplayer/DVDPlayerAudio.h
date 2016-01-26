@@ -138,8 +138,8 @@ public:
   bool IsStalled() const                            { return m_stalled;  }
   bool IsEOS()                                      { return false; }
   bool IsPassthrough() const;
-  double GetDelay() { return 0.0; }
-  double GetCacheTotal() { return 0.0; }
+  double GetDelay()                                 { CSingleLock lock(m_info_section); return m_info.delay; }
+  double GetCacheTotal()                            { CSingleLock lock(m_info_section); return m_info.cache; }
 protected:
 
   virtual void OnStartup();
@@ -237,6 +237,8 @@ protected:
     {}
 
     std::string      info;
+    double           delay;
+    double           cache;
     double           pts;
     bool             passthrough;
   };
