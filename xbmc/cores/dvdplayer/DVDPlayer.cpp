@@ -3078,7 +3078,9 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
     }
     else
     {
-      double dDelay = m_dvdPlayerVideo->GetDelay() / DVD_TIME_BASE - g_renderManager.GetDisplayLatency();
+      double dDelay = m_dvdPlayerAudio->GetDelay() / DVD_TIME_BASE;
+      double dCache = m_dvdPlayerAudio->GetCacheTotal();
+//      double dDelay = m_dvdPlayerVideo->GetDelay() / DVD_TIME_BASE - g_renderManager.GetDisplayLatency();
 
       double apts = m_dvdPlayerAudio->GetCurrentPts();
       double vpts = m_dvdPlayerVideo->GetCurrentPts();
@@ -3100,8 +3102,9 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
           strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_StateInput.cache_delay));
       }
 
-      strGeneralInfo = StringUtils::Format("C( ad:% 6.3f, a/v:% 6.3f%s, dcpu:%2i%% acpu:%2i%% vcpu:%2i%%%s )"
+      strGeneralInfo = StringUtils::Format("C( ad:% 6.3f(%6.3f), a/v:% 6.3f%s, dcpu:%2i%% acpu:%2i%% vcpu:%2i%%%s )"
                                            , dDelay
+                                           , dCache
                                            , dDiff
                                            , strEDL.c_str()
                                            , (int)(CThread::GetRelativeUsage()*100)
