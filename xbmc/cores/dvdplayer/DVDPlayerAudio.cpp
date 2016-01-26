@@ -488,6 +488,8 @@ void CDVDPlayerAudio::UpdatePlayerInfo()
 
   SInfo info;
   info.info        = s.str();
+  info.delay       = m_dvdAudio.GetDelay();
+  info.cache       = m_dvdAudio.GetCacheTime();
   info.pts         = m_dvdAudio.GetPlayingPts();
   info.passthrough = m_pAudioCodec && m_pAudioCodec->NeedPassthrough();
 
