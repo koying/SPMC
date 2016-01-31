@@ -13,7 +13,7 @@ import android.widget.ListView;
 public class XBMCSearchableActivity extends Activity
 {
 
-  private static final String TAG = "KodiSearch";
+  private static final String TAG = "SPMCSearch";
 
   private ListView mListView;
   
