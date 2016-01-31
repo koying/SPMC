@@ -53,7 +53,7 @@ GDBPATH=$(NDKROOT)/prebuilt/android-$(ARCH)/gdbserver/gdbserver
 endif
 
 SRCLIBS = $(addprefix $(PREFIX)/lib/,$(OBJS)) $(addprefix $(PREFIX)/lib/$(SDK_PLATFORM)/,$(PLATFORM_OBJS))
-DSTLIBS = $(CPU)/lib/libkodi.so $(addprefix $(CPU)/lib/,$(OBJS)) $(addprefix $(CPU)/lib/,$(PLATFORM_OBJS))
+DSTLIBS = $(CPU)/lib/libspmc.so $(addprefix $(CPU)/lib/,$(OBJS)) $(addprefix $(CPU)/lib/,$(PLATFORM_OBJS))
 libs= $(DSTLIBS)
 
 all: apk
@@ -81,7 +81,7 @@ endif
 
 shared:
 	mkdir -p assets
-	cp -rfp $(PREFIX)/share/kodi/* ./assets
+	cp -rfp $(PREFIX)/share/spmc/* ./assets
 	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
 	find `pwd`/assets/ -name "*.so" -exec rm {} \;
 	find `pwd`/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
@@ -93,9 +93,9 @@ sharedapk: shared | xbmc/assets
 	cp -rfp assets/* ./xbmc/assets
 
 sharedobb: shared
-	rm -f $(XBMCROOT)/main.kodi.obb
-	$(ZIP) -9 -q -r $(XBMCROOT)/main.kodi.obb assets
-	@echo "$(XBMCROOT)/main.kodi.obb created"
+	rm -f $(XBMCROOT)/main.spmc.obb
+	$(ZIP) -9 -q -r $(XBMCROOT)/main.spmc.obb assets
+	@echo "$(XBMCROOT)/main.spmc.obb created"
 
 python: | xbmc/assets
 	mkdir -p xbmc/assets/python2.6/lib/
@@ -103,7 +103,7 @@ python: | xbmc/assets
 	cd xbmc/assets/python2.6/lib/python2.6/; rm -rf test config lib-dynload
 
 res:
-	mkdir -p xbmc/gen/org/xbmc/kodi xbmc/res xbmc/res/raw xbmc/res/values images
+	mkdir -p xbmc/gen/com/semperpax/spmc xbmc/res xbmc/res/raw xbmc/res/values images
 	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(XBMCROOT)/media/Splash.png xbmc/res/drawable/splash.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
@@ -116,18 +116,18 @@ res:
 	cp xbmc/colors.xml xbmc/res/values/
 	cp xbmc/activity_main.xml xbmc/res/layout/
 	mkdir -p tmp/res; $(AAPT) c -S xbmc/res -C tmp/res; cp -r -n xbmc/res tmp/ || true
-	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/kodiapp-debug-skeleton.apk -J xbmc/gen/org/xbmc/kodi
+	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/spmcapp-debug-skeleton.apk -J xbmc/gen/com/semperpax/spmc
 	@rm -rf tmp/
 
-libs: $(PREFIX)/lib/kodi/libkodi.so
+libs: $(PREFIX)/lib/spmc/libspmc.so
 	rm -rf xbmc/lib/$(CPU) xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
 	mkdir -p xbmc/lib/$(CPU) xbmc/assets/python2.6/lib/ xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
 	cp -fp $(SRCLIBS) xbmc/obj/local/$(CPU)/
-	cp -fp $(PREFIX)/lib/kodi/libkodi.so xbmc/obj/local/$(CPU)/
-	find $(PREFIX)/lib/kodi/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	find $(PREFIX)/share/kodi/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	find $(PREFIX)/lib/kodi/system -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	find $(PREFIX)/share/kodi/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
+	cp -fp $(PREFIX)/lib/spmc/libspmc.so xbmc/obj/local/$(CPU)/
+	find $(PREFIX)/lib/spmc/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
+	find $(PREFIX)/share/spmc/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
+	find $(PREFIX)/lib/spmc/system -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
+	find $(PREFIX)/share/spmc/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
 	cd xbmc/obj/local/$(CPU)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
 	cp -fp xbmc/obj/local/$(CPU)/*.so xbmc/lib/$(CPU)/
 	$(STRIP) --strip-unneeded xbmc/lib/$(CPU)/*.so
@@ -140,23 +140,23 @@ libs: $(PREFIX)/lib/kodi/libkodi.so
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/org/xbmc/kodi/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/com/semperpax/spmc/*.java
 	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/libs
 
 package: libs symbols python xbmc/classes.dex
 	@echo "Creating package..."
-	@cp images/kodiapp-debug-skeleton.apk images/kodiapp-debug-$(CPU)-unaligned.apk
-	@cd xbmc; $(ZIP) -r -q ../images/kodiapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
+	@cp images/spmcapp-debug-skeleton.apk images/spmcapp-debug-$(CPU)-unaligned.apk
+	@cd xbmc; $(ZIP) -r -q ../images/spmcapp-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
 
 apk-sign:
 	@echo "Signing..."
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/kodiapp-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
-	@$(ZIPALIGN) -f 4 images/kodiapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/kodiapp-$(CPU)-debug.apk
-	@rm images/kodiapp-debug-$(CPU)-unaligned.apk
-	@echo "$(XBMCROOT)/kodiapp-$(CPU)-debug.apk created"
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/spmcapp-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
+	@$(ZIPALIGN) -f 4 images/spmcapp-debug-$(CPU)-unaligned.apk $(XBMCROOT)/spmcapp-$(CPU)-debug.apk
+	@rm images/spmcapp-debug-$(CPU)-unaligned.apk
+	@echo "$(XBMCROOT)/spmcapp-$(CPU)-debug.apk created"
 
-$(PREFIX)/lib/xbmc/libkodi.so: $(SRCLIBS)
+$(PREFIX)/lib/xbmc/libspmc.so: $(SRCLIBS)
 	$(MAKE) -C ../../depends/target/xbmc
 
 $(SRCLIBS):

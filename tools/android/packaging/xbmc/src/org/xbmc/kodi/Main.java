@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import android.app.NativeActivity;
 import android.content.ComponentName;
@@ -14,11 +14,11 @@ import android.widget.RelativeLayout;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
-import org.xbmc.kodi.XBMCVideoView;
+import com.semperpax.spmc.XBMCVideoView;
 
 public class Main extends NativeActivity
 {
-  private static final String TAG = "kodi";
+  private static final String TAG = "spmc";
 
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCVideoView mVideoView = null;
@@ -97,7 +97,7 @@ public class Main extends NativeActivity
       System.loadLibrary("smbclient");
     }
     catch (UnsatisfiedLinkError e) {}
-    System.loadLibrary("kodi");
+    System.loadLibrary("spmc");
 
     super.onCreate(savedInstanceState);
     getWindow().setFormat(PixelFormat.TRANSPARENT);
