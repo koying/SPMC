@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +15,7 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
 {
   native void _onReceive(Intent intent);
 
-  private static final String TAG = "KodiReceiver";
+  private static final String TAG = "SPMCReceiver";
 
   @Override
   public void onReceive(Context context, Intent intent)
@@ -44,10 +44,10 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
       String sXbmcAutostart = System.getProperty("xbmc.autostart", "");
       if (sXbmcAutostart.equalsIgnoreCase("yes"))
       {
-        // Run Kodi
+        // Run SPMC
         Intent i = new Intent();
         PackageManager manager = context.getPackageManager();
-        i = manager.getLaunchIntentForPackage("org.xbmc.kodi");
+        i = manager.getLaunchIntentForPackage("com.semperpax.spmc");
         i.addCategory(Intent.CATEGORY_LAUNCHER);
         context.startActivity(i);
       }

@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -68,7 +68,7 @@ public class Splash extends Activity {
   private static final int DownloadObbDone = 91;
   private static final int StartingXBMC = 99;
 
-  private static final String TAG = "Kodi";
+  private static final String TAG = "SPMC";
 
   private String mCpuinfo = "";
   private ArrayList<String> mMounts = new ArrayList<String>();
@@ -163,7 +163,7 @@ public class Splash extends Activity {
           sendEmptyMessage(CachingDone);
           break;
         case StartingXBMC:
-          mSplash.mTextView.setText("Starting Kodi...");
+          mSplash.mTextView.setText("Starting SPMC...");
           mSplash.mProgress.setVisibility(View.INVISIBLE);
           mSplash.startXBMC();
           break;
@@ -503,7 +503,7 @@ public class Splash extends Activity {
     String obbfn = "";
     if (fPackagePath.length() < 40 * 1024 * 1024)
     {
-      sPackagePath = System.getProperty("Kodi.obb", "");
+      sPackagePath = System.getProperty("spmc.obb", "");
       if (sPackagePath.equals(""))
       {
         try
@@ -523,42 +523,6 @@ public class Splash extends Activity {
         new DownloadObb(this).execute("http://mirrors.kodi.tv/releases/android/obb/" + obbfn, sPackagePath);
       }
     }
-  }
-
-  private void MigrateUserData() {
-      String sOldUserDir;
-      File fOldUserDir;
-      try {
-        sOldUserDir = getExternalFilesDir(null).getParentFile().getParentFile() + "/org.xbmc.xbmc/files/.xbmc";
-        fOldUserDir = new File(sOldUserDir);
-        if (!fOldUserDir.exists())
-          return;
-      } catch (Exception e) {
-        return;
-      }
-
-      File fNewUserDir = new File(getExternalFilesDir(null), ".kodi");
-      String sKodiMigrated = fNewUserDir.getAbsolutePath() + "/.kodi_data_was_migrated";
-      File fKodiMigrated = new File(sKodiMigrated);
-
-      Log.d(TAG, "External_dir = " + fOldUserDir);
-      if (fOldUserDir.exists() && !fNewUserDir.exists()) {
-        Log.d(TAG, "XBMC user data detected at " + fOldUserDir.getAbsolutePath() + ", migrating to " + fNewUserDir.getAbsolutePath());
-        if (!fNewUserDir.getParentFile().exists() && !fNewUserDir.getParentFile().mkdirs()) {
-          Log.d(TAG, "Error creating " + fNewUserDir.getParentFile().getAbsolutePath());
-          return;
-        }
-        if (fOldUserDir.renameTo(fNewUserDir)) {
-          try {
-            new FileOutputStream(fKodiMigrated).close();
-          } catch (IOException e1) {
-            e1.printStackTrace();
-          }
-          Log.d(TAG, "XBMC user data migrated to Kodi successfully");
-        } else {
-          Log.d(TAG, "Error migrating XBMC user data");
-        }
-      }
   }
 
 
@@ -703,7 +667,7 @@ public class Splash extends Activity {
   protected void startXBMC() {
     // Run Kodi
     Intent intent = getIntent();
-    intent.setClass(this, org.xbmc.kodi.Main.class);
+    intent.setClass(this, com.semperpax.spmc.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
     finish();
@@ -713,15 +677,15 @@ public class Splash extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    // Check if Kodi is not already running
+    // Check if SPMC is not already running
     ActivityManager activityManager = (ActivityManager) getBaseContext()
         .getSystemService(Context.ACTIVITY_SERVICE);
     List<RunningTaskInfo> tasks = activityManager
         .getRunningTasks(Integer.MAX_VALUE);
     for (RunningTaskInfo task : tasks)
       if (task.topActivity.toString().equalsIgnoreCase(
-          "ComponentInfo{org.xbmc.kodi/org.xbmc.kodi.Main}")) {
-        // Kodi already running; just activate it
+          "ComponentInfo{com.semperpax.spmc/.Main}")) {
+        // SPMC already running; just activate it
         startXBMC();
         return;
       }
@@ -775,7 +739,7 @@ public class Splash extends Activity {
         if (!curArch.equalsIgnoreCase(properties.getProperty("native_arch"))
               && !curArch2.equalsIgnoreCase(properties.getProperty("native_arch")))
         {
-          mErrorMsg = "This Kodi package is not compatible with your device (device=" + curArch + " vs. package=" + properties.getProperty("native_arch") +").\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
+          mErrorMsg = "This SPMC package is not compatible with your device (device=" + curArch + " vs. package=" + properties.getProperty("native_arch") +").\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
           Log.e(TAG, mErrorMsg);
           mState = InError;
         }
@@ -802,7 +766,7 @@ public class Splash extends Activity {
         } else {
           ret = CheckCpuFeature("neon") || CheckCpuFeature("aarch64");  //aarch64 is always neon
           if (!ret) {
-            mErrorMsg = "This Kodi package is not compatible with your device (NEON).\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
+            mErrorMsg = "This SPMC package is not compatible with your device (NEON).\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
             Log.e(TAG, mErrorMsg);
             mState = InError;
           }
@@ -827,7 +791,6 @@ public class Splash extends Activity {
       mState = ChecksDone;
 
       SetupEnvironment();
-      MigrateUserData();
 
       if ((mState != DownloadingObb && mState != InError) && fXbmcHome.exists() && fXbmcHome.lastModified() >= fPackagePath.lastModified() && !mInstallLibs) {
         mState = CachingDone;
