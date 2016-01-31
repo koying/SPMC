@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -11,7 +11,7 @@ public class XBMCSettingsContentObserver extends ContentObserver
 {
   native void _onVolumeChanged(int newVolume);
 
-  private static final String TAG = "kodi";
+  private static final String TAG = "spmc";
 
   int previousVolume;
   Context context;

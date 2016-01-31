@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -703,7 +703,7 @@ public class Splash extends Activity {
   protected void startXBMC() {
     // Run Kodi
     Intent intent = getIntent();
-    intent.setClass(this, org.xbmc.kodi.Main.class);
+    intent.setClass(this, com.semperpax.spmc.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
     finish();
@@ -720,7 +720,7 @@ public class Splash extends Activity {
         .getRunningTasks(Integer.MAX_VALUE);
     for (RunningTaskInfo task : tasks)
       if (task.topActivity.toString().equalsIgnoreCase(
-          "ComponentInfo{org.xbmc.kodi/org.xbmc.kodi.Main}")) {
+          "ComponentInfo{com.semperpax.spmc/org.xbmc.kodi.Main}")) {
         // Kodi already running; just activate it
         startXBMC();
         return;

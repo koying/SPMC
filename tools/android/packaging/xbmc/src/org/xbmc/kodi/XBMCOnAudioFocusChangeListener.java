@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.util.Log;
