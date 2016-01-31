@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public class XBMCJsonRPC
   public final static String COLUMN_VIEW_PROGRESS = "COLUMN_VIEW_PROGRESS";
   public final static String COLUMN_RECOMMENDATION_REASON = "COLUMN_RECOMMENDATION_REASON";
 
-  private static String TAG = "kodijson";
+  private static String TAG = "spmcjson";
   
   private String m_jsonURL = "http://localhost:8080";
   private int MAX_RECOMMENDATIONS = 3;
