@@ -1,6 +1,7 @@
 APP_NAME spmc
+APP_PACKAGE_ROOT com.semperpax
 COMPANY_NAME XBMC-Foundation
-WEBSITE http://kodi.tv
+WEBSITE http://spmc.semperpax.com/
 VERSION_MAJOR 17
 VERSION_MINOR 0
 VERSION_TAG BETA4
