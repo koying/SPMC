@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,9 +38,9 @@ import android.util.Log;
  */
 public class XBMCImageContentProvider extends ContentProvider
 {
-  private static String TAG = "kodi";
+  private static String TAG = "spmc";
   
-  public static String AUTHORITY = "org.xbmc.kodi";
+  public static String AUTHORITY = "com.semperpax.spmc";
   public static String AUTHORITY_IMAGE = AUTHORITY + ".image";
  
   @Override

@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;

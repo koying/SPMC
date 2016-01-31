@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.xbmc.kodi"
+    package="com.semperpax.spmc"
     android:installLocation="auto"
     android:versionCode="159801"
     android:versionName="16.0-BETA1" >
@@ -83,7 +83,7 @@
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data
                 android:name="android.app.lib_name"
-                android:value="kodi" />
+                android:value="spmc" />
         </activity>
 
         <receiver android:name=".XBMCBroadcastReceiver" >
@@ -98,12 +98,12 @@
 
         <provider
             android:name=".XBMCImageContentProvider"
-            android:authorities="org.xbmc.kodi.image"
+            android:authorities="com.semperpax.spmc.image"
             android:exported="true" />
 
         <provider
             android:name=".XBMCMediaContentProvider"
-            android:authorities="org.xbmc.kodi.media"
+            android:authorities="com.semperpax.spmc.media"
             android:exported="true" />
         
         <activity android:name=".XBMCSearchableActivity" >

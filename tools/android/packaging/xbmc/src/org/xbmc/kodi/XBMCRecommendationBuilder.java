@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -8,14 +8,14 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import org.xbmc.kodi.R;
+import com.semperpax.spmc.R;
 
 /*
  * This class builds recommendations as notifications with videos as inputs.
  */
 public class XBMCRecommendationBuilder
 {
-  private static final String TAG = "kodi";
+  private static final String TAG = "spmc";
 
   private Context mContext;
 

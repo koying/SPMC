@@ -1,4 +1,4 @@
-package org.xbmc.kodi;
+package com.semperpax.spmc;
 
 import android.app.SearchManager;
 import android.content.ContentProvider;
@@ -10,9 +10,9 @@ import android.util.Log;
 
 public class XBMCMediaContentProvider extends ContentProvider
 {
-  private static String TAG = "kodimediaprovider";
+  private static String TAG = "spmcmediaprovider";
   
-  public static final String AUTHORITY = "org.xbmc.kodi";
+  public static final String AUTHORITY = "com.semperpax.spmc";
   public static final String AUTHORITY_MEDIA = AUTHORITY + ".media";
   public static final String SUGGEST_PATH = "suggestions";
 
