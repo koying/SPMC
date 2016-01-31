@@ -33,7 +33,7 @@ import android.util.Log;
 
 public class XBMCJsonRPC
 {
-  public final static String APP_NAME = "Kodi Search";
+  public final static String APP_NAME = "SPMC Search";
   public final static String COLUMN_FULL_PATH = "COLUMN_FULL_PATH";
   public final static String COLUMN_BASE_PATH = "COLUMN_BASE_PATH";
   public final static String COLUMN_FILENAME = "COLUMN_FILENAME";
