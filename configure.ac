@@ -117,6 +117,7 @@ AC_DEFUN([XB_PUSH_FLAGS], [
 ])
 
 # version can be overridden by setting the following as ENV vars when running configure
+APP_PACKAGE_ROOT=${APP_PACKAGE_ROOT-$(${AWK} '/APP_PACKAGE_ROOT/ {print $2}' version.txt)}
 APP_NAME=${APP_NAME-$(${AWK} '/APP_NAME/ {print $2}' version.txt)}
 APP_NAME_LC=$(echo $APP_NAME | ${AWK} '{print tolower($0)}')
 APP_NAME_UC=$(echo $APP_NAME | ${AWK} '{print toupper($0)}')
