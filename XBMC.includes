@@ -2865,3 +2865,6 @@ xbmc/windowing/osx
 xbmc/windowing/windows
 xbmc/windowing/X11
 xbmc/windows
+tools/android/packaging/xbmc
+xbmc/video/jobs
+xbmc/video/videosync
