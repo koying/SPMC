@@ -662,12 +662,15 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
     m_info.m_dataFormats.push_back(AE_FMT_AC3);
     m_info.m_dataFormats.push_back(AE_FMT_DTS);
 #if defined(HAS_LIBAMCODEC)
-    if (aml_present() && HasAmlHD())
+    if (aml_present())
     {
-      m_sink_sampleRates.insert(192000);   // For HD audio
-      m_info.m_dataFormats.push_back(AE_FMT_EAC3);
-      m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
-      m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
+      if (HasAmlHD())
+      {
+        m_sink_sampleRates.insert(192000);   // For HD audio
+        m_info.m_dataFormats.push_back(AE_FMT_EAC3);
+        m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
+        m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
+      }
     }
     else
 #endif
