@@ -168,12 +168,6 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
   std::string searchString(needle);
   CRegExp re(true);
 
-  if (URIUtils::HasExtension(needle, ".ssif"))
-  {
-    stereoMode = "left_right";
-    return stereoMode;
-  }
-
   if (!re.RegComp(g_advancedSettings.m_stereoscopicregex_3d.c_str()))
   {
     CLog::Log(LOGERROR, "%s: Invalid RegExp for matching 3d content:'%s'", __FUNCTION__, g_advancedSettings.m_stereoscopicregex_3d.c_str());
@@ -212,6 +206,12 @@ std::string CStereoscopicsManager::DetectStereoModeByString(const std::string &n
 
   if (re.RegFind(searchString) > -1)
     stereoMode = "left_right";
+
+  if (URIUtils::HasExtension(needle, ".ssif"))
+  {
+    stereoMode = "top_bottom";
+    return stereoMode;
+  }
 
   return stereoMode;
 }
