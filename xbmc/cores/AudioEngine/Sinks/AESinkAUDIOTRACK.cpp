@@ -491,11 +491,10 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-  if (m_encoding == CJNIAudioFormat::ENCODING_E_AC3)
-  {
-    if (aml_present() && HasAmlHD())
-      head_pos /= 4;  // AML wants sink in 48k but returns pos in 192k
-  }
+#if defined(HAS_LIBAMCODEC)
+  if (aml_present() && (m_encoding == CJNIAudioFormat::ENCODING_E_AC3 || m_encoding == CJNIAudioFormat::ENCODING_DTSHD_MA || m_encoding == CJNIAudioFormat::ENCODING_TRUEHD))
+    head_pos /= m_sink_frameSize;  // AML returns pos in bytes for those
+#endif
 
   double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
   if (m_duration_written != m_last_duration_written && head_pos != m_last_head_pos)
