@@ -43,6 +43,7 @@
 #include "URL.h"
 #include "Util.h"
 #include "utils/Base64.h"
+#include "utils/FileUtils.h"
 #include "utils/log.h"
 #include "utils/Mime.h"
 #include "utils/StringUtils.h"
@@ -765,6 +766,10 @@ int CWebServer::CreateFileDownloadResponse(const std::shared_ptr<IHTTPRequestHan
   std::shared_ptr<XFILE::CFile> file = std::make_shared<XFILE::CFile>();
   std::string filePath = handler->GetResponseFile();
 
+  // white/black list access check
+  if (!CFileUtils::ZebraListAccessCheck(filePath))
+    return SendErrorResponse(request.connection, MHD_HTTP_NOT_FOUND, request.method);
+
   if (!file->Open(filePath, XFILE::READ_NO_CACHE))
   {
     CLog::Log(LOGERROR, "CWebServer[%hu]: Failed to open %s", m_port, filePath.c_str());
@@ -1258,4 +1263,5 @@ int CWebServer::AddHeader(struct MHD_Response *response, const std::string &name
 
   return MHD_add_response_header(response, name.c_str(), value.c_str());
 }
+
 #endif
