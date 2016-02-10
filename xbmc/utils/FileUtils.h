@@ -29,6 +29,7 @@ public:
   static bool RenameFile(const std::string &strFile);
   static bool RemoteAccessAllowed(const std::string &strPath);
   static unsigned int LoadFile(const std::string &filename, void* &outputBuffer);
+  static bool ZebraListAccessCheck(const std::string &filePath);
   /*! \brief Get the modified date of a file if its invalid it returns the creation date - this behavior changes when you set bUseLatestDate
   \param strFileNameAndPath path to the file
   \param bUseLatestDate use the newer datetime of the files mtime and ctime
