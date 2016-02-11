@@ -19226,7 +19226,7 @@ msgstr ""
 
 #: system/settings/rbp.xml
 msgctxt "#37027"
-msgid "540"
+msgid "1080"
 msgstr ""
 
 #: system/settings/rbp.xml
