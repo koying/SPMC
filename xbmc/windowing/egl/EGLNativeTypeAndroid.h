@@ -48,4 +48,7 @@ public:
   virtual bool  ShowWindow(bool show);
   virtual bool  BringToFront();
 
+protected:
+  int m_width;
+  int m_height;
 };
