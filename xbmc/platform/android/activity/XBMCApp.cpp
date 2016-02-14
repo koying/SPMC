@@ -122,6 +122,7 @@ std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIMainActivity(nativeActivity)
   , CJNIBroadcastReceiver(CJNIContext::getPackageName() + ".XBMCBroadcastReceiver")
+  , m_videosurfaceInUse(false)
 {
   m_xbmcappinstance = this;
   m_activity = nativeActivity;
@@ -206,7 +207,13 @@ void CXBMCApp::onPause()
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
-      CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
+    {
+      if (getVideosurfaceInUse())
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
+      else
+        if (!g_application.m_pPlayer->IsPaused())
+          CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
+    }
     else
       registerMediaButtonEventReceiver();
   }
@@ -490,6 +497,16 @@ void CXBMCApp::SetRefreshRateCallback(CVariant* rateVariant)
         window.setAttributes(params);
     }
   }
+}
+
+bool CXBMCApp::getVideosurfaceInUse()
+{
+  return m_videosurfaceInUse;
+}
+
+void CXBMCApp::setVideosurfaceInUse(bool videosurfaceInUse)
+{
+  m_videosurfaceInUse = videosurfaceInUse;
 }
 
 void CXBMCApp::SetRefreshRate(float rate)
