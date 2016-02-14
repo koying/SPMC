@@ -161,9 +161,6 @@ public:
 
   bool operator()(const SelectionStream& ss) const
   {
-    if (ss.type_index == CMediaSettings::GetInstance().GetCurrentVideoSettings().m_SubtitleStream)
-      return false;
-
     if (nosub)
       return true;
 
@@ -175,7 +172,10 @@ public:
         return true;
     }
       
-    if(STREAM_SOURCE_MASK(ss.source) == STREAM_SOURCE_DEMUX_SUB || STREAM_SOURCE_MASK(ss.source) == STREAM_SOURCE_TEXT)
+    if (ss.type_index == CMediaSettings::GetInstance().GetCurrentVideoSettings().m_SubtitleStream)
+      return false;
+
+    if (STREAM_SOURCE_MASK(ss.source) == STREAM_SOURCE_DEMUX_SUB || STREAM_SOURCE_MASK(ss.source) == STREAM_SOURCE_TEXT)
       return false;
 
     if ((ss.flags & CDemuxStream::FLAG_FORCED) && (original || g_LangCodeExpander.CompareISO639Codes(ss.language, audiolang)))
@@ -899,7 +899,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
     {
       valid = true;
       if(!psp.relevant(*it))
-        visible = false;
+        valid = false;
       else if(it->flags & CDemuxStream::FLAG_FORCED)
         visible = true;
     }
