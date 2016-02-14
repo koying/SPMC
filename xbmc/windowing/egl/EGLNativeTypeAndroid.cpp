@@ -54,20 +54,52 @@ void CEGLNativeTypeAndroid::Initialize()
   std::string displaySize;
   m_width = m_height = 0;
 
-  // FIXME: Temporary shield specific hack to obtain HDMI resolution
-  //        Remove and use New Android M API
-  displaySize = CJNISystemProperties::get("sys.display-size", "");
-  if (!displaySize.empty())
+  CJNIWindow window = CXBMCApp::getWindow();
+  if (window)
   {
-    CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: display-size: %s", displaySize.c_str());
-    std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
-    if (aSize.size() == 2)
+    CJNIView view(window.getDecorView());
+    if (view)
+      m_display = view.getDisplay();
+  }
+
+  // Try to find out the HDMI resolution
+  if (CJNIDisplay::GetSDKVersion() >= 23)
+  {
+    if (m_display)
     {
-      m_width = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
-      m_height = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
+      std::vector<CJNIDisplayMode> modes = m_display.getSupportedModes();
+      for (auto m : modes)
+      {
+        CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: available mode: %dx%d@%f", m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
+        if (m.getPhysicalWidth() > m_width || m.getPhysicalHeight() > m_height)
+        {
+          m_width = m.getPhysicalWidth();
+          m_height = m.getPhysicalHeight();
+        }
+      }
+
+      CJNIDisplayMode mode = m_display.getMode();
+      CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: current mode: %dx%d@%f", mode.getPhysicalWidth(), mode.getPhysicalHeight(), mode.getRefreshRate());
     }
   }
 
+  if (!m_width || !m_height)
+  {
+    // Property available on some devices
+    displaySize = CJNISystemProperties::get("sys.display-size", "");
+    if (!displaySize.empty())
+    {
+      std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
+      if (aSize.size() == 2)
+      {
+        m_width = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
+        m_height = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
+      }
+      CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: display-size: %s(%dx%d)", displaySize.c_str(), m_width, m_height);
+    }
+  }
+
+  CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: maximum/current resolution: %dx%d", m_width, m_height);
   int limit = CSettings::GetInstance().GetInt("videoscreen.limitgui");
   switch (limit)
   {
@@ -95,6 +127,7 @@ void CEGLNativeTypeAndroid::Initialize()
       }
       break;
   }
+  CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: selected resolution: %dx%d", m_width, m_height);
 }
 void CEGLNativeTypeAndroid::Destroy()
 {

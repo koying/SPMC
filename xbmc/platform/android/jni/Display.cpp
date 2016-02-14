@@ -24,6 +24,31 @@
 
 using namespace jni;
 
+int CJNIDisplayMode::getPhysicalHeight()
+{
+  return call_method<jint>(m_object,
+    "getPhysicalHeight", "()I");
+}
+
+int CJNIDisplayMode::getPhysicalWidth()
+{
+  return call_method<jint>(m_object,
+    "getPhysicalWidth", "()I");
+}
+
+float CJNIDisplayMode::getRefreshRate()
+{
+  return call_method<jfloat>(m_object,
+    "getRefreshRate", "()F");
+}
+
+/*************/
+
+CJNIDisplay::CJNIDisplay()
+ : CJNIBase("android.view.Display")
+{
+}
+
 float CJNIDisplay::getRefreshRate()
 {
   return call_method<jfloat>(m_object,
@@ -38,3 +63,22 @@ std::vector<float> CJNIDisplay::getSupportedRefreshRates()
   else
     return std::vector<float>();
 }
+
+CJNIDisplayMode CJNIDisplay::getMode()
+{
+  if (GetSDKVersion() >= 23)
+    return call_method<jhobject>(m_object,
+                                 "getMode", "()Landroid/view/Display$Mode;");
+  else
+    return jhobject();
+}
+
+std::vector<CJNIDisplayMode> CJNIDisplay::getSupportedModes()
+{
+  if (GetSDKVersion() >= 23)
+    return jcast<CJNIDisplayModes>(call_method<jhobjectArray>(m_object,
+                                                              "getSupportedModes", "()[Landroid/view/Display$Mode;"));
+  else
+    return CJNIDisplayModes();
+}
+

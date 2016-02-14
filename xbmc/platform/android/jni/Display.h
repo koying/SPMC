@@ -23,12 +23,31 @@
 
 #include "JNIBase.h"
 
+class CJNIDisplayMode : public CJNIBase
+{
+public:
+  ~CJNIDisplayMode() {};
+  CJNIDisplayMode(const jni::jhobject &object) : CJNIBase(object) {};
+
+  int getPhysicalHeight();
+  int getPhysicalWidth();
+  float getRefreshRate();
+
+protected:
+  CJNIDisplayMode();
+};
+
 class CJNIDisplay : public CJNIBase
 {
 public:
+  CJNIDisplay();
   CJNIDisplay(const jni::jhobject &object) : CJNIBase(object) {};
   ~CJNIDisplay() {};
 
   float getRefreshRate();
   std::vector<float> getSupportedRefreshRates();
+  CJNIDisplayMode getMode();
+  std::vector<CJNIDisplayMode> getSupportedModes();
 };
+
+typedef std::vector<CJNIDisplayMode> CJNIDisplayModes;
