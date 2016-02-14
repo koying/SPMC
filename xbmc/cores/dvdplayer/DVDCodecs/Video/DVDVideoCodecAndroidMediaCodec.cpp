@@ -489,6 +489,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     m_videosurface = CXBMCApp::get()->getVideoViewSurface();
     if (!m_videosurface)
       return false;
+    CXBMCApp::get()->setVideosurfaceInUse(true);
   }
 
   if (m_render_surface)
@@ -659,6 +660,7 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   ReleaseSurfaceTexture();
   if (m_render_surface)
     CXBMCApp::get()->clearVideoView();
+  CXBMCApp::get()->setVideosurfaceInUse(false);
 
   SAFE_DELETE(m_bitstream);
 }
