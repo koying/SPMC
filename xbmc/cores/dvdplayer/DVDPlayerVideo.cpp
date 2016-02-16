@@ -1381,14 +1381,8 @@ int CDVDPlayerVideo::CalcDropRequirement(double pts, bool updateOnly)
   g_renderManager.GetStats(iSleepTime, iRenderPts, queued, discard);
   iBufferLevel = queued + discard;
 
-  if (iBufferLevel < 0)
+  if (iBufferLevel < 2)
     result |= EOS_BUFFER_LEVEL;
-  else if (iBufferLevel < 2)
-  {
-    result |= EOS_BUFFER_LEVEL;
-    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
-      CLog::Log(LOGDEBUG,"CDVDPlayerVideo::CalcDropRequirement - hurry: %d", iBufferLevel);
-  }
 
   bNewFrame = iDecoderPts != m_droppingStats.m_lastDecoderPts;
 
