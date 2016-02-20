@@ -43,8 +43,6 @@ extern "C" {
 #pragma warning(pop)
 #endif
 
-enum AVDiscard;
-
 enum StreamType
 {
   STREAM_NONE = 0,// if unknown
@@ -105,9 +103,6 @@ public:
   }
 
   virtual void GetStreamName(std::string& strInfo);
-
-  virtual void      SetDiscard(AVDiscard discard);
-  virtual AVDiscard GetDiscard();
 
   int iId;         // most of the time starting from 0
   int iPhysicalId; // id
@@ -374,4 +369,9 @@ public:
    * return a user-presentable codec name of the given stream
    */
   virtual void GetStreamCodecName(int iStreamId, std::string &strName) {};
+
+  /*
+   * enable / disable demux stream
+   */
+  virtual void EnableStream(int id, bool enable) {};
 };
