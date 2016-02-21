@@ -77,12 +77,16 @@ if(WIN32)
     # make sure the extraction worked and that patch.exe is there
     set(PATCH_PATH ${BUILD_DIR}/${PATCH_ARCHIVE_NAME})
     set(PATCH_BINARY_PATH ${PATCH_PATH}/bin/patch.exe)
+    set(PATCH_MANIFEST_PATH ${PATCH_PATH}/bin/patch.exe.manifest)
     if(NOT EXISTS ${PATCH_PATH} OR NOT EXISTS ${PATCH_BINARY_PATH})
       message(FATAL_ERROR "ERROR extracting patch utility from ${PATCH_DOWNLOAD_DIR}")
     endif()
 
     # copy patch.exe into the output directory
     file(INSTALL ${PATCH_BINARY_PATH} DESTINATION ${ADDON_DEPENDS_PATH}/bin)
+    if(EXISTS ${PATCH_MANIFEST_PATH})
+      file(INSTALL ${PATCH_MANIFEST_PATH} DESTINATION ${ADDON_DEPENDS_PATH}/bin)
+    endif()
 
     # make sure that cmake can find the copied patch.exe
     find_program(PATCH_FOUND NAMES patch patch.exe)
