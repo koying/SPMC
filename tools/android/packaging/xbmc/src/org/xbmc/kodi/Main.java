@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.View;
 import android.view.Surface;
 import android.view.Window;
@@ -16,7 +17,7 @@ import android.graphics.PixelFormat;
 import android.os.Handler;
 import com.semperpax.spmc.XBMCVideoView;
 
-public class Main extends NativeActivity
+public class Main extends NativeActivity implements Choreographer.FrameCallback
 {
   private static final String TAG = "spmc";
 
@@ -30,6 +31,7 @@ public class Main extends NativeActivity
 
   native void _onNewIntent(Intent intent);
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
+  native void _doFrame(long frameTimeNanos);
 
   public Main()
   {
@@ -167,6 +169,8 @@ public class Main extends NativeActivity
   {
     super.onResume();
 
+    Choreographer.getInstance().postFrameCallback(this);
+
     Window window = getWindow();
     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -228,6 +232,14 @@ public class Main extends NativeActivity
   }
 
   @Override
+  public void onPause()
+  {
+    super.onPause();
+    
+    Choreographer.getInstance().removeFrameCallback(this);
+  }
+  
+  @Override
   public void onActivityResult(int requestCode, int resultCode,
       Intent resultData)
   {
@@ -249,6 +261,13 @@ public class Main extends NativeActivity
       }
     }.start();
     super.onDestroy();
+  }
+  
+  @Override
+  public void doFrame(long frameTimeNanos)
+  {
+    Choreographer.getInstance().postFrameCallback(this);
+    _doFrame(frameTimeNanos);
   }
 
   private native void _callNative(long funcAddr, long variantAddr);

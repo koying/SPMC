@@ -34,6 +34,7 @@ public:
   static void _onActivityResult(JNIEnv *env, jobject context, jint requestCode, jint resultCode, jobject resultData);
   static void _onVolumeChanged(JNIEnv *env, jobject context, jint volume);
   static void _onAudioFocusChange(JNIEnv *env, jobject context, jint focusChange);
+  static void _doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -53,4 +54,5 @@ protected:
   virtual void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData)=0;
   virtual void onVolumeChanged(int volume)=0;
   virtual void onAudioFocusChange(int focusChange)=0;
+  virtual void doFrame(int64_t frameTimeNanos)=0;
 };

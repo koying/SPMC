@@ -82,6 +82,7 @@
 
 #include "CompileInfo.h"
 #include "filesystem/VideoDatabaseFile.h"
+#include "video/videosync/VideoSyncAndroid.h"
 
 #define GIGABYTES       1073741824
 
@@ -108,6 +109,7 @@ bool CXBMCApp::m_headsetPlugged = false;
 CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
+CVideoSyncAndroid* CXBMCApp::m_syncImpl = NULL;
 
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
@@ -904,6 +906,22 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
     if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
   }
+}
+
+void CXBMCApp::InitFrameCallback(CVideoSyncAndroid* syncImpl)
+{
+  m_syncImpl = syncImpl;
+}
+
+void CXBMCApp::DeinitFrameCallback()
+{
+  m_syncImpl = NULL;
+}
+
+void CXBMCApp::doFrame(int64_t frameTimeNanos)
+{
+  if (m_syncImpl)
+    m_syncImpl->FrameCallback(frameTimeNanos);
 }
 
 void CXBMCApp::SetupEnv()
