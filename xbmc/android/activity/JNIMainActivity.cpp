@@ -84,6 +84,14 @@ void CJNIMainActivity::_onAudioFocusChange(JNIEnv *env, jobject context, jint fo
     m_appInstance->onAudioFocusChange(focusChange);
 }
 
+void CJNIMainActivity::_doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos)
+{
+  (void)env;
+  (void)context;
+  if(m_appInstance)
+    m_appInstance->doFrame(frameTimeNanos);
+}
+
 CJNISurface CJNIMainActivity::getVideoViewSurface()
 {
   return call_method<jhobject>(m_context,
