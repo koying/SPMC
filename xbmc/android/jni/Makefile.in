@@ -65,6 +65,7 @@ SRCS      += StorageVolume.cpp
 SRCS      += URIPermission.cpp
 SRCS      += DocumentsContract.cpp
 SRCS      += Document.cpp
+SRCS      += AudioTimestamp.cpp
 
 LIB        = jni.a
 
