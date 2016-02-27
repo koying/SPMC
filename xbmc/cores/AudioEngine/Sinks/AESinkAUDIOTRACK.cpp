@@ -34,6 +34,7 @@
 #include "android/jni/AudioManager.h"
 #include "android/jni/AudioTrack.h"
 #include "android/jni/Build.h"
+#include "android/jni/System.h"
 
 #include <algorithm>
 
@@ -475,11 +476,11 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
-  {
-    status.SetDelay(m_sink_delay);
-    return;
-  }
+//  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
+//  {
+//    status.SetDelay(m_sink_delay);
+//    return;
+//  }
 
   // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
   // return a 32bit "int" that you should "interpret as unsigned."  As such,
@@ -497,10 +498,24 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
 #endif
 
   double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
+  double frameDiffMilli = 0;
   if (m_duration_written != m_last_duration_written && head_pos != m_last_head_pos)
   {
+    if (CJNIBuild::SDK_INT >= 23)
+    {
+      CJNIAudioTimestamp ts;
+      int64_t systime = CJNISystem::nanoTime();
+      if (m_at_jni->getTimestamp(ts))
+      {
+        frameDiffMilli = (systime - ts.get_nanoTime()) / 1000000000.0;
+#ifdef DEBUG_VERBOSE
+        if (m_passthrough)
+          CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay timestamp: pos(%lld) time(%lld) diff(%f)", ts.get_framePosition(), ts.get_nanoTime(), frameDiffMilli);
+#endif
+      }
+    }
 
-    m_smoothedDelayVec.push_back(delay);
+    m_smoothedDelayVec.push_back(delay - frameDiffMilli);
     if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
       m_smoothedDelayCount++;
     else
