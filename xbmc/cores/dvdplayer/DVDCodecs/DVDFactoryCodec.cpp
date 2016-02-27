@@ -267,7 +267,8 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
 #endif
 
 #if defined(TARGET_ANDROID)
-  if (!hint.software && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
+  // Only give priority to Surface in 4K
+  if (!hint.software && hint.height > 1080 && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
   {
     switch(hint.codec)
     {
@@ -297,6 +298,22 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
       default:
         CLog::Log(LOGINFO, "MediaCodec Video Decoder...");
         if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(false), hint, options)) ) return pCodec;
+    }
+  }
+  if (!hint.software && hint.height <= 1080 && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
+  {
+    switch(hint.codec)
+    {
+      case AV_CODEC_ID_MPEG4:
+      case AV_CODEC_ID_MSMPEG4V2:
+      case AV_CODEC_ID_MSMPEG4V3:
+        // Avoid h/w decoder for SD; Those files might use features
+        // not supported and can easily be soft-decoded
+        if (hint.width <= 800)
+          break;
+      default:
+        CLog::Log(LOGINFO, "MediaCodec (Surface) Video Decoder...");
+        if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(true), hint, options)) ) return pCodec;
     }
   }
 #endif
