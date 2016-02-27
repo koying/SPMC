@@ -48,5 +48,12 @@ std::string CJNISystem::clearProperty(const std::string &property)
 {
   return jcast<std::string>(call_static_method<jhstring>("java/lang/System",
     "clearProperty", "(Ljava/lang/String;)Ljava/lang/String;",
-    jcast<jhstring>(property)));
+                                                         jcast<jhstring>(property)));
+}
+
+int64_t CJNISystem::nanoTime()
+{
+  return call_static_method<jlong>("java/lang/System",
+                           "nanoTime",
+                           "()J");
 }

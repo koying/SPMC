@@ -117,8 +117,6 @@ void CJNIAudioTrack::flush()
 void CJNIAudioTrack::release()
 {
   call_method<void>(m_object, "release", "()V");
-
-  JNIEnv* jenv  = xbmc_jnienv();
 }
 
 int CJNIAudioTrack::write(char* audioData, int offsetInBytes, int sizeInBytes)
@@ -159,6 +157,12 @@ int CJNIAudioTrack::getPlayState()
 int CJNIAudioTrack::getPlaybackHeadPosition()
 {
   return call_method<int>(m_object, "getPlaybackHeadPosition", "()I");
+}
+
+bool CJNIAudioTrack::getTimestamp(CJNIAudioTimestamp &timestamp)
+{
+  return call_method<jboolean>(m_object, "getTimestamp", "(Landroid/media/AudioTimestamp;)Z",
+                                    timestamp.get_raw());
 }
 
 int CJNIAudioTrack::getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat)
