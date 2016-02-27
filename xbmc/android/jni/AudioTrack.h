@@ -23,6 +23,7 @@
 
 #include "JNIBase.h"
 #include "ByteBuffer.h"
+#include "AudioTimestamp.h"
 
 namespace jni
 {
@@ -44,6 +45,7 @@ class CJNIAudioTrack : public CJNIBase
     int   getState();
     int   getPlayState();
     int   getPlaybackHeadPosition();
+    bool  getTimestamp (CJNIAudioTimestamp &timestamp);
 
     static int  MODE_STREAM;
     static int  STATE_INITIALIZED;
