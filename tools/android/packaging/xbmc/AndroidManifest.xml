@@ -3,8 +3,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.semperpax.spmc"
     android:installLocation="auto"
-    android:versionCode="159801"
-    android:versionName="16.0-BETA1" >
+    android:versionCode="16099100"
+    android:versionName="16.1-RC1" >
 
     <uses-sdk android:minSdkVersion="17" android:targetSdkVersion="22" />
 
