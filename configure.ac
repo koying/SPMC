@@ -134,6 +134,7 @@ if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSI
     APP_VERSION=${APP_VERSION}-${APP_VERSION_TAG}
   fi
 
+  AC_SUBST(APP_PACKAGE_ROOT)
   AC_SUBST(APP_NAME)
   AC_SUBST(APP_NAME_LC)
   AC_SUBST(APP_NAME_UC)
@@ -2423,10 +2424,11 @@ OUTPUT_FILES="Makefile \
     xbmc/osx/ios/XBMCIOS-Info.plist \
     project/cmake/kodi-config.cmake \
     project/cmake/xbmc-config.cmake \
-    addons/xbmc.addon/addon.xml"
+    addons/xbmc.addon/addon.xml \
+    tools/android/packaging/xbmc/AndroidManifest.xml \
+    "
 
 OUTPUT_FILES_JAVA_DROID=" \
-    tools/android/packaging/xbmc/AndroidManifest.xml \
     tools/android/packaging/Makefile \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java \
