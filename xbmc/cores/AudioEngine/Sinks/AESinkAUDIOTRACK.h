@@ -73,4 +73,5 @@ private:
   int                m_encoding;
   unsigned int       m_buffer_size;
   double             m_sink_delay;
+  uint32_t           m_lastAddTimeMs;
 };
