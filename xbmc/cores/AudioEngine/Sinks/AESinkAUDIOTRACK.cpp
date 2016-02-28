@@ -181,6 +181,7 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   m_last_duration_written = 0;
   m_last_head_pos = 0;
   m_sink_delay = 0;
+  m_lastAddTimeMs = 0;
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
@@ -458,6 +459,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_last_duration_written = 0;
   m_last_head_pos = 0;
   m_sink_delay = 0;
+  m_lastAddTimeMs = 0;
 
   delete m_at_jni;
   m_at_jni = NULL;
@@ -476,11 +478,11 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-//  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
-//  {
-//    status.SetDelay(m_sink_delay);
-//    return;
-//  }
+  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
+  {
+    status.SetDelay(m_sink_delay);
+    return;
+  }
 
   // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
   // return a 32bit "int" that you should "interpret as unsigned."  As such,
@@ -559,8 +561,6 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
   if (!IsInitialized())
     return INT_MAX;
 
-  unsigned int time = XbmcThreads::SystemClockMillis();
-
   uint8_t *buffer = data[0]+offset*m_format.m_frameSize;
   uint8_t *out_buf = buffer;
   int size = frames * m_format.m_frameSize;
@@ -604,7 +604,13 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
 
     double duration = (double)(written / m_format.m_frameSize) / m_format.m_sampleRate;
     m_duration_written += duration;
-    unsigned int sleep_ms = (duration * 1000.0) - (XbmcThreads::SystemClockMillis() - time) - 2 /* overhead */;
+
+    uint32_t sleep_ms;
+    if (m_lastAddTimeMs)
+      sleep_ms = (duration * 1000.0) - (XbmcThreads::SystemClockMillis() - m_lastAddTimeMs) - 2 /* overhead */;
+    else
+      sleep_ms = (duration * 1000.0);
+
     if (sleep_ms > 0)
       usleep(sleep_ms * 1000.0);
   }
@@ -612,9 +618,10 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
 
 #ifdef DEBUG_VERBOSE
   if (m_passthrough)
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d", written, size, XbmcThreads::SystemClockMillis() - time);
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs);
 #endif
 
+  m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
   return (unsigned int)(written/m_format.m_frameSize);
 }
 
@@ -630,6 +637,7 @@ void CAESinkAUDIOTRACK::Drain()
   m_last_duration_written = 0;
   m_last_head_pos = 0;
   m_sink_delay = 0;
+  m_lastAddTimeMs = 0;
 }
 
 bool CAESinkAUDIOTRACK::WantsIEC61937()
