@@ -124,7 +124,7 @@ void CAndroidStorageProvider::GetLocalDrives(VECSOURCES &localDrives)
 void CAndroidStorageProvider::GetRemovableDrives(VECSOURCES &removableDrives)
 {
   // Uses non-public API: be extra carefull
-  bool inError = false;
+  bool inError = true;
   VECSOURCES droidDrives;
 
   CJNIStorageManager manager(CJNIContext::getSystemService("storage"));
