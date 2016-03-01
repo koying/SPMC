@@ -31,7 +31,8 @@ void CJNIIntent::PopulateStaticFields()
 {
   jhclass clazz = find_class("android/content/Intent");
   EXTRA_KEY_EVENT  = jcast<std::string>(get_static_field<jhstring>(clazz,"EXTRA_KEY_EVENT"));
-  ACTION_OPEN_DOCUMENT_TREE  = jcast<std::string>(get_static_field<jhstring>(clazz,"ACTION_OPEN_DOCUMENT_TREE"));
+  if (CJNIIntent::GetSDKVersion() >= 21)
+    ACTION_OPEN_DOCUMENT_TREE  = jcast<std::string>(get_static_field<jhstring>(clazz,"ACTION_OPEN_DOCUMENT_TREE"));
 }
 
 CJNIIntent::CJNIIntent(const std::string &action) : CJNIBase("android/content/Intent")
