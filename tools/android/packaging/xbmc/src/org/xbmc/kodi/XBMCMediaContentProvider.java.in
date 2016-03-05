@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package @APP_PACKAGE@;
 
 import android.app.SearchManager;
 import android.content.ContentProvider;
@@ -10,9 +10,9 @@ import android.util.Log;
 
 public class XBMCMediaContentProvider extends ContentProvider
 {
-  private static String TAG = "spmcmediaprovider";
+  private static String TAG = "@APP_NAME@mediaprovider";
   
-  public static final String AUTHORITY = "com.semperpax.spmc";
+  public static final String AUTHORITY = "@APP_PACKAGE@";
   public static final String AUTHORITY_MEDIA = AUTHORITY + ".media";
   public static final String SUGGEST_PATH = "suggestions";
 

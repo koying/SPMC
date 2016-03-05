@@ -1,4 +1,4 @@
-package org.xbmc.@APP_NAME_LC@;
+package @APP_PACKAGE@;
 
 import android.app.NativeActivity;
 import android.content.ComponentName;
@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.View;
 import android.view.Surface;
 import android.view.Window;
@@ -14,19 +15,23 @@ import android.widget.RelativeLayout;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
-import org.xbmc.@APP_NAME_LC@.XBMCVideoView;
+import @APP_PACKAGE@.XBMCVideoView;
 
-public class Main extends NativeActivity
+public class Main extends NativeActivity implements Choreographer.FrameCallback
 {
-  private static final String TAG = "@APP_NAME_LC@";
+  private static final String TAG = "@APP_NAME@";
 
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCVideoView mVideoView = null;
+  private XBMCJsonRPC mJsonRPC = null;
   private RelativeLayout mVideoLayout = null;
   private View thisView = null;
   private Handler handler = new Handler();
+  private Intent mNewIntent = null;
 
   native void _onNewIntent(Intent intent);
+  native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
+  native void _doFrame(long frameTimeNanos);
 
   public Main()
   {
@@ -64,7 +69,7 @@ public class Main extends NativeActivity
       }
     });
   }
-  
+
   public void registerMediaButtonEventReceiver()
   {
     AudioManager manager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -109,6 +114,8 @@ public class Main extends NativeActivity
     mSettingsContentObserver = new XBMCSettingsContentObserver(this, new Handler());
     getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
 
+    mJsonRPC = new XBMCJsonRPC();
+
     thisView = getWindow().getDecorView();
     thisView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
@@ -146,11 +153,8 @@ public class Main extends NativeActivity
   protected void onNewIntent(Intent intent)
   {
     super.onNewIntent(intent);
-    try {
-      _onNewIntent(intent);
-    } catch (UnsatisfiedLinkError e) {
-      Log.e("Main", "Native not registered");
-    }
+    // Delay until after Resume
+    mNewIntent = intent;
   }
 
   @Override
@@ -164,6 +168,8 @@ public class Main extends NativeActivity
   public void onResume()
   {
     super.onResume();
+
+    Choreographer.getInstance().postFrameCallback(this);
 
     Window window = getWindow();
     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -181,7 +187,63 @@ public class Main extends NativeActivity
               | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_FULLSCREEN
               | API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+
+      if (getPackageManager().hasSystemFeature("android.software.leanback"))
+      {
+        // Leanback
+
+        new Thread()
+        {
+          public void run()
+          {
+            try
+            {
+              sleep(10000);
+              mJsonRPC.updateLeanback(Main.this);
+            } catch (Exception e)
+            {
+              e.printStackTrace();
+            }
+          }
+        }.start();
+      }
+
     }
+
+    // New intent ?
+    if (mNewIntent != null)
+    {
+      handler.postDelayed(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            try {
+              _onNewIntent(mNewIntent);
+            } catch (UnsatisfiedLinkError e) {
+              Log.e("Main", "Native not registered");
+            } finally {
+              mNewIntent = null;
+            }
+          }
+        }, 500);
+    }
+  }
+
+  @Override
+  public void onPause()
+  {
+    super.onPause();
+
+    Choreographer.getInstance().removeFrameCallback(this);
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode,
+      Intent resultData)
+  {
+    _onActivityResult(requestCode, resultCode, resultData);
   }
 
   @Override
@@ -199,6 +261,13 @@ public class Main extends NativeActivity
       }
     }.start();
     super.onDestroy();
+  }
+
+  @Override
+  public void doFrame(long frameTimeNanos)
+  {
+    Choreographer.getInstance().postFrameCallback(this);
+    _doFrame(frameTimeNanos);
   }
 
   private native void _callNative(long funcAddr, long variantAddr);
