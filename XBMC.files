@@ -9773,3 +9773,9 @@ xbmc/android/jni/Document.cpp
 xbmc/android/jni/Document.h
 xbmc/android/jni/DocumentsContract.cpp
 xbmc/android/jni/DocumentsContract.h
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaContentProvider.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java.in
+xbmc/CompileInfo.cpp.in
