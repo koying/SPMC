@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package @APP_PACKAGE@;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -33,7 +33,7 @@ import android.util.Log;
 
 public class XBMCJsonRPC
 {
-  public final static String APP_NAME = "SPMC Search";
+  public final static String APP_NAME = "@APP_NAME@ Search";
   public final static String COLUMN_FULL_PATH = "COLUMN_FULL_PATH";
   public final static String COLUMN_BASE_PATH = "COLUMN_BASE_PATH";
   public final static String COLUMN_FILENAME = "COLUMN_FILENAME";
@@ -45,7 +45,7 @@ public class XBMCJsonRPC
   public final static String COLUMN_VIEW_PROGRESS = "COLUMN_VIEW_PROGRESS";
   public final static String COLUMN_RECOMMENDATION_REASON = "COLUMN_RECOMMENDATION_REASON";
 
-  private static String TAG = "spmcjson";
+  private static String TAG = "@APP_NAME@json";
   
   private String m_jsonURL = "http://localhost:8080";
   private int MAX_RECOMMENDATIONS = 3;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="@APP_PACKAGE_ROOT@.@APP_NAME_LC@"
+    package="@APP_PACKAGE@"
     android:installLocation="auto"
     android:versionCode="@APP_VERSION_CODE@00"
     android:versionName="@APP_VERSION@" >
@@ -99,12 +99,12 @@
 
         <provider
             android:name=".XBMCImageContentProvider"
-            android:authorities="@APP_PACKAGE_ROOT@.@APP_NAME_LC@.image"
+            android:authorities="@APP_PACKAGE@.image"
             android:exported="true" />
 
         <provider
             android:name=".XBMCMediaContentProvider"
-            android:authorities="@APP_PACKAGE_ROOT@.@APP_NAME_LC@.media"
+            android:authorities="@APP_PACKAGE@.media"
             android:exported="true" />
         
         <activity android:name=".XBMCSearchableActivity" >

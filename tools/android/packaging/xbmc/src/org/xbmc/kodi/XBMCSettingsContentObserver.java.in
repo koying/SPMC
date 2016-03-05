@@ -1,4 +1,4 @@
-package org.xbmc.@APP_NAME_LC@;
+package @APP_PACKAGE@;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -11,7 +11,7 @@ public class XBMCSettingsContentObserver extends ContentObserver
 {
   native void _onVolumeChanged(int newVolume);
 
-  private static final String TAG = "@APP_NAME_LC@";
+  private static final String TAG = "@APP_NAME@";
 
   int previousVolume;
   Context context;
