@@ -1,4 +1,4 @@
-package com.semperpax.spmc;
+package @APP_PACKAGE@;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,9 +38,9 @@ import android.util.Log;
  */
 public class XBMCImageContentProvider extends ContentProvider
 {
-  private static String TAG = "spmc";
+  private static String TAG = "@APP_NAME@";
   
-  public static String AUTHORITY = "com.semperpax.spmc";
+  public static String AUTHORITY = "@APP_PACKAGE@";
   public static String AUTHORITY_IMAGE = AUTHORITY + ".image";
  
   @Override

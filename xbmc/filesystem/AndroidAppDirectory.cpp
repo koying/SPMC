@@ -49,9 +49,8 @@ bool CAndroidAppDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   CLog::Log(LOGDEBUG, "CAndroidAppDirectory::GetDirectory: %s",dirname.c_str()); 
   std::string appName = CCompileInfo::GetAppName();
   StringUtils::ToLower(appName);
-  std::string pkgRoot = CCompileInfo::GetPkgRoot();
-  StringUtils::ToLower(pkgRoot);
-  std::string className = pkgRoot + "." + appName;
+  std::string className = CCompileInfo::GetPackage();
+  StringUtils::ToLower(className);
 
   if (dirname == "apps")
   {

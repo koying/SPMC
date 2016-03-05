@@ -117,7 +117,7 @@ AC_DEFUN([XB_PUSH_FLAGS], [
 ])
 
 # version can be overridden by setting the following as ENV vars when running configure
-APP_PACKAGE_ROOT=${APP_PACKAGE_ROOT-$(${AWK} '/APP_PACKAGE_ROOT/ {print $2}' version.txt)}
+APP_PACKAGE=${APP_PACKAGE-$(${AWK} '/APP_PACKAGE/ {print $2}' version.txt)}
 APP_NAME=${APP_NAME-$(${AWK} '/APP_NAME/ {print $2}' version.txt)}
 APP_NAME_LC=$(echo $APP_NAME | ${AWK} '{print tolower($0)}')
 APP_NAME_UC=$(echo $APP_NAME | ${AWK} '{print toupper($0)}')
@@ -134,7 +134,7 @@ if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSI
     APP_VERSION=${APP_VERSION}-${APP_VERSION_TAG}
   fi
 
-  AC_SUBST(APP_PACKAGE_ROOT)
+  AC_SUBST(APP_PACKAGE)
   AC_SUBST(APP_NAME)
   AC_SUBST(APP_NAME_LC)
   AC_SUBST(APP_NAME_UC)
@@ -2224,6 +2224,7 @@ OUTPUT_FILES="Makefile \
 
 OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/Makefile \
+    tools/android/packaging/xbmc/AndroidManifest.xml \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java \
@@ -2232,15 +2233,18 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCContentProvider.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaContentProvider.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java \
     tools/android/packaging/xbmc/activity_main.xml \
     tools/android/packaging/xbmc/strings.xml \
     "
 
-# if test "$target_platform" = "target_android" ; then
-# OUTPUT_FILES="$OUTPUT_FILES $OUTPUT_FILES_JAVA_DROID"
-# fi
+if test "$target_platform" = "target_android" ; then
+OUTPUT_FILES="$OUTPUT_FILES $OUTPUT_FILES_JAVA_DROID"
+fi
 
 if test "$use_webserver" = "yes"; then
 OUTPUT_FILES="$OUTPUT_FILES xbmc/network/httprequesthandler/python/Makefile"
@@ -2267,10 +2271,12 @@ eval "APP_PREFIX=${prefix}"
 eval "APP_LIB_DIR=${libdir}/${APP_NAME_LC}"
 eval "APP_INCLUDE_DIR=${includedir}/${APP_NAME_LC}"
 eval "APP_DATA_DIR=${datarootdir}/${APP_NAME_LC}"
+eval "APP_PACKAGE_DIR=${APP_PACKAGE//./\/}"
 AC_SUBST(APP_PREFIX)
 AC_SUBST(APP_LIB_DIR)
 AC_SUBST(APP_INCLUDE_DIR)
 AC_SUBST(APP_DATA_DIR)
+AC_SUBST(APP_PACKAGE_DIR)
 
 # Line below is used so we can use AM_INIT_AUTOMAKE. The corresponding
 # .dummy.am does nothing.

@@ -134,15 +134,15 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
   std::string appName = CCompileInfo::GetAppName();
   StringUtils::ToLower(appName);
-  std::string pkgRoot = CCompileInfo::GetPkgRoot();
+  std::string pkgRoot = CCompileInfo::GetPackage();
   StringUtils::ToLower(pkgRoot);
   StringUtils::Replace(pkgRoot, '.', '/');
-  std::string mainClass = pkgRoot + "/" + appName + "/Main";
-  std::string bcReceiver = pkgRoot + "/" + appName + "/XBMCBroadcastReceiver";
-  std::string frameListener = pkgRoot + "/" + appName + "/XBMCOnFrameAvailableListener";
-  std::string settingsObserver = pkgRoot + "/" + appName + "/XBMCSettingsContentObserver";
-  std::string audioFocusChangeListener = pkgRoot + "/" + appName + "/XBMCOnAudioFocusChangeListener";
-  std::string inputDeviceListener = pkgroot + "/" + appName + "/XBMCInputDeviceListener";
+  std::string mainClass = pkgRoot + "/Main";
+  std::string bcReceiver = pkgRoot + "/XBMCBroadcastReceiver";
+  std::string frameListener = pkgRoot + "/XBMCOnFrameAvailableListener";
+  std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
+  std::string audioFocusChangeListener = pkgRoot + "/XBMCOnAudioFocusChangeListener";
+  std::string inputDeviceListener = pkgroot + "/XBMCInputDeviceListener";
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)

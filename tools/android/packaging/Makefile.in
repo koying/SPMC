@@ -7,14 +7,14 @@ OBJS = libcurl.so \
   libbluray.so libsmbclient.so
 
 PLATFORM_OBJS =
-EXCLUDED_ADDONS = 
+EXCLUDED_ADDONS =
 
 CORE_SOURCE_DIR = $(shell cd $(CURDIR)/../../..; pwd)
 COPYDIRS = system addons media
 GCC_VERSION=$(shell $(CC) -dumpversion)
 ZIP=zip
 
-SIGN_STORE=~/.android/debug.keystore
+SIGN_STORE=~/.android/@APP_NAME_LC@.keystore
 SIGN_STOREPASS=android
 SIGN_KEY=androiddebugkey
 SIGN_KEYPASS=
@@ -26,7 +26,7 @@ endif
 X86OVERRIDES=XBMC_OVERRIDE_HOST=i686-android-linux XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_X86_TOOLCHAIN)
 ARMOVERRIDES=XBMC_OVERRIDE_HOST=arm-linux-androideabi XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_ARM_TOOLCHAIN)
 
-#this fixes a android ndk fuckup where the pathes to 
+#this fixes a android ndk fuckup where the pathes to
 #prebuilt stuff follow different name shemes for
 #arm and x86
 ifeq ($(findstring i686,$(CPU)),i686)
@@ -86,9 +86,9 @@ xbmc/assets:
 	mkdir -p xbmc/assets
 
 symbols: libs
-ifeq (1,@USE_BREAKPAD@)
+ifeq (0,1)
 	for f in xbmc/obj/local/$(CPU)/*.so; do sh ./make_symbols.sh $$f; done
-	tar -cjf @APP_NAME@.symbols-$(CPU)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
+	tar -cjf Kodi.symbols-$(CPU)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
 endif
 
 shared:
@@ -115,7 +115,7 @@ python: | xbmc/assets
 	cd xbmc/assets/python2.7/lib/python2.7/; rm -rf test config lib-dynload
 
 res:
-	mkdir -p xbmc/gen/org/xbmc/kodi xbmc/res xbmc/res/raw xbmc/res/values images
+	mkdir -p xbmc/gen/@APP_PACKAGE_DIR@ xbmc/res xbmc/res/raw xbmc/res/values images
 	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(CORE_SOURCE_DIR)/media/Splash.png xbmc/res/drawable/splash.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
@@ -129,7 +129,7 @@ res:
 	cp xbmc/colors.xml xbmc/res/values/
 	cp xbmc/activity_main.xml xbmc/res/layout/
 	mkdir -p tmp/res; $(AAPT) c -S xbmc/res -C tmp/res; cp -r -n xbmc/res tmp/ || true
-	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME_LC@app-debug-skeleton.apk -J xbmc/gen/org/xbmc/@APP_NAME_LC@
+	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME_LC@app-debug-skeleton.apk -J xbmc/gen/@APP_PACKAGE_DIR@
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
@@ -154,8 +154,8 @@ endif
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/org/xbmc/@APP_NAME_LC@/*.java
-	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/@APP_NAME_LC@/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/@APP_PACKAGE_DIR@/*.java
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/libs
 
 package: libs python xbmc/classes.dex
@@ -191,4 +191,3 @@ apk-clean:
 	rm -rf assets
 
 .PHONY: force libs assets python sharedapk sharedobb res package
-

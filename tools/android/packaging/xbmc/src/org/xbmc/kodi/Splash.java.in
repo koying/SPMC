@@ -1,4 +1,4 @@
-package org.xbmc.@APP_NAME_LC@;
+package @APP_PACKAGE@;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -665,9 +665,9 @@ public class Splash extends Activity {
   }
 
   protected void startXBMC() {
-    // Run @APP_NAME@
+    // Run Kodi
     Intent intent = getIntent();
-    intent.setClass(this, org.xbmc.@APP_NAME_LC@.Main.class);
+    intent.setClass(this, @APP_PACKAGE@.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
     finish();
@@ -677,14 +677,14 @@ public class Splash extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    // Check if @APP_NAME@ is not already running
+    // Check if @APP_NAME_LC@ is not already running
     ActivityManager activityManager = (ActivityManager) getBaseContext()
         .getSystemService(Context.ACTIVITY_SERVICE);
     List<RunningTaskInfo> tasks = activityManager
         .getRunningTasks(Integer.MAX_VALUE);
     for (RunningTaskInfo task : tasks)
       if (task.topActivity.toString().equalsIgnoreCase(
-          "ComponentInfo{org.xbmc.@APP_NAME_LC@/org.xbmc.@APP_NAME_LC@.Main}")) {
+          "ComponentInfo{@APP_PACKAGE@/.Main}")) {
         // @APP_NAME@ already running; just activate it
         startXBMC();
         return;
@@ -756,7 +756,7 @@ public class Splash extends Activity {
           Log.e(TAG, mErrorMsg);
           mState = InError;
         } else {
-          ret = CheckCpuFeature("neon") || CheckCpuFeature("aarch64") || CheckCpuFeature("asimd");  // aarch64 is always neon; asimd feature also represents neon
+          ret = CheckCpuFeature("neon") || CheckCpuFeature("aarch64");  //aarch64 is always neon
           if (!ret) {
             mErrorMsg = "This @APP_NAME@ package is not compatible with your device (NEON).\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
             Log.e(TAG, mErrorMsg);
