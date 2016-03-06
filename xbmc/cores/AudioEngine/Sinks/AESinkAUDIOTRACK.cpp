@@ -24,6 +24,7 @@
 #include "cores/AudioEngine/Utils/AEPackIEC61937.h"
 #include "android/activity/XBMCApp.h"
 #include "settings/Settings.h"
+#include "settings/AdvancedSettings.h"
 #if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
 #endif
@@ -37,8 +38,6 @@
 #include "android/jni/System.h"
 
 #include <algorithm>
-
-//#define DEBUG_VERBOSE 1
 
 using namespace jni;
 
@@ -434,9 +433,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
 void CAESinkAUDIOTRACK::Deinitialize()
 {
-//#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Deinitialize %p", this);
-//#endif
+  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Deinitialize %p", this);
+
   // Restore volume
   if (m_volume != -1)
   {
@@ -510,10 +509,9 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
       if (m_at_jni->getTimestamp(ts))
       {
         frameDiffMilli = (systime - ts.get_nanoTime()) / 1000000000.0;
-#ifdef DEBUG_VERBOSE
-        if (m_passthrough)
+
+        if (m_passthrough && g_advancedSettings.CanLogComponent(LOGAUDIO))
           CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay timestamp: pos(%lld) time(%lld) diff(%f)", ts.get_framePosition(), ts.get_nanoTime(), frameDiffMilli);
-#endif
       }
     }
 
@@ -535,10 +533,8 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   if (m_passthrough && !WantsIEC61937() && m_smoothedDelayCount == SMOOTHED_DELAY_MAX && !m_sink_delay)
     m_sink_delay = smootheDelay;
 
-#ifdef DEBUG_VERBOSE
-  if (m_passthrough)
+  if (m_passthrough && g_advancedSettings.CanLogComponent(LOGAUDIO))
     CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_duration_written/head_pos %f/%u %f(%f)", m_duration_written, head_pos, smootheDelay, delay);
-#endif
 
     status.SetDelay(smootheDelay);
 }
@@ -616,10 +612,8 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
   }
 
 
-#ifdef DEBUG_VERBOSE
-  if (m_passthrough)
+  if (m_passthrough && g_advancedSettings.CanLogComponent(LOGAUDIO))
     CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs);
-#endif
 
   m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
   return (unsigned int)(written/m_format.m_frameSize);

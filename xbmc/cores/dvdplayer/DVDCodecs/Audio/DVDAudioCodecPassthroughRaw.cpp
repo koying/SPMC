@@ -21,12 +21,11 @@
 #include "DVDAudioCodecPassthroughRaw.h"
 #include "DVDCodecs/DVDCodecs.h"
 #include "utils/log.h"
+#include "settings/AdvancedSettings.h"
 
 #include <algorithm>
 
 #include "cores/AudioEngine/AEFactory.h"
-
-//#define DEBUG_VERBOSE 1
 
 #define CONSTANT_BUFFER_SIZE_SD 16384
 #define CONSTANT_BUFFER_SIZE_HD 61440
@@ -128,9 +127,8 @@ void CDVDAudioCodecPassthroughRaw::GetData(DVDAudioFrame &frame)
   frame.channel_count         = GetChannels();
 
 
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::GetData codec: %d; samplerate: %d; duration: %f", m_codec, frame.sample_rate, frame.duration);
-#endif
+  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::GetData codec: %d; samplerate: %d; duration: %f", m_codec, frame.sample_rate, frame.duration);
 }
 
 int CDVDAudioCodecPassthroughRaw::GetSampleRate()
@@ -216,9 +214,8 @@ int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
 
   unsigned int size = m_infobufferSize;
   used = m_info.AddData(pData, iSize, &m_infobuffer, &size);
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode iSize(%d), size(%d), used(%d)", iSize, size, used);
-#endif
+  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode iSize(%d), size(%d), used(%d)", iSize, size, used);
   m_infobufferSize = std::max(m_infobufferSize, size);
 
   m_bufferUsed = 0;
@@ -258,9 +255,9 @@ int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
 
 int CDVDAudioCodecPassthroughRaw::GetData(uint8_t** dst)
 {
-#ifdef DEBUG_VERBOSE
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::GetData %d", m_bufferUsed);
-#endif
+  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::GetData %d", m_bufferUsed);
+
   *dst     = m_buffer;
   return m_bufferUsed;
 }
