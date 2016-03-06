@@ -1,7 +1,7 @@
 -include ../../Makefile.include
 
 VERSION.TXT := $(CORE_SOURCE_DIR)/version.txt
-APP_NAME=$(shell awk '/APP_NAME/ {print tolower($$2)}' $(VERSION.TXT))
+APP_NAME=$(shell awk '/APP_NAME/ {print $$2}' $(VERSION.TXT))
 
 SOURCE=../../../../
 
