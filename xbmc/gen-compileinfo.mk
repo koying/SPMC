@@ -38,5 +38,6 @@ $(FILEPATH)/CompileInfo.cpp: $(VERSION.TXT) $(FILEPATH)/CompileInfo.cpp.in $(FIL
 	MAJOR=$$(awk '/VERSION_MAJOR/ {print $$2}' $(VERSION.TXT)) ;\
 	MINOR=$$(awk '/VERSION_MINOR/ {print $$2}' $(VERSION.TXT)) ;\
 	TAG=$$(awk '/VERSION_TAG/ {print $$2}' $(VERSION.TXT)) ;\
-	sed -e "s/\@APP_NAME\@/$$APP_NAME/" -e "s/\@APP_PACKAGE\@/$$APP_PACKAGE/" -e "s/\@APP_VERSION_MAJOR\@/$$MAJOR/" -e "s/\@APP_VERSION_MINOR\@/$$MINOR/" -e "s/\@APP_VERSION_TAG\@/$$TAG/" -e "s/\@APP_SCMID\@/$$GITREV/" $@.in > $@
+	sed -e "s/\@APP_NAME\@/$$APP_NAME/" -e "s/\@APP_PACKAGE\@/$$APP_PACKAGE/" -e "s/\@APP_VERSION_MAJOR\@/$$MAJOR/" -e "s/\@APP_VERSION_MINOR\@/$$MINOR/" -e "s/\@APP_VERSION_TAG\@/$$TAG/" -e "s/\@APP_SCMID\@/$$GITREV/" $@.in > $@ ;\
+	cd $(FILEPATH)/../media; convert Splash_orig.png -background black -fill white -pointsize 12 -gravity NorthEast -annotate +10+10 "$$APP_NAME $$MAJOR.$$MINOR.$$TAG" Splash.png
 
