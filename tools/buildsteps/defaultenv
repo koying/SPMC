@@ -179,3 +179,8 @@ function getBuildRevDateStr ()
     echo "Unknown"
   fi
 }
+
+function getAppName ()
+{
+  echo `awk '/APP_NAME/ {print $2}' $WORKSPACE/version.txt`
+}

@@ -15,8 +15,8 @@ cd $WORKSPACE
 
 #rename for upload
 #e.x. xbmc-20130314-8c2fb31-Frodo-x86.apk
-UPLOAD_FILENAME="spmc-$(getBuildRevDateStr)-x86"
-mv spmcapp-x86-*.apk $UPLOAD_FILENAME.apk
+UPLOAD_FILENAME="$(getAppName)-$(getBuildRevDateStr)-x86"
+mv $(getAppName)app-x86-*.apk $UPLOAD_FILENAME.apk
 if [ -f *.obb ] 
 then
   mv *.obb $UPLOAD_FILENAME.obb
