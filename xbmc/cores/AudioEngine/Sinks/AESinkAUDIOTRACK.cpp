@@ -704,16 +704,20 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
           CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
         }
       }
-      if (CJNIAudioFormat::ENCODING_AC3 != -1)
-        m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS));
-      if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
-        m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS));
-      if (CJNIAudioFormat::ENCODING_DTS != -1)
+      if (CJNIBase::GetSDKVersion() >= 23)
+      {
+        // Limit RAW to 6.0+, 5.x it too buggy...
+        if (CJNIAudioFormat::ENCODING_AC3 != -1)
+          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS));
+        if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
+          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS));
+        if (CJNIAudioFormat::ENCODING_DTS != -1)
           m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS));
-      if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
+        if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
           m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS));
-      if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
+        if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
           m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS));
+      }
     }
     std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
   }
