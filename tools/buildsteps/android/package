@@ -15,8 +15,8 @@ cd $WORKSPACE
 
 #rename for upload
 #e.x. xbmc-20130314-8c2fb31-Frodo-armeabi-v7a.apk
-UPLOAD_FILENAME="kodi-$(getBuildRevDateStr)-armeabi-v7a"
-mv kodiapp-armeabi-*.apk $UPLOAD_FILENAME.apk
+UPLOAD_FILENAME="$(getAppName)-$(getBuildRevDateStr)-armeabi-v7a"
+mv $(getAppName)app-armeabi-*.apk $UPLOAD_FILENAME.apk
 if [ -f *.obb ]
 then
   mv *.obb $UPLOAD_FILENAME.obb
