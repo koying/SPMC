@@ -110,7 +110,7 @@ public class XBMCRecommendationBuilder
             .setLocalOnly(true)
             .setOngoing(true)
             .setColor(
-                mContext.getResources().getColor(R.color.principal_color))
+                mContext.getResources().getColor(R.color.recommendation_color))
             .setCategory(API_NOTIFICATION_CATEGORY_RECOMMENDATION)
             .setLargeIcon(mBitmap).setSmallIcon(mSmallIcon)
             .setContentIntent(mIntent).setExtras(extras)).build();
