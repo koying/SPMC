@@ -1,4 +1,4 @@
-APP_NAME spmc
+APP_NAME SPMC
 APP_PACKAGE com.semperpax.spmc
 COMPANY_NAME Semperpax
 WEBSITE http://spmc.semperpax.com/
