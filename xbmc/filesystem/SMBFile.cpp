@@ -101,7 +101,8 @@ void CSMB::Init()
     std::string home = CSpecialProtocol::TranslatePath("special://home");
     URIUtils::RemoveSlashAtEnd(home);
     snprintf(smb_conf, sizeof(smb_conf), "%s/.smb", home.c_str());
-    if (mkdir(smb_conf, 0755) == 0)
+    int ret = mkdir(smb_conf, 0755);
+    if (ret == 0 || CSettings::GetInstance().GetBool(CSettings::SETTING_SMB_OVERWRITECONF))
     {
       snprintf(smb_conf, sizeof(smb_conf), "%s/.smb/smb.conf", home.c_str());
       FILE* f = fopen(smb_conf, "w");
