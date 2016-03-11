@@ -9779,3 +9779,4 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java.in
 xbmc/CompileInfo.cpp.in
+addons/resource.language.en_gb/resources/strings.po
