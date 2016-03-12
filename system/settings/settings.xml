@@ -1971,6 +1971,7 @@
           <level>2</level>
           <default>true</default>
           <control type="toggle" />
+          <visible>false</visible>
         </setting>
       </group>
     </category>
