@@ -27,3 +27,5 @@ IF EXIST %WORKSPACE%\project\VS2010Express\libs rmdir %WORKSPACE%\project\VS2010
 rem fetch submodules
 IF EXIST "%WORKSPACE%\addons\skin.re-touched" rmdir "%WORKSPACE%\addons\skin.re-touched" /S /Q || exit /b 10
 git submodule update --init "%WORKSPACE%\addons\skin.re-touched" || exit /b 30
+IF EXIST "%WORKSPACE%\addons\script.xbmc.debug.log" rmdir "%WORKSPACE%\addons\script.xbmc.debug.log" /S /Q || exit /b 10
+git submodule update --init "%WORKSPACE%\addons\script.xbmc.debug.log" || exit /b 30
