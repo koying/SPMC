@@ -36,6 +36,7 @@
 #include "utils/CPUInfo.h"
 #include "utils/log.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/DisplaySettings.h"
 #include "android/activity/XBMCApp.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderFlags.h"
@@ -49,6 +50,9 @@
 #include "android/jni/Surface.h"
 #include "android/jni/SurfaceTexture.h"
 #include "android/activity/AndroidFeatures.h"
+#include "android/jni/View.h"
+#include "android/jni/Window.h"
+#include "android/jni/Display.h"
 
 #include "utils/StringUtils.h"
 
@@ -176,10 +180,28 @@ CDVDMediaCodecInfo::CDVDMediaCodecInfo(
 , m_codec(codec)
 , m_surfacetexture(surfacetexture)
 , m_frameready(frameready)
+, m_scaleX(1.0)
+, m_scaleY(1.0)
 {
   // paranoid checks
   assert(m_index >= 0);
   assert(m_codec != NULL);
+
+  CJNIWindow window = CXBMCApp::getWindow();
+  if (window)
+  {
+    CJNIView view(window.getDecorView());
+    if (view)
+    {
+      CJNIDisplay display = view.getDisplay();
+      if (display)
+      {
+        CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
+        m_scaleX = (double)display.getWidth() / gui.Width();
+        m_scaleY = (double)display.getHeight() / gui.Height();
+      }
+    }
+  }
 }
 
 CDVDMediaCodecInfo::~CDVDMediaCodecInfo()
@@ -311,7 +333,10 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
 
   if (DestRect != cur_rect)
   {
-    CXBMCApp::get()->setVideoViewSurfaceRect(DestRect.x1, DestRect.y1, DestRect.x2, DestRect.y2);
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "RenderUpdate: %f+%f-%fx%f  scale(%fx%f)", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height(), m_scaleX, m_scaleY);
+
+    CXBMCApp::get()->setVideoViewSurfaceRect(DestRect.x1 * m_scaleX, DestRect.y1 * m_scaleY, DestRect.x2 * m_scaleX, DestRect.y2 * m_scaleY);
     cur_rect = DestRect;
     
     // setVideoViewSurfaceRect is async, so skip rendering this frame
