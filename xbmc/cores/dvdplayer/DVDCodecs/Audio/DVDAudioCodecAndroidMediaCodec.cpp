@@ -145,6 +145,11 @@ bool CDVDAudioCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       m_formatname = "amc-eac3";
       break;
 
+    case AV_CODEC_ID_FLAC:
+      m_mime = "audio/flac";
+      m_formatname = "amc-flac";
+      break;
+
     default:
       CLog::Log(LOGNOTICE, "CDVDAudioCodecAndroidMediaCodec:: Unknown hints.codec(%d)", hints.codec);
       return false;

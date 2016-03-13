@@ -151,12 +151,32 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
 
   try
   {
-    jniAt = new CJNIAudioTrack(stream,
-                               sampleRate,
-                               channelMask,
-                               encoding,
-                               bufferSize,
-                               CJNIAudioTrack::MODE_STREAM);
+    if (CJNIAudioTrack::GetSDKVersion() >= 21)
+    {
+      CJNIAudioFormatBuilder fmtbuilder;
+      fmtbuilder.setChannelMask(channelMask);
+      fmtbuilder.setEncoding(encoding);
+      fmtbuilder.setSampleRate(sampleRate);
+
+      CJNIAudioAttributesBuilder attrbuilder;
+      attrbuilder.setUsage(CJNIAudioAttributes::USAGE_MEDIA);
+      attrbuilder.setContentType(CJNIAudioAttributes::CONTENT_TYPE_MOVIE);
+      // Force direct output
+//      attrbuilder.setFlags(CJNIAudioAttributes::FLAG_HW_AV_SYNC);
+
+      jniAt = new CJNIAudioTrack(attrbuilder.build(),
+                                 fmtbuilder.build(),
+                                 bufferSize,
+                                 CJNIAudioTrack::MODE_STREAM,
+                                 0);
+    }
+    else
+      jniAt = new CJNIAudioTrack(stream,
+                                 sampleRate,
+                                 channelMask,
+                                 encoding,
+                                 bufferSize,
+                                 CJNIAudioTrack::MODE_STREAM);
   }
   catch (const std::invalid_argument& e)
   {
@@ -359,7 +379,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       m_sink_sampleRate = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
 
     m_format.m_sampleRate     = m_sink_sampleRate;
-    if (CJNIAudioManager::GetSDKVersion() >= 21 && m_format.m_channelLayout.Count() == 2)
+    if (0 && CJNIAudioManager::GetSDKVersion() >= 21 && m_format.m_channelLayout.Count() == 2)
     {
       m_encoding = CJNIAudioFormat::ENCODING_PCM_FLOAT;
       m_format.m_dataFormat     = AE_FMT_FLOAT;
