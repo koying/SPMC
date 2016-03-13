@@ -47,6 +47,8 @@ public:
   float getRefreshRate();
   std::vector<float> getSupportedRefreshRates();
   CJNIDisplayMode getMode();
+  int getWidth();
+  int getHeight();
   std::vector<CJNIDisplayMode> getSupportedModes();
 };
 
