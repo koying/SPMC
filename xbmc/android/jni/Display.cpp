@@ -73,6 +73,18 @@ CJNIDisplayMode CJNIDisplay::getMode()
     return jhobject();
 }
 
+int CJNIDisplay::getWidth()
+{
+  return call_method<jint>(m_object,
+    "getWidth", "()I");
+}
+
+int CJNIDisplay::getHeight()
+{
+  return call_method<jint>(m_object,
+    "getHeight", "()I");
+}
+
 std::vector<CJNIDisplayMode> CJNIDisplay::getSupportedModes()
 {
   if (GetSDKVersion() >= 23)
