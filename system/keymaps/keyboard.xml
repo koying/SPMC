@@ -329,10 +329,10 @@
       <r>Rewind</r>
       <period>StepForward</period>
       <comma>StepBack</comma>
-      <backspace>Fullscreen</backspace>
-      <backspace mod="longpress">Stop</backspace>
-      <browser_back>Fullscreen</browser_back>
-      <browser_back mod="longpress">Stop</browser_back>
+      <backspace>Stop</backspace>
+      <backspace mod="longpress">Fullscreen</backspace>
+      <browser_back>Stop</browser_back>
+      <browser_back mod="longpress">Fullscreen</browser_back>
       <quote>Seek(-7)</quote> <!-- Replaces smallstepback -->
       <opensquarebracket>BigStepForward</opensquarebracket>
       <closesquarebracket>BigStepBack</closesquarebracket>
