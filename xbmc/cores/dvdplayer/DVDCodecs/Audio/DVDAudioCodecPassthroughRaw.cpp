@@ -119,7 +119,7 @@ void CDVDAudioCodecPassthroughRaw::GetData(DVDAudioFrame &frame)
       break;
     }
   }
-  m_sampleRate = frame.nb_frames / frame.duration;
+  m_sampleRate = (frame.nb_frames / frame.duration) + 1 /* for rounding */;
   frame.duration *= DVD_TIME_BASE;
 
   frame.sample_rate           = GetSampleRate();
