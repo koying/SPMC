@@ -31,6 +31,7 @@ int CJNIAudioFormat::ENCODING_E_AC3     = -1;
 int CJNIAudioFormat::ENCODING_DTS       = -1;
 int CJNIAudioFormat::ENCODING_DTS_HD    = -1;
 int CJNIAudioFormat::ENCODING_DOLBY_TRUEHD    = -1;
+int CJNIAudioFormat::ENCODING_IEC61937  = -1;
 
 int CJNIAudioFormat::CHANNEL_OUT_STEREO  = 0x0000000c;
 int CJNIAudioFormat::CHANNEL_OUT_5POINT1 = 0x000000fc;
@@ -100,6 +101,11 @@ void CJNIAudioFormat::PopulateStaticFields()
         GetStaticValue(c, CJNIAudioFormat::ENCODING_TRUEHD, "ENCODING_TRUEHD");
         GetStaticValue(c, CJNIAudioFormat::ENCODING_DTSHD, "ENCODING_DTSHD");
         GetStaticValue(c, CJNIAudioFormat::ENCODING_DTSHD_MA, "ENCODING_DTSHD_MA");
+
+        if (sdk >= 23)
+        {
+          GetStaticValue(c, CJNIAudioFormat::ENCODING_IEC61937, "ENCODING_IEC61937");
+        }
       }
     }
 

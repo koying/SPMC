@@ -276,7 +276,6 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
-#if defined(HAS_LIBAMCODEC)
       case AE_FMT_AC3:
         if (aml_present() && HasAmlHD())
         {
@@ -284,7 +283,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
         }
         else
-          m_format.m_dataFormat   = AE_FMT_S16LE;
+        {
+          if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+            m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+          else
+            m_format.m_dataFormat   = AE_FMT_S16LE;
+        }
         break;
 
       case AE_FMT_EAC3:
@@ -294,7 +298,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
         }
         else
-          m_format.m_dataFormat   = AE_FMT_S16LE;
+        {
+          if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+            m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+          else
+            m_format.m_dataFormat   = AE_FMT_S16LE;
+        }
         break;
 
       case AE_FMT_DTS:
@@ -304,7 +313,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
         }
         else
-          m_format.m_dataFormat   = AE_FMT_S16LE;
+        {
+          if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+            m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+          else
+            m_format.m_dataFormat   = AE_FMT_S16LE;
+        }
         break;
 
       case AE_FMT_DTSHD:
@@ -314,7 +328,12 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_sink_sampleRate       = 192000;
         }
         else
-          m_format.m_dataFormat   = AE_FMT_S16LE;
+        {
+          if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+            m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+          else
+            m_format.m_dataFormat   = AE_FMT_S16LE;
+        }
         break;
 
       case AE_FMT_TRUEHD:
@@ -324,9 +343,14 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_sink_sampleRate       = 192000;
         }
         else
-          m_format.m_dataFormat   = AE_FMT_S16LE;
+        {
+          if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+            m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+          else
+            m_format.m_dataFormat   = AE_FMT_S16LE;
+        }
         break;
-#endif
+
       default:
         m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
@@ -704,7 +728,14 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
           CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
         }
       }
-      if (CJNIBase::GetSDKVersion() >= 23)
+      if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+      {
+        CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - ENCODING_IEC61937 supported (%d)", CJNIAudioFormat::ENCODING_IEC61937);
+        m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3));
+        m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTSHD));
+        m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_TRUEHD));
+      }
+      else if (CJNIBase::GetSDKVersion() >= 23)
       {
         // Limit RAW to 6.0+, 5.x it too buggy...
         if (CJNIAudioFormat::ENCODING_AC3 != -1)
