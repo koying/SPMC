@@ -503,7 +503,7 @@ public class Splash extends Activity {
     String obbfn = "";
     if (fPackagePath.length() < 40 * 1024 * 1024)
     {
-      sPackagePath = System.getProperty("@APP_NAME@.obb", "");
+      sPackagePath = System.getProperty("@APP_NAME_LC@.obb", "");
       if (sPackagePath.equals(""))
       {
         try
@@ -691,10 +691,10 @@ public class Splash extends Activity {
       }
 
     File fProp = new File(Environment.getExternalStorageDirectory()
-        .getAbsolutePath() + "/xbmc_env.properties");
+        .getAbsolutePath() + "/@APP_NAME_LC@_env.properties");
     if (fProp.exists())
     {
-      Log.i(TAG, "Loading xbmc_env.properties");
+      Log.i(TAG, "Loading @APP_NAME_LC@_env.properties");
       try
       {
         Properties sysProp = new Properties(System.getProperties());
@@ -703,7 +703,7 @@ public class Splash extends Activity {
         System.setProperties(sysProp);
       } catch (Exception e)
       {
-        Log.e(TAG, "Error loading xbmc_env.properties (" + e.getMessage() + ")");
+        Log.e(TAG, "Error loading @APP_NAME_LC@_env.properties (" + e.getMessage() + ")");
       }
     }
 
