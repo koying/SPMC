@@ -24,11 +24,11 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
     if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
     {
       File fProp = new File(Environment.getExternalStorageDirectory()
-          .getAbsolutePath() + "/xbmc_env.properties");
+          .getAbsolutePath() + "/@APP_NAME_LC@_env.properties");
       if (!fProp.exists())
         return;
 
-      Log.i(TAG, "Loading xbmc_env.properties");
+      Log.i(TAG, "Loading @APP_NAME_LC@_env.properties");
       try
       {
         Properties sysProp = new Properties(System.getProperties());
@@ -37,7 +37,7 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
         System.setProperties(sysProp);
       } catch (Exception e)
       {
-        Log.e(TAG, "Error loading xbmc_env.properties (" + e.getMessage() + ")");
+        Log.e(TAG, "Error loading @APP_NAME_LC@_env.properties (" + e.getMessage() + ")");
         return;
       }
 
