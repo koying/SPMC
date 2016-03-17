@@ -32,11 +32,14 @@ std::string CJNIDocument::MIME_TYPE_DIR;
 
 void CJNIDocument::PopulateStaticFields()
 {
-  jhclass c = find_class("android/provider/DocumentsContract$Document");
-  CJNIDocument::COLUMN_DISPLAY_NAME          = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_DISPLAY_NAME"));
-  CJNIDocument::COLUMN_MIME_TYPE             = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_MIME_TYPE"));
-  CJNIDocument::COLUMN_DOCUMENT_ID           = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_DOCUMENT_ID"));
-  CJNIDocument::COLUMN_SIZE                  = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_SIZE"));
-  CJNIDocument::COLUMN_FLAGS                 = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_FLAGS"));
-  CJNIDocument::MIME_TYPE_DIR                = jcast<std::string>(get_static_field<jhstring>(c,"MIME_TYPE_DIR"));
+  if (CJNIBase::GetSDKVersion() >= 19)
+  {
+    jhclass c = find_class("android/provider/DocumentsContract$Document");
+    CJNIDocument::COLUMN_DISPLAY_NAME          = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_DISPLAY_NAME"));
+    CJNIDocument::COLUMN_MIME_TYPE             = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_MIME_TYPE"));
+    CJNIDocument::COLUMN_DOCUMENT_ID           = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_DOCUMENT_ID"));
+    CJNIDocument::COLUMN_SIZE                  = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_SIZE"));
+    CJNIDocument::COLUMN_FLAGS                 = jcast<std::string>(get_static_field<jhstring>(c,"COLUMN_FLAGS"));
+    CJNIDocument::MIME_TYPE_DIR                = jcast<std::string>(get_static_field<jhstring>(c,"MIME_TYPE_DIR"));
+  }
 }
