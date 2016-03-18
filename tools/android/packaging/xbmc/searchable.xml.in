@@ -3,11 +3,11 @@
     android:label="@string/app_name"
     android:hint="@string/search_hint" 
 
-    android:searchSuggestAuthority="com.semperpax.spmc.media"
+    android:searchSuggestAuthority="@APP_PACKAGE@.media"
     android:searchSuggestPath="suggestions"
     
     android:searchSuggestIntentAction="android.intent.action.GET_CONTENT"
-    android:searchSuggestIntentData="content://com.semperpax.spmc.media/intent"
+    android:searchSuggestIntentData="content://@APP_PACKAGE@.media/intent"
     
     android:includeInGlobalSearch="true"
     android:searchSettingsDescription="Media"

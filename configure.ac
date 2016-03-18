@@ -2239,6 +2239,7 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java \
     tools/android/packaging/xbmc/activity_main.xml \
+    tools/android/packaging/xbmc/searchable.xml \
     tools/android/packaging/xbmc/strings.xml \
     "
 
