@@ -167,7 +167,6 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
 }
 
 
-CAEDeviceInfo CAESinkAUDIOTRACK::m_info;
 std::set<unsigned int> CAESinkAUDIOTRACK::m_sink_sampleRates;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -646,82 +645,114 @@ bool CAESinkAUDIOTRACK::HasAmlHD()
 
 void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 {
-  m_info.m_channels.Reset();
-  m_info.m_dataFormats.clear();
-  m_info.m_sampleRates.clear();
-
-  m_info.m_deviceType = AE_DEVTYPE_PCM;
-  m_info.m_deviceName = "AudioTrack";
-  m_info.m_displayName = "android";
-  m_info.m_displayNameExtra = "audiotrack";
-#ifdef LIMIT_TO_STEREO_AND_5POINT1_AND_7POINT1
-  if (Has71Support())
-    m_info.m_channels = AE_CH_LAYOUT_7_1;
-  else
-    m_info.m_channels = AE_CH_LAYOUT_5_1;
-#else
-  m_info.m_channels = KnownChannels;
-#endif
-  m_info.m_dataFormats.push_back(AE_FMT_S16LE);
-  if (CJNIAudioManager::GetSDKVersion() >= 21)
-    m_info.m_dataFormats.push_back(AE_FMT_FLOAT);
-
   m_sink_sampleRates.clear();
   m_sink_sampleRates.insert(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
 
+  int test_sample[] = { 32000, 44100, 48000, 96000, 192000 };
+  int test_sample_sz = sizeof(test_sample) / sizeof(int);
+  int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
+  if (CJNIAudioManager::GetSDKVersion() >= 21)
+    encoding = CJNIAudioFormat::ENCODING_PCM_FLOAT;
+  for (int i=0; i<test_sample_sz; ++i)
+  {
+    if (IsSupported(test_sample[i], CJNIAudioFormat::CHANNEL_OUT_STEREO, encoding))
+    {
+      m_sink_sampleRates.insert(test_sample[i]);
+      CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
+    }
+  }
+
+  CAEDeviceInfo pcminfo;
+  pcminfo.m_channels.Reset();
+  pcminfo.m_dataFormats.clear();
+  pcminfo.m_sampleRates.clear();
+
+  pcminfo.m_deviceName = "AudioTrackPCM";
+  pcminfo.m_displayName = "Android";
+  pcminfo.m_displayNameExtra = "PCM";
+
+  pcminfo.m_deviceType = AE_DEVTYPE_PCM;
+#ifdef LIMIT_TO_STEREO_AND_5POINT1_AND_7POINT1
+  if (Has71Support())
+    pcminfo.m_channels = AE_CH_LAYOUT_7_1;
+  else
+    pcminfo.m_channels = AE_CH_LAYOUT_5_1;
+#else
+  m_info.m_channels = KnownChannels;
+#endif
+  pcminfo.m_dataFormats.push_back(AE_FMT_S16LE);
+  if (CJNIAudioManager::GetSDKVersion() >= 21)
+    pcminfo.m_dataFormats.push_back(AE_FMT_FLOAT);
+
+  std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(pcminfo.m_sampleRates));
+  list.push_back(pcminfo);
+
   if (!CXBMCApp::IsHeadsetPlugged())
   {
-    m_info.m_deviceType = AE_DEVTYPE_HDMI;
+    CAEDeviceInfo ptinfo = pcminfo;
+    ptinfo.m_dataFormats.clear();
+    ptinfo.m_sampleRates.clear();
+
+    ptinfo.m_deviceName = "AudioTrackPT";
+    ptinfo.m_displayName = "Android";
+    ptinfo.m_displayNameExtra = "IEC Passthrough";
+
+    ptinfo.m_deviceType = AE_DEVTYPE_HDMI;
     // passthrough
     m_sink_sampleRates.insert(44100);
     m_sink_sampleRates.insert(48000);
-    m_info.m_dataFormats.push_back(AE_FMT_AC3);
-    m_info.m_dataFormats.push_back(AE_FMT_DTS);
-#if defined(HAS_LIBAMCODEC)
+    ptinfo.m_dataFormats.push_back(AE_FMT_AC3);
+    ptinfo.m_dataFormats.push_back(AE_FMT_DTS);
     if (aml_present())
     {
       if (HasAmlHD())
       {
         m_sink_sampleRates.insert(192000);   // For HD audio
-        m_info.m_dataFormats.push_back(AE_FMT_EAC3);
-        m_info.m_dataFormats.push_back(AE_FMT_TRUEHD);
-        m_info.m_dataFormats.push_back(AE_FMT_DTSHD);
+        ptinfo.m_dataFormats.push_back(AE_FMT_EAC3);
+        ptinfo.m_dataFormats.push_back(AE_FMT_TRUEHD);
+        ptinfo.m_dataFormats.push_back(AE_FMT_DTSHD);
+      }
+    }
+    std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(ptinfo.m_sampleRates));
+
+    if (CJNIBase::GetSDKVersion() >= 21)
+    {
+      CAEDeviceInfo rawptinfo = ptinfo;
+      rawptinfo.m_dataFormats.clear();
+      rawptinfo.m_sampleRates.clear();
+
+      rawptinfo.m_deviceName = "AudioTrackPTRAW";
+      rawptinfo.m_displayName = "Android";
+      rawptinfo.m_displayNameExtra = "RAW Passthrough";
+
+      if (CJNIAudioFormat::ENCODING_AC3 != -1)
+        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS));
+      if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
+        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS));
+      if (CJNIAudioFormat::ENCODING_DTS != -1)
+        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS));
+      if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
+        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS));
+      if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
+        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS));
+
+      std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(rawptinfo.m_sampleRates));
+
+      if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)  // Shield
+      {
+        list.push_back(rawptinfo);
+        list.push_back(ptinfo);
+      }
+      else
+      {
+        list.push_back(ptinfo);
+        list.push_back(rawptinfo);
       }
     }
     else
-#endif
     {
-      int test_sample[] = { 32000, 44100, 48000, 96000, 192000 };
-      int test_sample_sz = sizeof(test_sample) / sizeof(int);
-      int encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
-      if (CJNIAudioManager::GetSDKVersion() >= 21)
-        encoding = CJNIAudioFormat::ENCODING_PCM_FLOAT;
-      for (int i=0; i<test_sample_sz; ++i)
-      {
-        if (IsSupported(test_sample[i], CJNIAudioFormat::CHANNEL_OUT_STEREO, encoding))
-        {
-          m_sink_sampleRates.insert(test_sample[i]);
-          CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
-        }
-      }
-      if (CJNIBase::GetSDKVersion() >= 23)
-      {
-        // Limit RAW to 6.0+, 5.x it too buggy...
-        if (CJNIAudioFormat::ENCODING_AC3 != -1)
-          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS));
-        if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
-          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS));
-        if (CJNIAudioFormat::ENCODING_DTS != -1)
-          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS));
-        if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
-          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS));
-        if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
-          m_info.m_dataFormats.push_back((AEDataFormat)(AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS));
-      }
+      list.push_back(ptinfo);
     }
-    std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
   }
-
-  list.push_back(m_info);
 }
 
