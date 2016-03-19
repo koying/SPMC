@@ -60,7 +60,6 @@ private:
   double                m_last_duration_written;
   uint32_t              m_last_head_pos;
 
-  static CAEDeviceInfo m_info;
   static std::set<unsigned int>       m_sink_sampleRates;
   std::vector<double>                 m_smoothedDelayVec;
   int                                 m_smoothedDelayCount;
