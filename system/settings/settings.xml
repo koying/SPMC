@@ -1065,7 +1065,7 @@
           <level>1</level>
           <default></default>
           <constraints>
-            <allowempty>true</allowempty>		  
+            <allowempty>true</allowempty>
             <addontype>xbmc.subtitle.module</addontype>
           </constraints>
           <control type="button" format="addon">
@@ -2108,7 +2108,7 @@
       <group id="1">
         <setting id="services.webserver" type="boolean" label="263" help="36328">
           <level>1</level>
-          <default>false</default>
+          <default>true</default>
           <control type="toggle" />
         </setting>
         <setting id="services.webserverport" type="integer" parent="services.webserver" label="730" help="36329">
