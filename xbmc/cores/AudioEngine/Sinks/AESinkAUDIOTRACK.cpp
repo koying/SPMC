@@ -209,9 +209,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     m_passthrough = true;
 
     // Get equal or lower supported sample rate
-    std::set<unsigned int>::iterator s = m_sink_sampleRates.upper_bound(m_format.m_encodedRate);
-    if (--s != m_sink_sampleRates.begin())
-      m_sink_sampleRate = *s;
+    std::set<unsigned int>::iterator s = m_sink_sampleRates.upper_bound((AE_IS_RAW_RAW(m_format.m_dataFormat) ? m_format.m_encodedRate : m_format.m_sampleRate));
+    if (s != m_sink_sampleRates.end() && s != m_sink_sampleRates.begin())
+      m_sink_sampleRate = *(--s);
     else
       m_sink_sampleRate = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
 
@@ -337,8 +337,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
     // Get equal or lower supported sample rate
     std::set<unsigned int>::iterator s = m_sink_sampleRates.upper_bound(m_format.m_sampleRate);
-    if (--s != m_sink_sampleRates.begin())
-      m_sink_sampleRate = *s;
+    if (s != m_sink_sampleRates.end() && s != m_sink_sampleRates.begin())
+      m_sink_sampleRate = *(--s);
     else
       m_sink_sampleRate = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
 
