@@ -27,6 +27,7 @@
 
 #include "DVDVideoCodecAndroidMediaCodec.h"
 
+#include <androidjni/Build.h>
 #include <androidjni/ByteBuffer.h>
 #include <androidjni/MediaCodecList.h>
 #include <androidjni/MediaCodecInfo.h>
@@ -451,6 +452,12 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
           // No known h/w decoder supporting Hi10P
           return false;
       }
+      if (CJNIBuild::DEVICE == "foster" && hints.stereo_mode != "mono")   // SATV buggy with HTAB/HSBS
+      {
+        CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Open - SATV does not support stereo mode (%s)", hints.stereo_mode.c_str());
+        return false;
+      }
+
       m_mime = "video/avc";
       m_formatname = "amc-h264";
       // check for h264-avcC and convert to h264-annex-b
