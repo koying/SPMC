@@ -770,7 +770,7 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
     {
       if (AE_IS_RAW_RAW(audioframe.data_format))
       {
-        double correction = int(std::min(DVD_MSEC_TO_TIME(100), error) / audioframe.duration) * audioframe.duration;
+        double correction = int(error / audioframe.duration) * audioframe.duration;
 
         if (correction > 0)
         {
