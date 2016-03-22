@@ -33,7 +33,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -Np1 -i ../03-mysqlclient-android.patch
 	cd $(PLATFORM); patch -p0 < ../04-strnlen.patch
 	cd $(PLATFORM); patch -p0 < ../06-no-endpwent.patch
-	cd $(PLATFORM); autoconf
+	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE) 
 
 $(LIBDYLIB): $(PLATFORM)
