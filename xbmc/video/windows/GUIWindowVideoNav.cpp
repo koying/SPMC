@@ -129,26 +129,38 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
 
       if (message.GetStringParam(0) != "")
       {
+        CURL url(message.GetStringParam(0));
+        CLog::Log(LOGDEBUG, "VideoNav message: param(%s, %s)", message.GetStringParam(0).c_str(), url.GetWithoutOptions().c_str());
+
         int i = 0;
         for (; i < m_vecItems->Size(); i++)
         {
           CFileItemPtr pItem = m_vecItems->Get(i);
-          if (pItem->GetPath() == message.GetStringParam(0))
+          CLog::Log(LOGDEBUG, "-- path (%s)", pItem->GetPath().c_str());
+          if (URIUtils::PathEquals(pItem->GetPath(), message.GetStringParam(0), true, true))
           {
             m_viewControl.SetSelectedItem(i);
-            ADDON::ScraperPtr scrapper;
-            OnItemInfo(pItem.get(), scrapper);
+            if (url.GetOption("showinfo") == "true")
+            {
+              ADDON::ScraperPtr scrapper;
+              OnItemInfo(pItem.get(), scrapper);
+            }
             break;
           }
         }
-        if (i == m_vecItems->Size())
+        if (i >= m_vecItems->Size() && url.GetOption("showinfo") == "true")
         {
-          CFileItem* item = new CFileItem(message.GetStringParam(0), false);
+          std::string path = message.GetStringParam(0);
+          CFileItem* item = new CFileItem(path, URIUtils::HasSlashAtEnd(path));
           if (item->IsVideoDb())
           {
             *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
-            item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
+            if (path.find("tvshows") != std::string::npos && !URIUtils::HasSlashAtEnd(path))
+              item->SetPath(path + "/");
+            else
+              item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
           }
+          CLog::Log(LOGDEBUG, "-- not found (%s, %s)", path.c_str(), item->GetPath().c_str());
           ADDON::ScraperPtr scrapper;
           OnItemInfo(item, scrapper);
         }
@@ -763,6 +775,7 @@ void CGUIWindowVideoNav::PlayItem(int iItem)
 
 void CGUIWindowVideoNav::OnItemInfo(CFileItem* pItem, ADDON::ScraperPtr& scraper)
 {
+  CLog::Log(LOGDEBUG, "CGUIWindowVideoNav::OnItemInfo (%s)", pItem->GetPath().c_str());
   if (!scraper || scraper->Content() == CONTENT_NONE)
   {
     m_database.Open(); // since we can be called from the music library without being inited
