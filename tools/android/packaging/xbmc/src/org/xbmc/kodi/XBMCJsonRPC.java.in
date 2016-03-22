@@ -65,10 +65,13 @@ public class XBMCJsonRPC
   private String SEARCH_MOVIES_JSON =
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {%s}, "
-                  + "\"limits\": { \"start\" : 0, \"end\": %d}, "
+                  + "\"limits\": { \"start\" : 0, \"end\": 10}, "
 		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
 		  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
 		  + "\"id\": \"1\"}";
+
+  private String SEARCH_SHOWS_JSON =
+           "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{%s},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"1\"}";
 
   private NotificationManager mNotificationManager;
 
@@ -191,13 +194,12 @@ public class XBMCJsonRPC
 
       try
       {
-        int limit = 10;
         JSONObject req = request(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
         "\"or\": [" +
-        "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}, " +
+        "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"set\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}]"
-        , limit));
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
 
         if (req == null)
           return null;
@@ -209,6 +211,30 @@ public class XBMCJsonRPC
         {
           JSONObject movie = movies.getJSONObject(i);
           mc.addRow(new Object[]{movie.getString("movieid"), movie.getString("title"), movie.getString("tagline"), movie.getString("thumbnail"), movie.getString("fanart")});
+        }
+      } catch (Exception e)
+      {
+        e.printStackTrace();
+        return null;
+      }
+
+      try
+      {
+        JSONObject req = request(String.format(SEARCH_SHOWS_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
+        "\"or\": [" +
+        "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
+        if (req == null)
+          return null;
+
+        JSONObject results = req.getJSONObject("result");
+        JSONArray tvshows = results.getJSONArray("tvshows");
+
+        for (int i = 0; i < tvshows.length(); ++i)
+        {
+          JSONObject tvshow = tvshows.getJSONObject(i);
+          mc.addRow(new Object[]{tvshow.getString("movieid"), tvshow.getString("title"), tvshow.getString("plot"), tvshow.getString("thumbnail"), tvshow.getString("fanart")});
         }
       } catch (Exception e)
       {
@@ -238,10 +264,10 @@ public class XBMCJsonRPC
     {
       JSONObject req = request(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
       "\"or\": [" +
-      "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}, " +
-      "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
-      "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}]"
-      , limit));
+        "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"set\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
       if (req == null)
         return null;
 
@@ -258,6 +284,38 @@ public class XBMCJsonRPC
             movie.getString("tagline"),
             XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
             Uri.parse("videodb://movies/titles/" + movie.getString("movieid") + "?showinfo=true"),
+        });
+        totCount++;
+      }
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+
+    try
+    {
+      JSONObject req = request(String.format(SEARCH_SHOWS_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
+      "\"or\": [" +
+      "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
+      "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+      "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
+      if (req == null)
+        return null;
+
+      JSONObject results = req.getJSONObject("result");
+      JSONArray tvshows = results.getJSONArray("tvshows");
+
+      for (int i = 0; i < tvshows.length() && totCount < limit; ++i)
+      {
+        JSONObject tvshow = tvshows.getJSONObject(i);
+        mc.addRow(new Object[]
+        {
+            tvshow.getString("tvshowid"),
+            tvshow.getString("title"),
+            tvshow.getString("plot"),
+            XBMCImageContentProvider.GetImageUri(getBitmapUrl(tvshow.getString("thumbnail"))).toString(),
+            Uri.parse("videodb://tvshows/titles/" + tvshow.getString("tvshowid") + "?showinfo=true"),
         });
         totCount++;
       }
