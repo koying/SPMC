@@ -872,10 +872,11 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
   }
   else if (action == "android.intent.action.GET_CONTENT")
   {
-    if (URIUtils::IsVideoDb(targetFile))
+    CURL targeturl(targetFile);
+    if (targeturl.IsProtocol("videodb"))
     {
       std::vector<std::string> params;
-      params.push_back(targetFile);
+      params.push_back(targeturl.Get());
       params.push_back("return");
       CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
     }

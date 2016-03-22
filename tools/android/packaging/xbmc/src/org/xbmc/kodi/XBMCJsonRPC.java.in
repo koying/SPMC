@@ -46,26 +46,32 @@ public class XBMCJsonRPC
   public final static String COLUMN_RECOMMENDATION_REASON = "COLUMN_RECOMMENDATION_REASON";
 
   private static String TAG = "@APP_NAME@json";
-  
+
   private String m_jsonURL = "http://localhost:8080";
   private int MAX_RECOMMENDATIONS = 3;
-  private String RECOMMENDATION_JSON = 
+
+  // {"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "filter": {"field": "playcount", "operator": "is", "value": "0"}, "limits": { "start" : 0, "end": 3}, "properties" : ["imdbnumber", "title", "tagline", "thumbnail", "fanart"], "sort": { "order": "descending", "method": "dateadded", "ignorearticle": true } }, "id": "1"}
+  private String RECOMMENDATION_MOVIES_JSON =
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, "
-		  + "\"limits\": { \"start\" : 0, \"end\": %d}, "
+		  + "\"limits\": { \"start\" : 0, \"end\": 10}, "
 		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
 		  + "\"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, "
 		  + "\"id\": \"1\"}";
-  private String SEARCH_MOVIES_JSON = 
+
+  private String RECOMMENDATIONS_SHOWS_JSON =
+                 "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{\"and\":[{\"field\":\"playcount\",\"operator\":\"is\",\"value\":\"0\"},{\"field\":\"plot\",\"operator\":\"isnot\",\"value\":\"\"}]},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"1\"}";
+
+  private String SEARCH_MOVIES_JSON =
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {%s}, "
-      + "\"limits\": { \"start\" : 0, \"end\": %d}, "
+                  + "\"limits\": { \"start\" : 0, \"end\": %d}, "
 		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
 		  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
 		  + "\"id\": \"1\"}";
 
   private NotificationManager mNotificationManager;
-  
+
   public JSONObject request(String jsonRequest)
   {
     try
@@ -192,7 +198,7 @@ public class XBMCJsonRPC
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}]"
         , limit));
-        
+
         if (req == null)
           return null;
 
@@ -209,18 +215,18 @@ public class XBMCJsonRPC
         e.printStackTrace();
         return null;
       }
-      
+
       return mc;
   }
-  
+
   public Cursor getSuggestions(String query, int limit)
   {
     Log.d(TAG, "query: " + query);
 
     int totCount = 0;
     String[] menuCols = new String[]
-    { 
-        BaseColumns._ID, 
+    {
+        BaseColumns._ID,
         SearchManager.SUGGEST_COLUMN_TEXT_1,
         SearchManager.SUGGEST_COLUMN_TEXT_2,
         SearchManager.SUGGEST_COLUMN_ICON_1,
@@ -246,12 +252,12 @@ public class XBMCJsonRPC
       {
         JSONObject movie = movies.getJSONObject(i);
         mc.addRow(new Object[]
-        { 
+        {
             movie.getString("movieid"),
             movie.getString("title"),
             movie.getString("tagline"),
             XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
-            Uri.parse("videodb://movies/titles/" + movie.getString("movieid")),
+            Uri.parse("videodb://movies/titles/" + movie.getString("movieid") + "?showinfo=true"),
         });
         totCount++;
       }
@@ -263,7 +269,7 @@ public class XBMCJsonRPC
 
     return mc;
   }
-  
+
   public void updateLeanback(Context ctx)
   {
     if (mNotificationManager == null)
@@ -275,61 +281,123 @@ public class XBMCJsonRPC
         .setContext(ctx)
         .setSmallIcon(R.drawable.notif_icon);
 
-    JSONObject rep = request(String.format(RECOMMENDATION_JSON, MAX_RECOMMENDATIONS));
-    if (rep == null)
-      return;
-
-    try
-    {
-      JSONObject results = rep.getJSONObject("result");
-      JSONArray movies = results.getJSONArray("movies");
-
-      int count = 0;
-      for (int i = 0; i < movies.length(); ++i)
-      {
-        JSONObject movie = movies.getJSONObject(i);
-        int id = Integer.parseInt(movie.getString("imdbnumber").replace("tt",
-            ""));
-
-        final XBMCRecommendationBuilder notificationBuilder = builder
-            .setBackground(
-                XBMCImageContentProvider.GetImageUri(
-                    getBitmapUrl(movie.getString("fanart"))).toString())
-            .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
-            .setTitle(movie.getString("title"))
-            .setDescription(movie.getString("tagline"))
-            .setIntent(buildPendingIntent(ctx, movie));
-
-        Bitmap bitmap = getBitmap(movie.getString("thumbnail"));
-        notificationBuilder.setBitmap(bitmap);
-        Notification notification = notificationBuilder.build();
-        mNotificationManager.notify(id, notification);
-        ++count;
-      }
-    } catch (Exception e)
-    {
-      e.printStackTrace();
-    }
-  
-    }
-  
-    private PendingIntent buildPendingIntent(Context ctx, JSONObject movie)
+    JSONObject rep = request(RECOMMENDATION_MOVIES_JSON);
+    if (rep != null)
     {
       try
       {
-        Intent detailsIntent = new Intent(ctx, Splash.class);
-        detailsIntent.setAction(Intent.ACTION_GET_CONTENT);
-        detailsIntent.setData(Uri.parse("videodb://movies/titles/" + movie.getString("movieid")));
-        //detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
-        //detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
-  
-        return PendingIntent.getActivity(ctx, 0, detailsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        JSONObject results = rep.getJSONObject("result");
+        JSONArray movies = results.getJSONArray("movies");
+
+        int count = 0;
+        for (int i = 0; i < movies.length() && count < MAX_RECOMMENDATIONS; ++i)
+        {
+          try
+          {
+            JSONObject movie = movies.getJSONObject(i);
+            int id = Integer.parseInt(movie.getString("imdbnumber").replace("tt", ""));
+
+            final XBMCRecommendationBuilder notificationBuilder = builder
+                .setBackground(
+                    XBMCImageContentProvider.GetImageUri(
+                        getBitmapUrl(movie.getString("fanart"))).toString())
+                .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
+                .setTitle(movie.getString("title"))
+                .setDescription(movie.getString("tagline"))
+                .setIntent(buildPendingMovieIntent(ctx, movie));
+
+            Bitmap bitmap = getBitmap(movie.getString("thumbnail"));
+            notificationBuilder.setBitmap(bitmap);
+            Notification notification = notificationBuilder.build();
+            mNotificationManager.notify(id, notification);
+            ++count;
+          } catch (Exception e)
+          {
+            continue;
+          }
+        }
       } catch (Exception e)
       {
         e.printStackTrace();
-        return null;
       }
     }
-    
-    
+
+    rep = request(RECOMMENDATIONS_SHOWS_JSON);
+    if (rep != null)
+    {
+      try
+      {
+        JSONObject results = rep.getJSONObject("result");
+        JSONArray tvshows = results.getJSONArray("tvshows");
+
+        int count = 0;
+        for (int i = 0; i < tvshows.length() && count < MAX_RECOMMENDATIONS; ++i)
+        {
+          try
+          {
+            JSONObject tvshow = tvshows.getJSONObject(i);
+            int id = Integer.parseInt(tvshow.getString("imdbnumber").replace("tt", ""));
+
+            final XBMCRecommendationBuilder notificationBuilder = builder
+                .setBackground(
+                    XBMCImageContentProvider.GetImageUri(
+                        getBitmapUrl(tvshow.getString("fanart"))).toString())
+                .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
+                .setTitle(tvshow.getString("title"))
+                .setDescription(tvshow.getString("plot"))
+                .setIntent(buildPendingShowIntent(ctx, tvshow));
+
+            Bitmap bitmap = getBitmap(tvshow.getString("thumbnail"));
+            notificationBuilder.setBitmap(bitmap);
+            Notification notification = notificationBuilder.build();
+            mNotificationManager.notify(id, notification);
+            ++count;
+          } catch (Exception e)
+          {
+            continue;
+          }
+
+        }
+      } catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private PendingIntent buildPendingMovieIntent(Context ctx, JSONObject movie)
+  {
+    try
+    {
+      Intent detailsIntent = new Intent(ctx, Splash.class);
+      detailsIntent.setAction(Intent.ACTION_GET_CONTENT);
+      detailsIntent.setData(Uri.parse("videodb://movies/titles/" + movie.getString("movieid") + "?showinfo=true"));
+      //detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
+      //detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
+
+      return PendingIntent.getActivity(ctx, 0, detailsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  private PendingIntent buildPendingShowIntent(Context ctx, JSONObject tvshow)
+  {
+    try
+    {
+      Intent detailsIntent = new Intent(ctx, Splash.class);
+      detailsIntent.setAction(Intent.ACTION_GET_CONTENT);
+      detailsIntent.setData(Uri.parse("videodb://tvshows/titles/" + tvshow.getString("tvshowid") + "/"));
+      //detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
+      //detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
+
+      return PendingIntent.getActivity(ctx, 0, detailsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
 }
