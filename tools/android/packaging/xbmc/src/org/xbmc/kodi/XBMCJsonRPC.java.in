@@ -62,6 +62,9 @@ public class XBMCJsonRPC
   private String RECOMMENDATIONS_SHOWS_JSON =
                  "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{\"and\":[{\"field\":\"playcount\",\"operator\":\"is\",\"value\":\"0\"},{\"field\":\"plot\",\"operator\":\"isnot\",\"value\":\"\"}]},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"1\"}";
 
+  private String RECOMMENDATIONS_ALBUMS_JSON =
+                 "{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetAlbums\", \"params\": { \"limits\": { \"start\" : 0, \"end\": 3}, \"properties\" : [\"title\", \"displayartist\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"1\"}";
+
   private String SEARCH_MOVIES_JSON =
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {%s}, "
@@ -421,6 +424,49 @@ public class XBMCJsonRPC
         e.printStackTrace();
       }
     }
+
+    rep = request(RECOMMENDATIONS_ALBUMS_JSON);
+    if (rep != null)
+    {
+      try
+      {
+        JSONObject results = rep.getJSONObject("result");
+        JSONArray albums = results.getJSONArray("albums");
+
+        int count = 0;
+        for (int i = 0; i < albums.length() && count < MAX_RECOMMENDATIONS; ++i)
+        {
+          try
+          {
+            JSONObject album = albums.getJSONObject(i);
+            int id = Integer.parseInt(album.getString("albumid"));
+
+            final XBMCRecommendationBuilder notificationBuilder = builder
+                .setBackground(
+                    XBMCImageContentProvider.GetImageUri(
+                        getBitmapUrl(album.getString("fanart"))).toString())
+                .setId(id).setPriority(MAX_RECOMMENDATIONS - count)
+                .setTitle(album.getString("title"))
+                .setDescription(album.getString("displayartist"))
+                .setIntent(buildPendingAlbumIntent(ctx, album));
+
+            Bitmap bitmap = getBitmap(album.getString("thumbnail"));
+            notificationBuilder.setBitmap(bitmap);
+            Notification notification = notificationBuilder.build();
+            mNotificationManager.notify(id, notification);
+            ++count;
+          } catch (Exception e)
+          {
+            continue;
+          }
+
+        }
+      } catch (Exception e)
+      {
+        e.printStackTrace();
+      }
+    }
+
   }
 
   private PendingIntent buildPendingMovieIntent(Context ctx, JSONObject movie)
@@ -448,8 +494,6 @@ public class XBMCJsonRPC
       Intent detailsIntent = new Intent(ctx, Splash.class);
       detailsIntent.setAction(Intent.ACTION_GET_CONTENT);
       detailsIntent.setData(Uri.parse("videodb://tvshows/titles/" + tvshow.getString("tvshowid") + "/"));
-      //detailsIntent.putExtra(MovieDetailsActivity.MOVIE, movie);
-      //detailsIntent.putExtra(MovieDetailsActivity.NOTIFICATION_ID, id);
 
       return PendingIntent.getActivity(ctx, 0, detailsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
     } catch (Exception e)
@@ -458,4 +502,21 @@ public class XBMCJsonRPC
       return null;
     }
   }
+
+  private PendingIntent buildPendingAlbumIntent(Context ctx, JSONObject tvshow)
+  {
+    try
+    {
+      Intent detailsIntent = new Intent(ctx, Splash.class);
+      detailsIntent.setAction(Intent.ACTION_GET_CONTENT);
+      detailsIntent.setData(Uri.parse("musicdb://albums/" + tvshow.getString("albumid") + "/"));
+
+      return PendingIntent.getActivity(ctx, 0, detailsIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
 }
