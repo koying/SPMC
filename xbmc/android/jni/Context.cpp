@@ -51,6 +51,7 @@
 #include "Settings.h"
 #include "Environment.h"
 #include "Document.h"
+#include "RecognizerIntent.h"
 
 #include <android/native_activity.h>
 
@@ -96,6 +97,7 @@ void CJNIContext::PopulateStaticFields()
   CJNISettings::PopulateStaticFields();
   CJNIEnvironment::PopulateStaticFields();
   CJNIDocument::PopulateStaticFields();
+  CJNIRecognizerIntent::PopulateStaticFields();
 }
 
 CJNIPackageManager CJNIContext::GetPackageManager()

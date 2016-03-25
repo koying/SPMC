@@ -25,6 +25,7 @@
 
 using namespace jni;
 int CJNIBase::m_sdk_version = -1;
+int CJNIBase::RESULT_OK = -1;
 
 CJNIBase::CJNIBase(std::string classname)
 {
