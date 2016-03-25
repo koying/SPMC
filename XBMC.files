@@ -9781,3 +9781,7 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java.in
 xbmc/CompileInfo.cpp.in
 addons/resource.language.en_gb/resources/strings.po
 tools/android/packaging/xbmc/searchable.xml.in
+xbmc/android/jni/RecognizerIntent.cpp
+xbmc/android/jni/RecognizerIntent.h
+xbmc/android/jni/ArrayList.cpp
+xbmc/android/jni/ArrayList.h
