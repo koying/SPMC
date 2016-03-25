@@ -345,6 +345,9 @@
 #define ACTION_INPUT_TEXT             244
 #define ACTION_VOLUME_SET             245
 
+// Voice actions
+#define ACTION_VOICE_RECOGNIZE        300
+
 // touch actions
 #define ACTION_TOUCH_TAP              401
 #define ACTION_TOUCH_TAP_TEN          410

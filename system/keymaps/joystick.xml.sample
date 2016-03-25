@@ -279,6 +279,7 @@
       <button id="4">Symbols</button>
       <button id="5">Shift</button>
       <button id="9">Enter</button>
+      <button id="3">VoiceRecognizer</button>
       <axis id="3" limit="+1">CursorLeft</axis>
       <axis id="3" limit="-1">CursorRight</axis>
     </joystick>

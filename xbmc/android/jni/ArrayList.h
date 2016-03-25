@@ -19,35 +19,20 @@
  *
  */
 
-#include "jutils/jutils.hpp"
-class CJNIBase
+#include "JNIBase.h"
+
+template <typename T>
+class CJNIArrayList : public CJNIBase
 {
-  friend class CJNIContext; //for SetSDKVersion()
-
-  typedef void (CJNIBase::*safe_bool_type)();
-  void non_null_object() {}
-
 public:
-  operator safe_bool_type() const { return !m_object ?  0 : &CJNIBase::non_null_object; }
-  const jni::jhobject& get_raw() const { return m_object; }
-  static int GetSDKVersion();
-  const static std::string ExceptionToString();
+  CJNIArrayList(const jni::jhobject &object) : CJNIBase(object){};
+  ~CJNIArrayList(){};
 
-  static int RESULT_OK;
-
-protected:
-  CJNIBase(jni::jhobject const& object);
-  CJNIBase(std::string classname);
-  ~CJNIBase();
-
-  const std::string & GetClassName() {return m_className;}
-  const std::string GetDotClassName();
-
-  jni::jhobject m_object;
+  T   get(int index);
+  int size();
 
 private:
-  static void SetSDKVersion(int);
-  std::string m_className;
-  static int m_sdk_version;
+  CJNIArrayList();
 };
 
+template <> std::string CJNIArrayList<std::string>::get(int index);
