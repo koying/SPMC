@@ -388,6 +388,9 @@
 #define ACTION_VOLUME_SET             245
 #define ACTION_TOGGLE_COMMSKIP        246
 
+// Voice actions
+#define ACTION_VOICE_RECOGNIZE        300
+
 #define ACTION_TOUCH_TAP              401 //!< touch actions
 #define ACTION_TOUCH_TAP_TEN          410 //!< touch actions
 #define ACTION_TOUCH_LONGPRESS        411 //!< touch actions

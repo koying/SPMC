@@ -67,6 +67,7 @@ SRCS      += Settings.cpp
 SRCS      += URIPermission.cpp
 SRCS      += DocumentsContract.cpp
 SRCS      += Document.cpp
+SRCS      += RecognizerIntent.cpp
 
 LIB        = jni.a
 
