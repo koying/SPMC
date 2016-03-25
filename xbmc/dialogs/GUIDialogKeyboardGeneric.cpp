@@ -285,7 +285,11 @@ bool CGUIDialogKeyboardGeneric::OnMessage(CGUIMessage& message)
         MoveCursor(1);
         break;
       case CTL_BUTTON_IP_ADDRESS:
+#ifdef TARGET_ANDROID
+        OnVoiceRecognition();
+#else
         OnIPAddress();
+#endif
         break;
       case CTL_BUTTON_CLEAR:
         SetEditText("");
