@@ -5028,6 +5028,11 @@ void CApplication::StartVideoScan(const std::string &strDirectory, bool userInit
   CVideoLibraryQueue::GetInstance().ScanLibrary(strDirectory, scanAll, userInitiated);
 }
 
+void CApplication::StartThumbnailsCleanup(bool userInitiated /* = true */)
+{
+  CTextureCache::GetInstance().AddJob(new CTextureCleanupJob());
+}
+
 void CApplication::StartMusicCleanup(bool userInitiated /* = true */)
 {
   if (m_musicInfoScanner->IsScanning())

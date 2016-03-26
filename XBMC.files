@@ -9785,3 +9785,5 @@ xbmc/android/jni/RecognizerIntent.cpp
 xbmc/android/jni/RecognizerIntent.h
 xbmc/android/jni/ArrayList.cpp
 xbmc/android/jni/ArrayList.h
+xbmc/video/VideoLibraryQueue.cpp
+xbmc/video/VideoLibraryQueue.h
