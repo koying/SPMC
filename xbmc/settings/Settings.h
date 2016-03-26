@@ -367,6 +367,8 @@ public:
   static const std::string SETTING_GENERAL_ADDONNOTIFICATIONS;
   static const std::string SETTING_GENERAL_ADDONFOREIGNFILTER;
   static const std::string SETTING_GENERAL_ADDONBROKENFILTER;
+  static const std::string SETTING_THUMBNAILS_CLEANUP;
+
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
