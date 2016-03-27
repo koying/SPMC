@@ -27,6 +27,8 @@
 #include "FileItem.h"
 #include "filesystem/DirectoryCache.h"
 #include "filesystem/StackDirectory.h"
+#include "filesystem/File.h"
+#include "filesystem/CurlFile.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/StereoscopicsManager.h"
 #include "GUIUserMessages.h"
@@ -367,10 +369,28 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
   // We can only extract flags/thumbs for file-like items
   if (!pItem->m_bIsFolder && pItem->IsVideo())
   {
-    // An auto-generated thumb may have been cached on a different device - check we have it here
     std::string url = pItem->GetArt("thumb");
-    if (StringUtils::StartsWith(url, "image://video@") && !CTextureCache::GetInstance().HasCachedImage(url))
-      pItem->SetArt("thumb", "");
+    if (!CTextureCache::GetInstance().HasCachedImage(url))
+    {
+      // An auto-generated thumb may have been cached on a different device - check we have it here
+      if (StringUtils::StartsWith(url, "image://video@"))
+        pItem->SetArt("thumb", "");
+
+      // Check invalid redirections
+      else if (URIUtils::IsInternetStream(url))
+      {
+        std::string mimetype;
+        bool valid = XFILE::CCurlFile::GetMimeType(CURL(url), mimetype);
+        if (valid && !StringUtils::StartsWith(mimetype, "image/"))
+          valid = false;
+        if (!valid)
+          pItem->SetArt("thumb", "");
+      }
+
+      // Check if thumb source still exists
+      else if (!XFILE::CFile::Exists(url))
+        pItem->SetArt("thumb", "");
+    }
 
     if (!pItem->HasArt("thumb"))
     {
