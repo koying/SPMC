@@ -266,7 +266,8 @@ std::vector<std::string> CVideoThumbLoader::GetArtTypes(const std::string &type)
 bool CVideoThumbLoader::LoadItem(CFileItem* pItem)
 {
   bool result  = LoadItemCached(pItem);
-       result |= LoadItemLookup(pItem);
+  if (!result)
+    result |= LoadItemLookup(pItem);
 
   return result;
 }
@@ -324,7 +325,7 @@ bool CVideoThumbLoader::LoadItemCached(CFileItem* pItem)
 
   m_videoDatabase->Close();
 
-  return true;
+  return pItem->HasArt("thumb");
 }
 
 bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
