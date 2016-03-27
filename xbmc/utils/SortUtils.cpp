@@ -489,7 +489,7 @@ bool SorterAscending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, true, result, labelLeft, labelRight))
     return result;
 
-  return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) < 0;
+  return labelLeft.compare(labelRight) < 0;
 }
 
 bool SorterDescending(const SortItem &left, const SortItem &right)
@@ -499,7 +499,7 @@ bool SorterDescending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, true, result, labelLeft, labelRight))
     return result;
 
-  return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) > 0;
+  return labelLeft.compare(labelRight) > 0;
 }
 
 bool SorterIgnoreFoldersAscending(const SortItem &left, const SortItem &right)
@@ -509,7 +509,7 @@ bool SorterIgnoreFoldersAscending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, false, result, labelLeft, labelRight))
     return result;
 
-  return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) < 0;
+  return labelLeft.compare(labelRight) < 0;
 }
 
 bool SorterIgnoreFoldersDescending(const SortItem &left, const SortItem &right)
@@ -519,7 +519,7 @@ bool SorterIgnoreFoldersDescending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, false, result, labelLeft, labelRight))
     return result;
 
-  return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) > 0;
+  return labelLeft.compare(labelRight) > 0;
 }
 
 bool SorterIndirectAscending(const SortItemPtr &left, const SortItemPtr &right)
