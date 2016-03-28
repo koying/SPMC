@@ -60,7 +60,13 @@ CJNIByteBuffer CJNIByteBuffer::wrap(const std::vector<char> &array)
 
   return CJNIByteBuffer(call_static_method<jhobject>(m_classname,
     "wrap","([B)Ljava/nio/ByteBuffer;",
-    bytearray));
+                                                     bytearray));
+}
+
+CJNIByteBuffer CJNIByteBuffer::wrap(const jharray &array)
+{
+  return CJNIByteBuffer(call_static_method<jhobject>(m_classname,
+    "wrap","([B)Ljava/nio/ByteBuffer;", array));
 }
 
 CJNIByteBuffer CJNIByteBuffer::duplicate()

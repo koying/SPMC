@@ -9789,3 +9789,5 @@ xbmc/video/VideoLibraryQueue.cpp
 xbmc/video/VideoLibraryQueue.h
 xbmc/android/jni/AudioAttributes.cpp
 xbmc/android/jni/AudioAttributes.h
+xbmc/android/jni/ByteBuffer.cpp
+xbmc/android/jni/ByteBuffer.h

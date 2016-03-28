@@ -19,6 +19,7 @@
  *
  */
 
+#include "JNIBase.h"
 #include "Buffer.h"
 
 class CJNIByteBuffer : public CJNIBuffer
@@ -31,6 +32,7 @@ public:
   static CJNIByteBuffer allocate(int capacity);
   static CJNIByteBuffer wrap(const std::vector<char> &array, int start, int byteCount);
   static CJNIByteBuffer wrap(const std::vector<char> &array);
+  static CJNIByteBuffer wrap(const jni::jharray &array);
 
   CJNIByteBuffer    duplicate();
 

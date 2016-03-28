@@ -45,6 +45,7 @@ class CJNIAudioTrack : public CJNIBase
     void  flush();
     void  release();
     int   write(char* audioData, int offsetInBytes, int sizeInBytes);
+    int   write(char *audioData, int sizeInBytes, int64_t timestamp);
     int   getState();
     int   getPlayState();
     int   getPlaybackHeadPosition();

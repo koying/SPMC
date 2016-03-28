@@ -162,7 +162,7 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
       attrbuilder.setUsage(CJNIAudioAttributes::USAGE_MEDIA);
       attrbuilder.setContentType(CJNIAudioAttributes::CONTENT_TYPE_MOVIE);
       // Force direct output
-//      attrbuilder.setFlags(CJNIAudioAttributes::FLAG_HW_AV_SYNC);
+      attrbuilder.setFlags(CJNIAudioAttributes::FLAG_HW_AV_SYNC);
 
       jniAt = new CJNIAudioTrack(attrbuilder.build(),
                                  fmtbuilder.build(),
@@ -379,12 +379,14 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
       m_sink_sampleRate = CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC);
 
     m_format.m_sampleRate     = m_sink_sampleRate;
+    /*
     if (0 && CJNIAudioManager::GetSDKVersion() >= 21 && m_format.m_channelLayout.Count() == 2)
     {
       m_encoding = CJNIAudioFormat::ENCODING_PCM_FLOAT;
       m_format.m_dataFormat     = AE_FMT_FLOAT;
     }
     else
+    */
     {
       m_encoding = CJNIAudioFormat::ENCODING_PCM_16BIT;
       m_format.m_dataFormat     = AE_FMT_S16LE;
@@ -620,7 +622,7 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     while (toWrite > 0)
     {
       int bsize = std::min(toWrite, m_buffer_size);
-      int len = m_at_jni->write((char*)(&out_buf[written]), 0, bsize);
+      int len = m_at_jni->write((char*)(&out_buf[written]), bsize, (int64_t)(m_duration_written * 1000000));
       if (len < 0)
       {
         CLog::Log(LOGERROR, "CAESinkAUDIOTRACK::AddPackets write returned error:  %d(%d)", len, written);

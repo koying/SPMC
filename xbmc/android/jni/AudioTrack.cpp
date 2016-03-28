@@ -21,6 +21,7 @@
 #include "AudioTrack.h"
 #include "jutils/jutils-details.hpp"
 #include "AudioFormat.h"
+#include "ByteBuffer.h"
 
 using namespace jni;
 
@@ -168,6 +169,23 @@ int CJNIAudioTrack::write(char* audioData, int offsetInBytes, int sizeInBytes)
     }
     else
       written = call_method<int>(m_object, "write", "([BII)I", m_buffer, offsetInBytes, sizeInBytes);
+  }
+
+  return written;
+}
+
+int CJNIAudioTrack::write(char* audioData, int sizeInBytes, int64_t timestamp)
+{
+  int     written = 0;
+  JNIEnv* jenv    = xbmc_jnienv();
+  char*   pArray;
+
+  if ((pArray = (char*)jenv->GetPrimitiveArrayCritical(m_buffer, NULL)))
+  {
+    memcpy(pArray, audioData, sizeInBytes);
+    jenv->ReleasePrimitiveArrayCritical(m_buffer, pArray, 0);
+    CJNIByteBuffer buf = CJNIByteBuffer::wrap(m_buffer);
+    written = call_method<int>(m_object, "write", "(Ljava/nio/ByteBuffer;IIJ)I", buf.get_raw(), sizeInBytes, CJNIAudioTrack::WRITE_BLOCKING, timestamp);
   }
 
   return written;
