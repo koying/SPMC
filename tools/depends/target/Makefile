@@ -16,10 +16,10 @@ DEPENDS = \
 	libplist libcec libbluray tinyxml dummy-libxbmc \
 	libamplayer libssh taglib libusb libnfs \
 	pythonmodule-pil pythonmodule-setuptools \
-	libxslt ffmpeg platform crossguid libdcadec giflib \
+	libxslt ffmpeg platform crossguid giflib \
 	bento4 google-breakpad
 
-FFMPEG_DEPENDS = gnutls libdcadec
+FFMPEG_DEPENDS = gnutls
 
 ifeq ($(ENABLE_GPLV3),yes)
   DEPENDS+=samba-gplv3 libcdio-gplv3

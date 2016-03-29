@@ -59,7 +59,7 @@ install:
 # Linux dependencies
 #
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then 
-    sudo apt-get install -qq automake autopoint build-essential cmake curl dcadec-dev default-jre gawk gdc
+    sudo apt-get install -qq automake autopoint build-essential cmake curl default-jre gawk gdc
     gettext git-core gperf libasound2-dev libass-dev libboost-dev libboost-thread-dev libbz2-dev libcap-dev libcdio-dev
     libcrossguid-dev libcurl3 libcurl4-openssl-dev libdbus-1-dev libfontconfig-dev libegl1-mesa-dev libfreetype6-dev
     libfribidi-dev libgif-dev libglew-dev libiso9660-dev libjasper-dev libjpeg-dev libltdl-dev liblzo2-dev
