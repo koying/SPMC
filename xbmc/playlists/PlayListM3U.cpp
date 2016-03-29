@@ -36,6 +36,8 @@ using namespace XFILE;
 #define M3U_INFO_MARKER  "#EXTINF"
 #define M3U_ARTIST_MARKER  "#EXTART"
 #define M3U_ALBUM_MARKER  "#EXTALB"
+#define M3U_KODIPROP_MARKER "#KODIPROP"
+#define M3U_VLCPROP_MARKER "#EXTVLCOPT"
 #define M3U_STREAM_MARKER  "#EXT-X-STREAM-INF"
 #define M3U_BANDWIDTH_MARKER  "BANDWIDTH"
 #define M3U_OFFSET_MARKER  "#EXT-KX-OFFSET"
@@ -122,6 +124,20 @@ bool CPlayListM3U::Load(const std::string& strFileName)
         size_t equ = prop.find("=");
         if (equ != std::string::npos)
           properties[prop.substr(0, equ)] = prop.substr(equ+1);
+      }
+    }
+    else if (StringUtils::StartsWith(strLine, M3U_KODIPROP_MARKER)
+              || StringUtils::StartsWith(strLine, M3U_VLCPROP_MARKER))
+    {
+      size_t iColon = strLine.find(":");
+      size_t iEqualSign = strLine.find("=");
+      if (iColon != std::string::npos &&
+          iEqualSign != std::string::npos &&
+          iEqualSign > iColon)
+      {
+        std::string prop = strLine.substr(iColon, iEqualSign - iColon);
+        std::string val = strLine.substr(iEqualSign);
+        properties[StringUtils::Trim(prop)] = StringUtils::Trim(val);
       }
     }
     else if (StringUtils::StartsWith(strLine, M3U_OFFSET_MARKER))
@@ -260,10 +276,10 @@ std::string CPlayListM3U::GetBestBandwidthStream(const std::string &strFileName,
 
   // get protocol options if they were set, so we can restore them again at the end
   CURL playlistUrl(strFileName);
-  
+
   // and set the fallback value
   CURL subStreamUrl = CURL(strFileName);
-  
+
   // determine the base
   CURL basePlaylistUrl(URIUtils::GetParentPath(strFileName));
   basePlaylistUrl.SetOptions("");

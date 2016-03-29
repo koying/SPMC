@@ -182,6 +182,8 @@ public:
 
   bool ContentLookup() { return m_contentLookup; }
 
+  const CVariant &GetProperty(const std::string key) { return m_item.GetProperty(key); }
+
 protected:
   DVDStreamType m_streamType;
   BitstreamStats m_stats;
