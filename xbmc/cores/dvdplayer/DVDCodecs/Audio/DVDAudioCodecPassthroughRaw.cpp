@@ -28,7 +28,7 @@
 #include "cores/AudioEngine/AEFactory.h"
 
 #define CONSTANT_BUFFER_SIZE_SD 16384
-#define CONSTANT_BUFFER_SIZE_HD 61440
+#define CONSTANT_BUFFER_SIZE_HD 32768
 
 CDVDAudioCodecPassthroughRaw::CDVDAudioCodecPassthroughRaw(void) :
   m_buffer    (NULL),

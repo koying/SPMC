@@ -766,7 +766,7 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
     // below a given threshold. the constants are aligned with known
     // durations: DTS = 11ms, AC3 = 32ms
     // during this stage audio is muted
-    if (error > DVD_MSEC_TO_TIME(10))
+    if (error > DVD_MSEC_TO_TIME(32))
     {
       if (AE_IS_RAW_RAW(audioframe.data_format))
       {
