@@ -135,8 +135,8 @@ bool CPlayListM3U::Load(const std::string& strFileName)
           iEqualSign != std::string::npos &&
           iEqualSign > iColon)
       {
-        std::string prop = strLine.substr(iColon, iEqualSign - iColon);
-        std::string val = strLine.substr(iEqualSign);
+        std::string prop = strLine.substr(iColon + 1, iEqualSign - iColon - 1);
+        std::string val = strLine.substr(iEqualSign + 1);
         properties[StringUtils::Trim(prop)] = StringUtils::Trim(val);
       }
     }
