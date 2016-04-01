@@ -868,6 +868,20 @@ bool CRenderSystemDX::CreateWindowSizeDependentResources()
         g_graphicsContext.SetStereoMode(RENDER_STEREO_MODE_SPLIT_HORIZONTAL);
       }
 
+      // some drivers (AMD) are denied to switch in stereoscopic 3D mode, if so then fallback to mono mode
+      if (FAILED(hr) && bHWStereoEnabled)
+      {
+        // switch to stereo mode failed, create mono swapchain
+        CLog::Log(LOGERROR, "%s - Creating stereo swap chain failed with error: %s.", __FUNCTION__, GetErrorDescription(hr).c_str());
+        CLog::Log(LOGNOTICE, "%s - Fallback to monoscopic mode.", __FUNCTION__);
+
+        scDesc1.Stereo = false;
+        hr = dxgiFactory2->CreateSwapChainForHwnd(m_pD3DDev, m_hFocusWnd, &scDesc1, &scFSDesc, NULL, &m_pSwapChain1);
+
+        // fallback to split_horisontal mode.
+        g_graphicsContext.SetStereoMode(RENDER_STEREO_MODE_SPLIT_HORIZONTAL);
+      }
+
       if (SUCCEEDED(hr))
       {
         m_pSwapChain1->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&m_pSwapChain));
