@@ -9787,3 +9787,16 @@ xbmc/android/jni/ArrayList.cpp
 xbmc/android/jni/ArrayList.h
 xbmc/video/VideoLibraryQueue.cpp
 xbmc/video/VideoLibraryQueue.h
+xbmc/settings/dialogs/GUIDialogAudioDSPManager.cpp
+xbmc/settings/dialogs/GUIDialogAudioDSPManager.h
+xbmc/settings/dialogs/GUIDialogAudioDSPSettings.cpp
+xbmc/settings/dialogs/GUIDialogAudioDSPSettings.h
+xbmc/settings/dialogs/GUIDialogContentSettings.cpp
+xbmc/settings/dialogs/GUIDialogContentSettings.h
+xbmc/settings/dialogs/GUIDialogSettingsBase.cpp
+xbmc/settings/dialogs/GUIDialogSettingsBase.h
+xbmc/settings/dialogs/GUIDialogSettingsManagerBase.cpp
+xbmc/settings/dialogs/GUIDialogSettingsManagerBase.h
+xbmc/settings/dialogs/GUIDialogSettingsManualBase.cpp
+xbmc/settings/dialogs/GUIDialogSettingsManualBase.h
+xbmc/settings/dialogs/Makefile
