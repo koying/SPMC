@@ -303,6 +303,8 @@ bool CVideoThumbLoader::LoadItemCached(CFileItem* pItem)
     }
   }
 
+  DetectAndAddMissingItemData(*pItem);
+
   // if we have no art, look for it all
   std::map<std::string, std::string> artwork = pItem->GetArt();
   if (artwork.empty())
@@ -337,8 +339,6 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
       pItem->GetVideoInfoTag()->m_type != MediaTypeEpisode    &&
       pItem->GetVideoInfoTag()->m_type != MediaTypeMusicVideo)
     return false; // Nothing to do here
-
-  DetectAndAddMissingItemData(*pItem);
 
   m_videoDatabase->Open();
 
