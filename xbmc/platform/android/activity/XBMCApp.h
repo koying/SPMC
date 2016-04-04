@@ -35,6 +35,8 @@
 #include <androidjni/View.h>
 
 #include "threads/Event.h"
+#include "interfaces/IAnnouncer.h"
+
 #include "guilib/Geometry.h"
 #include "IActivityHandler.h"
 #include "IInputHandler.h"
@@ -82,14 +84,20 @@ protected:
   int m_resultcode;
 };
 
-class CXBMCApp : public IActivityHandler, public CJNIMainActivity,
-                 public CJNIBroadcastReceiver,
-                 public CJNIAudioManagerAudioFocusChangeListener
+class CXBMCApp
+    : public IActivityHandler
+    , public CJNIMainActivity
+    , public CJNIBroadcastReceiver
+    , public CJNIAudioManagerAudioFocusChangeListener
+    , public ANNOUNCEMENT::IAnnouncer
 {
 public:
   CXBMCApp(ANativeActivity *nativeActivity);
   virtual ~CXBMCApp();
   static CXBMCApp* get() { return m_xbmcappinstance; }
+
+  // IAnnouncer IF
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
   virtual void onReceive(CJNIIntent intent);
   virtual void onNewIntent(CJNIIntent intent);
