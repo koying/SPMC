@@ -88,10 +88,12 @@
 #include "CompileInfo.h"
 #include "video/videosync/VideoSyncAndroid.h"
 #include "filesystem/VideoDatabaseFile.h"
+#include "interfaces/AnnouncementManager.h"
 
 #define GIGABYTES       1073741824
 
 using namespace KODI::MESSAGING;
+using namespace ANNOUNCEMENT;
 
 template<class T, void(T::*fn)()>
 void* thread_run(void* obj)
@@ -134,12 +136,29 @@ CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
     exit(1);
     return;
   }
+  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CXBMCApp::~CXBMCApp()
 {
+  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
   m_xbmcappinstance = NULL;
   delete m_wakeLock;
+}
+
+void CXBMCApp::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if ((flag & Input) && strcmp(sender, "xbmc") == 0)
+  {
+    if (strcmp(message, "OnInputRequested") == 0)
+    {
+      CAndroidKey::SetHandleSearchKeys(true);
+    }
+    else if (strcmp(message, "OnInputFinished") == 0)
+    {
+      CAndroidKey::SetHandleSearchKeys(true);
+    }
+  }
 }
 
 void CXBMCApp::onStart()
