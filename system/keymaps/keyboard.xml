@@ -188,6 +188,7 @@
       <backspace>Backspace</backspace>
       <browser_back>Backspace</browser_back>
       <browser_back mod="longpress">PreviousMenu</browser_back>
+      <browser_search>VoiceRecognizer</browser_search>
       <menu>VoiceRecognizer</menu>
     </keyboard>
   </VirtualKeyboard>
