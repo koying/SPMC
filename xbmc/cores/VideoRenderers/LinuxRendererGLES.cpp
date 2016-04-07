@@ -154,6 +154,8 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   m_rgbBuffer = NULL;
   m_rgbBufferSize = 0;
 
+  m_nonLinStretch = false;
+
   m_sw_context = NULL;
   m_NumYV12Buffers = 0;
   m_iLastRenderBuffer = 0;
@@ -249,6 +251,7 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
     m_buffers[i].image.flags = 0;
 
   m_iLastRenderBuffer = -1;
+  m_nonLinStretch    = false;
 
   m_RenderUpdateCallBackFn = NULL;
   m_RenderUpdateCallBackCtx = NULL;
@@ -509,7 +512,7 @@ void CLinuxRendererGLES::Flush()
 
   glFinish();
   m_bValidated = false;
-  m_fbo.Cleanup();
+  m_fbo.fbo.Cleanup();
   m_iYV12RenderBuffer = 0;
 }
 
@@ -819,7 +822,7 @@ void CLinuxRendererGLES::UpdateVideoFilter()
     delete m_pVideoFilterShader;
     m_pVideoFilterShader = NULL;
   }
-  m_fbo.Cleanup();
+  m_fbo.fbo.Cleanup();
 
   VerifyGLState();
 
@@ -835,16 +838,42 @@ void CLinuxRendererGLES::UpdateVideoFilter()
     m_renderQuality = RQ_SINGLEPASS;
     return;
 
-  case VS_SCALINGMETHOD_CUBIC:
-    CLog::Log(LOGERROR, "GLES: CUBIC not supported!");
-    break;
-
-  case VS_SCALINGMETHOD_LANCZOS2:
-  case VS_SCALINGMETHOD_LANCZOS3:
   case VS_SCALINGMETHOD_SINC8:
   case VS_SCALINGMETHOD_NEDI:
     CLog::Log(LOGERROR, "GL: TODO: This scaler has not yet been implemented");
     break;
+
+  case VS_SCALINGMETHOD_LANCZOS2:
+  case VS_SCALINGMETHOD_SPLINE36_FAST:
+  case VS_SCALINGMETHOD_LANCZOS3_FAST:
+  case VS_SCALINGMETHOD_SPLINE36:
+  case VS_SCALINGMETHOD_LANCZOS3:
+  case VS_SCALINGMETHOD_CUBIC:
+    if (m_renderMethod & RENDER_GLSL)
+    {
+      if (!m_fbo.fbo.Initialize())
+      {
+        CLog::Log(LOGERROR, "GL: Error initializing FBO");
+        break;
+      }
+
+      if (!m_fbo.fbo.CreateAndBindToTexture(GL_TEXTURE_2D, m_sourceWidth, m_sourceHeight, GL_RGBA))
+      {
+        CLog::Log(LOGERROR, "GL: Error creating texture and binding to FBO");
+        break;
+      }
+    }
+
+    m_pVideoFilterShader = new ConvolutionFilterShader(m_scalingMethod, m_nonLinStretch);
+    if (!m_pVideoFilterShader->CompileAndLink())
+    {
+      CLog::Log(LOGERROR, "GL: Error compiling and linking video filter shader");
+      break;
+    }
+
+    SetTextureFilter(GL_LINEAR);
+    m_renderQuality = RQ_MULTIPASS;
+    return;
 
   default:
     break;
@@ -857,7 +886,7 @@ void CLinuxRendererGLES::UpdateVideoFilter()
     delete m_pVideoFilterShader;
     m_pVideoFilterShader = NULL;
   }
-  m_fbo.Cleanup();
+  m_fbo.fbo.Cleanup();
 
   SetTextureFilter(GL_LINEAR);
   m_renderQuality = RQ_SINGLEPASS;
@@ -1066,7 +1095,7 @@ void CLinuxRendererGLES::UnInit()
   }
 
   // cleanup framebuffer object if it was in use
-  m_fbo.Cleanup();
+  m_fbo.fbo.Cleanup();
   m_bValidated = false;
   m_bImageReady = false;
   m_bConfigured = false;
@@ -1155,7 +1184,9 @@ void CLinuxRendererGLES::Render(DWORD flags, int index)
       break;
 
     case RQ_MULTIPASS:
-      RenderMultiPass(index, m_currentField);
+//      RenderMultiPass(index, m_currentField);
+      RenderToFBO(index, m_currentField);
+      RenderFromFBO();
       VerifyGLState();
       break;
 
@@ -1307,6 +1338,223 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
   VerifyGLState();
 }
 
+void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*/)
+{
+  YUVPLANES &planes = m_buffers[index].fields[field];
+
+  if (m_reloadShaders)
+  {
+    m_reloadShaders = 0;
+    LoadShaders(m_currentField);
+  }
+
+  if (!m_fbo.fbo.IsValid())
+  {
+    if (!m_fbo.fbo.Initialize())
+    {
+      CLog::Log(LOGERROR, "GL: Error initializing FBO");
+      return;
+    }
+
+    if (!m_fbo.fbo.CreateAndBindToTexture(GL_TEXTURE_2D, m_sourceWidth, m_sourceHeight, GL_RGBA))
+    {
+      CLog::Log(LOGERROR, "GL: Error creating texture and binding to FBO");
+      return;
+    }
+  }
+
+  glDisable(GL_DEPTH_TEST);
+
+  // Y
+  glEnable(m_textureTarget);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(m_textureTarget, planes[0].id);
+  VerifyGLState();
+
+  // U
+  glActiveTexture(GL_TEXTURE1);
+  glEnable(m_textureTarget);
+  glBindTexture(m_textureTarget, planes[1].id);
+  VerifyGLState();
+
+  // V
+  glActiveTexture(GL_TEXTURE2);
+  glEnable(m_textureTarget);
+  glBindTexture(m_textureTarget, planes[2].id);
+  VerifyGLState();
+
+  glActiveTexture(GL_TEXTURE0);
+  VerifyGLState();
+
+  // make sure the yuv shader is loaded and ready to go
+  if (!m_pYUVProgShader || (!m_pYUVProgShader->OK()))
+  {
+    CLog::Log(LOGERROR, "GL: YUV shader not active, cannot do multipass render");
+    return;
+  }
+
+  m_fbo.fbo.BeginRender();
+  VerifyGLState();
+
+  m_pYUVProgShader->SetBlack(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+  m_pYUVProgShader->SetContrast(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  m_pYUVProgShader->SetWidth(planes[0].texwidth);
+  m_pYUVProgShader->SetHeight(planes[0].texheight);
+  m_pYUVProgShader->SetNonLinStretch(1.0);
+  if     (field == FIELD_TOP)
+    m_pYUVProgShader->SetField(1);
+  else if(field == FIELD_BOT)
+    m_pYUVProgShader->SetField(0);
+
+  VerifyGLState();
+
+  glPushAttrib(GL_VIEWPORT_BIT);
+  glPushAttrib(GL_SCISSOR_BIT);
+
+  glMatrixModview.Push();
+  glMatrixModview->LoadIdentity();
+  glMatrixModview.Load();
+
+  glMatrixProject.Push();
+  glMatrixProject->LoadIdentity();
+  glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
+  glMatrixProject.Load();
+
+  glViewport(0, 0, m_sourceWidth, m_sourceHeight);
+  glScissor (0, 0, m_sourceWidth, m_sourceHeight);
+
+  if (!m_pYUVProgShader->Enable())
+  {
+    CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
+  }
+
+  m_fbo.width  = planes[0].rect.x2 - planes[0].rect.x1;
+  m_fbo.height = planes[0].rect.y2 - planes[0].rect.y1;
+  if (m_textureTarget == GL_TEXTURE_2D)
+  {
+    m_fbo.width  *= planes[0].texwidth;
+    m_fbo.height *= planes[0].texheight;
+  }
+  m_fbo.width  *= planes[0].pixpertex_x;
+  m_fbo.height *= planes[0].pixpertex_y;
+  if (weave)
+    m_fbo.height *= 2;
+
+  // 1st Pass to video frame size
+  glBegin(GL_QUADS);
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x1, planes[0].rect.y1);
+  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x1, planes[1].rect.y1);
+  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x1, planes[2].rect.y1);
+  glVertex2f(0.0f    , 0.0f);
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x2, planes[0].rect.y1);
+  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x2, planes[1].rect.y1);
+  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x2, planes[2].rect.y1);
+  glVertex2f(m_fbo.width, 0.0f);
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x2, planes[0].rect.y2);
+  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x2, planes[1].rect.y2);
+  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x2, planes[2].rect.y2);
+  glVertex2f(m_fbo.width, m_fbo.height);
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x1, planes[0].rect.y2);
+  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x1, planes[1].rect.y2);
+  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x1, planes[2].rect.y2);
+  glVertex2f(0.0f    , m_fbo.height);
+
+  glEnd();
+  VerifyGLState();
+
+  m_pYUVProgShader->Disable();
+
+  glMatrixModview.PopLoad();
+  glMatrixProject.PopLoad();
+
+  glPopAttrib(); // pop scissor
+  glPopAttrib(); // pop viewport
+  VerifyGLState();
+
+  m_fbo.fbo.EndRender();
+
+  glActiveTexture(GL_TEXTURE1);
+  glDisable(m_textureTarget);
+  glActiveTexture(GL_TEXTURE2);
+  glDisable(m_textureTarget);
+  glActiveTexture(GL_TEXTURE0);
+  glDisable(m_textureTarget);
+}
+
+void CLinuxRendererGLES::RenderFromFBO()
+{
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  VerifyGLState();
+
+  // Use regular normalized texture coordinates
+
+  // 2nd Pass to screen size with optional video filter
+
+  if (m_pVideoFilterShader)
+  {
+    GLint filter;
+    if (!m_pVideoFilterShader->GetTextureFilter(filter))
+      filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
+
+    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, filter);
+    m_pVideoFilterShader->SetSourceTexture(0);
+    m_pVideoFilterShader->SetWidth(m_sourceWidth);
+    m_pVideoFilterShader->SetHeight(m_sourceHeight);
+
+    //disable non-linear stretch when a dvd menu is shown, parts of the menu are rendered through the overlay renderer
+    //having non-linear stretch on breaks the alignment
+    if (g_application.m_pPlayer->IsInMenu())
+      m_pVideoFilterShader->SetNonLinStretch(1.0);
+    else
+      m_pVideoFilterShader->SetNonLinStretch(pow(CDisplaySettings::GetInstance().GetPixelRatio(), g_advancedSettings.m_videoNonLinStretchRatio));
+
+    m_pVideoFilterShader->Enable();
+  }
+  else
+  {
+    GLint filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
+    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, filter);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  }
+
+  VerifyGLState();
+
+  float imgwidth = m_fbo.width / m_sourceWidth;
+  float imgheight = m_fbo.height / m_sourceHeight;
+
+  glBegin(GL_QUADS);
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, 0.0f, 0.0f);
+  glVertex4f(m_rotatedDestCoords[0].x, m_rotatedDestCoords[0].y, 0, 1.0f );
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, imgwidth, 0.0f);
+  glVertex4f(m_rotatedDestCoords[1].x, m_rotatedDestCoords[1].y, 0, 1.0f );
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, imgwidth, imgheight);
+  glVertex4f(m_rotatedDestCoords[2].x, m_rotatedDestCoords[2].y, 0, 1.0f );
+
+  glMultiTexCoord2fARB(GL_TEXTURE0, 0.0f, imgheight);
+  glVertex4f(m_rotatedDestCoords[3].x, m_rotatedDestCoords[3].y, 0, 1.0f );
+
+  glEnd();
+
+  VerifyGLState();
+
+  if (m_pVideoFilterShader)
+    m_pVideoFilterShader->Disable();
+
+  VerifyGLState();
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
+  VerifyGLState();
+}
+
 void CLinuxRendererGLES::RenderMultiPass(int index, int field)
 {
   // TODO: Multipass rendering does not currently work! FIX!
@@ -1352,7 +1600,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
     return;
   }
 
-  m_fbo.BeginRender();
+  m_fbo.fbo.BeginRender();
   VerifyGLState();
 
   m_pYUVProgShader->SetBlack(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
@@ -1430,7 +1678,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
 //  glPopAttrib(); // pop viewport
   VerifyGLState();
 
-  m_fbo.EndRender();
+  m_fbo.fbo.EndRender();
 
   glActiveTexture(GL_TEXTURE1);
   glDisable(m_textureTarget);
@@ -1440,7 +1688,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
   glDisable(m_textureTarget);
 
   glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, m_fbo.Texture());
+  glBindTexture(GL_TEXTURE_2D, m_fbo.fbo.Texture());
   VerifyGLState();
 
   // Use regular normalized texture coordinates
@@ -1449,14 +1697,14 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
 
   if (m_pVideoFilterShader)
   {
-    m_fbo.SetFiltering(GL_TEXTURE_2D, GL_NEAREST);
+    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, GL_NEAREST);
     m_pVideoFilterShader->SetSourceTexture(0);
     m_pVideoFilterShader->SetWidth(m_sourceWidth);
     m_pVideoFilterShader->SetHeight(m_sourceHeight);
     m_pVideoFilterShader->Enable();
   }
   else
-    m_fbo.SetFiltering(GL_TEXTURE_2D, GL_LINEAR);
+    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, GL_LINEAR);
 
   VerifyGLState();
 
@@ -3054,6 +3302,31 @@ bool CLinuxRendererGLES::Supports(ESCALINGMETHOD method)
   if(method == VS_SCALINGMETHOD_NEAREST
   || method == VS_SCALINGMETHOD_LINEAR)
     return true;
+
+  if(method == VS_SCALINGMETHOD_CUBIC
+  || method == VS_SCALINGMETHOD_LANCZOS2
+  || method == VS_SCALINGMETHOD_SPLINE36_FAST
+  || method == VS_SCALINGMETHOD_LANCZOS3_FAST
+  || method == VS_SCALINGMETHOD_SPLINE36
+  || method == VS_SCALINGMETHOD_LANCZOS3)
+  {
+    // if scaling is below level, avoid hq scaling
+    float scaleX = fabs(((float)m_sourceWidth - m_destRect.Width())/m_sourceWidth)*100;
+    float scaleY = fabs(((float)m_sourceHeight - m_destRect.Height())/m_sourceHeight)*100;
+    int minScale = CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_HQSCALERS);
+    if (scaleX < minScale && scaleY < minScale)
+      return false;
+
+    if (m_renderMethod & RENDER_GLSL)
+    {
+      // spline36 and lanczos3 are only allowed through advancedsettings.xml
+      if(method != VS_SCALINGMETHOD_SPLINE36
+      && method != VS_SCALINGMETHOD_LANCZOS3)
+        return true;
+      else
+        return g_advancedSettings.m_videoEnableHighQualityHwScalers;
+    }
+  }
 
   return false;
 }
