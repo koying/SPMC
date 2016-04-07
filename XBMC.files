@@ -9800,3 +9800,6 @@ xbmc/settings/dialogs/GUIDialogSettingsManagerBase.h
 xbmc/settings/dialogs/GUIDialogSettingsManualBase.cpp
 xbmc/settings/dialogs/GUIDialogSettingsManualBase.h
 xbmc/settings/dialogs/Makefile
+xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp
+xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp
+xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.h
