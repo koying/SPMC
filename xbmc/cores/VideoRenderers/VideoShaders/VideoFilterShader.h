@@ -36,7 +36,9 @@ namespace Shaders {
   {
   public:
     BaseVideoFilterShader();
-    void Free() { CGLSLShaderProgram::Free(); }
+    virtual void OnCompiledAndLinked();
+    bool OnEnabled();
+    virtual void Free() { CGLSLShaderProgram::Free(); }
     virtual void  SetSourceTexture(GLint ytex) { m_sourceTexUnit = ytex; }
     virtual void  SetWidth(int w)     { m_width  = w; m_stepX = w>0?1.0f/w:0; }
     virtual void  SetHeight(int h)    { m_height = h; m_stepY = h>0?1.0f/h:0; }
@@ -46,6 +48,7 @@ namespace Shaders {
     virtual GLint GetVertexLoc() { return m_hVertex; }
     virtual GLint GetcoordLoc() { return m_hcoord; }
     virtual void SetMatrices(GLfloat *p, GLfloat *m) { m_proj = p; m_model = m; }
+    virtual void SetAlpha(GLfloat alpha)             { m_alpha = alpha; }
 #endif
 
   protected:
@@ -65,9 +68,11 @@ namespace Shaders {
     GLint m_hcoord;
     GLint m_hProj;
     GLint m_hModel;
+    GLint m_hAlpha;
 
     GLfloat *m_proj;
     GLfloat *m_model;
+    GLfloat  m_alpha;
 #endif
   };
 

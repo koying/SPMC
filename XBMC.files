@@ -9803,3 +9803,4 @@ xbmc/settings/dialogs/Makefile
 xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp
 xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp
 xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.h
+system/shaders/convolution-4x4_gles.glsl

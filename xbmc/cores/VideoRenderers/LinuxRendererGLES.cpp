@@ -1401,6 +1401,7 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   pYUVShader->SetContrast(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
   pYUVShader->SetWidth(planesf[0].texwidth);
   pYUVShader->SetHeight(planesf[0].texheight);
+  pYUVShader->SetAlpha(1.0f);
   pYUVShader->SetNonLinStretch(1.0);
   if     (field == FIELD_TOP)
     pYUVShader->SetField(1);
@@ -1521,6 +1522,7 @@ void CLinuxRendererGLES::RenderFromFBO()
     m_pVideoFilterShader->SetSourceTexture(0);
     m_pVideoFilterShader->SetWidth(m_sourceWidth);
     m_pVideoFilterShader->SetHeight(m_sourceHeight);
+    m_pVideoFilterShader->SetAlpha(1.0f);
 
     //disable non-linear stretch when a dvd menu is shown, parts of the menu are rendered through the overlay renderer
     //having non-linear stretch on breaks the alignment
