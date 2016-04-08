@@ -1409,21 +1409,6 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
   VerifyGLState();
 
-  glMatrixModview.Push();
-  glMatrixModview->LoadIdentity();
-  glMatrixModview.Load();
-
-  glMatrixProject.Push();
-  glMatrixProject->LoadIdentity();
-  glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
-  glMatrixProject.Load();
-
-  pYUVShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
-  if (!pYUVShader->Enable())
-  {
-    CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
-  }
-
   m_fbo.width  = planesf[0].rect.x2 - planesf[0].rect.x1;
   m_fbo.height = planesf[0].rect.y2 - planesf[0].rect.y1;
   if (m_textureTarget == GL_TEXTURE_2D)
@@ -1435,6 +1420,21 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   m_fbo.height *= planesf[0].pixpertex_y;
   if (weave)
     m_fbo.height *= 2;
+
+  glMatrixModview.Push();
+  glMatrixModview->LoadIdentity();
+  glMatrixModview.Load();
+
+  glMatrixProject.Push();
+  glMatrixProject->LoadIdentity();
+  glMatrixProject->Ortho2D(0, m_fbo.width, 0, m_fbo.height);
+  glMatrixProject.Load();
+
+  pYUVShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
+  if (!pYUVShader->Enable())
+  {
+    CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
+  }
 
   // 1st Pass to video frame size
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
@@ -1529,6 +1529,16 @@ void CLinuxRendererGLES::RenderFromFBO()
     else
       m_pVideoFilterShader->SetNonLinStretch(pow(CDisplaySettings::GetInstance().GetPixelRatio(), g_advancedSettings.m_videoNonLinStretchRatio));
 
+    glMatrixModview.Push();
+    glMatrixModview->LoadIdentity();
+    glMatrixModview.Load();
+
+    glMatrixProject.Push();
+    glMatrixProject->LoadIdentity();
+    glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
+    glMatrixProject.Load();
+
+    m_pVideoFilterShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
     m_pVideoFilterShader->Enable();
   }
   else
@@ -1545,23 +1555,16 @@ void CLinuxRendererGLES::RenderFromFBO()
 
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
   GLfloat m_vert[4][3];
-  GLfloat m_tex[3][4][2];
+  GLfloat m_tex[4][2];
 
-  Shaders::BaseYUV2RGBShader *pYUVShader = m_pYUVProgShader;
-  GLint vertLoc = pYUVShader->GetVertexLoc();
-  GLint Yloc    = pYUVShader->GetYcoordLoc();
-  GLint Uloc    = pYUVShader->GetUcoordLoc();
-  GLint Vloc    = pYUVShader->GetVcoordLoc();
+  GLint vertLoc = m_pVideoFilterShader->GetVertexLoc();
+  GLint loc     = m_pVideoFilterShader->GetcoordLoc();
 
   glVertexAttribPointer(vertLoc, 3, GL_FLOAT, 0, 0, m_vert);
-  glVertexAttribPointer(Yloc, 2, GL_FLOAT, 0, 0, m_tex[0]);
-  glVertexAttribPointer(Uloc, 2, GL_FLOAT, 0, 0, m_tex[1]);
-  glVertexAttribPointer(Vloc, 2, GL_FLOAT, 0, 0, m_tex[2]);
+  glVertexAttribPointer(loc, 2, GL_FLOAT, 0, 0, m_tex);
 
   glEnableVertexAttribArray(vertLoc);
-  glEnableVertexAttribArray(Yloc);
-  glEnableVertexAttribArray(Uloc);
-  glEnableVertexAttribArray(Vloc);
+  glEnableVertexAttribArray(loc);
 
   // Setup vertex position values
   for(int i = 0; i < 4; i++)
@@ -1572,13 +1575,10 @@ void CLinuxRendererGLES::RenderFromFBO()
   }
 
   // Setup texture coordinates
-  for (int i=0; i<3; i++)
-  {
-    m_tex[i][0][0] = m_tex[i][3][0] = 0.0f;
-    m_tex[i][0][1] = m_tex[i][1][1] = 0.0f;
-    m_tex[i][1][0] = m_tex[i][2][0] = imgwidth;
-    m_tex[i][2][1] = m_tex[i][3][1] = imgheight;
-  }
+  m_tex[0][0] = m_tex[3][0] = 0.0f;
+  m_tex[0][1] = m_tex[1][1] = 0.0f;
+  m_tex[1][0] = m_tex[2][0] = imgwidth;
+  m_tex[2][1] = m_tex[3][1] = imgheight;
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
 

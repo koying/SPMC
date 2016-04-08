@@ -55,6 +55,32 @@ BaseVideoFilterShader::BaseVideoFilterShader()
 
   m_stretch = 0.0f;
 
+#ifdef HAS_GLES == 2
+  std::string shaderv =
+      " attribute vec4 m_attrpos;"
+      " attribute vec2 m_attrcord;"
+      " varying vec2 cord;"
+      " uniform mat4 m_proj;"
+      " uniform mat4 m_model;"
+
+      " void main ()"
+      " {"
+      "   mat4 mvp    = m_proj * m_model;"
+      "   gl_Position = mvp * m_attrpos;"
+      "   cord        = m_attrcord;"
+      " }";
+  VertexShader()->SetSource(shaderv);
+
+  std::string shaderp =
+    "uniform sampler2D img;"
+    "varying vec2 cord;"
+    "void main()"
+    "{"
+    "gl_FragColor.rgb = texture2D(img, cord).rgb;"
+    "gl_FragColor.a = gl_Color.a;"
+    "}";
+  PixelShader()->SetSource(shaderp);
+#else
   std::string shaderv =
     "varying vec2 cord;"
     "void main()"
@@ -74,6 +100,7 @@ BaseVideoFilterShader::BaseVideoFilterShader()
     "gl_FragColor.a = gl_Color.a;"
     "}";
   PixelShader()->SetSource(shaderp);
+#endif
 }
 
 ConvolutionFilterShader::ConvolutionFilterShader(ESCALINGMETHOD method, bool stretch)
@@ -229,6 +256,10 @@ void StretchFilterShader::OnCompiledAndLinked()
 {
   m_hSourceTex = glGetUniformLocation(ProgramHandle(), "img");
   m_hStretch   = glGetUniformLocation(ProgramHandle(), "m_stretch");
+#if HAS_GLES == 2
+  m_hVertex = glGetAttribLocation(ProgramHandle(),  "m_attrpos");
+  m_hcoord = glGetAttribLocation(ProgramHandle(),  "m_attrcord");
+#endif
 }
 
 bool StretchFilterShader::OnEnabled()
@@ -247,6 +278,10 @@ void DefaultFilterShader::OnCompiledAndLinked()
 bool DefaultFilterShader::OnEnabled()
 {
   glUniform1i(m_hSourceTex, m_sourceTexUnit);
+#if HAS_GLES == 2
+  glUniformMatrix4fv(m_hProj,  1, GL_FALSE, m_proj);
+  glUniformMatrix4fv(m_hModel, 1, GL_FALSE, m_model);
+#endif
   VerifyGLState();
   return true;
 }

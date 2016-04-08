@@ -42,6 +42,11 @@ namespace Shaders {
     virtual void  SetHeight(int h)    { m_height = h; m_stepY = h>0?1.0f/h:0; }
     virtual void  SetNonLinStretch(float stretch) { m_stretch = stretch; }
     virtual bool  GetTextureFilter(GLint& filter) { return false; }
+#if HAS_GLES == 2
+    virtual GLint GetVertexLoc() { return m_hVertex; }
+    virtual GLint GetcoordLoc() { return m_hcoord; }
+    virtual void SetMatrices(GLfloat *p, GLfloat *m) { m_proj = p; m_model = m; }
+#endif
 
   protected:
     int   m_width;
@@ -55,6 +60,15 @@ namespace Shaders {
     GLint m_hSourceTex;
     GLint m_hStepXY;
     GLint m_hStretch;
+#if HAS_GLES == 2
+    GLint m_hVertex;
+    GLint m_hcoord;
+    GLint m_hProj;
+    GLint m_hModel;
+
+    GLfloat *m_proj;
+    GLfloat *m_model;
+#endif
   };
 
   class ConvolutionFilterShader : public BaseVideoFilterShader
