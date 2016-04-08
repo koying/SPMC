@@ -1340,7 +1340,7 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
 
 void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*/)
 {
-  YUVPLANES &planes = m_buffers[index].fields[field];
+  YUVPLANES &planesf = m_buffers[index].fields[field];
 
   if (m_reloadShaders)
   {
@@ -1368,26 +1368,27 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   // Y
   glEnable(m_textureTarget);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(m_textureTarget, planes[0].id);
+  glBindTexture(m_textureTarget, planesf[0].id);
   VerifyGLState();
 
   // U
   glActiveTexture(GL_TEXTURE1);
   glEnable(m_textureTarget);
-  glBindTexture(m_textureTarget, planes[1].id);
+  glBindTexture(m_textureTarget, planesf[1].id);
   VerifyGLState();
 
   // V
   glActiveTexture(GL_TEXTURE2);
   glEnable(m_textureTarget);
-  glBindTexture(m_textureTarget, planes[2].id);
+  glBindTexture(m_textureTarget, planesf[2].id);
   VerifyGLState();
 
   glActiveTexture(GL_TEXTURE0);
   VerifyGLState();
 
+  Shaders::BaseYUV2RGBShader *pYUVShader = m_pYUVProgShader;
   // make sure the yuv shader is loaded and ready to go
-  if (!m_pYUVProgShader || (!m_pYUVProgShader->OK()))
+  if (!pYUVShader || (!pYUVShader->OK()))
   {
     CLog::Log(LOGERROR, "GL: YUV shader not active, cannot do multipass render");
     return;
@@ -1396,15 +1397,15 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   m_fbo.fbo.BeginRender();
   VerifyGLState();
 
-  m_pYUVProgShader->SetBlack(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
-  m_pYUVProgShader->SetContrast(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
-  m_pYUVProgShader->SetWidth(planes[0].texwidth);
-  m_pYUVProgShader->SetHeight(planes[0].texheight);
-  m_pYUVProgShader->SetNonLinStretch(1.0);
+  pYUVShader->SetBlack(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+  pYUVShader->SetContrast(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  pYUVShader->SetWidth(planesf[0].texwidth);
+  pYUVShader->SetHeight(planesf[0].texheight);
+  pYUVShader->SetNonLinStretch(1.0);
   if     (field == FIELD_TOP)
-    m_pYUVProgShader->SetField(1);
+    pYUVShader->SetField(1);
   else if(field == FIELD_BOT)
-    m_pYUVProgShader->SetField(0);
+    pYUVShader->SetField(0);
 
   VerifyGLState();
 
@@ -1417,21 +1418,21 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
   glMatrixProject.Load();
 
-  m_pYUVProgShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
-  if (!m_pYUVProgShader->Enable())
+  pYUVShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
+  if (!pYUVShader->Enable())
   {
     CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
   }
 
-  m_fbo.width  = planes[0].rect.x2 - planes[0].rect.x1;
-  m_fbo.height = planes[0].rect.y2 - planes[0].rect.y1;
+  m_fbo.width  = planesf[0].rect.x2 - planesf[0].rect.x1;
+  m_fbo.height = planesf[0].rect.y2 - planesf[0].rect.y1;
   if (m_textureTarget == GL_TEXTURE_2D)
   {
-    m_fbo.width  *= planes[0].texwidth;
-    m_fbo.height *= planes[0].texheight;
+    m_fbo.width  *= planesf[0].texwidth;
+    m_fbo.height *= planesf[0].texheight;
   }
-  m_fbo.width  *= planes[0].pixpertex_x;
-  m_fbo.height *= planes[0].pixpertex_y;
+  m_fbo.width  *= planesf[0].pixpertex_x;
+  m_fbo.height *= planesf[0].pixpertex_y;
   if (weave)
     m_fbo.height *= 2;
 
@@ -1532,9 +1533,9 @@ void CLinuxRendererGLES::RenderFromFBO()
   }
   else
   {
-    GLint filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
-    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, filter);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+//    GLint filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
+//    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, filter);
+//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   }
 
   VerifyGLState();
@@ -1546,6 +1547,7 @@ void CLinuxRendererGLES::RenderFromFBO()
   GLfloat m_vert[4][3];
   GLfloat m_tex[3][4][2];
 
+  Shaders::BaseYUV2RGBShader *pYUVShader = m_pYUVProgShader;
   GLint vertLoc = pYUVShader->GetVertexLoc();
   GLint Yloc    = pYUVShader->GetYcoordLoc();
   GLint Uloc    = pYUVShader->GetUcoordLoc();
