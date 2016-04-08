@@ -1408,9 +1408,6 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
   VerifyGLState();
 
-  glPushAttrib(GL_VIEWPORT_BIT);
-  glPushAttrib(GL_SCISSOR_BIT);
-
   glMatrixModview.Push();
   glMatrixModview->LoadIdentity();
   glMatrixModview.Load();
@@ -1420,9 +1417,7 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
   glMatrixProject.Load();
 
-  glViewport(0, 0, m_sourceWidth, m_sourceHeight);
-  glScissor (0, 0, m_sourceWidth, m_sourceHeight);
-
+  m_pYUVProgShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
   if (!m_pYUVProgShader->Enable())
   {
     CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
@@ -1441,48 +1436,68 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
     m_fbo.height *= 2;
 
   // 1st Pass to video frame size
-  glBegin(GL_QUADS);
+  GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
+  GLfloat m_vert[4][3];
+  GLfloat m_tex[3][4][2];
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x1, planes[0].rect.y1);
-  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x1, planes[1].rect.y1);
-  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x1, planes[2].rect.y1);
-  glVertex2f(0.0f    , 0.0f);
+  GLint vertLoc = pYUVShader->GetVertexLoc();
+  GLint Yloc    = pYUVShader->GetYcoordLoc();
+  GLint Uloc    = pYUVShader->GetUcoordLoc();
+  GLint Vloc    = pYUVShader->GetVcoordLoc();
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x2, planes[0].rect.y1);
-  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x2, planes[1].rect.y1);
-  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x2, planes[2].rect.y1);
-  glVertex2f(m_fbo.width, 0.0f);
+  glVertexAttribPointer(vertLoc, 3, GL_FLOAT, 0, 0, m_vert);
+  glVertexAttribPointer(Yloc, 2, GL_FLOAT, 0, 0, m_tex[0]);
+  glVertexAttribPointer(Uloc, 2, GL_FLOAT, 0, 0, m_tex[1]);
+  glVertexAttribPointer(Vloc, 2, GL_FLOAT, 0, 0, m_tex[2]);
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x2, planes[0].rect.y2);
-  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x2, planes[1].rect.y2);
-  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x2, planes[2].rect.y2);
-  glVertex2f(m_fbo.width, m_fbo.height);
+  glEnableVertexAttribArray(vertLoc);
+  glEnableVertexAttribArray(Yloc);
+  glEnableVertexAttribArray(Uloc);
+  glEnableVertexAttribArray(Vloc);
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, planes[0].rect.x1, planes[0].rect.y2);
-  glMultiTexCoord2fARB(GL_TEXTURE1, planes[1].rect.x1, planes[1].rect.y2);
-  glMultiTexCoord2fARB(GL_TEXTURE2, planes[2].rect.x1, planes[2].rect.y2);
-  glVertex2f(0.0f    , m_fbo.height);
+  // Setup vertex position values
+  for(int i = 0; i < 4; i++)
+  {
+    m_vert[i][0] = 0.0f;
+    m_vert[i][1] = 0.0f;
+    m_vert[i][2] = 0.0f;// set z to 0
+  }
+  m_vert[1][0] = m_vert[2][0] = m_fbo.width;
+  m_vert[2][1] = m_vert[3][1] = m_fbo.height;
 
-  glEnd();
+  // Setup texture coordinates
+  for (int i=0; i<3; i++)
+  {
+    m_tex[i][0][0] = m_tex[i][3][0] = planesf[i].rect.x1;
+    m_tex[i][0][1] = m_tex[i][1][1] = planesf[i].rect.y1;
+    m_tex[i][1][0] = m_tex[i][2][0] = planesf[i].rect.x2;
+    m_tex[i][2][1] = m_tex[i][3][1] = planesf[i].rect.y2;
+  }
+
+  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
+
   VerifyGLState();
 
   m_pYUVProgShader->Disable();
-
-  glMatrixModview.PopLoad();
-  glMatrixProject.PopLoad();
-
-  glPopAttrib(); // pop scissor
-  glPopAttrib(); // pop viewport
   VerifyGLState();
+
+  glDisableVertexAttribArray(vertLoc);
+  glDisableVertexAttribArray(Yloc);
+  glDisableVertexAttribArray(Uloc);
+  glDisableVertexAttribArray(Vloc);
 
   m_fbo.fbo.EndRender();
 
   glActiveTexture(GL_TEXTURE1);
   glDisable(m_textureTarget);
+
   glActiveTexture(GL_TEXTURE2);
   glDisable(m_textureTarget);
+
   glActiveTexture(GL_TEXTURE0);
   glDisable(m_textureTarget);
+
+  VerifyGLState();
 }
 
 void CLinuxRendererGLES::RenderFromFBO()
@@ -1527,21 +1542,43 @@ void CLinuxRendererGLES::RenderFromFBO()
   float imgwidth = m_fbo.width / m_sourceWidth;
   float imgheight = m_fbo.height / m_sourceHeight;
 
-  glBegin(GL_QUADS);
+  GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
+  GLfloat m_vert[4][3];
+  GLfloat m_tex[3][4][2];
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, 0.0f, 0.0f);
-  glVertex4f(m_rotatedDestCoords[0].x, m_rotatedDestCoords[0].y, 0, 1.0f );
+  GLint vertLoc = pYUVShader->GetVertexLoc();
+  GLint Yloc    = pYUVShader->GetYcoordLoc();
+  GLint Uloc    = pYUVShader->GetUcoordLoc();
+  GLint Vloc    = pYUVShader->GetVcoordLoc();
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, imgwidth, 0.0f);
-  glVertex4f(m_rotatedDestCoords[1].x, m_rotatedDestCoords[1].y, 0, 1.0f );
+  glVertexAttribPointer(vertLoc, 3, GL_FLOAT, 0, 0, m_vert);
+  glVertexAttribPointer(Yloc, 2, GL_FLOAT, 0, 0, m_tex[0]);
+  glVertexAttribPointer(Uloc, 2, GL_FLOAT, 0, 0, m_tex[1]);
+  glVertexAttribPointer(Vloc, 2, GL_FLOAT, 0, 0, m_tex[2]);
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, imgwidth, imgheight);
-  glVertex4f(m_rotatedDestCoords[2].x, m_rotatedDestCoords[2].y, 0, 1.0f );
+  glEnableVertexAttribArray(vertLoc);
+  glEnableVertexAttribArray(Yloc);
+  glEnableVertexAttribArray(Uloc);
+  glEnableVertexAttribArray(Vloc);
 
-  glMultiTexCoord2fARB(GL_TEXTURE0, 0.0f, imgheight);
-  glVertex4f(m_rotatedDestCoords[3].x, m_rotatedDestCoords[3].y, 0, 1.0f );
+  // Setup vertex position values
+  for(int i = 0; i < 4; i++)
+  {
+    m_vert[i][0] = m_rotatedDestCoords[i].x;
+    m_vert[i][1] = m_rotatedDestCoords[i].y;
+    m_vert[i][2] = 0.0f;// set z to 0
+  }
 
-  glEnd();
+  // Setup texture coordinates
+  for (int i=0; i<3; i++)
+  {
+    m_tex[i][0][0] = m_tex[i][3][0] = 0.0f;
+    m_tex[i][0][1] = m_tex[i][1][1] = 0.0f;
+    m_tex[i][1][0] = m_tex[i][2][0] = imgwidth;
+    m_tex[i][2][1] = m_tex[i][3][1] = imgheight;
+  }
+
+  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
 
   VerifyGLState();
 
