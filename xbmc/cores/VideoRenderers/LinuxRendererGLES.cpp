@@ -1464,7 +1464,6 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
     vert[i][0] = m_rotatedDestCoords[i].x;
     vert[i][1] = m_rotatedDestCoords[i].y;
     vert[i][2] = 0.0f;// set z to 0
-    vert[i][3] = 1.0f;
   }
 
   // Setup texture coordinates
@@ -1507,6 +1506,7 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
 void CLinuxRendererGLES::RenderFromFBO()
 {
+  /*
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, m_fbo.fbo.Texture());
   VerifyGLState();
@@ -1583,6 +1583,69 @@ void CLinuxRendererGLES::RenderFromFBO()
 
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
+  VerifyGLState();
+  */
+
+  glDisable(GL_DEPTH_TEST);
+
+  // Y
+  glEnable(m_textureTarget);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, m_fbo.fbo.Texture());
+
+  g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA);
+
+  GLint   contrastLoc = g_Windowing.GUIShaderGetContrast();
+  glUniform1f(contrastLoc, CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  GLint   brightnessLoc = g_Windowing.GUIShaderGetBrightness();
+  glUniform1f(brightnessLoc, CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+
+  GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
+  GLfloat ver[4][4];
+  GLfloat tex[4][2];
+  GLfloat col[3] = {1.0f, 1.0f, 1.0f};
+
+  GLint   posLoc = g_Windowing.GUIShaderGetPos();
+  GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
+  GLint   colLoc = g_Windowing.GUIShaderGetCol();
+
+  glVertexAttribPointer(posLoc, 4, GL_FLOAT, 0, 0, ver);
+  glVertexAttribPointer(texLoc, 2, GL_FLOAT, 0, 0, tex);
+  glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, 0, col);
+
+  glEnableVertexAttribArray(posLoc);
+  glEnableVertexAttribArray(texLoc);
+  glEnableVertexAttribArray(colLoc);
+
+  // Set vertex coordinates
+  for(int i = 0; i < 4; i++)
+  {
+    ver[i][0] = m_rotatedDestCoords[i].x;
+    ver[i][1] = m_rotatedDestCoords[i].y;
+    ver[i][2] = 0.0f;// set z to 0
+    ver[i][3] = 1.0f;
+  }
+
+  float imgwidth = m_fbo.width / m_sourceWidth;
+  float imgheight = m_fbo.height / m_sourceHeight;
+
+  // Setup texture coordinates
+  tex[0][0] = tex[3][0] = 0.0f;
+  tex[0][1] = tex[1][1] = 0.0f;
+  tex[1][0] = tex[2][0] = imgwidth;
+  tex[2][1] = tex[3][1] = imgheight;
+
+  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
+
+  glDisableVertexAttribArray(posLoc);
+  glDisableVertexAttribArray(texLoc);
+  glDisableVertexAttribArray(colLoc);
+
+  g_Windowing.DisableGUIShader();
+
+  VerifyGLState();
+
+  glDisable(m_textureTarget);
   VerifyGLState();
 }
 
