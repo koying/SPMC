@@ -1428,7 +1428,7 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
   glMatrixProject.Push();
   glMatrixProject->LoadIdentity();
-  glMatrixProject->Ortho2D(0, m_fbo.width, 0, m_fbo.height);
+  glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
   glMatrixProject.Load();
 
   pYUVShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
@@ -1439,18 +1439,18 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
   // 1st Pass to video frame size
   GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
-  GLfloat m_vert[4][3];
-  GLfloat m_tex[3][4][2];
+  GLfloat vert[4][3];
+  GLfloat tex[3][4][2];
 
   GLint vertLoc = pYUVShader->GetVertexLoc();
   GLint Yloc    = pYUVShader->GetYcoordLoc();
   GLint Uloc    = pYUVShader->GetUcoordLoc();
   GLint Vloc    = pYUVShader->GetVcoordLoc();
 
-  glVertexAttribPointer(vertLoc, 3, GL_FLOAT, 0, 0, m_vert);
-  glVertexAttribPointer(Yloc, 2, GL_FLOAT, 0, 0, m_tex[0]);
-  glVertexAttribPointer(Uloc, 2, GL_FLOAT, 0, 0, m_tex[1]);
-  glVertexAttribPointer(Vloc, 2, GL_FLOAT, 0, 0, m_tex[2]);
+  glVertexAttribPointer(vertLoc, 3, GL_FLOAT, 0, 0, vert);
+  glVertexAttribPointer(Yloc, 2, GL_FLOAT, 0, 0, tex[0]);
+  glVertexAttribPointer(Uloc, 2, GL_FLOAT, 0, 0, tex[1]);
+  glVertexAttribPointer(Vloc, 2, GL_FLOAT, 0, 0, tex[2]);
 
   glEnableVertexAttribArray(vertLoc);
   glEnableVertexAttribArray(Yloc);
@@ -1458,22 +1458,22 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   glEnableVertexAttribArray(Vloc);
 
   // Setup vertex position values
+  // Set vertex coordinates
   for(int i = 0; i < 4; i++)
   {
-    m_vert[i][0] = 0.0f;
-    m_vert[i][1] = 0.0f;
-    m_vert[i][2] = 0.0f;// set z to 0
+    vert[i][0] = m_rotatedDestCoords[i].x;
+    vert[i][1] = m_rotatedDestCoords[i].y;
+    vert[i][2] = 0.0f;// set z to 0
+    vert[i][3] = 1.0f;
   }
-  m_vert[1][0] = m_vert[2][0] = m_fbo.width;
-  m_vert[2][1] = m_vert[3][1] = m_fbo.height;
 
   // Setup texture coordinates
   for (int i=0; i<3; i++)
   {
-    m_tex[i][0][0] = m_tex[i][3][0] = planesf[i].rect.x1;
-    m_tex[i][0][1] = m_tex[i][1][1] = planesf[i].rect.y1;
-    m_tex[i][1][0] = m_tex[i][2][0] = planesf[i].rect.x2;
-    m_tex[i][2][1] = m_tex[i][3][1] = planesf[i].rect.y2;
+    tex[i][0][0] = tex[i][3][0] = planesf[i].rect.x1;
+    tex[i][0][1] = tex[i][1][1] = planesf[i].rect.y1;
+    tex[i][1][0] = tex[i][2][0] = planesf[i].rect.x2;
+    tex[i][2][1] = tex[i][3][1] = planesf[i].rect.y2;
   }
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
@@ -1481,6 +1481,9 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   VerifyGLState();
 
   m_pYUVProgShader->Disable();
+
+  glMatrixModview.PopLoad();
+  glMatrixProject.PopLoad();
   VerifyGLState();
 
   glDisableVertexAttribArray(vertLoc);
@@ -1505,7 +1508,7 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 void CLinuxRendererGLES::RenderFromFBO()
 {
   glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, m_fbo.fbo.Texture());
   VerifyGLState();
 
   // Use regular normalized texture coordinates
@@ -1531,24 +1534,11 @@ void CLinuxRendererGLES::RenderFromFBO()
     else
       m_pVideoFilterShader->SetNonLinStretch(pow(CDisplaySettings::GetInstance().GetPixelRatio(), g_advancedSettings.m_videoNonLinStretchRatio));
 
-    glMatrixModview.Push();
-    glMatrixModview->LoadIdentity();
-    glMatrixModview.Load();
-
-    glMatrixProject.Push();
-    glMatrixProject->LoadIdentity();
-    glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
-    glMatrixProject.Load();
-
     m_pVideoFilterShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
     m_pVideoFilterShader->Enable();
   }
   else
-  {
-//    GLint filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
-//    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, filter);
-//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  }
+    m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, GL_LINEAR);
 
   VerifyGLState();
 
