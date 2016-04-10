@@ -231,7 +231,6 @@ protected:
   // renderers
   void RenderToFBO(int index, int field, bool weave = false);
   void RenderFromFBO();
-  void RenderMultiPass(int index, int field);     // multi pass glsl renderer
   void RenderSinglePass(int index, int field);    // single pass glsl renderer
   void RenderSoftware(int index, int field);      // single pass s/w yuv2rgb renderer
   void RenderOpenMax(int index, int field);       // OpenMAX rgb texture
