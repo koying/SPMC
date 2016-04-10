@@ -165,6 +165,9 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   m_StrictBinding = false;
   m_clearColour = 0.0f;
 
+  m_fbo.width = 0.0;
+  m_fbo.height = 0.0;
+
 #ifdef HAS_LIBSTAGEFRIGHT
   if (!eglCreateImageKHR)
     eglCreateImageKHR = (PFNEGLCREATEIMAGEKHRPROC) CEGLWrapper::GetProcAddress("eglCreateImageKHR");
@@ -1397,19 +1400,6 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   m_fbo.fbo.BeginRender();
   VerifyGLState();
 
-  pYUVShader->SetBlack(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
-  pYUVShader->SetContrast(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
-  pYUVShader->SetWidth(planesf[0].texwidth);
-  pYUVShader->SetHeight(planesf[0].texheight);
-  pYUVShader->SetAlpha(1.0f);
-  pYUVShader->SetNonLinStretch(1.0);
-  if     (field == FIELD_TOP)
-    pYUVShader->SetField(1);
-  else if(field == FIELD_BOT)
-    pYUVShader->SetField(0);
-
-  VerifyGLState();
-
   m_fbo.width  = planesf[0].rect.x2 - planesf[0].rect.x1;
   m_fbo.height = planesf[0].rect.y2 - planesf[0].rect.y1;
   if (m_textureTarget == GL_TEXTURE_2D)
@@ -1422,6 +1412,18 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   if (weave)
     m_fbo.height *= 2;
 
+  pYUVShader->SetBlack(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+  pYUVShader->SetContrast(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  pYUVShader->SetWidth(m_sourceWidth);
+  pYUVShader->SetHeight(m_sourceHeight);
+  pYUVShader->SetNonLinStretch(1.0);
+  if     (field == FIELD_TOP)
+    pYUVShader->SetField(1);
+  else if(field == FIELD_BOT)
+    pYUVShader->SetField(0);
+
+  VerifyGLState();
+
   glMatrixModview.Push();
   glMatrixModview->LoadIdentity();
   glMatrixModview.Load();
@@ -1432,6 +1434,12 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   glMatrixProject.Load();
 
   pYUVShader->SetMatrices(glMatrixProject.Get(), glMatrixModview.Get());
+
+  CRect viewport;
+  g_Windowing.GetViewPort(viewport);
+  glViewport(0, 0, m_sourceWidth, m_sourceHeight);
+  glScissor (0, 0, m_sourceWidth, m_sourceHeight);
+
   if (!pYUVShader->Enable())
   {
     CLog::Log(LOGERROR, "GL: Error enabling YUV shader");
@@ -1459,12 +1467,12 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
   // Setup vertex position values
   // Set vertex coordinates
-  for(int i = 0; i < 4; i++)
-  {
-    vert[i][0] = m_rotatedDestCoords[i].x;
-    vert[i][1] = m_rotatedDestCoords[i].y;
-    vert[i][2] = 0.0f;// set z to 0
-  }
+  vert[0][0] = vert[3][0] = 0.0f;
+  vert[0][1] = vert[1][1] = 0.0f;
+  vert[1][0] = vert[2][0] = m_fbo.width;
+  vert[2][1] = vert[3][1] = m_fbo.height;
+  vert[0][2] = vert[1][2] = vert[2][2] = vert[3][2] = 0.0f;
+
 
   // Setup texture coordinates
   for (int i=0; i<3; i++)
@@ -1489,6 +1497,8 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   glDisableVertexAttribArray(Yloc);
   glDisableVertexAttribArray(Uloc);
   glDisableVertexAttribArray(Vloc);
+
+  g_Windowing.SetViewPort(viewport);
 
   m_fbo.fbo.EndRender();
 
