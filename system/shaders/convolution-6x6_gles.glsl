@@ -31,19 +31,19 @@ uniform float     m_alpha;
   uniform sampler2D kernelTex;
 #endif
 
-vec4 weight(float pos)
+vec3 weight(float pos)
 {
 #if (HAS_FLOAT_TEXTURE)
   #if (USE1DTEXTURE)
-    return texture1D(kernelTex, pos);
+    return texture1D(kernelTex, pos).rgb;
   #else
-    return texture2D(kernelTex, vec2(pos, 0.5));
+    return texture2D(kernelTex, vec2(pos, 0.5)).rgb;
   #endif
 #else
   #if (USE1DTEXTURE)
-    return texture1D(kernelTex, pos) * 2.0 - 1.0;
+    return texture1D(kernelTex, pos).rgb * 2.0 - 1.0;
   #else
-    return texture2D(kernelTex, vec2(pos, 0.5)) * 2.0 - 1.0;
+    return texture2D(kernelTex, vec2(pos, 0.5)).rgb * 2.0 - 1.0;
   #endif
 #endif
 }
@@ -66,13 +66,15 @@ vec3 pixel(float xpos, float ypos)
   return texture2D(img, vec2(xpos, ypos)).rgb;
 }
 
-vec3 line (float ypos, vec4 xpos, vec4 linetaps)
+vec3 line (float ypos, vec3 xpos1, vec3 xpos2, vec3 linetaps1, vec3 linetaps2)
 {
   return
-    pixel(xpos.r, ypos) * linetaps.r +
-    pixel(xpos.g, ypos) * linetaps.g +
-    pixel(xpos.b, ypos) * linetaps.b +
-    pixel(xpos.a, ypos) * linetaps.a;
+    pixel(xpos1.r, ypos) * linetaps1.r +
+    pixel(xpos1.g, ypos) * linetaps2.r +
+    pixel(xpos1.b, ypos) * linetaps1.g +
+    pixel(xpos2.r, ypos) * linetaps2.g +
+    pixel(xpos2.g, ypos) * linetaps1.b +
+    pixel(xpos2.b, ypos) * linetaps2.b; 
 }
 
 void main()
@@ -80,21 +82,30 @@ void main()
   vec2 pos = stretch(cord) + stepxy * 0.5;
   vec2 f = fract(pos / stepxy);
 
-  vec4 linetaps   = weight(1.0 - f.x);
-  vec4 columntaps = weight(1.0 - f.y);
+  vec3 linetaps1   = weight((1.0 - f.x) / 2.0);
+  vec3 linetaps2   = weight((1.0 - f.x) / 2.0 + 0.5);
+  vec3 columntaps1 = weight((1.0 - f.y) / 2.0);
+  vec3 columntaps2 = weight((1.0 - f.y) / 2.0 + 0.5);
 
   //make sure all taps added together is exactly 1.0, otherwise some (very small) distortion can occur
-  linetaps /= linetaps.r + linetaps.g + linetaps.b + linetaps.a;
-  columntaps /= columntaps.r + columntaps.g + columntaps.b + columntaps.a;
+  float sum = linetaps1.r + linetaps1.g + linetaps1.b + linetaps2.r + linetaps2.g + linetaps2.b;
+  linetaps1 /= sum;
+  linetaps2 /= sum;
+  sum = columntaps1.r + columntaps1.g + columntaps1.b + columntaps2.r + columntaps2.g + columntaps2.b;
+  columntaps1 /= sum;
+  columntaps2 /= sum;
 
-  vec2 xystart = (-1.5 - f) * stepxy + pos;
-  vec4 xpos = vec4(xystart.x, xystart.x + stepxy.x, xystart.x + stepxy.x * 2.0, xystart.x + stepxy.x * 3.0);
+  vec2 xystart = (-2.5 - f) * stepxy + pos;
+  vec3 xpos1 = vec3(xystart.x, xystart.x + stepxy.x, xystart.x + stepxy.x * 2.0);
+  vec3 xpos2 = vec3(xystart.x + stepxy.x * 3.0, xystart.x + stepxy.x * 4.0, xystart.x + stepxy.x * 5.0);
 
   gl_FragColor.rgb =
-    line(xystart.y                 , xpos, linetaps) * columntaps.r +
-    line(xystart.y + stepxy.y      , xpos, linetaps) * columntaps.g +
-    line(xystart.y + stepxy.y * 2.0, xpos, linetaps) * columntaps.b +
-    line(xystart.y + stepxy.y * 3.0, xpos, linetaps) * columntaps.a;
+   line(xystart.y                 , xpos1, xpos2, linetaps1, linetaps2) * columntaps1.r +
+   line(xystart.y + stepxy.y      , xpos1, xpos2, linetaps1, linetaps2) * columntaps2.r +
+   line(xystart.y + stepxy.y * 2.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps1.g +
+   line(xystart.y + stepxy.y * 3.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps2.g +
+   line(xystart.y + stepxy.y * 4.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps1.b +
+   line(xystart.y + stepxy.y * 5.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps2.b;
 
   gl_FragColor.a = m_alpha;
 }

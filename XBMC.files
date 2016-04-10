@@ -9804,3 +9804,4 @@ xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp
 xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp
 xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAEResampleFFMPEG.h
 system/shaders/convolution-4x4_gles.glsl
+system/shaders/convolution-6x6_gles.glsl
