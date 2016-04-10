@@ -159,6 +159,7 @@ void CGUIWindowPVRSearch::OnPrepareFileItems(CFileItemList &items)
 
     bAddSpecialSearchItem = true;
 
+    items.Clear();
     CGUIDialogProgress* dlgProgress = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
     if (dlgProgress)
     {
