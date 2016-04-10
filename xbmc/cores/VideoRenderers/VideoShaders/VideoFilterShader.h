@@ -37,7 +37,7 @@ namespace Shaders {
   public:
     BaseVideoFilterShader();
     virtual void OnCompiledAndLinked();
-    bool OnEnabled();
+    virtual bool OnEnabled();
     virtual void Free() { CGLSLShaderProgram::Free(); }
     virtual void  SetSourceTexture(GLint ytex) { m_sourceTexUnit = ytex; }
     virtual void  SetWidth(int w)     { m_width  = w; m_stepX = w>0?1.0f/w:0; }

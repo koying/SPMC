@@ -1516,8 +1516,8 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
 
 void CLinuxRendererGLES::RenderFromFBO()
 {
-  /*
   glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, m_fbo.fbo.Texture());
   VerifyGLState();
 
@@ -1530,8 +1530,8 @@ void CLinuxRendererGLES::RenderFromFBO()
     GLint filter;
     if (!m_pVideoFilterShader->GetTextureFilter(filter))
       filter = m_scalingMethod == VS_SCALINGMETHOD_NEAREST ? GL_NEAREST : GL_LINEAR;
-
     m_fbo.fbo.SetFiltering(GL_TEXTURE_2D, filter);
+
     m_pVideoFilterShader->SetSourceTexture(0);
     m_pVideoFilterShader->SetWidth(m_sourceWidth);
     m_pVideoFilterShader->SetHeight(m_sourceHeight);
@@ -1594,8 +1594,8 @@ void CLinuxRendererGLES::RenderFromFBO()
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
   VerifyGLState();
-  */
 
+  /*
   glDisable(GL_DEPTH_TEST);
 
   // Y
@@ -1657,6 +1657,7 @@ void CLinuxRendererGLES::RenderFromFBO()
 
   glDisable(m_textureTarget);
   VerifyGLState();
+  */
 }
 
 void CLinuxRendererGLES::RenderMultiPass(int index, int field)

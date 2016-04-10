@@ -73,17 +73,17 @@ BaseVideoFilterShader::BaseVideoFilterShader()
       " {"
       "   mat4 mvp    = m_proj * m_model;"
       "   gl_Position = mvp * m_attrpos;"
-      "   cord        = m_attrcord;"
+      "   cord        = m_attrcord.xy;"
       " }";
   VertexShader()->SetSource(shaderv);
 
   std::string shaderp =
+    "precision mediump float;"
     "uniform sampler2D img;"
     "varying vec2 cord;"
     "void main()"
     "{"
-    "gl_FragColor.rgb = texture2D(img, cord).rgb;"
-    "gl_FragColor.a = gl_Color.a;"
+    "  gl_FragColor = texture2D(img, cord);"
     "}";
   PixelShader()->SetSource(shaderp);
 #else
@@ -115,6 +115,8 @@ void BaseVideoFilterShader::OnCompiledAndLinked()
   m_hVertex = glGetAttribLocation(ProgramHandle(),  "m_attrpos");
   m_hcoord = glGetAttribLocation(ProgramHandle(),  "m_attrcord");
   m_hAlpha  = glGetUniformLocation(ProgramHandle(), "m_alpha");
+  m_hProj  = glGetUniformLocation(ProgramHandle(), "m_proj");
+  m_hModel = glGetUniformLocation(ProgramHandle(), "m_model");
 #endif
 }
 
