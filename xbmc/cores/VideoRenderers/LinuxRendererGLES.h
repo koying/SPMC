@@ -230,6 +230,7 @@ protected:
 
   // renderers
   void RenderToFBO(int index, int field, bool weave = false);
+  void RenderToFBO_OES(int index, int field, bool weave = false);
   void RenderFromFBO();
   void RenderMultiPass(int index, int field);     // multi pass glsl renderer
   void RenderSinglePass(int index, int field);    // single pass glsl renderer

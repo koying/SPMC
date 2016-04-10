@@ -925,6 +925,7 @@ void CLinuxRendererGLES::LoadShaders(int field)
       {
         CLog::Log(LOGNOTICE, "GL: Using MediaCodec render method");
         m_renderMethod = RENDER_MEDIACODEC;
+        UpdateVideoFilter();
         break;
       }
       else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
@@ -1214,7 +1215,20 @@ void CLinuxRendererGLES::Render(DWORD flags, int index)
   }
   else if (m_renderMethod & RENDER_MEDIACODEC)
   {
-    RenderSurfaceTexture(index, m_currentField);
+    UpdateVideoFilter();
+    switch(m_renderQuality)
+    {
+    case RQ_LOW:
+    case RQ_SINGLEPASS:
+      RenderSurfaceTexture(index, m_currentField);
+      VerifyGLState();
+      break;
+
+    case RQ_MULTIPASS:
+      RenderMultiPass(index, m_currentField);
+      VerifyGLState();
+      break;
+    }
   }
   else if (m_renderMethod & RENDER_IMXMAP)
   {
@@ -1497,6 +1511,150 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
   VerifyGLState();
 }
 
+void CLinuxRendererGLES::RenderToFBO_OES(int index, int field, bool weave /*= false*/)
+{
+#if defined(TARGET_ANDROID)
+  #ifdef DEBUG_VERBOSE
+    unsigned int time = XbmcThreads::SystemClockMillis();
+  #endif
+
+  YUVPLANE &plane = m_buffers[index].fields[0][0];
+  YUVPLANE &planef = m_buffers[index].fields[field][0];
+
+  glDisable(GL_DEPTH_TEST);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_EXTERNAL_OES, plane.id);
+
+  m_fbo.fbo.BeginRender();
+  VerifyGLState();
+
+  m_fbo.width  = plane.rect.x2 - plane.rect.x1;
+  m_fbo.height = plane.rect.y2 - plane.rect.y1;
+  if (m_textureTarget == GL_TEXTURE_2D)
+  {
+    m_fbo.width  *= plane.texwidth;
+    m_fbo.height *= plane.texheight;
+  }
+  m_fbo.width  *= plane.pixpertex_x;
+  m_fbo.height *= plane.pixpertex_y;
+  if (weave)
+    m_fbo.height *= 2;
+
+  glMatrixModview.Push();
+  glMatrixModview->LoadIdentity();
+  glMatrixModview.Load();
+
+  glMatrixProject.Push();
+  glMatrixProject->LoadIdentity();
+  glMatrixProject->Ortho2D(0, m_sourceWidth, 0, m_sourceHeight);
+  glMatrixProject.Load();
+
+  CRect viewport;
+  g_Windowing.GetViewPort(viewport);
+  glViewport(0, 0, m_sourceWidth, m_sourceHeight);
+  glScissor (0, 0, m_sourceWidth, m_sourceHeight);
+
+  if (field != FIELD_FULL)
+  {
+    g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA_BOB_OES);
+    GLint   fieldLoc = g_Windowing.GUIShaderGetField();
+    GLint   stepLoc = g_Windowing.GUIShaderGetStep();
+
+    // Y is inverted, so invert fields
+    if     (field == FIELD_TOP)
+      glUniform1i(fieldLoc, 0);
+    else if(field == FIELD_BOT)
+      glUniform1i(fieldLoc, 1);
+    glUniform1f(stepLoc, 1.0f / (float)plane.texheight);
+  }
+  else
+    g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA_OES);
+
+  GLint   contrastLoc = g_Windowing.GUIShaderGetContrast();
+  glUniform1f(contrastLoc, CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
+  GLint   brightnessLoc = g_Windowing.GUIShaderGetBrightness();
+  glUniform1f(brightnessLoc, CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
+
+  glUniformMatrix4fv(g_Windowing.GUIShaderGetCoord0Matrix(), 1, GL_FALSE, m_textureMatrix);
+
+  GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
+  GLfloat vert[4][4];
+  GLfloat tex[4][4];
+
+  GLint   posLoc = g_Windowing.GUIShaderGetPos();
+  GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
+
+
+  glVertexAttribPointer(posLoc, 4, GL_FLOAT, 0, 0, vert);
+  glVertexAttribPointer(texLoc, 4, GL_FLOAT, 0, 0, tex);
+
+  glEnableVertexAttribArray(posLoc);
+  glEnableVertexAttribArray(texLoc);
+
+  // Set vertex coordinates
+  vert[0][0] = vert[3][0] = 0.0f;
+  vert[0][1] = vert[1][1] = 0.0f;
+  vert[1][0] = vert[2][0] = m_fbo.width;
+  vert[2][1] = vert[3][1] = m_fbo.height;
+  vert[0][2] = vert[1][2] = vert[2][2] = vert[3][2] = 0.0f;
+  vert[0][3] = vert[1][3] = vert[2][3] = vert[3][3] = 1.0f;
+
+  // Set texture coordinates (MediaCodec is flipped in y)
+  if (field == FIELD_FULL)
+  {
+    tex[0][0] = tex[3][0] = plane.rect.x1;
+    tex[0][1] = tex[1][1] = plane.rect.y2;
+    tex[1][0] = tex[2][0] = plane.rect.x2;
+    tex[2][1] = tex[3][1] = plane.rect.y1;
+  }
+  else
+  {
+    tex[0][0] = tex[3][0] = planef.rect.x1;
+    tex[0][1] = tex[1][1] = planef.rect.y2 * 2.0f;
+    tex[1][0] = tex[2][0] = planef.rect.x2;
+    tex[2][1] = tex[3][1] = planef.rect.y1 * 2.0f;
+  }
+
+  for(int i = 0; i < 4; i++)
+  {
+    tex[i][2] = 0.0f;
+    tex[i][3] = 1.0f;
+  }
+
+  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
+
+  glDisableVertexAttribArray(posLoc);
+  glDisableVertexAttribArray(texLoc);
+
+  const float identity[16] = {
+      1.0f, 0.0f, 0.0f, 0.0f,
+      0.0f, 1.0f, 0.0f, 0.0f,
+      0.0f, 0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f
+  };
+  glUniformMatrix4fv(g_Windowing.GUIShaderGetCoord0Matrix(),  1, GL_FALSE, identity);
+
+  g_Windowing.DisableGUIShader();
+  VerifyGLState();
+
+  glBindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+  VerifyGLState();
+
+  glMatrixModview.PopLoad();
+  glMatrixProject.PopLoad();
+  VerifyGLState();
+
+  g_Windowing.SetViewPort(viewport);
+
+  m_fbo.fbo.EndRender();
+
+  #ifdef DEBUG_VERBOSE
+    CLog::Log(LOGDEBUG, "RenderMediaCodecImage %d: tm:%d", index, XbmcThreads::SystemClockMillis() - time);
+  #endif
+#endif
+}
+
 void CLinuxRendererGLES::RenderFromFBO()
 {
   glEnable(GL_TEXTURE_2D);
@@ -1577,70 +1735,6 @@ void CLinuxRendererGLES::RenderFromFBO()
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
   VerifyGLState();
-
-  /*
-  glDisable(GL_DEPTH_TEST);
-
-  // Y
-  glEnable(m_textureTarget);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, m_fbo.fbo.Texture());
-
-  g_Windowing.EnableGUIShader(SM_TEXTURE_RGBA);
-
-  GLint   contrastLoc = g_Windowing.GUIShaderGetContrast();
-  glUniform1f(contrastLoc, CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Contrast * 0.02f);
-  GLint   brightnessLoc = g_Windowing.GUIShaderGetBrightness();
-  glUniform1f(brightnessLoc, CMediaSettings::GetInstance().GetCurrentVideoSettings().m_Brightness * 0.01f - 0.5f);
-
-  GLubyte idx[4] = {0, 1, 3, 2};        //determines order of triangle strip
-  GLfloat ver[4][4];
-  GLfloat tex[4][2];
-  GLfloat col[3] = {1.0f, 1.0f, 1.0f};
-
-  GLint   posLoc = g_Windowing.GUIShaderGetPos();
-  GLint   texLoc = g_Windowing.GUIShaderGetCoord0();
-  GLint   colLoc = g_Windowing.GUIShaderGetCol();
-
-  glVertexAttribPointer(posLoc, 4, GL_FLOAT, 0, 0, ver);
-  glVertexAttribPointer(texLoc, 2, GL_FLOAT, 0, 0, tex);
-  glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, 0, col);
-
-  glEnableVertexAttribArray(posLoc);
-  glEnableVertexAttribArray(texLoc);
-  glEnableVertexAttribArray(colLoc);
-
-  // Set vertex coordinates
-  for(int i = 0; i < 4; i++)
-  {
-    ver[i][0] = m_rotatedDestCoords[i].x;
-    ver[i][1] = m_rotatedDestCoords[i].y;
-    ver[i][2] = 0.0f;// set z to 0
-    ver[i][3] = 1.0f;
-  }
-
-  float imgwidth = m_fbo.width / m_sourceWidth;
-  float imgheight = m_fbo.height / m_sourceHeight;
-
-  // Setup texture coordinates
-  tex[0][0] = tex[3][0] = 0.0f;
-  tex[0][1] = tex[1][1] = 0.0f;
-  tex[1][0] = tex[2][0] = imgwidth;
-  tex[2][1] = tex[3][1] = imgheight;
-
-  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_BYTE, idx);
-
-  glDisableVertexAttribArray(posLoc);
-  glDisableVertexAttribArray(texLoc);
-  glDisableVertexAttribArray(colLoc);
-
-  g_Windowing.DisableGUIShader();
-
-  VerifyGLState();
-
-  glDisable(m_textureTarget);
-  VerifyGLState();
-  */
 }
 
 void CLinuxRendererGLES::RenderMultiPass(int index, int field)
@@ -1660,7 +1754,10 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
     }
   }
 
-  RenderToFBO(index, m_currentField);
+  if (m_renderMethod & RENDER_MEDIACODEC)
+    RenderToFBO_OES(index, m_currentField);
+  else
+    RenderToFBO(index, m_currentField);
   RenderFromFBO();
 }
 
@@ -3242,7 +3339,7 @@ bool CLinuxRendererGLES::Supports(ESCALINGMETHOD method)
     if (scaleX < minScale && scaleY < minScale)
       return false;
 
-    if (m_renderMethod & RENDER_GLSL)
+    if (m_renderMethod & (RENDER_GLSL | RENDER_MEDIACODEC))
     {
       // spline36 and lanczos3 are only allowed through advancedsettings.xml
       if(method != VS_SCALINGMETHOD_SPLINE36
