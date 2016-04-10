@@ -31,15 +31,7 @@ uniform float     m_alpha;
   uniform sampler2D kernelTex;
 #endif
 
-//nvidia's half is a 16 bit float and can bring some speed improvements
-//without affecting quality
-#ifndef __GLSL_CG_DATA_TYPES
-  #define half float
-  #define half3 vec3
-  #define half4 vec4
-#endif
-
-half4 weight(float pos)
+vec4 weight(float pos)
 {
 #if (HAS_FLOAT_TEXTURE)
   #if (USE1DTEXTURE)
@@ -69,12 +61,12 @@ vec2 stretch(vec2 pos)
 #endif
 }
 
-half3 pixel(float xpos, float ypos)
+vec3 pixel(float xpos, float ypos)
 {
   return texture2D(img, vec2(xpos, ypos)).rgb;
 }
 
-half3 line (float ypos, vec4 xpos, half4 linetaps)
+vec3 line (float ypos, vec4 xpos, vec4 linetaps)
 {
   return
     pixel(xpos.r, ypos) * linetaps.r +
@@ -88,8 +80,8 @@ void main()
   vec2 pos = stretch(cord) + stepxy * 0.5;
   vec2 f = fract(pos / stepxy);
 
-  half4 linetaps   = weight(1.0 - f.x);
-  half4 columntaps = weight(1.0 - f.y);
+  vec4 linetaps   = weight(1.0 - f.x);
+  vec4 columntaps = weight(1.0 - f.y);
 
   //make sure all taps added together is exactly 1.0, otherwise some (very small) distortion can occur
   linetaps /= linetaps.r + linetaps.g + linetaps.b + linetaps.a;
@@ -104,6 +96,6 @@ void main()
     line(xystart.y + stepxy.y * 2.0, xpos, linetaps) * columntaps.b +
     line(xystart.y + stepxy.y * 3.0, xpos, linetaps) * columntaps.a;
 
-  gl_FragColor.a = m_alpha;
+  gl_FragColor.a = 1.0;
 }
 
