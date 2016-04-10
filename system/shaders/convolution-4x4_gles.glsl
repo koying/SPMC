@@ -18,7 +18,7 @@
  *
  */
 
-precision highp float;
+precision mediump float;
 uniform sampler2D img;
 uniform vec2      stepxy;
 uniform float     m_stretch;
