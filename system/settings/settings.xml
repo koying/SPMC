@@ -844,7 +844,7 @@
           <control type="toggle" />
         </setting>
       </group>
-      <group id="3">
+      <group id="4">
         <setting id="videoplayer.accelMPEG2" type="integer" label="39001">
           <level>2</level>
           <default>800</default>
