@@ -847,7 +847,7 @@
       <group id="3">
         <setting id="videoplayer.accelMPEG2" type="integer" label="39001">
           <level>2</level>
-          <default>50</default>
+          <default>800</default>
           <constraints>
             <options>
             <option label="20420">9999</option>   <!-- Never -->
@@ -860,7 +860,7 @@
         </setting>
         <setting id="videoplayer.accelMPEG4" type="integer" label="39002">
           <level>2</level>
-          <default>50</default>
+          <default>800</default>
           <constraints>
             <options>
             <option label="20420">9999</option>   <!-- Never -->
@@ -873,7 +873,7 @@
         </setting>
         <setting id="videoplayer.accelH264" type="integer" label="39003">
           <level>2</level>
-          <default>99</default>
+          <default>0</default>
           <constraints>
             <options>
             <option label="20420">9999</option>   <!-- Never -->
