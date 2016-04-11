@@ -850,9 +850,9 @@
           <default>50</default>
           <constraints>
             <options>
-            <option label="20420">0</option>   <!-- Never -->
-            <option label="39000">50</option>  <!-- HD -->
-            <option label="20422">99</option>  <!-- Always -->
+            <option label="20420">9999</option>   <!-- Never -->
+            <option label="39000">800</option>  <!-- HD -->
+            <option label="20422">0</option>  <!-- Always -->
             </options>
           </constraints>
           <control type="spinner" format="string" />
@@ -863,9 +863,9 @@
           <default>50</default>
           <constraints>
             <options>
-            <option label="20420">0</option>   <!-- Never -->
-            <option label="39000">50</option>  <!-- HD -->
-            <option label="20422">99</option>  <!-- Always -->
+            <option label="20420">9999</option>   <!-- Never -->
+            <option label="39000">800</option>  <!-- HD -->
+            <option label="20422">0</option>  <!-- Always -->
             </options>
           </constraints>
           <control type="spinner" format="string" />
@@ -876,9 +876,9 @@
           <default>99</default>
           <constraints>
             <options>
-            <option label="20420">0</option>   <!-- Never -->
-            <option label="39000">50</option>  <!-- HD -->
-            <option label="20422">99</option>  <!-- Always -->
+            <option label="20420">9999</option>   <!-- Never -->
+            <option label="39000">800</option>  <!-- HD -->
+            <option label="20422">0</option>  <!-- Always -->
             </options>
           </constraints>
           <control type="spinner" format="string" />
