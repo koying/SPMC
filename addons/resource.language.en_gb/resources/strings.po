@@ -18191,3 +18191,18 @@ msgctxt "#38113"
 msgid "This option uses frame-packing to output full resolution for 3D through HDMI"
 msgstr ""
 
+msgctxt "#39000"
+msgid "HD and up"
+msgstr ""
+
+msgctxt "#39001"
+msgid "Accelerate MPEG2"
+msgstr ""
+
+msgctxt "#39002"
+msgid "Accelerate MPEG4"
+msgstr ""
+
+msgctxt "#39003"
+msgid "Accelerate h264"
+msgstr ""
