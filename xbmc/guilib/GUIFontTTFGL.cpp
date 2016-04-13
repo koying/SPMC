@@ -285,7 +285,7 @@ CVertexBuffer CGUIFontTTFGL::CreateVertexBuffer(const std::vector<SVertex> &vert
   // Unbind GL_ARRAY_BUFFER
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  return CVertexBuffer(bufferHandle, vertices.size() / 4, this);
+  return CVertexBuffer((void *) bufferHandle, vertices.size() / 4, this);
 }
 
 void CGUIFontTTFGL::DestroyVertexBuffer(CVertexBuffer &buffer) const
