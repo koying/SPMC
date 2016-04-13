@@ -412,6 +412,7 @@ unsigned int CDVDVideoCodecFFmpeg::SetFilters(unsigned int flags)
       }
   }
 
+#if (defined(__i386__) || defined(__x86_64__))
   if(flags & FILTER_DEINTERLACE_YADIF)
   {
     if(flags & FILTER_DEINTERLACE_HALFED)
@@ -424,6 +425,7 @@ unsigned int CDVDVideoCodecFFmpeg::SetFilters(unsigned int flags)
 
     flags &= ~FILTER_DEINTERLACE_ANY | FILTER_DEINTERLACE_YADIF;
   }
+#endif
 
   return flags;
 }
