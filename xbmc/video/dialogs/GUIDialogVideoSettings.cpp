@@ -252,9 +252,10 @@ void CGUIDialogVideoSettings::InitializeSettings()
   entries.push_back(std::make_pair(20129, VS_INTERLACEMETHOD_RENDER_WEAVE));
   entries.push_back(std::make_pair(16022, VS_INTERLACEMETHOD_RENDER_BOB_INVERTED));
   entries.push_back(std::make_pair(16021, VS_INTERLACEMETHOD_RENDER_BOB));
-  entries.push_back(std::make_pair(16020, VS_INTERLACEMETHOD_DEINTERLACE));
-  entries.push_back(std::make_pair(16036, VS_INTERLACEMETHOD_DEINTERLACE_HALF));
+  entries.push_back(std::make_pair(16020, VS_INTERLACEMETHOD_YADIF));
+  entries.push_back(std::make_pair(16036, VS_INTERLACEMETHOD_YADIF_HALF));
   entries.push_back(std::make_pair(16324, VS_INTERLACEMETHOD_SW_BLEND));
+  entries.push_back(std::make_pair(16336, VS_INTERLACEMETHOD_SW_FFMPEG));
   entries.push_back(std::make_pair(16314, VS_INTERLACEMETHOD_INVERSE_TELECINE));
   entries.push_back(std::make_pair(16311, VS_INTERLACEMETHOD_VDPAU_TEMPORAL_SPATIAL));
   entries.push_back(std::make_pair(16310, VS_INTERLACEMETHOD_VDPAU_TEMPORAL));
