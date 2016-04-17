@@ -551,7 +551,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
   if (m_passthrough && !WantsIEC61937() && m_smoothedDelayCount == SMOOTHED_DELAY_MAX && !m_sink_delay)
     m_sink_delay = smootheDelay;
 
-  if (m_passthrough && g_advancedSettings.CanLogComponent(LOGAUDIO))
+  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
     CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_duration_written/head_pos %f/%u %f(%f)", m_duration_written, head_pos, smootheDelay, delay);
 
     status.SetDelay(smootheDelay);
@@ -619,21 +619,17 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     double duration = (double)(written / m_format.m_frameSize) / m_format.m_sampleRate;
     m_duration_written += duration;
 
-    uint32_t sleep_ms;
-    if (m_lastAddTimeMs)
-      sleep_ms = (duration * 1000.0) - (XbmcThreads::SystemClockMillis() - m_lastAddTimeMs) - 2 /* overhead */;
-    else
-      sleep_ms = (duration * 1000.0);
-
+    if (!m_lastAddTimeMs)
+      m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
+    int32_t diff = XbmcThreads::SystemClockMillis() - m_lastAddTimeMs;
+    int32_t sleep_ms = (duration * 1000.0) - diff;
+    m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
     if (sleep_ms > 0)
       usleep(sleep_ms * 1000.0);
+
+    if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+      CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d(%d;%d)", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs, diff, sleep_ms);
   }
-
-
-  if (m_passthrough && g_advancedSettings.CanLogComponent(LOGAUDIO))
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs);
-
-  m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
   return (unsigned int)(written/m_format.m_frameSize);
 }
 
