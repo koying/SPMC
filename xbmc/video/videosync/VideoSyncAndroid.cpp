@@ -81,14 +81,14 @@ void CVideoSyncAndroid::FrameCallback(int64_t frameTimeNanos)
   int64_t       nowtime = CurrentHostCounter();
   
   //calculate how many vblanks happened
-  VBlankTime = (double)(nowtime - m_LastVBlankTime) / (double)g_VideoReferenceClock.GetFrequency();
+  int64_t FT = (frameTimeNanos - m_LastVBlankTime);
+  VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
   NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
   
-//  int64_t FT = (nowtime - m_LastVBlankTime);
-//  CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback %lld(%f fps)", FT, 1.0/((double)FT/1000000000));
+  // CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
 
   //save the timestamp of this vblank so we can calculate how many happened next time
-  m_LastVBlankTime = nowtime;
+  m_LastVBlankTime = frameTimeNanos;
   
   //update the vblank timestamp, update the clock and send a signal that we got a vblank
   UpdateClock(NrVBlanks, nowtime);
