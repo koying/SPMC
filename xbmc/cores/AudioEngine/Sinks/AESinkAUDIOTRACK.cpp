@@ -496,10 +496,29 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-  // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
-  // return a 32bit "int" that you should "interpret as unsigned."  As such,
-  // for wrap saftey, we need to do all ops on it in 32bit integer math.
-  uint32_t head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
+  uint32_t head_pos = 0;
+  double frameDiffMilli = 0;
+  if (CJNIBuild::SDK_INT >= 23)
+  {
+    CJNIAudioTimestamp ts;
+    int64_t systime = CJNISystem::nanoTime();
+    if (m_at_jni->getTimestamp(ts))
+    {
+      head_pos = (uint32_t)ts.get_framePosition();
+      frameDiffMilli = (systime - ts.get_nanoTime()) / 1000000000.0;
+
+      if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+        CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay timestamp: pos(%lld) time(%lld) diff(%f)", ts.get_framePosition(), ts.get_nanoTime(), frameDiffMilli);
+    }
+  }
+  if (!head_pos)
+  {
+    // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
+    // return a 32bit "int" that you should "interpret as unsigned."  As such,
+    // for wrap saftey, we need to do all ops on it in 32bit integer math.
+    head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
+  }
+
   if (!head_pos)
   {
     status.SetDelay(m_duration_written);
@@ -512,22 +531,8 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
 #endif
 
   double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
-  double frameDiffMilli = 0;
   if (m_duration_written != m_last_duration_written && head_pos != m_last_head_pos)
   {
-    if (CJNIBuild::SDK_INT >= 23)
-    {
-      CJNIAudioTimestamp ts;
-      int64_t systime = CJNISystem::nanoTime();
-      if (m_at_jni->getTimestamp(ts))
-      {
-        frameDiffMilli = (systime - ts.get_nanoTime()) / 1000000000.0;
-
-        if (m_passthrough && g_advancedSettings.CanLogComponent(LOGAUDIO))
-          CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay timestamp: pos(%lld) time(%lld) diff(%f)", ts.get_framePosition(), ts.get_nanoTime(), frameDiffMilli);
-      }
-    }
-
     m_smoothedDelayVec.push_back(delay - frameDiffMilli);
     if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
       m_smoothedDelayCount++;
