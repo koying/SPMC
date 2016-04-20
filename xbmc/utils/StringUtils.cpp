@@ -828,7 +828,6 @@ int StringUtils::FindNumber(const std::string& strInput, const std::string &strF
 int64_t StringUtils::AlphaNumericCompare(const wchar_t *left, const wchar_t *right)
 {
   bool isNumeric = true;
-  int64_t numericResult = 0;
   wchar_t *l = (wchar_t *)left;
   wchar_t *r = (wchar_t *)right;
   wchar_t *ld = nullptr, *rd = nullptr;
@@ -836,6 +835,7 @@ int64_t StringUtils::AlphaNumericCompare(const wchar_t *left, const wchar_t *rig
   int64_t lnum, rnum;
   const std::collate<wchar_t>& coll = std::use_facet<std::collate<wchar_t> >(g_langInfo.GetSystemLocale());
   int cmp_res = 0;
+
   while (*l != 0 && *r != 0)
   {
     // check if we have a numerical value
@@ -856,21 +856,22 @@ int64_t StringUtils::AlphaNumericCompare(const wchar_t *left, const wchar_t *rig
         rnum += *rd++ - L'0';
       }
       // do we have numbers?
-      if (lnum != rnum)
-      { // yes - and they're different!
-        numericResult = lnum - rnum;
+      if ((*ld == 0 || *ld == L' ') && (*rd == 0 || *rd == L' '))
+      {
+        if (lnum != rnum)
+          return lnum - rnum;
+      }
+      else
+      {
+        // Restart
+        isNumeric = false;
+        ld = rd = nullptr;
+        l = (wchar_t *)left;
+        r = (wchar_t *)right;
+        continue;
       }
       l = ld;
       r = rd;
-      continue;
-    }
-    if (isNumeric && (ld || rd))
-    {
-      // Restart
-      isNumeric = false;
-      ld = rd = nullptr;
-      l = (wchar_t *)left;
-      r = (wchar_t *)right;
       continue;
     }
     // do case less comparison
@@ -888,9 +889,6 @@ int64_t StringUtils::AlphaNumericCompare(const wchar_t *left, const wchar_t *rig
     }
     l++; r++;
   }
-  if (isNumeric)
-    return numericResult;
-
   if (*r)
   { // r is longer
     return -1;
