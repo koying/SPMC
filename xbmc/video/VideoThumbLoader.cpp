@@ -329,7 +329,7 @@ bool CVideoThumbLoader::LoadItemCached(CFileItem* pItem)
 
   m_videoDatabase->Close();
 
-  return pItem->HasArt("thumb");
+  return pItem->HasArt("thumb") && pItem->HasVideoInfoTag() && pItem->GetVideoInfoTag()->HasStreamDetails();
 }
 
 bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
