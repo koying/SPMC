@@ -23,6 +23,9 @@
 #include "VideoSync.h"
 #include "guilib/DispResource.h"
 
+#include <vector>
+#define AVERAGE_VSYNC_NUM 50
+
 class CVideoSyncAndroid : public CVideoSync, IDispResource
 {
 public:
@@ -43,6 +46,9 @@ public:
 private:
   int64_t m_LastVBlankTime;  //timestamp of the last vblank, used for calculating how many vblanks happened
   volatile bool m_abort;
+  bool    m_emulatedVsync;
+  int64_t m_emulatedVsyncDurationNs;
+  std::vector<int64_t> m_vecVsync;
 };
 
 #endif// TARGET_ANDROID

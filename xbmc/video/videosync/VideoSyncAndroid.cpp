@@ -39,6 +39,9 @@ bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
   m_LastVBlankTime = CurrentHostCounter();
   UpdateClock = func;
   m_abort = false;
+  m_emulatedVsync = false;
+  m_emulatedVsyncDurationNs = g_VideoReferenceClock.GetFrequency() / GetFPS();
+  m_vecVsync.clear();
   
   CXBMCApp::InitFrameCallback(this);
   g_Windowing.Register(this);
@@ -48,10 +51,41 @@ bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
 
 void CVideoSyncAndroid::Run(volatile bool& stop)
 {
-  //because cocoa has a vblank callback, we just keep sleeping until we're asked to stop the thread
+  // vblank callback, we just keep sleeping until we're asked to stop the thread
   while(!stop && !m_abort)
   {
-    Sleep(100);
+    if (m_emulatedVsync)
+    {
+      usleep(m_emulatedVsyncDurationNs);
+      uint64_t now = CurrentHostCounter();
+      UpdateClock(1, now);
+    }
+    else
+    {
+      // Check if the Choregrapher clock is inline with the refresh rate
+      int64_t averageVsyncNs = 0;
+      for (auto n : m_vecVsync)
+      {
+        averageVsyncNs += n;
+      }
+      averageVsyncNs /= m_vecVsync.size();
+
+      if (m_vecVsync >= AVERAGE_VSYNC_NUM )
+      {
+        double r =  (double)averageVsyncNs / m_emulatedVsyncDurationNs;
+        if (r < 0.8 || r > 1.2)
+        {
+          // Nope. Let's shift to emulated vsync
+          CLog::Log(LOGWARNING, "CVideoSyncAndroid::%s too big error (%f): going to emulated", __FUNCTION__, r);
+
+          m_emulatedVsync = true;
+          CXBMCApp::DeinitFrameCallback();
+          continue;
+        }
+      }
+
+      Sleep(100);
+    }
   }
 }
 
@@ -82,6 +116,9 @@ void CVideoSyncAndroid::FrameCallback(int64_t frameTimeNanos)
   
   //calculate how many vblanks happened
   int64_t FT = (frameTimeNanos - m_LastVBlankTime);
+  m_vecVsync.push_back(FT);
+  if (m_vecVsync.size() > AVERAGE_VSYNC_NUM)
+    m_vecVsync.erase(m_vecVsync.begin());
   VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
   NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
   

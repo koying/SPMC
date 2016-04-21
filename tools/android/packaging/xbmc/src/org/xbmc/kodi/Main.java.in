@@ -162,14 +162,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onStart();
     getWindow().setFormat(PixelFormat.TRANSPARENT);
+
+    Choreographer.getInstance().postFrameCallback(this);
   }
 
   @Override
   public void onResume()
   {
     super.onResume();
-
-    Choreographer.getInstance().postFrameCallback(this);
 
     Window window = getWindow();
     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -236,7 +236,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onPause();
 
-    Choreographer.getInstance().removeFrameCallback(this);
+    // Choreographer.getInstance().removeFrameCallback(this);
   }
 
   @Override
