@@ -40,7 +40,7 @@ bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
   UpdateClock = func;
   m_abort = false;
   m_emulatedVsync = false;
-  m_emulatedVsyncDurationNs = g_VideoReferenceClock.GetFrequency() / GetFPS();
+  m_emulatedVsyncDurationNs = g_VideoReferenceClock.GetFrequency() / GetFps();
   m_vecVsync.clear();
   
   CXBMCApp::InitFrameCallback(this);
@@ -62,17 +62,18 @@ void CVideoSyncAndroid::Run(volatile bool& stop)
     }
     else
     {
-      // Check if the Choregrapher clock is inline with the refresh rate
-      int64_t averageVsyncNs = 0;
-      for (auto n : m_vecVsync)
+      if (m_vecVsync.size() >= AVERAGE_VSYNC_NUM )
       {
-        averageVsyncNs += n;
-      }
-      averageVsyncNs /= m_vecVsync.size();
+        // Check if the Choregrapher clock is inline with the refresh rate
+        int64_t averageVsyncNs = 0;
+        for (auto n : m_vecVsync)
+        {
+          averageVsyncNs += n;
+        }
+        averageVsyncNs /= m_vecVsync.size();
 
-      if (m_vecVsync >= AVERAGE_VSYNC_NUM )
-      {
         double r =  (double)averageVsyncNs / m_emulatedVsyncDurationNs;
+        CLog::Log(LOGDEBUG, "CVideoSyncAndroid::%s averageVsyncNs (%lld) m_emulatedVsyncDurationNs(%lld) ratio(%f)", __FUNCTION__, averageVsyncNs, m_emulatedVsyncDurationNs, r);
         if (r < 0.8 || r > 1.2)
         {
           // Nope. Let's shift to emulated vsync
@@ -122,7 +123,7 @@ void CVideoSyncAndroid::FrameCallback(int64_t frameTimeNanos)
   VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
   NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
   
-  // CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
+//   CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
 
   //save the timestamp of this vblank so we can calculate how many happened next time
   m_LastVBlankTime = frameTimeNanos;
