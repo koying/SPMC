@@ -268,8 +268,7 @@ std::vector<std::string> CVideoThumbLoader::GetArtTypes(const std::string &type)
 bool CVideoThumbLoader::LoadItem(CFileItem* pItem)
 {
   bool result  = LoadItemCached(pItem);
-  if (!result)
-    result |= LoadItemLookup(pItem);
+       result |= LoadItemLookup(pItem);
 
   return result;
 }
@@ -308,8 +307,6 @@ bool CVideoThumbLoader::LoadItemCached(CFileItem* pItem)
     }
   }
 
-  DetectAndAddMissingItemData(*pItem);
-
   // if we have no art, look for it all
   std::map<std::string, std::string> artwork = pItem->GetArt();
   if (artwork.empty())
@@ -329,7 +326,7 @@ bool CVideoThumbLoader::LoadItemCached(CFileItem* pItem)
 
   m_videoDatabase->Close();
 
-  return pItem->HasArt("thumb") && pItem->HasVideoInfoTag() && pItem->GetVideoInfoTag()->HasStreamDetails();
+  return true;
 }
 
 bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
@@ -344,6 +341,8 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
       pItem->GetVideoInfoTag()->m_type != MediaTypeEpisode    &&
       pItem->GetVideoInfoTag()->m_type != MediaTypeMusicVideo)
     return false; // Nothing to do here
+
+  DetectAndAddMissingItemData(*pItem);
 
   m_videoDatabase->Open();
 

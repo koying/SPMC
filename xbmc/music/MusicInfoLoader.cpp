@@ -127,8 +127,7 @@ bool CMusicInfoLoader::LoadAdditionalTagInfo(CFileItem* pItem)
 bool CMusicInfoLoader::LoadItem(CFileItem* pItem)
 {
   bool result  = LoadItemCached(pItem);
-  if (!result)
-    result |= LoadItemLookup(pItem);
+       result |= LoadItemLookup(pItem);
 
   return result;
 }
@@ -141,7 +140,7 @@ bool CMusicInfoLoader::LoadItemCached(CFileItem* pItem)
   // Get thumb for item
   m_thumbLoader->LoadItem(pItem);
 
-  return pItem->HasMusicInfoTag() && pItem->GetMusicInfoTag()->Loaded();
+  return true;
 }
 
 bool CMusicInfoLoader::LoadItemLookup(CFileItem* pItem)

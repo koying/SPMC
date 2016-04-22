@@ -54,8 +54,7 @@ void CPictureThumbLoader::OnLoaderFinish()
 bool CPictureThumbLoader::LoadItem(CFileItem* pItem)
 {
   bool result  = LoadItemCached(pItem);
-  if (!result)
-    result |= LoadItemLookup(pItem);
+       result |= LoadItemLookup(pItem);
 
   return result;
 }
