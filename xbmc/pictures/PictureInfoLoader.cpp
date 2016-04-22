@@ -51,8 +51,7 @@ void CPictureInfoLoader::OnLoaderStart()
 bool CPictureInfoLoader::LoadItem(CFileItem* pItem)
 {
   bool result  = LoadItemCached(pItem);
-  if (!result)
-    result |= LoadItemLookup(pItem);
+       result |= LoadItemLookup(pItem);
 
   return result;
 }
