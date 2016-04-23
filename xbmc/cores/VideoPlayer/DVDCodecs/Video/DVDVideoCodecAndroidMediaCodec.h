@@ -120,7 +120,6 @@ protected:
   void            ConfigureOutputFormat(CJNIMediaFormat* mediaformat);
 
   // surface handling functions
-  static void     CallbackInitSurfaceTexture(void*);
   void            InitSurfaceTexture(void);
   void            ReleaseSurfaceTexture(void);
 
