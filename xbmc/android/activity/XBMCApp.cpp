@@ -112,6 +112,7 @@ CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
 CVideoSyncAndroid* CXBMCApp::m_syncImpl = NULL;
+std::vector<GLuint> CXBMCApp::m_texturePool;
 
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
@@ -544,6 +545,11 @@ void CXBMCApp::BringToFront()
     CLog::Log(LOGERROR, "CXBMCApp::BringToFront");
     StartActivity(getPackageName());
   }
+}
+
+std::vector<GLuint> &CXBMCApp::GetTexturePool()
+{
+  return m_texturePool;
 }
 
 int CXBMCApp::GetDPI()

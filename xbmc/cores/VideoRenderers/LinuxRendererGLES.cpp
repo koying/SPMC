@@ -65,11 +65,14 @@ extern "C" {
 #ifdef TARGET_DARWIN_IOS
 #include "osx/DarwinUtils.h"
 #endif
+#if defined(TARGET_ANDROID)
+#include "android/activity/XBMCApp.h"
+#include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
+#endif
 #if defined(HAS_LIBSTAGEFRIGHT)
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include "windowing/egl/EGLWrapper.h"
-#include "android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecStageFright.h"
 
 // EGL extension functions
@@ -87,10 +90,6 @@ static PFNEGLCLIENTWAITSYNCKHRPROC eglClientWaitSyncKHR;
 #ifdef HAS_IMXVPU
 #include "windowing/egl/EGLWrapper.h"
 #include "DVDCodecs/Video/DVDVideoCodecIMX.h"
-#endif
-
-#if defined(TARGET_ANDROID)
-#include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #endif
 
 #ifndef GL_UNPACK_ROW_LENGTH_EXT
@@ -795,6 +794,12 @@ unsigned int CLinuxRendererGLES::PreInit()
 #if defined(TARGET_ANDROID)
   m_formats.push_back(RENDER_FMT_MEDIACODEC);
   m_formats.push_back(RENDER_FMT_MEDIACODECSURFACE);
+
+  // Allocate a pool of texture for MediaCodec
+  GLuint texture_ids[5];
+  glGenTextures(5, texture_ids);
+  for (int i=0; i<5; ++i)
+    CXBMCApp::GetTexturePool().push_back(texture_ids[i]);
 #endif
 #ifdef HAS_IMXVPU
   m_formats.push_back(RENDER_FMT_IMXMAP);
@@ -1080,6 +1085,15 @@ void CLinuxRendererGLES::UnInit()
 {
   CLog::Log(LOGDEBUG, "LinuxRendererGL: Cleaning up GL resources");
   CSingleLock lock(g_graphicsContext);
+
+#if defined(TARGET_ANDROID)
+  while(!CXBMCApp::GetTexturePool().empty())
+  {
+    GLuint texture_id = CXBMCApp::GetTexturePool().back();
+    glDeleteTextures(1, &texture_id);
+    CXBMCApp::GetTexturePool().pop_back();
+  }
+#endif
 
   if (m_rgbBuffer != NULL)
   {
