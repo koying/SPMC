@@ -1394,52 +1394,26 @@ void CDVDVideoCodecAndroidMediaCodec::ConfigureOutputFormat(AMediaFormat* mediaf
   }
 }
 
-void CDVDVideoCodecAndroidMediaCodec::CallbackInitSurfaceTexture(void *userdata)
-{
-  CDVDVideoCodecAndroidMediaCodec *ctx = static_cast<CDVDVideoCodecAndroidMediaCodec*>(userdata);
-  ctx->InitSurfaceTexture();
-}
-
 void CDVDVideoCodecAndroidMediaCodec::InitSurfaceTexture(void)
 {
   if (m_render_sw || m_render_surface)
     return;
 
-  // We MUST create the GLES texture on the main thread
-  // to match where the valid GLES context is located.
-  // It would be nice to move this out of here, we would need
-  // to create/fetch/create from g_RenderMananger. But g_RenderMananger
-  // does not know we are using MediaCodec until Configure and we
-  // we need m_surfaceTexture valid before then. Chicken, meet Egg.
-  if (g_application.IsCurrentThread())
-  {
-    // localize GLuint so we do not spew gles includes in our header
-    GLuint texture_id;
+  GLuint texture_id = CXBMCApp::GetTexturePool().back();
+  CXBMCApp::GetTexturePool().pop_back();
+  glBindTexture(  GL_TEXTURE_EXTERNAL_OES, texture_id);
+  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glBindTexture(  GL_TEXTURE_EXTERNAL_OES, 0);
+  m_textureId = texture_id;
 
-    glGenTextures(1, &texture_id);
-    glBindTexture(  GL_TEXTURE_EXTERNAL_OES, texture_id);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(  GL_TEXTURE_EXTERNAL_OES, 0);
-    m_textureId = texture_id;
-
-    m_surfaceTexture = std::shared_ptr<CJNISurfaceTexture>(new CJNISurfaceTexture(m_textureId));
-    // hook the surfaceTexture OnFrameAvailable callback
-    m_frameAvailable = std::shared_ptr<CDVDMediaCodecOnFrameAvailable>(new CDVDMediaCodecOnFrameAvailable(m_surfaceTexture));
-    m_jnisurface = new CJNISurface(*m_surfaceTexture);
-    m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnisurface->get_raw());
-  }
-  else
-  {
-    ThreadMessageCallback callbackData;
-    callbackData.callback = &CallbackInitSurfaceTexture;
-    callbackData.userptr  = (void*)this;
-
-    // wait for it.
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_CALLBACK, -1, -1, static_cast<void*>(&callbackData));
-  }
+  m_surfaceTexture = std::shared_ptr<CJNISurfaceTexture>(new CJNISurfaceTexture(m_textureId));
+  // hook the surfaceTexture OnFrameAvailable callback
+  m_frameAvailable = std::shared_ptr<CDVDMediaCodecOnFrameAvailable>(new CDVDMediaCodecOnFrameAvailable(m_surfaceTexture));
+  m_jnisurface = new CJNISurface(*m_surfaceTexture);
+  m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnisurface->get_raw());
 
   return;
 }
@@ -1457,8 +1431,7 @@ void CDVDVideoCodecAndroidMediaCodec::ReleaseSurfaceTexture(void)
 
   if (m_textureId > 0)
   {
-    GLuint texture_id = m_textureId;
-    glDeleteTextures(1, &texture_id);
+    CXBMCApp::GetTexturePool().push_back((GLuint)m_textureId);
     m_textureId = 0;
   }
 }

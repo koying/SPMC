@@ -27,6 +27,9 @@
 #include <vector>
 #include <map>
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <android/native_activity.h>
 
 #include <androidjni/Activity.h>
@@ -135,6 +138,7 @@ public:
   static int SetBuffersGeometry(int width, int height, int format);
   static int android_printf(const char *format, ...);
   static void BringToFront();
+  static std::vector<GLuint> &GetTexturePool();
   
   static int GetBatteryLevel();
   static bool EnableWakeLock(bool on);
@@ -226,6 +230,7 @@ private:
 
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;
+  static std::vector<GLuint> m_texturePool;
 
   static CVideoSyncAndroid* m_syncImpl;
   static CEvent m_vsyncEvent;

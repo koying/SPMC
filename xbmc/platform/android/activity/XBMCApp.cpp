@@ -119,6 +119,7 @@ std::vector<androidPackage> CXBMCApp::m_applications;
 CVideoSyncAndroid* CXBMCApp::m_syncImpl = NULL;
 CEvent CXBMCApp::m_vsyncEvent;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
+std::vector<GLuint> CXBMCApp::m_texturePool;
 
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
@@ -562,6 +563,11 @@ void CXBMCApp::BringToFront()
     CLog::Log(LOGERROR, "CXBMCApp::BringToFront");
     StartActivity(getPackageName());
   }
+}
+
+std::vector<GLuint> &CXBMCApp::GetTexturePool()
+{
+  return m_texturePool;
 }
 
 int CXBMCApp::GetDPI()
