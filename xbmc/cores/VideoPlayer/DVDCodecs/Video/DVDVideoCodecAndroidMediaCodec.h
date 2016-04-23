@@ -129,7 +129,6 @@ protected:
   void            ConfigureOutputFormat(AMediaFormat* mediaformat);
 
   // surface handling functions
-  static void     CallbackInitSurfaceTexture(void*);
   void            InitSurfaceTexture(void);
   void            ReleaseSurfaceTexture(void);
 
