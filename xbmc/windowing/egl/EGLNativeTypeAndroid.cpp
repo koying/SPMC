@@ -174,13 +174,40 @@ bool CEGLNativeTypeAndroid::DestroyNativeWindow()
 
 static float currentRefreshRate()
 {
+  // AFTV stick
+  // Always return 60, whatever the actual HDMI mode
+  std::string sCEAmode = CJNISystemProperties::get("hw.brcm.tv.hdmi.mode", "");
+  if (!sCEAmode.empty() && StringUtils::IsInteger(sCEAmode))
+  {
+    float detectedrate = 0.0;
+    int CEAmode = atoi(sCEAmode.c_str());
+    switch (CEAmode)
+    {
+      case 16: // 1080p60
+      case 4:  // 720p60
+        detectedrate = 60.0;
+        break;
+      case 31: // 1080p50
+      case 19: // 720p50
+        detectedrate = 50.0;
+        break;
+      default:
+        break;
+    }
+    if (detectedrate > 0.0)
+    {
+      CLog::Log(LOGINFO, "CEGLNativeTypeAndroid: AFTVS refresh rate: %f", detectedrate);
+      return detectedrate;
+    }
+  }
+
   CJNIWindow window = CXBMCApp::getWindow();
   if (window)
   {
     float preferredRate = window.getAttributes().getpreferredRefreshRate();
     if (preferredRate > 20.0 && preferredRate < 70.0)
     {
-      CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: Preferred refresh rate: %f", preferredRate);
+      CLog::Log(LOGINFO, "CEGLNativeTypeAndroid: Preferred refresh rate: %f", preferredRate);
       return preferredRate;
     }
     CJNIView view(window.getDecorView());
@@ -191,7 +218,7 @@ static float currentRefreshRate()
         float reportedRate = display.getRefreshRate();
         if (reportedRate > 20.0 && reportedRate < 70.0)
         {
-          CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: Current display refresh rate: %f", reportedRate);
+          CLog::Log(LOGINFO, "CEGLNativeTypeAndroid: Current display refresh rate: %f", reportedRate);
           return reportedRate;
         }
       }
@@ -251,33 +278,39 @@ bool CEGLNativeTypeAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &resol
 {
   RESOLUTION_INFO res;
   bool ret = GetNativeResolution(&res);
+
   if (ret && res.iWidth > 1 && res.iHeight > 1)
   {
-    std::vector<float> refreshRates;
-    CJNIWindow window = CXBMCApp::getWindow();
-    if (window)
+    // AFTV stick always return 60.0
+    std::string sCEAmode = CJNISystemProperties::get("hw.brcm.tv.hdmi.mode", "");
+    if (sCEAmode.empty())
     {
-      CJNIView view = window.getDecorView();
-      if (view)
+      std::vector<float> refreshRates;
+      CJNIWindow window = CXBMCApp::getWindow();
+      if (window)
       {
-        CJNIDisplay display = view.getDisplay();
-        if (display)
+        CJNIView view = window.getDecorView();
+        if (view)
         {
-          refreshRates = display.getSupportedRefreshRates();
+          CJNIDisplay display = view.getDisplay();
+          if (display)
+          {
+            refreshRates = display.getSupportedRefreshRates();
+          }
         }
       }
-    }
 
-    if (!refreshRates.empty())
-    {
-      for (unsigned int i = 0; i < refreshRates.size(); i++)
+      if (!refreshRates.empty())
       {
-        if (refreshRates[i] < 20.0 || refreshRates[i] > 70.0)
-          continue;
-        res.fRefreshRate = refreshRates[i];
-        res.strMode      = StringUtils::Format("%dx%d @ %.6f%s - Full Screen", res.iScreenWidth, res.iScreenHeight, res.fRefreshRate,
-                                               res.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
-        resolutions.push_back(res);
+        for (unsigned int i = 0; i < refreshRates.size(); i++)
+        {
+          if (refreshRates[i] < 20.0 || refreshRates[i] > 70.0)
+            continue;
+          res.fRefreshRate = refreshRates[i];
+          res.strMode      = StringUtils::Format("%dx%d @ %.6f%s - Full Screen", res.iScreenWidth, res.iScreenHeight, res.fRefreshRate,
+                                                 res.dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
+          resolutions.push_back(res);
+        }
       }
     }
     if (resolutions.empty())
