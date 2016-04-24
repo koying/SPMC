@@ -35,6 +35,8 @@
 #include "platform/android/jni/Build.h"
 #include "platform/android/jni/System.h"
 
+#include "utils/SysfsUtils.h"
+
 CEGLNativeTypeAndroid::CEGLNativeTypeAndroid()
   : m_width(0), m_height(0)
 {
@@ -172,34 +174,43 @@ bool CEGLNativeTypeAndroid::DestroyNativeWindow()
   return true;
 }
 
-static float currentRefreshRate()
+static float overrideRefreshRate()
 {
-  // AFTV stick
-  // Always return 60, whatever the actual HDMI mode
-  std::string sCEAmode = CJNISystemProperties::get("hw.brcm.tv.hdmi.mode", "");
-  if (!sCEAmode.empty() && StringUtils::IsInteger(sCEAmode))
+  static float overridedRR = -1;
+
+  if (overridedRR == -1)  // Do it once
   {
-    float detectedrate = 0.0;
-    int CEAmode = atoi(sCEAmode.c_str());
-    switch (CEAmode)
+    int CEAmode;
+    overridedRR = 0.0;
+
+    // AFTV stick
+    // Always return 60, whatever the actual HDMI mode
+    std::string sCEAmode = CJNISystemProperties::get("hw.brcm.tv.hdmi.mode", "");
+    if (!sCEAmode.empty() && StringUtils::IsInteger(sCEAmode))
     {
-      case 16: // 1080p60
-      case 4:  // 720p60
-        detectedrate = 60.0;
-        break;
-      case 31: // 1080p50
-      case 19: // 720p50
-        detectedrate = 50.0;
-        break;
-      default:
-        break;
+      CEAmode = atoi(sCEAmode.c_str());
+      RESOLUTION_INFO res = SysfsUtils::CEAtoRES(CEAmode);
+      CLog::Log(LOGINFO, "CEGLNativeTypeAndroid: AFTVS refresh rate: %f", res.fRefreshRate);
+      overridedRR = res.fRefreshRate;
     }
-    if (detectedrate > 0.0)
+
+    // AFTV1
+    // Always return 60, whatever the actual HDMI mode
+    if (SysfsUtils::GetInt("/sys/class/graphics/fb0/video_mode", CEAmode) == 0)
     {
-      CLog::Log(LOGINFO, "CEGLNativeTypeAndroid: AFTVS refresh rate: %f", detectedrate);
-      return detectedrate;
+      RESOLUTION_INFO res = SysfsUtils::CEAtoRES(CEAmode);
+      CLog::Log(LOGINFO, "CEGLNativeTypeAndroid: AFTV1 refresh rate: %f", res.fRefreshRate);
+      overridedRR = res.fRefreshRate;
     }
   }
+  return overridedRR;
+}
+
+static float currentRefreshRate()
+{
+  float overridedrate = overrideRefreshRate();
+  if (overridedrate)
+    return overridedrate;
 
   CJNIWindow window = CXBMCApp::getWindow();
   if (window)
@@ -281,9 +292,7 @@ bool CEGLNativeTypeAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &resol
 
   if (ret && res.iWidth > 1 && res.iHeight > 1)
   {
-    // AFTV stick always return 60.0
-    std::string sCEAmode = CJNISystemProperties::get("hw.brcm.tv.hdmi.mode", "");
-    if (sCEAmode.empty())
+    if (overrideRefreshRate() == 0.0)  // If override => assume not standard
     {
       std::vector<float> refreshRates;
       CJNIWindow window = CXBMCApp::getWindow();

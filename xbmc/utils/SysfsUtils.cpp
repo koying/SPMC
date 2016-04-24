@@ -95,6 +95,26 @@ int SysfsUtils::GetInt(const std::string& path, int& val)
     if (read(fd, bcmd, sizeof(bcmd)) < 0)
       ret = -1;
     else
+      val = strtol(bcmd, NULL, 10);
+
+    close(fd);
+  }
+  if (ret)
+    CLog::Log(LOGERROR, "%s: error reading %s",__FUNCTION__, path.c_str());
+
+  return ret;
+}
+
+int SysfsUtils::GetIntHexa(const std::string& path, int& val)
+{
+  int fd = open(path.c_str(), O_RDONLY);
+  int ret = 0;
+  if (fd >= 0)
+  {
+    char bcmd[16];
+    if (read(fd, bcmd, sizeof(bcmd)) < 0)
+      ret = -1;
+    else
       val = strtol(bcmd, NULL, 16);
 
     close(fd);
@@ -125,4 +145,38 @@ bool SysfsUtils::HasRW(const std::string &path)
     return true;
   }
   return false;
+}
+
+RESOLUTION_INFO SysfsUtils::CEAtoRES(int CEA)
+{
+  RESOLUTION_INFO res;
+  switch (CEA)
+  {
+    case 16: // 1080p60
+      res.iWidth = res.iScreenWidth = 1920;
+      res.iHeight = res.iScreenHeight = 1080;
+      res.fRefreshRate = 60.0;
+      break;
+    case 4:  // 720p60
+      res.iWidth = res.iScreenWidth = 1280;
+      res.iHeight = res.iScreenHeight = 720;
+      res.fRefreshRate = 60.0;
+      break;
+    case 31: // 1080p50
+      res.iWidth = res.iScreenWidth = 1920;
+      res.iHeight = res.iScreenHeight = 1080;
+      res.fRefreshRate = 50.0;
+      break;
+    case 19: // 720p50
+      res.iWidth = res.iScreenWidth = 1280;
+      res.iHeight = res.iScreenHeight = 720;
+      res.fRefreshRate = 50.0;
+      break;
+    default:
+      res.iWidth = res.iScreenWidth = 0;
+      res.iHeight = res.iScreenHeight = 0;
+      res.fRefreshRate = 0.0;
+      break;
+  }
+  return res;
 }
