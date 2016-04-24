@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include "guilib/Resolution.h"
+
 class SysfsUtils
 {
 public:
@@ -28,6 +30,9 @@ public:
   static int GetString(const std::string& path, std::string& valstr);
   static int SetInt(const std::string& path, const int val);
   static int GetInt(const std::string& path, int& val);
+  static int GetIntHexa(const std::string& path, int& val);
   static bool Has(const std::string& path);
   static bool HasRW(const std::string &path);
+
+  static RESOLUTION_INFO CEAtoRES(int CEA);
 };
