@@ -179,8 +179,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onResume();
 
-    Choreographer.getInstance().postFrameCallback(this);
-
     Window window = getWindow();
     window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
