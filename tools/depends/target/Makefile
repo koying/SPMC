@@ -9,7 +9,7 @@ DEPENDS = \
 	libgcrypt bzip2 liblzo2 libzip freetype2 fontconfig \
 	openssl gmp nettle gnutls libssh2 curl \
 	libjpeg-turbo tiff jasper libpng \
-	libogg libvorbis libflac fribidi libmpeg2 \
+	libflac fribidi libmpeg2 \
 	libass libsquish \
 	libmodplug librtmp libxml2 yajl libmicrohttpd mysql libffi \
 	python26 libshairplay \
@@ -80,8 +80,6 @@ libssh2: libgcrypt openssl
 curl: openssl libssh2
 tiff: libjpeg-turbo
 jasper: libjpeg-turbo
-libvorbis: libogg
-libflac: libogg gettext
 libass: fontconfig libpng freetype2 expat $(ICONV)
 librtmp: openssl
 libmicrohttpd: gnutls libgcrypt libgpg-error
@@ -99,7 +97,7 @@ nettle: gmp
 pythonmodule-pil: $(ZLIB) libjpeg-turbo libpng freetype2 python26
 libsdl2: $(LINUX_SYSTEM_LIBS)
 libxslt: libgcrypt
-ffmpeg: $(ICONV) $(ZLIB) bzip2 libvorbis $(FFMPEG_DEPENDS)
+ffmpeg: $(ICONV) $(ZLIB) bzip2 $(FFMPEG_DEPENDS)
 libcec: platform
 crossguid: $(CROSSGUID_DEPS)
 
