@@ -59,6 +59,7 @@ const std::string& CSkinSettings::GetString(int setting) const
 void CSkinSettings::SetString(int setting, const std::string &label)
 {
   g_SkinInfo->SetString(setting, label);
+  g_SkinInfo->SaveSettings();
 }
 
 int CSkinSettings::TranslateBool(const std::string &setting)
@@ -74,16 +75,19 @@ bool CSkinSettings::GetBool(int setting) const
 void CSkinSettings::SetBool(int setting, bool set)
 {
   g_SkinInfo->SetBool(setting, set);
+  g_SkinInfo->SaveSettings();
 }
 
 void CSkinSettings::Reset(const std::string &setting)
 {
   g_SkinInfo->Reset(setting);
+  g_SkinInfo->SaveSettings();
 }
 
 void CSkinSettings::Reset()
 {
   g_SkinInfo->Reset();
+  g_SkinInfo->SaveSettings();
 
   g_infoManager.ResetCache();
 }
