@@ -19,8 +19,6 @@
  *
  */
 
-#define PT_FORMAT_RAW_CLASS 0xFF00
-
 /**
  * The possible channels
  */
@@ -115,6 +113,13 @@ enum AEDataFormat
   AE_FMT_TRUEHD,   // 20 / 0x14
   AE_FMT_DTSHD,   // 21 / 0x15
   AE_FMT_LPCM,   // 22 / 0x16
+
+  /* Raw Bitstream formats */
+  AE_FMT_AC3_RAW,
+  AE_FMT_DTS_RAW,
+  AE_FMT_EAC3_RAW,
+  AE_FMT_TRUEHD_RAW,
+  AE_FMT_DTSHD_RAW,
 
   /* planar formats */
   AE_FMT_U8P,

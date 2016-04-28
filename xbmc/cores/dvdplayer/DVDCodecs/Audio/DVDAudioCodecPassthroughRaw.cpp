@@ -56,11 +56,11 @@ bool CDVDAudioCodecPassthroughRaw::Open(CDVDStreamInfo &hints, CDVDCodecOptions 
 
   CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Open codec: %d; ch:%d; birate:%d; blk;%d; bits:%d; profile:%d", m_hints.codec, m_hints.channels, m_hints.bitrate, m_hints.blockalign, m_hints.bitspersample, m_hints.profile);
 
-  bool bSupportsAC3Out    = CAEFactory::SupportsRaw((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS), hints.samplerate);
-  bool bSupportsDTSOut    = CAEFactory::SupportsRaw((AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS), hints.samplerate);
-  bool bSupportsEAC3Out   = CAEFactory::SupportsRaw((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS), hints.samplerate);
-  bool bSupportsTrueHDOut = CAEFactory::SupportsRaw((AEDataFormat)(AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS), hints.samplerate);
-  bool bSupportsDTSHDOut  = CAEFactory::SupportsRaw((AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS), hints.samplerate);
+  bool bSupportsAC3Out    = CAEFactory::SupportsRaw(AE_FMT_AC3_RAW, hints.samplerate);
+  bool bSupportsDTSOut    = CAEFactory::SupportsRaw(AE_FMT_DTS_RAW, hints.samplerate);
+  bool bSupportsEAC3Out   = CAEFactory::SupportsRaw(AE_FMT_EAC3_RAW, hints.samplerate);
+  bool bSupportsTrueHDOut = CAEFactory::SupportsRaw(AE_FMT_TRUEHD_RAW, hints.samplerate);
+  bool bSupportsDTSHDOut  = CAEFactory::SupportsRaw(AE_FMT_DTSHD_RAW, hints.samplerate);
 
   if ((hints.codec == AV_CODEC_ID_AC3 && bSupportsAC3Out) ||
       (hints.codec == AV_CODEC_ID_EAC3 && bSupportsEAC3Out) ||
@@ -89,17 +89,17 @@ void CDVDAudioCodecPassthroughRaw::GetData(DVDAudioFrame &frame)
 
   switch(m_codec)
   {
-    case AE_FMT_AC3 + PT_FORMAT_RAW_CLASS:
+    case AE_FMT_AC3_RAW:
     {
       frame.duration = 0.032;
       break;
     }
-    case AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS:
+    case AE_FMT_EAC3_RAW:
     {
       frame.duration = 1536.0 / frame.encoded_sample_rate;
       break;
     }
-    case AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS:
+    case AE_FMT_TRUEHD_RAW:
     {
       int rate;
       if (frame.encoded_sample_rate == 48000 ||
@@ -112,8 +112,8 @@ void CDVDAudioCodecPassthroughRaw::GetData(DVDAudioFrame &frame)
       break;
     }
 
-    case AE_FMT_DTS + PT_FORMAT_RAW_CLASS:
-    case AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS:
+    case AE_FMT_DTS_RAW:
+    case AE_FMT_DTSHD_RAW:
     {
       frame.duration = 512.0 / frame.encoded_sample_rate;
       break;
@@ -152,26 +152,26 @@ enum AEDataFormat CDVDAudioCodecPassthroughRaw::GetDataFormat()
   switch(m_info.GetDataType())
   {
     case CAEStreamInfo::STREAM_TYPE_AC3:
-      codec = (AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS);
+      codec = AE_FMT_AC3_RAW;
       break;
 
     case CAEStreamInfo::STREAM_TYPE_DTS_512:
     case CAEStreamInfo::STREAM_TYPE_DTS_1024:
     case CAEStreamInfo::STREAM_TYPE_DTS_2048:
     case CAEStreamInfo::STREAM_TYPE_DTSHD_CORE:
-      codec = (AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS);
+      codec = AE_FMT_DTS_RAW;
       break;
 
     case CAEStreamInfo::STREAM_TYPE_DTSHD:
-      codec = (AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS);
+      codec = AE_FMT_DTSHD_RAW;
       break;
 
     case CAEStreamInfo::STREAM_TYPE_EAC3:
-      codec = (AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS);
+      codec = AE_FMT_EAC3_RAW;
       break;
 
     case CAEStreamInfo::STREAM_TYPE_TRUEHD:
-      codec = (AEDataFormat)(AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS);
+      codec = AE_FMT_TRUEHD_RAW;
       pktperframe = 24;
       break;
   }

@@ -220,7 +220,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
     switch (m_format.m_dataFormat)
     {
-      case AE_FMT_AC3 + PT_FORMAT_RAW_CLASS:
+      case AE_FMT_AC3_RAW:
         if (CJNIAudioFormat::ENCODING_AC3 != -1)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_AC3;
@@ -231,7 +231,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
-      case AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS:
+      case AE_FMT_EAC3_RAW:
         if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_E_AC3;
@@ -242,7 +242,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
-      case AE_FMT_DTS + PT_FORMAT_RAW_CLASS:
+      case AE_FMT_DTS_RAW:
         if (CJNIAudioFormat::ENCODING_DTS != -1)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DTS;
@@ -253,7 +253,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
-      case AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS:
+      case AE_FMT_DTSHD_RAW:
         if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DTS_HD;
@@ -264,7 +264,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_format.m_dataFormat   = AE_FMT_S16LE;
         break;
 
-      case AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS:
+      case AE_FMT_TRUEHD_RAW:
         if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
         {
           m_encoding              = CJNIAudioFormat::ENCODING_DOLBY_TRUEHD;
@@ -738,15 +738,15 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
       rawptinfo.m_displayNameExtra = "RAW Passthrough";
 
       if (CJNIAudioFormat::ENCODING_AC3 != -1)
-        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS));
+        rawptinfo.m_dataFormats.push_back(AE_FMT_AC3_RAW);
       if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
-        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS));
+        rawptinfo.m_dataFormats.push_back(AE_FMT_EAC3_RAW);
       if (CJNIAudioFormat::ENCODING_DTS != -1)
-        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS));
+        rawptinfo.m_dataFormats.push_back(AE_FMT_DTS_RAW);
       if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
-        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS));
+        rawptinfo.m_dataFormats.push_back(AE_FMT_DTSHD_RAW);
       if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
-        rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_TRUEHD + PT_FORMAT_RAW_CLASS));
+        rawptinfo.m_dataFormats.push_back(AE_FMT_TRUEHD_RAW);
 
       std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(rawptinfo.m_sampleRates));
 
