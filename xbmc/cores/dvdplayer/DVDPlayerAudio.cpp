@@ -773,12 +773,9 @@ bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
       {
         double correction = int(error / audioframe.duration) * audioframe.duration;
 
-        if (correction > 0)
-        {
-          // Force clock sync to audio
-          CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket forcing clock sync for passthrough - dup error(%f), clock(%f), correction(%f)", error, clock, correction);
-          m_pClock->Update(clock+correction, absolute, 0.0, "CDVDPlayerAudio::OutputPacket");
-        }
+        // Force clock sync to audio
+        CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket forcing clock sync for passthrough - dup error(%f), clock(%f), correction(%f)", error, clock, correction);
+        m_pClock->Update(clock+correction, absolute, 0.0, "CDVDPlayerAudio::OutputPacket");
         m_dvdAudio.AddPackets(audioframe);
       }
       else
