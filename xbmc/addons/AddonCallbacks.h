@@ -24,7 +24,9 @@
 #include "../../addons/library.kodi.guilib/libKODI_guilib.h"
 #include "../../addons/library.kodi.adsp/libKODI_adsp.h"
 #include "../../addons/library.kodi.audioengine/libKODI_audioengine.h"
+#include "../../addons/library.kodi.inputstream/libKODI_inputstream.h"
 #include "cores/dvdplayer/DVDDemuxers/DVDDemuxUtils.h"
+#include "AddonCallbacksInputStream.h"
 #include "addons/include/kodi_adsp_types.h"
 #include "addons/include/kodi_audioengine_types.h"
 #include "addons/include/xbmc_pvr_types.h"
@@ -503,6 +505,15 @@ typedef struct CB_PVRLib
 
 } CB_PVRLib;
 
+typedef void (*InputStreamFreeDemuxPacket)(void *addonData, DemuxPacket* pPacket);
+typedef DemuxPacket* (*InputStreamAllocateDemuxPacket)(void *addonData, int iDataSize);
+
+typedef struct CB_INPUTSTREAMLib
+{
+  InputStreamFreeDemuxPacket FreeDemuxPacket;
+  InputStreamAllocateDemuxPacket AllocateDemuxPacket;
+} CB_INPUTSTREAMLib;
+
 
 typedef CB_AddOnLib* (*XBMCAddOnLib_RegisterMe)(void *addonData);
 typedef void (*XBMCAddOnLib_UnRegisterMe)(void *addonData, CB_AddOnLib *cbTable);
@@ -516,6 +527,8 @@ typedef CB_GUILib* (*XBMCGUILib_RegisterMe)(void *addonData);
 typedef void (*XBMCGUILib_UnRegisterMe)(void *addonData, CB_GUILib *cbTable);
 typedef CB_PVRLib* (*XBMCPVRLib_RegisterMe)(void *addonData);
 typedef void (*XBMCPVRLib_UnRegisterMe)(void *addonData, CB_PVRLib *cbTable);
+typedef CB_INPUTSTREAMLib* (*KODIINPUTSTREAMLib_RegisterMe)(void *addonData);
+typedef void (*KODIINPUTSTREAMLib_UnRegisterMe)(void *addonData, CB_INPUTSTREAMLib *cbTable);
 
 typedef struct AddonCB
 {
@@ -533,6 +546,8 @@ typedef struct AddonCB
   XBMCPVRLib_UnRegisterMe    PVRLib_UnRegisterMe;
   KODIADSPLib_RegisterMe     ADSPLib_RegisterMe;
   KODIADSPLib_UnRegisterMe   ADSPLib_UnRegisterMe;
+  KODIINPUTSTREAMLib_RegisterMe INPUTSTREAMLib_RegisterMe;
+  KODIINPUTSTREAMLib_UnRegisterMe INPUTSTREAMLib_UnRegisterMe;
 } AddonCB;
 
 
@@ -566,6 +581,8 @@ public:
   static void GUILib_UnRegisterMe(void *addonData, CB_GUILib *cbTable);
   static CB_PVRLib* PVRLib_RegisterMe(void *addonData);
   static void PVRLib_UnRegisterMe(void *addonData, CB_PVRLib *cbTable);
+  static CB_INPUTSTREAMLib* INPUTSTREAMLib_RegisterMe(void *addonData);
+  static void INPUTSTREAMLib_UnRegisterMe(void *addonData, CB_INPUTSTREAMLib *cbTable);
 
   CAddonCallbacksAddon *GetHelperAddon() { return m_helperAddon; }
   CAddonCallbacksADSP *GetHelperADSP() { return m_helperADSP; }
@@ -573,6 +590,7 @@ public:
   CAddonCallbacksCodec *GetHelperCodec() { return m_helperCODEC; }
   CAddonCallbacksGUI *GetHelperGUI() { return m_helperGUI; }
   CAddonCallbacksPVR *GetHelperPVR() { return m_helperPVR; }
+  CAddonCallbacksInputStream *GetHelperInputStream() { return m_helperInputStream; }
 
 private:
   AddonCB             *m_callbacks;
@@ -583,6 +601,7 @@ private:
   CAddonCallbacksCodec *m_helperCODEC;
   CAddonCallbacksGUI   *m_helperGUI;
   CAddonCallbacksPVR   *m_helperPVR;
+  CAddonCallbacksInputStream *m_helperInputStream;
 };
 
 }; /* namespace ADDON */

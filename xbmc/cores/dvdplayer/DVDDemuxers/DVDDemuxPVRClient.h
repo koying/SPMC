@@ -101,6 +101,7 @@ public:
   int GetNrOfStreams();
   std::string GetFileName();
   virtual void GetStreamCodecName(int iStreamId, std::string &strName);
+  virtual void EnableStream(int id, bool enable) override;
 
 protected:
   CDVDInputStream* m_pInput;

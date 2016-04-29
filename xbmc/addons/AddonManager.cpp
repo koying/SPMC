@@ -25,6 +25,7 @@
 
 #include "Addon.h"
 #include "addons/ImageResource.h"
+#include "addons/InputStream.h"
 #include "addons/LanguageResource.h"
 #include "addons/UISoundsResource.h"
 #include "addons/Webinterface.h"
@@ -130,6 +131,7 @@ AddonPtr CAddonMgr::Factory(const cp_extension_t *props)
     case ADDON_ADSPDLL:
     case ADDON_AUDIOENCODER:
     case ADDON_AUDIODECODER:
+    case ADDON_INPUTSTREAM:
       { // begin temporary platform handling for Dlls
         // ideally platforms issues will be handled by C-Pluff
         // this is not an attempt at a solution
@@ -173,6 +175,9 @@ AddonPtr CAddonMgr::Factory(const cp_extension_t *props)
           return AddonPtr(new CAudioEncoder(props));
         else if (type == ADDON_AUDIODECODER)
           return AddonPtr(new CAudioDecoder(props));
+        else if (type == ADDON_INPUTSTREAM)
+          return AddonPtr(new CInputStream(props));
+
         else
           return AddonPtr(new CScreenSaver(props));
       }
@@ -897,6 +902,8 @@ AddonPtr CAddonMgr::AddonFromProps(AddonProps& addonProps)
       return AddonPtr(new CRepository(addonProps));
     case ADDON_CONTEXT_ITEM:
       return AddonPtr(new CContextMenuAddon(addonProps));
+  case ADDON_INPUTSTREAM:
+    return AddonPtr(new CInputStream(addonProps));
     default:
       break;
   }

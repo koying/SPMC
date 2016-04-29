@@ -202,14 +202,3 @@ void CDemuxStream::GetStreamName( std::string& strInfo )
 {
   strInfo = "";
 }
-
-AVDiscard CDemuxStream::GetDiscard()
-{
-  return AVDISCARD_NONE;
-}
-
-void CDemuxStream::SetDiscard(AVDiscard discard)
-{
-  return;
-}
-

@@ -931,6 +931,25 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   }
   if(!valid)
     CloseStream(m_CurrentRadioRDS, false);
+
+  // disable demux streams
+  if (m_item.IsRemote() && m_pDemuxer)
+  {
+    for (auto &stream : m_SelectionStreams.m_Streams)
+    {
+      if (STREAM_SOURCE_MASK(stream.source) == STREAM_SOURCE_DEMUX)
+      {
+        if (stream.id != m_CurrentVideo.id &&
+            stream.id != m_CurrentAudio.id &&
+            stream.id != m_CurrentSubtitle.id &&
+            stream.id != m_CurrentTeletext.id &&
+            stream.id != m_CurrentRadioRDS.id)
+        {
+          m_pDemuxer->EnableStream(stream.id, false);
+        }
+      }
+    }
+  }
 }
 
 bool CDVDPlayer::ReadPacket(DemuxPacket*& packet, CDemuxStream*& stream)
@@ -1554,7 +1573,8 @@ void CDVDPlayer::ProcessPacket(CDemuxStream* pStream, DemuxPacket* pPacket)
     ProcessRadioRDSData(pStream, pPacket);
   else
   {
-    pStream->SetDiscard(AVDISCARD_ALL);
+    if (m_pDemuxer)
+      m_pDemuxer->EnableStream(pStream->iId, false);
     CDVDDemuxUtils::FreeDemuxPacket(pPacket); // free it since we won't do anything with it
   }
 }
@@ -3365,7 +3385,7 @@ bool CDVDPlayer::OpenStream(CCurrentStream& current, int iStream, int source, bo
     stream = m_pSubtitleDemuxer->GetStream(iStream);
     if(!stream || stream->disabled)
       return false;
-    stream->SetDiscard(AVDISCARD_NONE);
+    m_pSubtitleDemuxer->EnableStream(iStream, true);
 
     hint.Assign(*stream, true);
   }
@@ -3388,7 +3408,7 @@ bool CDVDPlayer::OpenStream(CCurrentStream& current, int iStream, int source, bo
     stream = m_pDemuxer->GetStream(iStream);
     if(!stream || stream->disabled)
       return false;
-    stream->SetDiscard(AVDISCARD_NONE);
+    m_pDemuxer->EnableStream(iStream, true);
 
     hint.Assign(*stream, true);
 
@@ -3450,7 +3470,6 @@ bool CDVDPlayer::OpenStream(CCurrentStream& current, int iStream, int source, bo
       /* mark stream as disabled, to disallaw further attempts*/
       CLog::Log(LOGWARNING, "%s - Unsupported stream %d. Stream disabled.", __FUNCTION__, stream->iId);
       stream->disabled = true;
-      stream->SetDiscard(AVDISCARD_ALL);
     }
   }
 

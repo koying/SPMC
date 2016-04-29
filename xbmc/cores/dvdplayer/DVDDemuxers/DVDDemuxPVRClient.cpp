@@ -430,6 +430,8 @@ void CDVDDemuxPVRClient::RequestStreams()
     }
 
     m_streams[i]->codec       = (AVCodecID)props.stream[i].iCodecId;
+    m_streams[i]->codecName   = props.stream[i].codecName;
+    m_streams[i]->bandwidth   = props.stream[i].bandwidth;
     m_streams[i]->iId         = i;
     m_streams[i]->iPhysicalId = props.stream[i].iPhysicalId;
     m_streams[i]->language[0] = props.stream[i].strLanguage[0];
@@ -504,4 +506,12 @@ void CDVDDemuxPVRClient::SetSpeed ( int speed )
 {
   if (m_pInput)
     m_pvrClient->SetSpeed(speed);
+}
+
+void CDVDDemuxClient::EnableStream(int id, bool enable)
+{
+  if (m_IDemux)
+  {
+    m_IDemux->EnableStream(id, enable);
+  }
 }

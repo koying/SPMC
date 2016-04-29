@@ -6,6 +6,7 @@ SRCS=Addon.cpp \
      AddonCallbacksCodec.cpp \
      AddonCallbacksGUI.cpp \
      AddonCallbacksPVR.cpp \
+     AddonCallbacksInputStream.cpp \
      AddonDatabase.cpp \
      AddonInstaller.cpp \
      AddonManager.cpp \
@@ -19,6 +20,7 @@ SRCS=Addon.cpp \
      GUIViewStateAddonBrowser.cpp \
      GUIWindowAddonBrowser.cpp \
      ImageResource.cpp \
+     InputStream.cpp \
      LanguageResource.cpp \
      PluginSource.cpp \
      Repository.cpp \

@@ -42,6 +42,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libKODI_guilib", "..\..\lib
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libXBMC_pvr", "..\..\lib\addons\library.xbmc.pvr\project\VS2010Express\libXBMC_pvr.vcxproj", "{6D8C91F8-992F-4C83-9DE3-485D64EF8420}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libKODI_inputstream", "..\..\lib\addons\library.kodi.inputstream\project\VS2010Express\libKODI_inputstream.vcxproj", "{8BC9CEB8-8B4A-11D0-8D11-00A0CFEBC942}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XbmcCommons", "XbmcCommons.vcxproj", "{87DA0A1E-3F33-4927-A5E5-2D58F2C58E17}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XbmcThreads", "XbmcThreads.vcxproj", "{034B1D02-CA92-455D-8866-DB95BEE49C10}"

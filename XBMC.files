@@ -9840,3 +9840,13 @@ xbmc/interfaces/builtins/SystemBuiltins.cpp
 xbmc/interfaces/builtins/SystemBuiltins.h
 xbmc/interfaces/builtins/WeatherBuiltins.cpp
 xbmc/interfaces/builtins/WeatherBuiltins.h
+project/cmake/kodi-config.cmake.in
+project/cmake/xbmc-config.cmake.in
+xbmc/addons/InputStream.cpp
+xbmc/addons/InputStream.h
+xbmc/addons/Makefile
+xbmc/cores/dvdplayer/DVDInputStreams/Makefile
+xbmc/addons/AddonCallbacksAudioDSP.cpp
+xbmc/addons/AddonCallbacksAudioDSP.h
+xbmc/addons/AddonCallbacksInputStream.cpp
+xbmc/addons/AddonCallbacksInputStream.h

@@ -43,8 +43,6 @@ extern "C" {
 #pragma warning(pop)
 #endif
 
-enum AVDiscard;
-
 enum StreamType
 {
   STREAM_NONE = 0,// if unknown
@@ -106,9 +104,6 @@ public:
 
   virtual void GetStreamName(std::string& strInfo);
 
-  virtual void      SetDiscard(AVDiscard discard);
-  virtual AVDiscard GetDiscard();
-
   int iId;         // most of the time starting from 0
   int iPhysicalId; // id
   AVCodecID codec;
@@ -117,6 +112,7 @@ public:
   int level;   // encoder level of the stream reported by the decoder. used to qualify hw decoders.
   StreamType type;
   int source;
+  unsigned int bandwidth;
 
   int iDuration; // in mseconds
   void* pPrivate; // private pointer for the demuxer
@@ -125,6 +121,8 @@ public:
 
   char language[4]; // ISO 639 3-letter language code (empty string if undefined)
   bool disabled; // set when stream is disabled. (when no decoder exists)
+
+  std::string codecName;
 
   int  changes; // increment on change which player may need to know about
 
@@ -374,4 +372,10 @@ public:
    * return a user-presentable codec name of the given stream
    */
   virtual void GetStreamCodecName(int iStreamId, std::string &strName) {};
+
+
+  /*
+   * enable / disable demux stream
+   */
+  virtual void EnableStream(int id, bool enable) {};
 };
