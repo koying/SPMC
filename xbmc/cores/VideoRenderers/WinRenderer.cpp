@@ -1096,8 +1096,8 @@ bool CWinRenderer::Supports(EINTERLACEMETHOD method)
   }
 
   if(m_format != RENDER_FMT_DXVA
-  && (   method == VS_INTERLACEMETHOD_DEINTERLACE
-      || method == VS_INTERLACEMETHOD_DEINTERLACE_HALF
+  && (   method == VS_INTERLACEMETHOD_YADIF
+      || method == VS_INTERLACEMETHOD_YADIF_HALF
       || method == VS_INTERLACEMETHOD_SW_BLEND))
     return true;
 
@@ -1176,7 +1176,7 @@ EINTERLACEMETHOD CWinRenderer::AutoInterlaceMethod()
   if (m_renderMethod == RENDER_DXVA)
     return VS_INTERLACEMETHOD_DXVA_BOB;
   else
-    return VS_INTERLACEMETHOD_DEINTERLACE_HALF;
+    return VS_INTERLACEMETHOD_YADIF_HALF;
 }
 
 CRenderInfo CWinRenderer::GetRenderInfo()
