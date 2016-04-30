@@ -676,9 +676,11 @@
           <level>2</level>
           <default>10</default>
           <constraints>
-            <minimum>0</minimum>
-            <step>10</step>
-            <maximum>100</maximum>
+            <options>
+              <option label="418">20</option>  <!-- Low -->
+              <option label="419">80</option>  <!-- High -->
+              <option label="20420">99999</option>   <!-- Never -->
+            </options>
           </constraints>
           <control type="spinner" format="string">
             <formatlabel>14047</formatlabel>
