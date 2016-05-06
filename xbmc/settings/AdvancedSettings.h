@@ -254,6 +254,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler, CJob
     std::string m_fanartImages;
 
     int m_iMusicLibraryRecentlyAddedItems;
+    int m_iMusicLibraryDateAdded;
     bool m_bMusicLibraryAllItemsOnBottom;
     bool m_bMusicLibraryCleanOnUpdate;
     std::string m_strMusicLibraryAlbumFormat;
@@ -388,8 +389,7 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler, CJob
 
     std::string m_userAgent;
 
-    static bool IsSettingVisible(const std::string &condition, const std::string &value, const CSetting *setting, void *data);
-    void setInetrnalMYSQL(const bool enable, const bool init);
+    void setInternalMYSQL(const bool enable, const bool init);
   private:
     std::string m_musicExtensions;
     void setExtraLogLevel(const std::vector<CVariant> &components);
