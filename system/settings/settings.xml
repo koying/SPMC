@@ -1953,11 +1953,6 @@
     <category id="mysql" label="1261" help="1262">
       <group id="1">
         <setting id="mysql.enabled" type="boolean" label="24022" help="1263">
-        <dependencies>
-            <dependency type="enable">
-                <condition on="property" operator="!is" name="enablemysqlgui" />
-            </dependency>
-          </dependencies>
           <level>1</level>
           <default>false</default>
           <control type="toggle" />
