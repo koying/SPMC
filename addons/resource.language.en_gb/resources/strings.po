@@ -19765,3 +19765,10 @@ msgctxt "#39010"
 msgid "Select sort method"
 msgstr ""
 
+msgctxt "#39104"
+msgid "Export"
+msgstr ""
+
+msgctxt "#39105"
+msgid "Exports nfo, thumbnail & fanart near the media file"
+msgstr ""
