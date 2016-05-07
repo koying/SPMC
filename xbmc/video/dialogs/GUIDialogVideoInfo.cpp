@@ -1004,6 +1004,7 @@ int CGUIDialogVideoInfo::ManageVideoItem(const CFileItemPtr &item)
 
     // set or change movie set the movie belongs to
     buttons.Add(CONTEXT_BUTTON_SET_MOVIESET, 20465);
+    buttons.Add(CONTEXT_BUTTON_EXPORT, 39004);
   }
 
   if (type == MediaTypeEpisode &&
@@ -1068,6 +1069,11 @@ int CGUIDialogVideoInfo::ManageVideoItem(const CFileItemPtr &item)
           result = SetMovieSet(item.get(), selectedSet.get());
         break;
       }
+
+      case CONTEXT_BUTTON_EXPORT:
+        database.ExportSingleVideoToXML(item->GetPath(), true, true, item->GetPath());
+        result = true;
+        break;
 
       case CONTEXT_BUTTON_UNLINK_BOOKMARK:
         database.DeleteBookMarkForEpisode(*item->GetVideoInfoTag());

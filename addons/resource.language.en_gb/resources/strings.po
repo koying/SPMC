@@ -18258,3 +18258,11 @@ msgstr ""
 msgctxt "#39003"
 msgid "Accelerate h264"
 msgstr ""
+
+msgctxt "#39004"
+msgid "Export"
+msgstr ""
+
+msgctxt "#3905"
+msgid "Exports nfo, thumbnail & fanart near the media file"
+msgstr ""
