@@ -265,7 +265,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       {
         try
         {
-          sleep(1000);
+          sleep(5000);
           android.os.Process.killProcess(android.os.Process.myPid());
         } catch (Exception e) {}
       }
