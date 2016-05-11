@@ -35,6 +35,23 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
   native void _doFrame(long frameTimeNanos);
 
+  private Runnable leanbackUpdateRunnable = new Runnable() 
+  {
+    @Override
+    public void run() 
+    {
+      Log.d(TAG, "Updating recommendations");
+      new Thread()
+      {
+        public void run()
+        {
+          mJsonRPC.updateLeanback(Main.this);
+        }
+      }.start();
+      handler.postDelayed(this, 60*60*1000);
+    }
+  };
+  
   public Main()
   {
     super();
@@ -113,7 +130,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-    mSettingsContentObserver = new XBMCSettingsContentObserver(this, new Handler());
+    mSettingsContentObserver = new XBMCSettingsContentObserver(this, handler);
     getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
 
     // register the InputDeviceListener implementation
@@ -200,23 +217,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       if (getPackageManager().hasSystemFeature("android.software.leanback"))
       {
         // Leanback
-
-        new Thread()
-        {
-          public void run()
-          {
-            try
-            {
-              sleep(10000);
-              mJsonRPC.updateLeanback(Main.this);
-            } catch (Exception e)
-            {
-              e.printStackTrace();
-            }
-          }
-        }.start();
+        handler.removeCallbacks(leanbackUpdateRunnable);
+        handler.postDelayed(leanbackUpdateRunnable, 10*1000);
       }
-
     }
 
     // New intent ?
