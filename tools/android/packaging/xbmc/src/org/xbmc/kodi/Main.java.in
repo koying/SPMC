@@ -33,6 +33,16 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
   native void _doFrame(long frameTimeNanos);
 
+  private Runnable leanbackUpdateRunnable = new Runnable() 
+  {
+    @Override
+    public void run() 
+    {
+      mJsonRPC.updateLeanback(Main.this);
+      handler.postDelayed(this, 24*60*60*1000);
+    }
+  };
+  
   public Main()
   {
     super();
@@ -193,23 +203,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       if (getPackageManager().hasSystemFeature("android.software.leanback"))
       {
         // Leanback
-
-        new Thread()
-        {
-          public void run()
-          {
-            try
-            {
-              sleep(10000);
-              mJsonRPC.updateLeanback(Main.this);
-            } catch (Exception e)
-            {
-              e.printStackTrace();
-            }
-          }
-        }.start();
+        handler.postDelayed(leanbackUpdateRunnable, 10*1000);
       }
-
     }
 
     // New intent ?
