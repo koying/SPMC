@@ -171,20 +171,20 @@ bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
 {
   // white/black list access checks, disallow exploits
 
-  // no access to the passwords.xml file,
-  // this can expose user/pass of remote servers
-  if (filePath.find("passwords.xml") != std::string::npos)
+  static const char *blacklist_access[] = {
+    "passwords.xml",
+    "sources.xml",
+    "guisettings.xml",
+    "advancedsettings.xml",
+    NULL
+  };
+  for (const char **ptr = blacklist_access; *ptr; ptr++)
   {
-    CLog::Log(LOGDEBUG,"http access denied");
-    return false;
-  }
-
-  // no access to the sources.xml file,
-  // this can expose user/pass of remote servers
-  if (filePath.find("sources.xml") != std::string::npos)
-  {
-    CLog::Log(LOGDEBUG,"http access denied");
-    return false;
+    if (filePath.find(*ptr) != std::string::npos)
+    {
+      CLog::Log(LOGDEBUG,"http access denied");
+      return false;
+    }
   }
 
 #if defined(TARGET_DARWIN)
