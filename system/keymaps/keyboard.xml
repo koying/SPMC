@@ -342,6 +342,7 @@
       <enter mod="longpress">PlayPause</enter>
       <m>OSD</m>
       <menu>OSD</menu>
+      <menu mod="longpress">CodecInfo</menu>
       <i>Info</i>
       <o>PlayerProcessInfo</o>
       <o mod="ctrl,shift">PlayerDebug</o>
