@@ -312,6 +312,7 @@
       <enter mod="longpress">PlayPause</enter>
       <m>OSD</m>
       <menu>OSD</menu>
+      <menu mod="longpress">CodecInfo</menu>
       <i>Info</i>
       <o>CodecInfo</o>
       <z>AspectRatio</z>
