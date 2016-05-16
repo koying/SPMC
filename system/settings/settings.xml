@@ -674,7 +674,7 @@
         </setting>
         <setting id="videoplayer.hqscalers" type="integer" parent="videoplayer.rendermethod" label="13435" help="36154">
           <level>2</level>
-          <default>20</default>
+          <default>80</default>
           <constraints>
             <options>
               <option label="418">20</option>  <!-- Low -->
