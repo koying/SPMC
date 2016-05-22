@@ -150,13 +150,9 @@ void CXBMCApp::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender,
   if ((flag & Input) && strcmp(sender, "xbmc") == 0)
   {
     if (strcmp(message, "OnInputRequested") == 0)
-    {
       CAndroidKey::SetHandleSearchKeys(true);
-    }
     else if (strcmp(message, "OnInputFinished") == 0)
-    {
-      CAndroidKey::SetHandleSearchKeys(true);
-    }
+      CAndroidKey::SetHandleSearchKeys(false);
   }
 }
 
