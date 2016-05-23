@@ -89,6 +89,17 @@ public class XBMCJsonRPC
 
   private NotificationManager mNotificationManager;
 
+  public XBMCJsonRPC()
+  {
+    String jsonPort = System.getProperty("xbmc.jsonPort", "8080");
+    String jsonUser = System.getProperty("xbmc.jsonUser", "");
+    String jsonPwd = System.getProperty("xbmc.jsonPwd", "");
+    if (!jsonUser.isEmpty())
+      m_jsonURL = "http://" + jsonUser + ":" + jsonPwd + "@localhost:" + jsonPort;
+    else
+      m_jsonURL = "http://localhost:" + jsonPort;
+  }
+
   public String request_string(String jsonRequest)
   {
     try
