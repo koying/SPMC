@@ -164,7 +164,7 @@ bool CActiveAEResamplePi::Init(uint64_t dst_chan_layout, int dst_channels, int d
   {
     av_opt_set_double(m_pContext, "rematrix_maxval", 1.0, 0);
   }
-  int boost_center = CSettings::Get().GetInt("audiooutput.boostcenter");
+  int boost_center = CSettings::GetInstance().GetInt("audiooutput.boostcenter");
   if (boost_center)
   {
     float gain = pow(10.0f, ((float)(-3 + boost_center))/20.0f);
