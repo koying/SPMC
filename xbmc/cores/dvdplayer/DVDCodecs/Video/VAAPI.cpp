@@ -1875,7 +1875,7 @@ void COutput::InitCycle()
         ||  method == VS_INTERLACEMETHOD_VAAPI_BOB
         ||  method == VS_INTERLACEMETHOD_VAAPI_MADI
         ||  method == VS_INTERLACEMETHOD_VAAPI_MACI
-        ||  method == VS_INTERLACEMETHOD_DEINTERLACE
+        ||  method == VS_INTERLACEMETHOD_YADIF
         ||  method == VS_INTERLACEMETHOD_RENDER_BOB)
     {
         if (method == VS_INTERLACEMETHOD_AUTO)
@@ -1896,7 +1896,7 @@ void COutput::InitCycle()
     }
     if (!m_pp)
     {
-      if (method == VS_INTERLACEMETHOD_DEINTERLACE ||
+      if (method == VS_INTERLACEMETHOD_YADIF ||
           method == VS_INTERLACEMETHOD_RENDER_BOB)
       {
         m_pp = new CFFmpegPostproc();
@@ -3037,7 +3037,7 @@ bool CFFmpegPostproc::PreInit(CVaapiConfig &config, SDiMethods *methods)
     m_cache = (uint8_t*)_aligned_malloc(CACHED_BUFFER_SIZE, 64);
     if (methods)
     {
-      methods->diMethods[methods->numDiMethods++] = VS_INTERLACEMETHOD_DEINTERLACE;
+      methods->diMethods[methods->numDiMethods++] = VS_INTERLACEMETHOD_YADIF;
       methods->diMethods[methods->numDiMethods++] = VS_INTERLACEMETHOD_RENDER_BOB;
     }
   }
@@ -3096,7 +3096,7 @@ bool CFFmpegPostproc::Init(EINTERLACEMETHOD method)
   inputs->pad_idx = 0;
   inputs->next    = NULL;
 
-  if (method == VS_INTERLACEMETHOD_DEINTERLACE)
+  if (method == VS_INTERLACEMETHOD_YADIF)
   {
     std::string filter;
 
@@ -3194,7 +3194,7 @@ bool CFFmpegPostproc::AddPicture(CVaapiDecodedPicture &inPic)
   CheckSuccess(vaUnmapBuffer(m_config.dpy, image.buf));
   CheckSuccess(vaDestroyImage(m_config.dpy,image.image_id));
 
-  if (m_diMethod == VS_INTERLACEMETHOD_DEINTERLACE)
+  if (m_diMethod == VS_INTERLACEMETHOD_YADIF)
   {
     if (av_buffersrc_add_frame(m_pFilterIn, m_pFilterFrameIn) < 0)
     {
@@ -3220,7 +3220,7 @@ error:
 bool CFFmpegPostproc::Filter(CVaapiProcessedPicture &outPic)
 {
   outPic.DVDPic = m_DVDPic;
-  if (m_diMethod == VS_INTERLACEMETHOD_DEINTERLACE)
+  if (m_diMethod == VS_INTERLACEMETHOD_YADIF)
   {
     int result;
     result = av_buffersink_get_frame(m_pFilterOut, m_pFilterFrameOut);
@@ -3295,7 +3295,7 @@ void CFFmpegPostproc::Flush()
 
 bool CFFmpegPostproc::Compatible(EINTERLACEMETHOD method)
 {
-  if (method == VS_INTERLACEMETHOD_DEINTERLACE)
+  if (method == VS_INTERLACEMETHOD_YADIF)
     return true;
   else if (method == VS_INTERLACEMETHOD_RENDER_BOB)
     return true;

@@ -8011,7 +8011,7 @@ msgstr ""
 
 #: xbmc/video/dialogs/GUIDialogVideoSettings.cpp
 msgctxt "#16020"
-msgid "Yadif"
+msgid "Yadif (2X)"
 msgstr ""
 
 #: xbmc/video/dialogs/GUIDialogVideoSettings.cpp
@@ -8080,7 +8080,7 @@ msgstr ""
 
 #: xbmc/video/dialogs/GUIDialogVideoSettings.cpp
 msgctxt "#16036"
-msgid "Yadif (half)"
+msgid "Yadif"
 msgstr ""
 
 msgctxt "#16037"

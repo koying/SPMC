@@ -3347,12 +3347,12 @@ bool CLinuxRendererGL::Supports(EINTERLACEMETHOD method)
 
 #ifdef TARGET_DARWIN_IOS
   // iOS does not have the ponies for YADIF
-  if(method == VS_INTERLACEMETHOD_DEINTERLACE)
+  if(method == VS_INTERLACEMETHOD_YADIF)
     return false;
 #endif
   
-  if(method == VS_INTERLACEMETHOD_DEINTERLACE
-  || method == VS_INTERLACEMETHOD_DEINTERLACE_HALF
+  if(method == VS_INTERLACEMETHOD_YADIF
+  || method == VS_INTERLACEMETHOD_YADIF_HALF
   || method == VS_INTERLACEMETHOD_SW_BLEND)
     return true;
 
