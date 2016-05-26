@@ -22,7 +22,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "settings/Settings.h"
 #include "utils/URIUtils.h"
-#include "utils/Log.h"
+#include "utils/log.h"
 
 CDVDInputStreamMpegDashComponent::CDVDInputStreamMpegDashComponent(const std::vector<std::string>& segments)
   : CDVDInputStreamFile(), m_segments(segments)
