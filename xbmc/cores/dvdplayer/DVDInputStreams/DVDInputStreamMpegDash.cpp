@@ -201,7 +201,7 @@ bool CDVDInputStreamMpegDash::Open(const char* strFile, const std::string& conte
               return a.first < b.first;
             });
 
-  CLog::Log(LOGDEBUG, "Found MPD with base path: %s",m_mpd.base);
+  CLog::Log(LOGDEBUG, "Found MPD with base path: %s",m_mpd.base.c_str());
   for (auto& it : bw)
     CLog::Log(LOGDEBUG, "Representation with bw %i", it.first);
 //               << ", segment duration " << m_mpd.sets[it.second].first().duration
