@@ -739,10 +739,14 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 
       if (CJNIAudioFormat::ENCODING_AC3 != -1)
         rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_AC3 + PT_FORMAT_RAW_CLASS));
+      else
+        rawptinfo.m_dataFormats.push_back(AE_FMT_AC3);
       if (CJNIAudioFormat::ENCODING_E_AC3 != -1)
         rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_EAC3 + PT_FORMAT_RAW_CLASS));
       if (CJNIAudioFormat::ENCODING_DTS != -1)
         rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTS + PT_FORMAT_RAW_CLASS));
+      else
+        rawptinfo.m_dataFormats.push_back(AE_FMT_DTS);
       if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
         rawptinfo.m_dataFormats.push_back((AEDataFormat)(AE_FMT_DTSHD + PT_FORMAT_RAW_CLASS));
       if (CJNIAudioFormat::ENCODING_DOLBY_TRUEHD != -1)
