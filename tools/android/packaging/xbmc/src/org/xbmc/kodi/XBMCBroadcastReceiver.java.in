@@ -23,31 +23,7 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
     Log.d("XBMCBroadcastReceiver", "Received Intent");
     if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
     {
-      String propfn = Environment.getExternalStorageDirectory().getAbsolutePath() + "/@APP_NAME_LC@_env.properties";
-      File fProp = new File(propfn);
-      if (!fProp.exists())
-      {
-        propfn = Environment.getExternalStorageDirectory().getAbsolutePath() + "/xbmc_env.properties";
-        fProp = new File(propfn);
-      }
-      if (!fProp.exists())
-        return;
-
-      Log.i(TAG, "Loading " + propfn);
-      try
-      {
-        Properties sysProp = new Properties(System.getProperties());
-        FileInputStream xbmcenvprop = new FileInputStream(fProp);
-        sysProp.load(xbmcenvprop);
-        System.setProperties(sysProp);
-      } catch (Exception e)
-      {
-        Log.e(TAG, "Error loading " + propfn + " (" + e.getMessage() + ")");
-        return;
-      }
-
-      String sXbmcAutostart = System.getProperty("xbmc.autostart", "");
-      if (sXbmcAutostart.equalsIgnoreCase("yes"))
+      if (XBMCProperties.getBoolProperty("xbmc.autostart"))
       {
         // Run @APP_NAME@
         Intent i = new Intent();
