@@ -1,5 +1,6 @@
 package @APP_PACKAGE@;
 
+import android.util.Base64;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,6 +54,7 @@ public class XBMCJsonRPC
   private static String TAG = "@APP_NAME@json";
 
   private String m_jsonURL = "http://localhost:8080";
+
   private int MAX_RECOMMENDATIONS = 3;
 
   // {"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "filter": {"field": "playcount", "operator": "is", "value": "0"}, "limits": { "start" : 0, "end": 3}, "properties" : ["imdbnumber", "title", "tagline", "thumbnail", "fanart"], "sort": { "order": "descending", "method": "dateadded", "ignorearticle": true } }, "id": "1"}
@@ -91,13 +93,8 @@ public class XBMCJsonRPC
 
   public XBMCJsonRPC()
   {
-    String jsonPort = System.getProperty("xbmc.jsonPort", "8080");
-    String jsonUser = System.getProperty("xbmc.jsonUser", "");
-    String jsonPwd = System.getProperty("xbmc.jsonPwd", "");
-    if (!jsonUser.isEmpty())
-      m_jsonURL = "http://" + jsonUser + ":" + jsonPwd + "@localhost:" + jsonPort;
-    else
-      m_jsonURL = "http://localhost:" + jsonPort;
+    String jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "8080");
+    m_jsonURL = "http://localhost:" + jsonPort;
   }
 
   public String request_string(String jsonRequest)
@@ -105,10 +102,14 @@ public class XBMCJsonRPC
     try
     {
       Log.d(TAG, "JSON in: " + jsonRequest);
+      Log.d(TAG, "JSON url: " + m_jsonURL);
 
       StringBuilder strbuilder = new StringBuilder();
       HttpClient client = new DefaultHttpClient();
       HttpPost httpPost = new HttpPost(m_jsonURL + "/jsonrpc");
+      String auth = XBMCProperties.getJsonAuthorization();
+      if (!auth.isEmpty())
+        httpPost.setHeader("Authorization", auth);
       httpPost.setHeader(HTTP.CONTENT_TYPE, "application/json");
       httpPost.setEntity(new StringEntity(jsonRequest));
       try
@@ -192,6 +193,9 @@ public class XBMCJsonRPC
 
       URL url = new URL(m_jsonURL + "/" + surl);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      String auth = XBMCProperties.getJsonAuthorization();
+      if (!auth.isEmpty())
+        connection.setRequestProperty("Authorization", auth);
       connection.setDoInput(true);
       connection.connect();
       InputStream input = connection.getInputStream();

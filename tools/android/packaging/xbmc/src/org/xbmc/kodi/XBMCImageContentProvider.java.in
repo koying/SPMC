@@ -74,6 +74,9 @@ public class XBMCImageContentProvider extends ContentProvider
 
       URL url = new URL(decodedUrl);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      String auth = XBMCProperties.getJsonAuthorization();
+      if (!auth.isEmpty())
+        connection.setRequestProperty("Authorization", auth);
       connection.setDoInput(true);
       connection.connect();
 

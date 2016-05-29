@@ -440,7 +440,7 @@ public class Splash extends Activity {
 
   private void SetupEnvironment()
   {
-    sXbmcHome = System.getProperty("xbmc.home", "");
+    sXbmcHome = XBMCProperties.getStringProperty("xbmc.home", "");
     if (!sXbmcHome.isEmpty())
     {
       fXbmcHome = new File(sXbmcHome);
@@ -469,7 +469,7 @@ public class Splash extends Activity {
       fXbmcHome = new File(sXbmcHome);
     }
 
-    sXbmcdata = System.getProperty("xbmc.data", "");
+    sXbmcdata = XBMCProperties.getStringProperty("xbmc.data", "");
     if (!sXbmcdata.isEmpty())
     {
       File fXbmcData = new File(sXbmcdata);
@@ -499,7 +499,7 @@ public class Splash extends Activity {
     String obbfn = "";
     if (fPackagePath.length() < 40 * 1024 * 1024)
     {
-      sPackagePath = System.getProperty("@APP_NAME_LC@.obb", "");
+      sPackagePath = XBMCProperties.getStringProperty("@APP_NAME_LC@.obb", "");
       if (sPackagePath.equals(""))
       {
         try
@@ -673,6 +673,9 @@ public class Splash extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    // Be sure properties are initialized for native
+    XBMCProperties.initializeProperties();
+
     // Check if @APP_NAME_LC@ is not already running
     ActivityManager activityManager = (ActivityManager) getBaseContext()
         .getSystemService(Context.ACTIVITY_SERVICE);
@@ -685,28 +688,6 @@ public class Splash extends Activity {
         startXBMC();
         return;
       }
-
-    String propfn = Environment.getExternalStorageDirectory().getAbsolutePath() + "/@APP_NAME_LC@_env.properties";
-    File fProp = new File(propfn);
-    if (!fProp.exists())
-    {
-      propfn = Environment.getExternalStorageDirectory().getAbsolutePath() + "/xbmc_env.properties";
-      fProp = new File(propfn);
-    }
-    if (fProp.exists())
-    {
-      Log.i(TAG, "Loading " + propfn);
-      try
-      {
-        Properties sysProp = new Properties(System.getProperties());
-        FileInputStream xbmcenvprop = new FileInputStream(fProp);
-        sysProp.load(xbmcenvprop);
-        System.setProperties(sysProp);
-      } catch (Exception e)
-      {
-        Log.e(TAG, "Error loading " + propfn + " (" + e.getMessage() + ")");
-      }
-    }
 
     mStateMachine.sendEmptyMessage(Checking);
 
@@ -771,8 +752,7 @@ public class Splash extends Activity {
     if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
       mExternalStorageChecked = true;
 
-    String sXbmcWaitNetwork = System.getProperty("xbmc.waitnetwork", "");
-    if (sXbmcWaitNetwork.equalsIgnoreCase("yes"))
+    if (XBMCProperties.getBoolProperty("xbmc.waitnetwork"))
     {
       if (IsNetworkReady())
         mNetworkReady = true;
