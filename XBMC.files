@@ -9840,3 +9840,4 @@ xbmc/interfaces/builtins/SystemBuiltins.cpp
 xbmc/interfaces/builtins/SystemBuiltins.h
 xbmc/interfaces/builtins/WeatherBuiltins.cpp
 xbmc/interfaces/builtins/WeatherBuiltins.h
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProperties.java.in
