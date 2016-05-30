@@ -45,6 +45,9 @@
 #include "LangInfo.h"
 #include "input/Key.h"
 #include "ContextMenuManager.h"
+#if defined (TARGET_ANDROID)
+  #include "android/activity/AndroidFeatures.h"
+#endif
 
 #include <utility>
 
@@ -458,6 +461,14 @@ int CGUIWindowAddonBrowser::SelectAddonID(const std::vector<ADDON::TYPE> &types,
     item->SetLabel2((*addon)->Summary());
     if (!items.Contains(item->GetPath()))
     {
+#if defined(TARGET_ANDROID)
+      // only show "skin.re-touched" on fire tables and iOS.
+      if ((*addon)->ID() == "skin.re-touched")
+      {
+        if (!CAndroidFeatures::HasTouchScreen())
+          continue;
+      }
+#endif
       items.Add(item);
       addonMap.insert(std::make_pair(item->GetPath(), *addon));
     }
