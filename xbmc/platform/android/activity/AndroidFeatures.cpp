@@ -22,6 +22,8 @@
 
 #include <cpu-features.h>
 #include <androidjni/JNIThreading.h>
+#include <androidjni/Context.h>
+#include <androidjni/PackageManager.h>
 
 #include "utils/log.h"
 
@@ -75,3 +77,16 @@ int CAndroidFeatures::GetCPUCount()
   return count;
 }
 
+bool CAndroidFeatures::HasTouchScreen()
+{
+  static int hastouchscreen = -1;
+  if (hastouchscreen == -1)
+  {
+    if (CJNIContext::GetPackageManager().hasSystemFeature("android.hardware.touchscreen"))
+      hastouchscreen = 1;
+    else
+      hastouchscreen = 0;
+  }
+
+  return (hastouchscreen == 1);
+}

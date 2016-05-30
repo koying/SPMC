@@ -28,4 +28,5 @@ class CAndroidFeatures
   static bool         HasNeon();
   static int          GetVersion();
   static int          GetCPUCount();
+  static bool         HasTouchScreen();
 };
