@@ -22,7 +22,9 @@
 #include "utils/log.h"
 
 #include <cpu-features.h>
+#include "android/jni/Context.h"
 #include "android/jni/JNIThreading.h"
+#include "android/jni/PackageManager.h"
 
 bool CAndroidFeatures::HasNeon()
 {
@@ -42,7 +44,7 @@ int CAndroidFeatures::GetVersion()
     JNIEnv *jenv = xbmc_jnienv();
 
     jclass jcOsBuild = jenv->FindClass("android/os/Build$VERSION");
-    if (jcOsBuild == NULL) 
+    if (jcOsBuild == NULL)
     {
       CLog::Log(LOGERROR, "%s: Error getting class android.os.Build.VERSION", __PRETTY_FUNCTION__);
       return version;
@@ -74,3 +76,16 @@ int CAndroidFeatures::GetCPUCount()
   return count;
 }
 
+bool CAndroidFeatures::HasTouchScreen()
+{
+  static int hastouchscreen = -1;
+  if (hastouchscreen == -1)
+  {
+    if (CJNIContext::GetPackageManager().hasSystemFeature("android.hardware.touchscreen"))
+      hastouchscreen = 1;
+    else
+      hastouchscreen = 0;
+  }
+
+  return (hastouchscreen == 1);
+}
