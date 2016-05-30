@@ -53,6 +53,10 @@
 #if defined(TARGET_DARWIN_IOS)
 #include "SettingAddon.h"
 #endif
+#if defined(TARGET_ANDROID)
+  #include "SettingAddon.h"
+  #include "platform/android/activity/AndroidFeatures.h"
+#endif
 #if defined(TARGET_RASPBERRY_PI)
 #include "linux/RBP.h"
 #endif
@@ -936,6 +940,18 @@ void CSettings::InitializeVisibility()
 void CSettings::InitializeDefaults()
 {
   // set some default values if necessary
+#if defined(HAS_TOUCH_SKIN)
+  bool default_touch_skin = false;
+#if defined(TARGET_DARWIN_IOS)
+  default_touch_skin = true;
+#endif
+#if defined(TARGET_ANDROID)
+  default_touch_skin = CAndroidFeatures::HasTouchScreen();
+#endif
+  if (default_touch_skin)
+    ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.estouchy");
+#endif
+
 #if defined(TARGET_POSIX)
   CSettingString* timezonecountry = (CSettingString*)m_settingsManager->GetSetting(CSettings::SETTING_LOCALE_TIMEZONECOUNTRY);
   CSettingString* timezone = (CSettingString*)m_settingsManager->GetSetting(CSettings::SETTING_LOCALE_TIMEZONE);
