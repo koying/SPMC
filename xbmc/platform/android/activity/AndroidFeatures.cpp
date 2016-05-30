@@ -23,6 +23,8 @@
 
 #include <cpu-features.h>
 #include "platform/android/jni/JNIThreading.h"
+#include "platform/android/jni/Context.h"
+#include "platform/android/jni/PackageManager.h"
 
 bool CAndroidFeatures::HasNeon()
 {
@@ -74,3 +76,16 @@ int CAndroidFeatures::GetCPUCount()
   return count;
 }
 
+bool CAndroidFeatures::HasTouchScreen()
+{
+  static int hastouchscreen = -1;
+  if (hastouchscreen == -1)
+  {
+    if (CJNIContext::GetPackageManager().hasSystemFeature("android.hardware.touchscreen"))
+      hastouchscreen = 1;
+    else
+      hastouchscreen = 0;
+  }
+
+  return (hastouchscreen == 1);
+}

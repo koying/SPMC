@@ -562,6 +562,7 @@ bool CApplication::Create()
   std::string extstorage;
   bool extready = CXBMCApp::GetExternalStorage(extstorage);
   CLog::Log(LOGNOTICE, "External storage path = %s; status = %s", extstorage.c_str(), extready ? "ok" : "nok");
+  CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
 #endif
 
 #if defined(__arm__) || defined(__aarch64__)
