@@ -59,6 +59,9 @@
 #ifdef TARGET_DARWIN_OSX
 #include "VDA.h"
 #endif
+#if defined(TARGET_ANDROID)
+#include "platform/android/activity/AndroidFeatures.h"
+#endif
 #include "utils/StringUtils.h"
 
 extern "C" {
@@ -264,9 +267,13 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
     }
     else
     {
-      int num_threads = std::min(8 /*MAX_THREADS*/, g_cpuInfo.getCPUCount());
-      if( num_threads > 1)
-        m_pCodecContext->thread_count = num_threads;
+#if defined(TARGET_ANDROID)
+      int num_threads = CAndroidFeatures::GetCPUCount() * 3 / 2;
+#else
+      int num_threads = av_cpu_count() * 3 / 2;
+#endif
+      num_threads = std::max(1, std::min(num_threads, 16));
+      m_pCodecContext->thread_count = num_threads;
       m_pCodecContext->thread_safe_callbacks = 1;
       m_decoderState = STATE_SW_MULTI;
       CLog::Log(LOGDEBUG, "CDVDVideoCodecFFmpeg - open frame threaded with %d threads", num_threads);
