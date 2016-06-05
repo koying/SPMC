@@ -490,7 +490,7 @@ public class XBMCJsonRPC
           try
           {
             JSONObject movie = movies.getJSONObject(i);
-            int id = Integer.parseInt(movie.getString("imdbnumber").replace("tt", ""));
+            int id = Integer.parseInt(movie.getString("movieid"));
 
             final XBMCRecommendationBuilder notificationBuilder = builder
                 .setBackground(
@@ -531,7 +531,7 @@ public class XBMCJsonRPC
           try
           {
             JSONObject tvshow = tvshows.getJSONObject(i);
-            int id = Integer.parseInt(tvshow.getString("imdbnumber").replace("tt", ""));
+            int id = Integer.parseInt(tvshow.getString("tvshowid"));
 
             final XBMCRecommendationBuilder notificationBuilder = builder
                 .setBackground(
