@@ -433,26 +433,7 @@ void CXBMCApp::run()
   SetupEnv();
   XBMC::Context context;
 
-  CJNIIntent startIntent = getIntent();
-
-  android_printf("%s Started with action: %s\n", CCompileInfo::GetAppName(), startIntent.getAction().c_str());
-
   CAppParamParser appParamParser;
-  std::string filenameToPlay = GetFilenameFromIntent(startIntent);
-  if (!filenameToPlay.empty())
-  {
-    int argc = 2;
-    const char** argv = (const char**) malloc(argc*sizeof(char*));
-
-    std::string exe_name(CCompileInfo::GetAppName());
-    argv[0] = exe_name.c_str();
-    argv[1] = filenameToPlay.c_str();
-
-    appParamParser.Parse((const char **)argv, argc);
-
-    free(argv);
-  }
-
   m_firstrun=false;
   android_printf(" => running XBMC_Run...");
   try
