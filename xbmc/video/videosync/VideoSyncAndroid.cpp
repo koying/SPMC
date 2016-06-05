@@ -85,7 +85,8 @@ void CVideoSyncAndroid::FrameCallback(int64_t frameTimeNanos)
   VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
   NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
   
-  // CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
+  if (NrVBlanks > 1)
+    CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback late: %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
 
   //save the timestamp of this vblank so we can calculate how many happened next time
   m_LastVBlankTime = frameTimeNanos;
