@@ -292,7 +292,7 @@
   </ContextMenu>
   <Scripts>
     <joystick>
-      <button id="3">Info</button>
+      <button id="4">Info</button>
     </joystick>
   </Scripts>
   <Settings>
