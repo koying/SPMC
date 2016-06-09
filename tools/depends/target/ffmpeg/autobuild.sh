@@ -154,6 +154,7 @@ CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" \
 	--enable-protocol=http \
 	--enable-nonfree \
 	--enable-pthreads \
+	--enable-pic \
 	--enable-zlib \
 	--disable-mipsdsp \
 	--disable-mipsdspr2 \
