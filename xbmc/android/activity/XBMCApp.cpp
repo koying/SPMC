@@ -186,6 +186,8 @@ void CXBMCApp::onResume()
   intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
   intentFilter.addAction("android.intent.action.SCREEN_ON");
   intentFilter.addAction("android.intent.action.SCREEN_OFF");
+  intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+  intentFilter.addAction("android.media.action.HDMI_AUDIO_PLUG");
   registerReceiver(*this, intentFilter);
 
   if (!g_application.IsInScreenSaver())
@@ -194,7 +196,12 @@ void CXBMCApp::onResume()
     g_application.WakeUpScreenSaverAndDPMS();
 
   CJNIAudioManager audioManager(getSystemService("audio"));
-  m_headsetPlugged = audioManager.isWiredHeadsetOn() || audioManager.isBluetoothA2dpOn();
+  bool newstate = audioManager.isWiredHeadsetOn() || audioManager.isBluetoothA2dpOn();
+  if (newstate != m_headsetPlugged)
+  {
+    m_headsetPlugged = newstate;
+    CAEFactory::DeviceChange();
+  }
 
   unregisterMediaButtonEventReceiver();
 
@@ -826,6 +833,18 @@ void CXBMCApp::onReceive(CJNIIntent intent)
       CAndroidKey::XBMC_Key(keycode, XBMCK_MEDIA_REWIND, 0, 0, up);
     else if (keycode == CJNIKeyEvent::KEYCODE_MEDIA_STOP)
       CAndroidKey::XBMC_Key(keycode, XBMCK_MEDIA_STOP, 0, 0, up);
+  }
+  else if (action == "android.media.action.HDMI_AUDIO_PLUG")
+  {
+    bool newstate = false;
+    if (intent.getIntExtra("android.media.extra.AUDIO_PLUG_STATE", 0) == 1 && intent.getIntExtra("android.media.extra.MAX_CHANNEL_COUNT", 0) == 2)
+      newstate = true;
+
+    if (newstate != m_headsetPlugged)
+    {
+      m_headsetPlugged = newstate;
+      CAEFactory::DeviceChange();
+    }
   }
 }
 
