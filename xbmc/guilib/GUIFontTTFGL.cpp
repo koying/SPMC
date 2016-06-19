@@ -232,7 +232,7 @@ void CGUIFontTTFGL::LastEnd()
       glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glMatrixModview.Get());
 
       // Bind the buffer to the OpenGL context's GL_ARRAY_BUFFER binding point
-      glBindBuffer(GL_ARRAY_BUFFER, (GLuint) ((long)(m_vertexTrans[i].vertexBuffer->bufferHandle) & 0xffff));
+      glBindBuffer(GL_ARRAY_BUFFER, (GLuint) m_vertexTrans[i].vertexBuffer->bufferHandle);
 
       // Do the actual drawing operation, split into groups of characters no
       // larger than the pre-determined size of the element array
