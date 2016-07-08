@@ -155,6 +155,24 @@ void CJNIMainActivity::_onInputDeviceRemoved(JNIEnv *env, jobject context, jint 
     m_appInstance->onInputDeviceRemoved(deviceId);
 }
 
+void CJNIMainActivity::_onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices)
+{
+  static_cast<void>(env);
+  static_cast<void>(context);
+
+  if (m_appInstance != nullptr)
+    m_appInstance->onAudioDeviceAdded(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
+}
+
+void CJNIMainActivity::_onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices)
+{
+  static_cast<void>(env);
+  static_cast<void>(context);
+
+  if (m_appInstance != nullptr)
+    m_appInstance->onAudioDeviceRemoved(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
+}
+
 void CJNIMainActivity::_doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos)
 {
   (void)env;

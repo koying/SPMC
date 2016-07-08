@@ -36,6 +36,7 @@
 
 #include <androidjni/Activity.h>
 #include <androidjni/AudioManager.h>
+#include <androidjni/AudioDeviceInfo.h>
 #include <androidjni/BroadcastReceiver.h>
 #include <androidjni/Image.h>
 #include <androidjni/SurfaceHolder.h>
@@ -131,6 +132,8 @@ public:
   virtual void onVisibleBehindCanceled();
   virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
   virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
+  virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
+  virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
 
   // implementation of CJNIInputManagerInputDeviceListener
   void onInputDeviceAdded(int deviceId) override;
@@ -169,6 +172,7 @@ public:
   static bool EnableWakeLock(bool on);
   static bool HasFocus() { return m_hasFocus; }
   static bool IsResumed() { return m_isResumed; }
+  static void CheckHeadsetPlugged();
   static bool IsHeadsetPlugged();
   static bool IsHDMIPlugged();
 

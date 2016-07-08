@@ -23,6 +23,7 @@
 #include <androidjni/InputManager.h>
 #include <androidjni/Rect.h>
 #include <androidjni/Image.h>
+#include <androidjni/AudioDeviceInfo.h>
 
 class CJNIMainActivity : public CJNIActivity, public CJNIInputManagerInputDeviceListener
 {
@@ -44,6 +45,8 @@ public:
   static void _onVisibleBehindCanceled(JNIEnv *env, jobject context);
   static void _onMultiWindowModeChanged(JNIEnv *env, jobject context, jboolean isInMultiWindowMode);
   static void _onPictureInPictureModeChanged(JNIEnv *env, jobject context, jboolean isInPictureInPictureMode);
+  static void _onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices);
+  static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -70,4 +73,6 @@ protected:
   virtual void onVisibleBehindCanceled() = 0;
   virtual void onMultiWindowModeChanged(bool isInMultiWindowMode) = 0;
   virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode) = 0;
+  virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
+  virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
 };
