@@ -52,6 +52,7 @@
 #include "Environment.h"
 #include "Document.h"
 #include "RecognizerIntent.h"
+#include "AudioDeviceInfo.h"
 
 #include <android/native_activity.h>
 
@@ -98,6 +99,7 @@ void CJNIContext::PopulateStaticFields()
   CJNIEnvironment::PopulateStaticFields();
   CJNIDocument::PopulateStaticFields();
   CJNIRecognizerIntent::PopulateStaticFields();
+  CJNIAudioDeviceInfo::PopulateStaticFields();
 }
 
 CJNIPackageManager CJNIContext::GetPackageManager()

@@ -36,14 +36,26 @@ int CJNIAudioManager::AUDIOFOCUS_LOSS(0xffffffff);
 int CJNIAudioManager::AUDIOFOCUS_REQUEST_GRANTED(0x00000001);
 int CJNIAudioManager::AUDIOFOCUS_REQUEST_FAILED(0x00000000);
 
+int CJNIAudioManager::GET_DEVICES_ALL(0x00000003);
+int CJNIAudioManager::GET_DEVICES_INPUTS(0x00000001);
+int CJNIAudioManager::GET_DEVICES_OUTPUTS(0x00000002);
+
 void CJNIAudioManager::PopulateStaticFields()
 {
   jhclass clazz = find_class("android/media/AudioManager");
-  STREAM_MUSIC  = (get_static_field<int>(clazz, "STREAM_MUSIC"));
-  AUDIOFOCUS_GAIN  = (get_static_field<int>(clazz, "AUDIOFOCUS_GAIN"));
-  AUDIOFOCUS_LOSS  = (get_static_field<int>(clazz, "AUDIOFOCUS_LOSS"));
-  AUDIOFOCUS_REQUEST_GRANTED  = (get_static_field<int>(clazz, "AUDIOFOCUS_REQUEST_GRANTED"));
-  AUDIOFOCUS_REQUEST_FAILED  = (get_static_field<int>(clazz, "AUDIOFOCUS_REQUEST_FAILED"));
+  STREAM_MUSIC = (get_static_field<int>(clazz, "STREAM_MUSIC"));
+  AUDIOFOCUS_GAIN = (get_static_field<int>(clazz, "AUDIOFOCUS_GAIN"));
+  AUDIOFOCUS_LOSS = (get_static_field<int>(clazz, "AUDIOFOCUS_LOSS"));
+  AUDIOFOCUS_REQUEST_GRANTED = (get_static_field<int>(clazz, "AUDIOFOCUS_REQUEST_GRANTED"));
+  AUDIOFOCUS_REQUEST_FAILED = (get_static_field<int>(clazz, "AUDIOFOCUS_REQUEST_FAILED"));
+
+  int sdk = CJNIBase::GetSDKVersion();
+  if (sdk >= 23)
+  {
+    GET_DEVICES_ALL = (get_static_field<int>(clazz, "GET_DEVICES_ALL"));
+    GET_DEVICES_INPUTS = (get_static_field<int>(clazz, "GET_DEVICES_INPUTS"));
+    GET_DEVICES_OUTPUTS = (get_static_field<int>(clazz, "GET_DEVICES_OUTPUTS"));
+  }
 }
 
 int CJNIAudioManager::getStreamMaxVolume()
@@ -93,6 +105,12 @@ bool CJNIAudioManager::isWiredHeadsetOn()
   return call_method<jboolean>(m_object,
                                "isWiredHeadsetOn",
                                "()Z");
+}
+
+CJNIAudioDeviceInfos CJNIAudioManager::getDevices(int flags)
+{
+  return jcast<CJNIAudioDeviceInfos>(call_method<jhobjectArray>(m_object,
+                                "getDevices", "(I)[Landroid/media/AudioDeviceInfo;", flags));
 }
 
 //////////////////////////////////////////////////////////////////////////////////

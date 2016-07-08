@@ -21,6 +21,8 @@
 
 #include "android/jni/Activity.h"
 #include "android/jni/Surface.h"
+#include "android/jni/Intent.h"
+#include "android/jni/AudioDeviceInfo.h"
 
 class CJNIMainActivity : public CJNIActivity
 {
@@ -35,6 +37,8 @@ public:
   static void _onVolumeChanged(JNIEnv *env, jobject context, jint volume);
   static void _onAudioFocusChange(JNIEnv *env, jobject context, jint focusChange);
   static void _doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos);
+  static void _onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices);
+  static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -55,4 +59,6 @@ protected:
   virtual void onVolumeChanged(int volume)=0;
   virtual void onAudioFocusChange(int focusChange)=0;
   virtual void doFrame(int64_t frameTimeNanos)=0;
+  virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
+  virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
 };

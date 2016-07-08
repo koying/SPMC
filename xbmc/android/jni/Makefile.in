@@ -68,6 +68,7 @@ SRCS      += Document.cpp
 SRCS      += AudioTimestamp.cpp
 SRCS      += ArrayList.cpp
 SRCS      += RecognizerIntent.cpp
+SRCS      += AudioDeviceInfo.cpp
 
 LIB        = jni.a
 
