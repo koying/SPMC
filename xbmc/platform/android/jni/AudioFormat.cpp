@@ -51,7 +51,12 @@ int CJNIAudioFormat::CHANNEL_OUT_BACK_RIGHT            = 0x00000080;
 
 int CJNIAudioFormat::CHANNEL_INVALID                   = 0x00000000;
 
-void CJNIAudioFormat::GetStaticValue(jhclass& c, int& field, char* value)
+// AML
+int CJNIAudioFormat::ENCODING_DTSHD       = -1;
+int CJNIAudioFormat::ENCODING_DTSHD_MA    = -1;
+int CJNIAudioFormat::ENCODING_TRUEHD      = -1;
+
+void CJNIAudioFormat::GetStaticValue(jhclass& c, int& field, const char* value)
 {
   jfieldID id = get_static_field_id<jclass>(c, value, "I");
   if (id != NULL)

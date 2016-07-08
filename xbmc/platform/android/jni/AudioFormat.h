@@ -21,9 +21,6 @@
 
 #include "jutils/jutils-details.hpp"
 
-namespace jni
-{
-
 class CJNIAudioFormat
 {
   public:
@@ -56,8 +53,6 @@ class CJNIAudioFormat
     static int CHANNEL_INVALID;
 
 protected:
-    static void GetStaticValue(jhclass &c, int &field, char *value);
-};
-
+    static void GetStaticValue(jni::jhclass &c, int &field, const char *value);
 };
 
