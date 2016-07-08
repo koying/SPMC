@@ -138,7 +138,7 @@ case $host in
     use_sdk="${use_sdk:-android-23}"
     use_ndk="${use_ndk:-android-17}"
     deps_dir="$use_host-$use_ndk"
-    platform_cflags="-DANDROID -Os -fexceptions"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC"
     if test "x$use_cpu" = "xarmeabi-v7a"; then
       platform_cflags+=" -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=neon"
     fi
@@ -173,7 +173,7 @@ case $host in
     use_sdk="${use_sdk:-android-23}"
     use_ndk="${use_ndk:-android-17}"
     deps_dir="$use_host-$use_ndk"
-    platform_cflags="-DANDROID -Os -fexceptions"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC"
     platform_ldflags="-L$prefix/$deps_dir/lib/$use_ndk"
     platform_cxxflags="$platform_cflags -frtti"
     platform_includes="-I$prefix/$deps_dir/include/$use_ndk"
