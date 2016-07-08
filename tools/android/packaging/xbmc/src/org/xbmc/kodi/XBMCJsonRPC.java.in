@@ -4,17 +4,10 @@ import android.util.Base64;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -104,45 +97,56 @@ public class XBMCJsonRPC
       Log.d(TAG, "JSON in: " + jsonRequest);
       Log.d(TAG, "JSON url: " + m_jsonURL);
 
+      String returnStr = null;
       StringBuilder strbuilder = new StringBuilder();
-      HttpClient client = new DefaultHttpClient();
-      HttpPost httpPost = new HttpPost(m_jsonURL + "/jsonrpc");
+
+      URL url = new URL(m_jsonURL + "/jsonrpc");
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setDoOutput(true);
+      connection.setDoInput(true);
+      connection.setRequestProperty("Content-Type", "application/json");
       String auth = XBMCProperties.getJsonAuthorization();
       if (!auth.isEmpty())
-        httpPost.setHeader("Authorization", auth);
-      httpPost.setHeader(HTTP.CONTENT_TYPE, "application/json");
-      httpPost.setEntity(new StringEntity(jsonRequest));
+        connection.setRequestProperty("Authorization", auth);
+      connection.setRequestMethod("POST");
+
+      OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+      writer.write(jsonRequest);
+      writer.close();
+
       try
       {
-        HttpResponse response = client.execute(httpPost);
-        StatusLine statusLine = response.getStatusLine();
-        int statusCode = statusLine.getStatusCode();
+        int statusCode = connection.getResponseCode();
         if (statusCode == 200)
         {
-          HttpEntity entity = response.getEntity();
-          InputStream content = entity.getContent();
-
-          BufferedReader reader = new BufferedReader(new InputStreamReader(
-              content));
+          InputStream content = connection.getInputStream();
+          BufferedReader reader = new BufferedReader(new InputStreamReader(content, "UTF-8"));
           String line;
           while ((line = reader.readLine()) != null)
           {
             strbuilder.append(line);
           }
+          reader.close();
+          connection.disconnect();
 
           Log.d(TAG, "JSON out: " + strbuilder.toString());
-          return strbuilder.toString();
+          returnStr = strbuilder.toString();
 
         } else
         {
           Log.e(TAG, "Failed to read JSON");
-          return null;
         }
-      } catch (Exception e)
+      } 
+      catch (Exception e)
       {
         e.printStackTrace();
-        return null;
       }
+      finally
+      {
+        connection.disconnect();
+        return returnStr;
+      }
+
     } catch (Exception e)
     {
       Log.e(TAG, "Failed to read JSON");
