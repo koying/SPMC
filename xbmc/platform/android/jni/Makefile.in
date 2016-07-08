@@ -68,6 +68,7 @@ SRCS      += URIPermission.cpp
 SRCS      += DocumentsContract.cpp
 SRCS      += Document.cpp
 SRCS      += RecognizerIntent.cpp
+SRCS      += AudioDeviceInfo.cpp
 
 LIB        = jni.a
 

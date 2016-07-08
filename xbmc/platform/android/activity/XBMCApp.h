@@ -37,6 +37,7 @@
 #include "platform/android/jni/BroadcastReceiver.h"
 #include "platform/android/jni/AudioManager.h"
 #include "platform/android/jni/View.h"
+#include "platform/android/jni/AudioDeviceInfo.h"
 #include "threads/Event.h"
 #include "interfaces/IAnnouncer.h"
 
@@ -108,6 +109,8 @@ public:
   virtual void onVolumeChanged(int volume);
   virtual void onAudioFocusChange(int focusChange);
   virtual void doFrame(int64_t frameTimeNanos);
+  virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
+  virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
 
   // implementation of CJNIInputManagerInputDeviceListener
   void onInputDeviceAdded(int deviceId) override;
@@ -143,6 +146,7 @@ public:
   static bool EnableWakeLock(bool on);
   static bool HasFocus() { return m_hasFocus; }
   static bool IsResumed() { return m_isResumed; }
+  static void CheckHeadsetPlugged();
   static bool IsHeadsetPlugged();
 
   static bool StartActivity(const std::string &package, const std::string &intent = std::string(), const std::string &dataType = std::string(), const std::string &dataURI = std::string());

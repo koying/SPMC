@@ -1,9 +1,13 @@
 package @APP_PACKAGE@;
 
+import android.os.Build.VERSION_CODES;
+import android.os.Build;
 import android.app.NativeActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.input.InputManager;
+import android.media.AudioDeviceCallback;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +38,23 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onNewIntent(Intent intent);
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
   native void _doFrame(long frameTimeNanos);
+  native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
+  native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
+
+  private class MyAudioDeviceCallback extends AudioDeviceCallback 
+  {
+    public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) 
+    {
+      if (addedDevices.length != 0) 
+        _onAudioDeviceAdded(addedDevices);
+    }
+
+    public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) 
+    {
+      if (removedDevices.length != 0) 
+        _onAudioDeviceRemoved(removedDevices);
+    }
+  }
 
   private Runnable leanbackUpdateRunnable = new Runnable() 
   {
@@ -138,6 +159,10 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     InputManager manager = (InputManager) getSystemService(INPUT_SERVICE);
     manager.registerInputDeviceListener(mInputDeviceListener, new Handler());
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
+      audioManager.registerAudioDeviceCallback(new MyAudioDeviceCallback(), null);
+    }
     mJsonRPC = new XBMCJsonRPC();
 
     // Delayed Intent

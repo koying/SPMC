@@ -203,8 +203,7 @@ void CXBMCApp::onResume()
   else
     g_application.WakeUpScreenSaverAndDPMS();
 
-  CJNIAudioManager audioManager(getSystemService("audio"));
-  m_headsetPlugged = audioManager.isWiredHeadsetOn() || audioManager.isBluetoothA2dpOn();
+  CheckHeadsetPlugged();
 
   unregisterMediaButtonEventReceiver();
 
@@ -420,6 +419,32 @@ bool CXBMCApp::ReleaseAudioFocus()
   }
   m_hasAudioFocus = false;
   return true;
+}
+
+void CXBMCApp::CheckHeadsetPlugged()
+{
+  bool oldstate = m_headsetPlugged;
+  
+  CJNIAudioManager audioManager(getSystemService("audio"));
+  m_headsetPlugged = audioManager.isWiredHeadsetOn() || audioManager.isBluetoothA2dpOn();
+
+  if (CJNIAudioManager::GetSDKVersion() >= 23)
+  {
+    CJNIAudioDeviceInfos devices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
+    
+    for (auto dev : devices)
+    {
+      if (StringUtils::CompareNoCase(dev.getProductName().toString(), "SHIELD Android TV") == 0 && dev.getType() == CJNIAudioDeviceInfo::TYPE_DOCK)
+      {
+        // SHIELD specifics: Gamepad headphone is inserted
+        m_headsetPlugged = true;
+        CLog::Log(LOGINFO, "SHIELD: Wifi direct headset inserted");
+      }
+    }
+  }
+
+  if (m_headsetPlugged != oldstate)
+    CAEFactory::DeviceChange();
 }
 
 bool CXBMCApp::IsHeadsetPlugged()
@@ -814,17 +839,7 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
   {
-    bool newstate;
-    if (action == "android.intent.action.HEADSET_PLUG")
-      newstate = (intent.getIntExtra("state", 0) != 0);
-    else
-      newstate = (intent.getIntExtra("android.bluetooth.profile.extra.STATE", 0) == 2 /* STATE_CONNECTED */);
-
-    if (newstate != m_headsetPlugged)
-    {
-      m_headsetPlugged = newstate;
-      CAEFactory::DeviceChange();
-    }
+    CheckHeadsetPlugged();
   }
   else if (action == "android.intent.action.MEDIA_BUTTON")
   {
@@ -906,6 +921,16 @@ void CXBMCApp::onActivityResult(int requestCode, int resultCode, CJNIIntent resu
       break;
     }
   }
+}
+
+void CXBMCApp::onAudioDeviceAdded(CJNIAudioDeviceInfos devices)
+{
+  CheckHeadsetPlugged();
+}
+
+void CXBMCApp::onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)
+{
+  CheckHeadsetPlugged();
 }
 
 int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent &result)

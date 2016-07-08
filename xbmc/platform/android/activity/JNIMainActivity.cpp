@@ -62,6 +62,24 @@ void CJNIMainActivity::_callNative(JNIEnv *env, jobject context, jlong funcAddr,
   ((void (*)(CVariant *))funcAddr)((CVariant *)variantAddr);
 }
 
+void CJNIMainActivity::_onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+  {
+    m_appInstance->onAudioDeviceAdded(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
+  }
+}
+
+void CJNIMainActivity::_onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onAudioDeviceRemoved(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
+}
+
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
 {
   call_method<void>(m_context,

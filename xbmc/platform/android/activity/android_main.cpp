@@ -174,6 +174,20 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       (void*)&CJNIMainActivity::_callNative
     };
     env->RegisterNatives(cMain, &mCallNative, 1);
+
+    JNINativeMethod mAudioDeviceAdded = {
+      "_onAudioDeviceAdded",
+      "([Landroid/media/AudioDeviceInfo;)V",
+      (void*)&CJNIMainActivity::_onAudioDeviceAdded
+    };
+    env->RegisterNatives(cMain, &mAudioDeviceAdded, 1);
+
+    JNINativeMethod mAudioDeviceRemoved = {
+      "_onAudioDeviceRemoved",
+      "([Landroid/media/AudioDeviceInfo;)V",
+      (void*)&CJNIMainActivity::_onAudioDeviceRemoved
+    };
+    env->RegisterNatives(cMain, &mAudioDeviceRemoved, 1);
   }
 
   jclass cBroadcastReceiver = env->FindClass(bcReceiver.c_str());

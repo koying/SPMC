@@ -22,6 +22,7 @@
 #include "platform/android/jni/Activity.h"
 #include "platform/android/jni/InputManager.h"
 #include "platform/android/jni/Surface.h"
+#include "platform/android/jni/AudioDeviceInfo.h"
 
 class CJNIMainActivity : public CJNIActivity, public CJNIInputManagerInputDeviceListener
 {
@@ -39,6 +40,8 @@ public:
   static void _onInputDeviceAdded(JNIEnv *env, jobject context, jint deviceId);
   static void _onInputDeviceChanged(JNIEnv *env, jobject context, jint deviceId);
   static void _onInputDeviceRemoved(JNIEnv *env, jobject context, jint deviceId);
+  static void _onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices);
+  static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -59,4 +62,6 @@ protected:
   virtual void onVolumeChanged(int volume)=0;
   virtual void onAudioFocusChange(int focusChange)=0;
   virtual void doFrame(int64_t frameTimeNanos)=0;
+  virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
+  virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
 };
