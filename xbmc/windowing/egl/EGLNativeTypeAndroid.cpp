@@ -64,22 +64,21 @@ void CEGLNativeTypeAndroid::Initialize()
       m_display = view.getDisplay();
   }
 
-  // Try to find out the HDMI resolution
-  if (CJNIDisplay::GetSDKVersion() >= 23)
+  if (m_display)
   {
-    if (m_display)
+    std::vector<CJNIDisplayMode> modes = m_display.getSupportedModes();
+    for (auto m : modes)
     {
-      std::vector<CJNIDisplayMode> modes = m_display.getSupportedModes();
-      for (auto m : modes)
+      CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: available mode: %dx%d@%f", m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
+      if (m.getPhysicalWidth() > m_width || m.getPhysicalHeight() > m_height)
       {
-        CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: available mode: %dx%d@%f", m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
-        if (m.getPhysicalWidth() > m_width || m.getPhysicalHeight() > m_height)
-        {
-          m_width = m.getPhysicalWidth();
-          m_height = m.getPhysicalHeight();
-        }
+        m_width = m.getPhysicalWidth();
+        m_height = m.getPhysicalHeight();
       }
+    }
 
+    if (modes.size())
+    {
       CJNIDisplayMode mode = m_display.getMode();
       CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: current mode: %dx%d@%f", mode.getPhysicalWidth(), mode.getPhysicalHeight(), mode.getRefreshRate());
     }
