@@ -1,0 +1,3 @@
+[submodule "xbmc/platform/android/jni"]
+	path = xbmc/platform/android/jni
+	url = https://github.com/koying/libdroidjni.git
