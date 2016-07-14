@@ -112,6 +112,7 @@ CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
 CVideoSyncAndroid* CXBMCApp::m_syncImpl = NULL;
+CEvent CXBMCApp::m_vsyncEvent;
 std::vector<GLuint> CXBMCApp::m_texturePool;
 
 
@@ -956,6 +957,13 @@ void CXBMCApp::doFrame(int64_t frameTimeNanos)
 {
   if (m_syncImpl)
     m_syncImpl->FrameCallback(frameTimeNanos);
+
+  m_vsyncEvent.Set();
+}
+
+bool CXBMCApp::WaitVSync(unsigned int milliSeconds)
+{
+  return m_vsyncEvent.WaitMSec(milliSeconds);
 }
 
 void CXBMCApp::SetupEnv()
