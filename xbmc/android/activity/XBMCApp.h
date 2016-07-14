@@ -171,6 +171,7 @@ public:
 
   static void InitFrameCallback(CVideoSyncAndroid *syncImpl);
   static void DeinitFrameCallback();
+  static bool WaitVSync(unsigned int milliSeconds);
 
 protected:
   // limit who can access Volume
@@ -208,6 +209,7 @@ private:
   static std::vector<GLuint> m_texturePool;
 
   static CVideoSyncAndroid* m_syncImpl;
+  static CEvent m_vsyncEvent;
 
   bool XBMC_DestroyDisplay();
   bool XBMC_SetupDisplay();
