@@ -117,6 +117,7 @@ IInputDeviceEventHandler* CXBMCApp::m_inputDeviceEventHandler = nullptr;
 CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 CVideoSyncAndroid* CXBMCApp::m_syncImpl = NULL;
+std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
 CEvent CXBMCApp::m_vsyncEvent;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
 std::vector<GLuint> CXBMCApp::m_texturePool;
@@ -969,21 +970,8 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
   }
 }
 
-void CXBMCApp::InitFrameCallback(CVideoSyncAndroid* syncImpl)
-{
-  m_syncImpl = syncImpl;
-}
-
-void CXBMCApp::DeinitFrameCallback()
-{
-  m_syncImpl = NULL;
-}
-
 void CXBMCApp::doFrame(int64_t frameTimeNanos)
 {
-  if (m_syncImpl)
-    m_syncImpl->FrameCallback(frameTimeNanos);
-
   m_vsyncEvent.Set();
 }
 

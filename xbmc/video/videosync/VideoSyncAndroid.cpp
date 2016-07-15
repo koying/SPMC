@@ -35,13 +35,8 @@
 bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
 {
   CLog::Log(LOGDEBUG, "CVideoSyncAndroid::%s setting up", __FUNCTION__);
-  
-  //init the vblank timestamp
-  m_LastVBlankTime = CurrentHostCounter();
   UpdateClock = func;
   m_abort = false;
-  
-  CXBMCApp::InitFrameCallback(this);
   g_Windowing.Register(this);
 
   return true;
@@ -49,16 +44,40 @@ bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
 
 void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
 {
-  while(!stop && !m_abort)
+  int NrVBlanks;
+  double VBlankTime;
+  int64_t nowtime = CurrentHostCounter();
+  int64_t lastSync = 0;
+
+  while (!stop && !m_abort)
   {
-    Sleep(100);
+    if (!CXBMCApp::WaitVSync(1000))
+    {
+      CLog::Log(LOGERROR, "CVideoSyncAndroid: timeout waiting for sync");
+      return;
+    }
+
+    nowtime = CurrentHostCounter();
+
+    //calculate how many vblanks happened
+    int64_t FT = (nowtime - lastSync);
+    VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
+    NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
+
+    if (NrVBlanks > 1)
+      CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback late: %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
+
+    //save the timestamp of this vblank so we can calculate how many happened next time
+    lastSync = nowtime;
+
+    //update the vblank timestamp, update the clock and send a signal that we got a vblank
+    UpdateClock(NrVBlanks, nowtime);
   }
 }
 
 void CVideoSyncAndroid::Cleanup()
 {
   CLog::Log(LOGDEBUG, "CVideoSyncAndroid::%s cleaning up", __FUNCTION__);
-  CXBMCApp::DeinitFrameCallback();
   g_Windowing.Unregister(this);
 }
 
