@@ -186,9 +186,6 @@ public:
   static void UnregisterInputDeviceEventHandler();
   static bool onInputDeviceEvent(const AInputEvent* event);
 
-  static void InitFrameCallback(CVideoSyncAndroid *syncImpl);
-  static void DeinitFrameCallback();
-
   static bool WaitVSync(unsigned int milliSeconds);
 
   bool getVideosurfaceInUse();
@@ -232,7 +229,6 @@ private:
   static CEvent m_windowCreated;
   static std::vector<GLuint> m_texturePool;
 
-  static CVideoSyncAndroid* m_syncImpl;
   static CEvent m_vsyncEvent;
 
   bool XBMC_DestroyDisplay();
