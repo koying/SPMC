@@ -169,8 +169,6 @@ public:
   bool getVideosurfaceInUse();
   void setVideosurfaceInUse(bool videosurfaceInUse);
 
-  static void InitFrameCallback(CVideoSyncAndroid *syncImpl);
-  static void DeinitFrameCallback();
   static bool WaitVSync(unsigned int milliSeconds);
 
 protected:
@@ -208,7 +206,6 @@ private:
   static CEvent m_windowCreated;
   static std::vector<GLuint> m_texturePool;
 
-  static CVideoSyncAndroid* m_syncImpl;
   static CEvent m_vsyncEvent;
 
   bool XBMC_DestroyDisplay();
