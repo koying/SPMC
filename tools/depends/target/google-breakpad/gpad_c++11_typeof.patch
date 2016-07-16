@@ -1,0 +1,141 @@
+Index: src/client/linux/dump_writer_common/seccomp_unwinder.cc
+===================================================================
+--- src/client/linux/dump_writer_common/seccomp_unwinder.cc	(revision 1434)
++++ src/client/linux/dump_writer_common/seccomp_unwinder.cc	(working copy)
+@@ -74,14 +74,14 @@
+         uint64_t ret;
+         /* char redzone[128]; */
+       } seccomp_stackframe;
+-      if (top - offsetof(typeof(seccomp_stackframe), deadbeef) < old_top ||
+-          top - offsetof(typeof(seccomp_stackframe), deadbeef) +
++      if (top - offsetof(__typeof__(seccomp_stackframe), deadbeef) < old_top ||
++          top - offsetof(__typeof__(seccomp_stackframe), deadbeef) +
+           sizeof(seccomp_stackframe) >
+           thread.stack.start_of_memory_range+thread.stack.memory.data_size) {
+         break;
+       }
+       my_memcpy(&seccomp_stackframe,
+-                bp_addr - offsetof(typeof(seccomp_stackframe), deadbeef),
++                bp_addr - offsetof(__typeof__(seccomp_stackframe), deadbeef),
+                 sizeof(seccomp_stackframe));
+       cpu->rbx = seccomp_stackframe.rbx;
+       cpu->rcx = seccomp_stackframe.rcx;
+@@ -128,14 +128,14 @@
+         uint32_t fakeret;
+         uint32_t ret;
+       } seccomp_stackframe;
+-      if (top - offsetof(typeof(seccomp_stackframe), deadbeef) < old_top ||
+-          top - offsetof(typeof(seccomp_stackframe), deadbeef) +
++      if (top - offsetof(__typeof__(seccomp_stackframe), deadbeef) < old_top ||
++          top - offsetof(__typeof__(seccomp_stackframe), deadbeef) +
+           sizeof(seccomp_stackframe) >
+           thread.stack.start_of_memory_range+thread.stack.memory.data_size) {
+         break;
+       }
+       my_memcpy(&seccomp_stackframe,
+-                bp_addr - offsetof(typeof(seccomp_stackframe), deadbeef),
++                bp_addr - offsetof(__typeof__(seccomp_stackframe), deadbeef),
+                 sizeof(seccomp_stackframe));
+       cpu->ebx = seccomp_stackframe.ebx;
+       cpu->ecx = seccomp_stackframe.ecx;
+Index: src/client/linux/dump_writer_common/thread_info.h
+===================================================================
+--- src/client/linux/dump_writer_common/thread_info.h	(revision 1434)
++++ src/client/linux/dump_writer_common/thread_info.h	(working copy)
+@@ -40,7 +40,7 @@
+ namespace google_breakpad {
+ 
+ #if defined(__i386) || defined(__x86_64)
+-typedef typeof(((struct user*) 0)->u_debugreg[0]) debugreg_t;
++typedef __typeof__(((struct user*) 0)->u_debugreg[0]) debugreg_t;
+ #endif
+ 
+ // We produce one of these structures for each thread in the crashed process.
+Index: src/client/linux/handler/exception_handler_unittest.cc
+===================================================================
+--- src/client/linux/handler/exception_handler_unittest.cc	(revision 1434)
++++ src/client/linux/handler/exception_handler_unittest.cc	(working copy)
+@@ -955,7 +955,7 @@
+   const ssize_t n = HANDLE_EINTR(recvmsg(fds[0], &msg, 0));
+   ASSERT_EQ(static_cast<ssize_t>(kCrashContextSize), n);
+   ASSERT_EQ(kControlMsgSize, msg.msg_controllen);
+-  ASSERT_EQ(static_cast<typeof(msg.msg_flags)>(0), msg.msg_flags);
++  ASSERT_EQ(static_cast<__typeof__(msg.msg_flags)>(0), msg.msg_flags);
+   ASSERT_EQ(0, close(fds[0]));
+ 
+   pid_t crashing_pid = -1;
+Index: src/client/linux/minidump_writer/linux_dumper.h
+===================================================================
+--- src/client/linux/minidump_writer/linux_dumper.h	(revision 1434)
++++ src/client/linux/minidump_writer/linux_dumper.h	(working copy)
+@@ -58,7 +58,7 @@
+ typedef Elf64_auxv_t elf_aux_entry;
+ #endif
+ 
+-typedef typeof(((elf_aux_entry*) 0)->a_un.a_val) elf_aux_val_t;
++typedef __typeof__(((elf_aux_entry*) 0)->a_un.a_val) elf_aux_val_t;
+ 
+ // When we find the VDSO mapping in the process's address space, this
+ // is the name we use for it when writing it to the minidump.
+Index: src/client/windows/tests/crash_generation_app/crash_generation_app.cc
+===================================================================
+--- src/client/windows/tests/crash_generation_app/crash_generation_app.cc	(revision 1434)
++++ src/client/windows/tests/crash_generation_app/crash_generation_app.cc	(working copy)
+@@ -197,8 +197,8 @@
+   return succeeded;
+ }
+ 
+-static void _cdecl ShowClientConnected(void* context,
+-                                       const ClientInfo* client_info) {
++static void ShowClientConnected(void* context,
++                                const ClientInfo* client_info) {
+   TCHAR* line = new TCHAR[kMaximumLineLength];
+   line[0] = _T('\0');
+   int result = swprintf_s(line,
+@@ -214,9 +214,9 @@
+   QueueUserWorkItem(AppendTextWorker, line, WT_EXECUTEDEFAULT);
+ }
+ 
+-static void _cdecl ShowClientCrashed(void* context,
+-                                     const ClientInfo* client_info,
+-                                     const wstring* dump_path) {
++static void ShowClientCrashed(void* context,
++                              const ClientInfo* client_info,
++                              const wstring* dump_path) {
+   TCHAR* line = new TCHAR[kMaximumLineLength];
+   line[0] = _T('\0');
+   int result = swprintf_s(line,
+@@ -259,8 +259,8 @@
+   QueueUserWorkItem(AppendTextWorker, line, WT_EXECUTEDEFAULT);
+ }
+ 
+-static void _cdecl ShowClientExited(void* context,
+-                                    const ClientInfo* client_info) {
++static void ShowClientExited(void* context,
++                             const ClientInfo* client_info) {
+   TCHAR* line = new TCHAR[kMaximumLineLength];
+   line[0] = _T('\0');
+   int result = swprintf_s(line,
+Index: src/common/linux/eintr_wrapper.h
+===================================================================
+--- src/common/linux/eintr_wrapper.h	(revision 1434)
++++ src/common/linux/eintr_wrapper.h	(working copy)
+@@ -37,7 +37,7 @@
+ //
+ 
+ #define HANDLE_EINTR(x) ({ \
+-  typeof(x) eintr_wrapper_result; \
++  __typeof__(x) eintr_wrapper_result; \
+   do { \
+     eintr_wrapper_result = (x); \
+   } while (eintr_wrapper_result == -1 && errno == EINTR); \
+@@ -45,7 +45,7 @@
+ })
+ 
+ #define IGNORE_EINTR(x) ({ \
+-  typeof(x) eintr_wrapper_result; \
++  __typeof__(x) eintr_wrapper_result; \
+   do { \
+     eintr_wrapper_result = (x); \
+     if (eintr_wrapper_result == -1 && errno == EINTR) { \
+
