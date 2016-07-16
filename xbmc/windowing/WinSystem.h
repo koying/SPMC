@@ -41,6 +41,7 @@ struct RESOLUTION_WHR
   int width;
   int height;
   int flags; //< only D3DPRESENTFLAG_MODEMASK flags
+  float RefreshRate;
   int ResInfo_Index;
 };
 
@@ -102,7 +103,7 @@ public:
   virtual void UpdateResolutions();
   void SetWindowResolution(int width, int height);
   int DesktopResolution(int screen);
-  std::vector<RESOLUTION_WHR> ScreenResolutions(int screen, float refreshrate);
+  std::vector<RESOLUTION_WHR> ScreenResolutions(int screen);
   std::vector<REFRESHRATE> RefreshRates(int screen, int width, int height, uint32_t dwFlags);
   REFRESHRATE DefaultRefreshRate(int screen, std::vector<REFRESHRATE> rates);
   virtual bool HasCalibration(const RESOLUTION_INFO &resInfo) { return true; };
