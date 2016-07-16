@@ -130,7 +130,7 @@ int CWinSystemBase::DesktopResolution(int screen)
   return RES_DESKTOP;
 }
 
-static void AddResolution(std::vector<RESOLUTION_WHR> &resolutions, unsigned int addindex, float bestRefreshrate)
+static void AddResolution(std::vector<RESOLUTION_WHR> &resolutions, unsigned int addindex)
 {
   RESOLUTION_INFO resInfo = CDisplaySettings::GetInstance().GetResolutionInfo(addindex);
   int width  = resInfo.iScreenWidth;
@@ -138,23 +138,7 @@ static void AddResolution(std::vector<RESOLUTION_WHR> &resolutions, unsigned int
   int flags  = resInfo.dwFlags & D3DPRESENTFLAG_MODEMASK;
   float refreshrate = resInfo.fRefreshRate;
 
-  // don't touch RES_DESKTOP
-  for (unsigned int idx = 1; idx < resolutions.size(); idx++)
-    if (   resolutions[idx].width == width
-        && resolutions[idx].height == height
-        &&(resolutions[idx].flags & D3DPRESENTFLAG_MODEMASK) == flags)
-    {
-      // check if the refresh rate of this resolution is better suited than
-      // the refresh rate of the resolution with the same width/height/interlaced
-      // property and if so replace it
-      if (bestRefreshrate > 0.0 && refreshrate == bestRefreshrate)
-        resolutions[idx].ResInfo_Index = addindex;
-
-      // no need to add the resolution again
-      return;
-    }
-
-  RESOLUTION_WHR res = {width, height, flags, (int)addindex};
+  RESOLUTION_WHR res = {width, height, flags, refreshrate, (int)addindex};
   resolutions.push_back(res);
 }
 
@@ -164,10 +148,11 @@ static bool resSortPredicate(RESOLUTION_WHR i, RESOLUTION_WHR j)
   // a "!=" on the flags comparison resulted in memory corruption
   return (    i.width < j.width
           || (i.width == j.width && i.height < j.height)
-          || (i.width == j.width && i.height == j.height && i.flags < j.flags) );
+          || (i.width == j.width && i.height == j.height && i.flags < j.flags)
+          || (i.width == j.width && i.height == j.height && i.flags == j.flags && i.RefreshRate < j.RefreshRate) );
 }
 
-std::vector<RESOLUTION_WHR> CWinSystemBase::ScreenResolutions(int screen, float refreshrate)
+std::vector<RESOLUTION_WHR> CWinSystemBase::ScreenResolutions(int screen)
 {
   std::vector<RESOLUTION_WHR> resolutions;
 
@@ -175,7 +160,7 @@ std::vector<RESOLUTION_WHR> CWinSystemBase::ScreenResolutions(int screen, float 
   {
     RESOLUTION_INFO info = CDisplaySettings::GetInstance().GetResolutionInfo(idx);
     if (info.iScreen == screen)
-      AddResolution(resolutions, idx, refreshrate);
+      AddResolution(resolutions, idx);
   }
 
   // Can't assume a sort order
