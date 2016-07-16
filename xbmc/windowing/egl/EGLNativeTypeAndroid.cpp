@@ -181,13 +181,16 @@ void CEGLNativeTypeAndroid::Initialize()
   std::string displaySize;
   m_width = m_height = 0;
 
-  fetchDisplayModes();
-  for (auto res : s_res_displayModes)
+  if (CJNIBuild::DEVICE != "foster")   // Buggy implementation of DisplayMode API on SATV
   {
-    if (res.iWidth > m_width || res.iHeight > m_height)
+    fetchDisplayModes();
+    for (auto res : s_res_displayModes)
     {
-      m_width = res.iWidth;
-      m_height = res.iHeight;
+      if (res.iWidth > m_width || res.iHeight > m_height)
+      {
+        m_width = res.iWidth;
+        m_height = res.iHeight;
+      }
     }
   }
 
