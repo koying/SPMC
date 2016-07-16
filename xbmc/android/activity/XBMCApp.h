@@ -155,6 +155,7 @@ public:
   static void SetSystemVolume(float percent);
 
   static void SetRefreshRate(float rate);
+  static void SetDisplayMode(int mode);
   static int GetDPI();
 
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
@@ -187,6 +188,7 @@ private:
   void stop();
   void SetupEnv();
   static void SetRefreshRateCallback(CVariant *rate);
+  static void SetDisplayModeCallback(CVariant *mode);
   static ANativeActivity *m_activity;
   static CJNIWakeLock *m_wakeLock;
   static int m_batteryLevel;
