@@ -7,7 +7,7 @@ AC_CONFIG_FILES([target/config.site native/config.site.native Makefile.include t
 AC_CANONICAL_HOST
 m4_include([../../m4/xbmc_arch.m4])
 m4_include([../../m4/ax_cxx_compile_stdcxx_11.m4])
-AX_CXX_COMPILE_STDCXX_11(,[optional])
+AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
 # check for not same cpu value
 AC_DEFUN([MC_CHECK_NOT_CPU],
