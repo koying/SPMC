@@ -54,7 +54,6 @@ public:
   virtual bool  BringToFront();
 
 protected:
-  CJNIDisplay m_display;
   int m_width;
   int m_height;
 };
