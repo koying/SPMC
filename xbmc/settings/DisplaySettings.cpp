@@ -701,12 +701,12 @@ void CDisplaySettings::SettingOptionsResolutionsFiller(const CSetting *setting, 
   else
   {
     std::map<RESOLUTION, RESOLUTION_INFO> resolutionInfos;
-    std::vector<RESOLUTION_WHR> resolutions = g_Windowing.ScreenResolutions(info.iScreen);
+    std::vector<RESOLUTION_WHR> resolutions = g_Windowing.ScreenResolutions(info.iScreen, info.fRefreshRate);
     for (std::vector<RESOLUTION_WHR>::const_iterator resolution = resolutions.begin(); resolution != resolutions.end(); ++resolution)
     {
       list.push_back(std::make_pair(
-        StringUtils::Format("%dx%d%s @ %.2f", resolution->width, resolution->height,
-                            ModeFlagsToString(resolution->flags, false).c_str(), resolution->RefreshRate),
+        StringUtils::Format("%dx%d%s", resolution->width, resolution->height,
+                            ModeFlagsToString(resolution->flags, false).c_str()),
                             resolution->ResInfo_Index));
 
       resolutionInfos.insert(std::make_pair((RESOLUTION)resolution->ResInfo_Index, CDisplaySettings::GetInstance().GetResolutionInfo(resolution->ResInfo_Index)));
