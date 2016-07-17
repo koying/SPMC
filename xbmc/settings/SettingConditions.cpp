@@ -261,8 +261,12 @@ void CSettingConditions::Initialize()
   m_simpleConditions.insert("hasdxva2");
 #endif
 
+#ifdef TARGET_ANDROID
+  m_simpleConditions.insert("isstandalone");
+#else
   if (g_application.IsStandAlone())
     m_simpleConditions.insert("isstandalone");
+#endif
 
   if(CAEFactory::SupportsQualitySetting())
     m_simpleConditions.insert("has_ae_quality_levels");
