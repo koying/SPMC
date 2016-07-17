@@ -6,9 +6,6 @@
         <setting id="videoscreen.screen">
           <visible>false</visible>
         </setting>
-        <setting id="videoscreen.screenmode">
-          <visible>false</visible>
-        </setting>
         <setting id="videoscreen.fakefullscreen">
           <visible>false</visible>
         </setting>
