@@ -27,6 +27,7 @@
 #include "FileOperationJob.h"
 #include "URIUtils.h"
 #include "filesystem/StackDirectory.h"
+#include "filesystem/SpecialProtocol.h"
 #include "filesystem/MultiPathDirectory.h"
 #include <vector>
 #include "settings/MediaSourceSettings.h"
@@ -167,51 +168,6 @@ bool CFileUtils::RemoteAccessAllowed(const std::string &strPath)
   return false;
 }
 
-bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
-{
-  // white/black list access checks, disallow exploits
-
-  static const char *blacklist_access[] = {
-    "passwords.xml",
-    "sources.xml",
-    "guisettings.xml",
-    "advancedsettings.xml",
-    NULL
-  };
-  for (const char **ptr = blacklist_access; *ptr; ptr++)
-  {
-    if (filePath.find(*ptr) != std::string::npos)
-    {
-      CLog::Log(LOGDEBUG,"http access denied");
-      return false;
-    }
-  }
-
-#if defined(TARGET_DARWIN)
-  char *fullpath = realpath(filePath.c_str(), nullptr);
-  if (fullpath)
-  {
-    const std::string testpath = fullpath;
-    free(fullpath);
-
-    // if this is a real path and accesses into user home, allow.
-    std::string userHome = CDarwinUtils::GetUserHomeDirectory();
-    if (testpath.find(userHome) != std::string::npos)
-      return true;
-
-    // if this is a real path and accesses outside app, deny.
-    std::string appRoot = CDarwinUtils::GetOSAppRootFolder();
-    if (testpath.find(appRoot) == std::string::npos)
-    {
-      CLog::Log(LOGDEBUG,"http access denied");
-      return false;
-    }
-  }
-#endif
-
-  return true;
-}
-
 CDateTime CFileUtils::GetModificationDate(const std::string& strFileNameAndPath, const bool& bUseLatestDate)
 {
   CDateTime dateAdded;
@@ -273,4 +229,51 @@ CDateTime CFileUtils::GetModificationDate(const std::string& strFileNameAndPath,
     CLog::Log(LOGERROR, "%s unable to extract modification date for file (%s)", __FUNCTION__, strFileNameAndPath.c_str());
   }
   return dateAdded;
+}
+
+bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
+{
+  // white/black list access checks, disallow exploits
+
+  // no access to these files,
+  // this can expose user/pass of remote servers
+  static const char *blacklist_files[] = {
+    "passwords.xml",
+    "sources.xml",
+    "guisettings.xml",
+    "advancedsettings.xml",
+    NULL
+  };
+
+  for (const char **ptr = blacklist_files; *ptr; ++ptr)
+  {
+    if (filePath.find(*ptr) != std::string::npos)
+    {
+      CLog::Log(LOGDEBUG,"http access denied");
+      return false;
+    }
+  }
+
+  char *fullpath = realpath(filePath.c_str(), nullptr);
+  if (fullpath)
+  {
+    const std::string testpath = fullpath;
+    free(fullpath);
+
+    // if this is a real path and accesses into user home, allow.
+    std::string userHome = CSpecialProtocol::TranslatePath("special://home");
+    if (testpath.find(userHome) != std::string::npos)
+      return true;
+
+    // if this is a real path and accesses outside app, deny.
+    std::string appRoot;
+    CUtil::GetHomePath(appRoot);
+    if (testpath.find(appRoot) == std::string::npos)
+    {
+      CLog::Log(LOGDEBUG,"http access denied");
+      return false;
+    }
+  }
+
+  return true;
 }
