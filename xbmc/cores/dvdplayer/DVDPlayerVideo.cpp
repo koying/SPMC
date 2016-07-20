@@ -1185,8 +1185,7 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
   }
 
   // make sure waiting time is not negative
-  // and do not stall after seeks
-  int maxWaitTime = std::min(std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 50), 500);
+  int maxWaitTime = std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 50);
   // don't wait when going ff
   if (m_speed > DVD_PLAYSPEED_NORMAL)
     maxWaitTime = std::max(DVD_TIME_TO_MSEC(iSleepTime), 0);
