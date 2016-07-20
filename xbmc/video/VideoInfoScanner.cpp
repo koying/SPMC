@@ -1567,7 +1567,8 @@ namespace VIDEO
         else
         {
           // Never add the same file twice
-          if (m_database.GetEpisodeId(file->strPath, -1, -1) >= 0)
+          CVideoInfoTag info;
+          if (m_database.GetFileInfo(file->strPath, info) > -1)
           {
             if (m_handle)
               m_handle->SetText(g_localizeStrings.Get(20415));
