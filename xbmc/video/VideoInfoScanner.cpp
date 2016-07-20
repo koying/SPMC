@@ -1554,15 +1554,17 @@ namespace VIDEO
         }
         else
         {
-          file->iEpisode = 0;
-          file->iSeason = 0;
-
-          if (m_database.GetEpisodeId(file->strPath, file->iEpisode, file->iSeason) > -1)
+          // Never add the same file twice
+          CVideoInfoTag info;
+          if (m_database.GetFileInfo(file->strPath, info) > -1)
           {
             if (m_handle)
               m_handle->SetText(g_localizeStrings.Get(20415));
             continue;
           }
+
+          file->iEpisode = 0;
+          file->iSeason = 0;
         }
       }
 
@@ -1653,19 +1655,19 @@ namespace VIDEO
         item.SetPath(file->strPath);
         if (!imdb.GetEpisodeDetails(guide->cScraperUrl, *item.GetVideoInfoTag(), pDlgProgress))
           return INFO_NOT_FOUND; // TODO: should we just skip to the next episode?
-          
+
         // Only set season/epnum from filename when it is not already set by a scraper
         if (item.GetVideoInfoTag()->m_iSeason == -1)
           item.GetVideoInfoTag()->m_iSeason = guide->iSeason;
         if (item.GetVideoInfoTag()->m_iEpisode == -1)
           item.GetVideoInfoTag()->m_iEpisode = guide->iEpisode;
-          
+
         if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, useLocal, &showInfo) < 0)
           return INFO_ERROR;
       }
       else
       {
-        if (!CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOLIBRARY_IMPORTALL))
+        if (!episodes.empty() || !CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOLIBRARY_IMPORTALL))
         {
           CLog::Log(LOGDEBUG,"%s - no match for show: '%s', season: %d, episode: %d.%d, airdate: '%s', title: '%s'",
                     __FUNCTION__, showInfo.m_strTitle.c_str(), file->iSeason, file->iEpisode, file->iSubepisode,
