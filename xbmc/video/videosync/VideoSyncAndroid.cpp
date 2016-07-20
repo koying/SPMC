@@ -44,9 +44,9 @@ bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
 
 void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
 {
-  int NrVBlanks;
-  double VBlankTime;
-  int64_t nowtime = CurrentHostCounter();
+  /* This shouldn't be very busy and timing is important so increase priority */
+  CThread::GetCurrentThread()->SetPriority(CThread::GetCurrentThread()->GetPriority()+1);
+
   int64_t lastSync = 0;
 
   while (!stop && !m_abort)
@@ -57,21 +57,22 @@ void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
       return;
     }
 
-    nowtime = CurrentHostCounter();
+#if 0
+    int64_t nowtime = CurrentHostCounter();
 
     //calculate how many vblanks happened
     int64_t FT = (nowtime - lastSync);
-    VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
-    NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
+    double VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
+    int NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
 
-    if (NrVBlanks > 1)
-      CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback late: %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
+    CLog::Log(LOGDEBUG, "CVideoSyncAndroid heartbeat: %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
 
     //save the timestamp of this vblank so we can calculate how many happened next time
     lastSync = nowtime;
+#endif
 
-    //update the vblank timestamp, update the clock and send a signal that we got a vblank
-    UpdateClock(NrVBlanks, nowtime);
+    uint64_t now = CurrentHostCounter();
+    UpdateClock(1, now);
   }
 }
 
