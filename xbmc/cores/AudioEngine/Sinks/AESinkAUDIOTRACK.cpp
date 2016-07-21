@@ -299,7 +299,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         else
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+            m_sink_sampleRate       = 48000;
+          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
@@ -323,7 +326,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         else
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
+//            m_sink_sampleRate       = 48000;
+          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
@@ -337,7 +343,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
           {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
-            m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
+//            m_sink_sampleRate       = 48000;
           }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
@@ -392,6 +398,9 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
     }
     else
     {
+      if (m_passthrough && m_format.m_sampleRate > 48000)
+        m_buffer_size             = std::max((unsigned int) 65536, m_buffer_size);
+
       m_format.m_frameSize      = m_format.m_channelLayout.Count() *
                                     (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
       if (m_passthrough)

@@ -573,7 +573,7 @@ void CDVDPlayerAudio::Process()
     }
 
     // Zero out the frame data if we are supposed to silence the audio
-    if (m_silence || (m_syncclock && !AE_IS_RAW_RAW(audioframe.data_format)))
+    if (m_silence || (m_syncclock && !AE_IS_RAW(audioframe.data_format)))
     {
       int size = audioframe.nb_frames * audioframe.framesize / audioframe.planes;
       for (unsigned int i=0; i<audioframe.planes; i++)
