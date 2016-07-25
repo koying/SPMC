@@ -157,15 +157,6 @@ endif()
 include(${APP_ROOT}/project/cmake/scripts/common/check_target_platform.cmake)
 
 set(ADDON_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-if(NOT WIN32)
-  # check install permissions
-  check_install_permissions(${CMAKE_INSTALL_PREFIX} can_write)
-  if(NOT ${can_write} AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(NEED_SUDO TRUE)
-    set(ADDON_INSTALL_DIR ${CMAKE_BINARY_DIR}/.install)
-    message(STATUS "NEED_SUDO: ${NEED_SUDO}")
-  endif()
-endif()
 
 ### prepare the build environment for the binary addons
 # copy the prepare-env.cmake script to the depends path so that we can include it
