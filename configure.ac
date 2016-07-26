@@ -2409,9 +2409,6 @@ OUTPUT_FILES="Makefile \
     tools/EventClients/Clients/OSXRemote/Makefile \
     xbmc/peripherals/bus/Makefile \
     xbmc/peripherals/devices/Makefile \
-    xbmc/android/activity/Makefile \
-    xbmc/android/loader/Makefile \
-    xbmc/android/jni/Makefile \
     xbmc/utils/Makefile \
     xbmc/main/Makefile \
     xbmc/main/posix/Makefile \
@@ -2425,6 +2422,12 @@ OUTPUT_FILES="Makefile \
     project/cmake/kodi-config.cmake \
     project/cmake/xbmc-config.cmake \
     addons/xbmc.addon/addon.xml \
+    "
+
+OUTPUT_FILES_DROID=" \
+    xbmc/android/activity/Makefile \
+    xbmc/android/loader/Makefile \
+    xbmc/android/jni/Makefile  \
     "
 
 OUTPUT_FILES_JAVA_DROID=" \
@@ -2449,7 +2452,7 @@ OUTPUT_FILES_JAVA_DROID=" \
     "
 
 if test "$target_platform" = "target_android" ; then
-OUTPUT_FILES="$OUTPUT_FILES $OUTPUT_FILES_JAVA_DROID"
+OUTPUT_FILES="$OUTPUT_FILES $OUTPUT_FILES_DROID $OUTPUT_FILES_JAVA_DROID"
 fi
 
 if test "$use_webserver" = "yes"; then
