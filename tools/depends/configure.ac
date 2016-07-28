@@ -508,7 +508,11 @@ if test "$platform_os" == "android"; then
   if [ ! test -f $use_ndk_path/sources/android/native_app_glue/android_native_app_glue.h ]; then
     AC_MSG_ERROR(verify ndk path)
   fi
-
+ 
+  if [ ! test -f $prefix/$deps_dir/include/langinfo.h ]; then
+    touch $prefix/$deps_dir/include/langinfo.h
+  fi
+ 
   #not all sort versions support -V - probe it...
   SORT_PARAMS=""
   sort -V /dev/null > /dev/null 2>&1 && SORT_PARAMS="-V"
