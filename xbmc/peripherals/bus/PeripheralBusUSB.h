@@ -35,6 +35,4 @@
 #define HAVE_PERIPHERAL_BUS_USB 1
 #include "osx/PeripheralBusUSB.h"
 #elif defined(TARGET_ANDROID)
-#define HAVE_PERIPHERAL_BUS_USB 1
-#include "linux/PeripheralBusUSBLibUSB.h"
 #endif
