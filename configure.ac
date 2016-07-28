@@ -691,7 +691,6 @@ if test "$target_platform" = "target_android" ; then
   USE_ANDROID=1
   webserver_checkdepends=yes
   CFLAGS="$CFLAGS -Wno-psabi"
-  DROID_DVDLIB_SEEK64="-D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED_ -Doff_t=off64_t -Dlseek=lseek64"
   CXXFLAGS="$CXXFLAGS -Wno-psabi"
   AC_DEFINE(HAS_EGLGLES, [1], [Define if supporting EGL based GLES Framebuffer])
 fi
@@ -2620,7 +2619,7 @@ XB_CONFIG_MODULE([lib/libdvd/libdvdcss], [
   ./configure \
     CC="$CC" \
     CXX="$CXX" \
-    CFLAGS="$CFLAGS $DROID_DVDLIB_SEEK64" \
+    CFLAGS="$CFLAGS" \
     --prefix="${prefix}" --includedir="${includedir}" --libdir="${libdir}" --datadir="${datadir}" \
     --host=$host_alias \
     --build=$build_alias \
@@ -2632,7 +2631,7 @@ XB_CONFIG_MODULE([lib/libdvd/libdvdcss], [
 
 XB_CONFIG_MODULE([lib/libdvd/libdvdread], [
   ./configure2 \
-    --extra-cflags="$CFLAGS $DVDREAD_CFLAGS -I`pwd`/../libdvdcss/src $DROID_DVDLIB_SEEK64" \
+    --extra-cflags="$CFLAGS $DVDREAD_CFLAGS -I`pwd`/../libdvdcss/src" \
     --prefix="${prefix}" --includedir="${includedir}" --libdir="${libdir}" --datadir="${datadir}" \
     --host=$host_alias \
     --build=$build_alias \
@@ -2649,7 +2648,7 @@ XB_CONFIG_MODULE([lib/libdvd/libdvdread], [
 
 XB_CONFIG_MODULE([lib/libdvd/libdvdnav], [
   ./configure2 \
-    --extra-cflags="$CFLAGS $DVDREAD_CFLAGS -I`pwd`/../includes $DROID_DVDLIB_SEEK64" \
+    --extra-cflags="$CFLAGS $DVDREAD_CFLAGS -I`pwd`/../includes" \
     --extra-ldflags="-L`pwd`/../libdvdread/obj" \
     --with-dvdread-config="`pwd`/../dvdread-config" \
     --prefix="${prefix}" --includedir="${includedir}" --libdir="${libdir}" --datadir="${datadir}" \
