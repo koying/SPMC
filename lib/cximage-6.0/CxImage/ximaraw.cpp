@@ -16,7 +16,7 @@
 
 #if defined(__ANDROID__)
 #include <stdint.h>
-#include <asm/byteorder.h>
+#include <byteswap.h>
 
 extern "C" void swab(const void *from, void*to, ssize_t n)
 {
@@ -26,7 +26,7 @@ extern "C" void swab(const void *from, void*to, ssize_t n)
     return;
 
   for (i = 0; i < (n/2)*2; i += 2)
-    *((uint16_t*)to+i) = __arch__swab16(*((uint16_t*)from+i));
+    *((uint16_t*)to+i) = bswap_16(*((uint16_t*)from+i));
 }
 
 #endif
