@@ -1,0 +1,45 @@
+diff -Npur lib/libnfs-sync.c /tmp/nfs/lib/libnfs-sync.c
+--- lib/libnfs-sync.c  2014-11-25 15:47:55.000000000 +0100
++++ /tmp/nfs/lib/libnfs-sync.c 2016-07-28 17:47:55.032067758 +0200
+@@ -37,7 +37,7 @@
+ #include <net/if.h>
+ #endif
+
+-#ifdef ANDROID
++#if defined(ANDROID) && !defined(HAVE_SYS_STATVFS_H)
+ #define statvfs statfs
+ #endif
+
+diff -Npur lib/libnfs.c /tmp/nfs/lib/libnfs.c
+--- lib/libnfs.c       2016-07-28 17:49:20.504625936 +0200
++++ /tmp/nfs/lib/libnfs.c      2016-07-28 17:46:00.467319089 +0200
+@@ -33,7 +33,7 @@
+ #include <utime.h>
+ #endif
+
+-#ifdef ANDROID
++#if defined(ANDROID) && !defined(HAVE_SYS_STATVFS_H)
+ #define statvfs statfs
+ #endif
+
+diff -Npur utils/nfs-ls.c /var/lib/cloud9/w1/SPMC/tools/depends/target/libnfs/arm-linux-androideabi-21/utils/nfs-ls.c
+--- utils/nfs-ls.c    2014-11-25 15:47:55.000000000 +0100
++++ /tmp/nfs/utils/nfs-ls.c 2016-07-28 20:06:44.118298685 +0200
+@@ -35,9 +35,13 @@ WSADATA wsaData;
+ #include <inttypes.h>
+ #include <string.h>
+ #include <sys/stat.h>
+-#include <sys/statvfs.h>
+-#ifndef AROS
+-#include <sys/statvfs.h>
++#ifdef HAVE_SYS_VFS_H
++#include <sys/vfs.h>
++#endif
++#ifdef HAVE_SYS_STATVFS_H
++#  include <sys/statvfs.h>
++#elif defined(ANDROID)
++#  define statvfs statfs
+ #endif
+ #endif
+
+
