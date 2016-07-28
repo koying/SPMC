@@ -33,9 +33,6 @@
 #endif
 #include <sys/stat.h>
 #include <sys/types.h>
-#if !defined(TARGET_FREEBSD)
-#include <sys/timeb.h>
-#endif
 #include "system.h" // for HAS_DVD_DRIVE
 #ifdef HAS_DVD_DRIVE
   #ifdef TARGET_POSIX
@@ -114,7 +111,7 @@ extern "C" void __stdcall init_emu_environ()
   // python
 #if defined(TARGET_WINDOWS)
   // fill our array with the windows system vars
-  LPTSTR lpszVariable; 
+  LPTSTR lpszVariable;
   LPTCH lpvEnv;
   lpvEnv = GetEnvironmentStrings();
   if (lpvEnv != NULL)
@@ -583,7 +580,7 @@ extern "C"
              err != ECONNRESET && err != ENOTCONN && err != ETIMEDOUT &&
              err != ENOBUFS && err != ENOMEM && err != ENXIO))
           errno = EIO; // exact errno is unknown or incorrect, use default error number
-        
+
         return -1;
       }
       return ret;
