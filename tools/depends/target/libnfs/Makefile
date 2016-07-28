@@ -22,6 +22,8 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	-rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
+	sed -ie "s|#define statvfs|//#define statvfs|" "$(PLATFORM)/lib/libnfs.c"
+	sed -ie "s|#define statvfs|//#define statvfs|" "$(PLATFORM)/lib/libnfs-sync.c"
 	cd $(PLATFORM); ./bootstrap
 	cd $(PLATFORM); patch -p1 < ../vfstat_redefine.patch
 	cd $(PLATFORM); $(CONFIGURE)
