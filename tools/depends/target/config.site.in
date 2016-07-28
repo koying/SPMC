@@ -132,6 +132,7 @@ if test "@platform_os@" = "android"; then
   samba_cv_have_longlong=yes
   samba_cv_HAVE_OFF64_T=yes
   samba_cv_HAVE_UT_UT_TYPE=no
+  ac_cv_func_bzero=yes
   ac_cv_func_srand=yes
   ac_cv_func_rand=yes
 
