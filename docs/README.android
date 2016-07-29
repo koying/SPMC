@@ -123,7 +123,7 @@ install some android packages using the Android SDK Manager:
 
     $ cd <android-sdk>/tools
     $ ./android update sdk -u -t platform,platform-tool
-    $ ./android update sdk --all -u -t build-tools-20.0.0
+    $ ./android update sdk -u -t build-tools-23.0.2
 --------------------------------------------------------------------
 3.4. Setup the Android toolchain
 --------------------------------------------------------------------
@@ -136,7 +136,7 @@ common scenario.
 The --install-dir option (and therefore the <android-toolchain-arm>/<android-toolchain-x86> value)
 specifies where the resulting toolchain should be installed (your choice).
 
-[NOTICE] Kodi uses the android API Version 21 and gcc version 4.9!
+[NOTICE] SPMC uses the android NDK level 21, SDK level 21 and gcc version 4.9!
 
 Building for arm architecture:
 
