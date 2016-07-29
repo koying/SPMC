@@ -52,7 +52,7 @@ AC_ARG_WITH([sdk],
 
 AC_ARG_WITH([ndk],
   [AS_HELP_STRING([--with-ndk],
-  [spcify ndk version (optional for android). default is android-17])],
+  [spcify ndk version (optional for android). default is android-21])],
   [use_ndk=$withval])
 
 AC_ARG_ENABLE([gplv3],
@@ -126,7 +126,7 @@ case $host in
       use_cpu="armeabi-v7a"
     fi
     use_sdk="${use_sdk:-android-23}"
-    use_ndk="${use_ndk:-android-17}"
+    use_ndk="${use_ndk:-android-21}"
     deps_dir="$use_host-$use_ndk"
     platform_cflags="-DANDROID -Os -fexceptions -fPIC"
     if test "x$use_cpu" = "xarmeabi-v7a"; then
@@ -144,7 +144,7 @@ case $host in
       use_cpu=$host_cpu
     fi
     use_sdk="${use_sdk:-android-23}"
-    use_ndk="${use_ndk:-android-17}"
+    use_ndk="${use_ndk:-android-21}"
     deps_dir="$use_host-$use_ndk"
     platform_cflags="-DANDROID -Os -fexceptions -fPIC"
     platform_ldflags="-L$prefix/$deps_dir/lib/$use_ndk"
