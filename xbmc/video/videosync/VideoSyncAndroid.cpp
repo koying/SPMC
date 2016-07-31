@@ -88,6 +88,12 @@ float CVideoSyncAndroid::GetFps()
   return m_fps;
 }
 
+void CVideoSyncAndroid::RefreshChanged()
+{
+  m_fps = g_graphicsContext.GetFPS();
+  CLog::Log(LOGDEBUG, "CVideoSyncAndroid::%s Detected new refreshrate: %f hertz", __FUNCTION__, m_fps);
+}
+
 void CVideoSyncAndroid::OnResetDevice()
 {
   m_abort = true;
