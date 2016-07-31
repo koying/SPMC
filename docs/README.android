@@ -29,7 +29,7 @@ These are the minimum packages necessary for building Kodi.
 Non-Ubuntu users will need to get the equivalents.
 
     $ sudo apt-get install build-essential default-jdk git curl autoconf \
-      unzip zip zlib1g-dev gawk gperf cmake
+      unzip zip zlib1g-dev gawk gperf cmake libcurl4-openssl-dev
 
 If you run a 64bit operating system you will also need to get ia32-libs
 
@@ -42,8 +42,8 @@ Older versions:
 The following versions are used on our continuous integration system "jenkins". Other (newer)
 versions might work as well.
 
-JDK: openjdk-6-jdk (java version "1.6.0_27")
-JRE: openjre-6-jre (java version "1.6.0_27")
+JDK: openjdk-8-jdk
+JRE: openjdk-8-jre
 
 
 -----------------------------------------------------------------------------
@@ -123,7 +123,8 @@ install some android packages using the Android SDK Manager:
 
     $ cd <android-sdk>/tools
     $ ./android update sdk -u -t platform,platform-tool
-    $ ./android update sdk -u -t build-tools-23.0.2
+    $ ./android update sdk -u -a -t build-tools-24.0.1
+    $ ./android update sdk -u -a -t extra-android-support
 --------------------------------------------------------------------
 3.4. Setup the Android toolchain
 --------------------------------------------------------------------
