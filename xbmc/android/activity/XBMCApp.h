@@ -171,6 +171,7 @@ public:
   void setVideosurfaceInUse(bool videosurfaceInUse);
 
   static bool WaitVSync(unsigned int milliSeconds);
+  static uint64_t GetVsyncTime() { return m_vsynctime; }
 
 protected:
   // limit who can access Volume
@@ -208,6 +209,7 @@ private:
   static CEvent m_windowCreated;
   static std::vector<GLuint> m_texturePool;
 
+  static uint64_t m_vsynctime;
   static CEvent m_vsyncEvent;
 
   bool XBMC_DestroyDisplay();
