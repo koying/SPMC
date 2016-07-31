@@ -33,7 +33,8 @@ public:
   virtual void Run(volatile bool& stop);
   virtual void Cleanup();
   virtual float GetFps();
-  
+  virtual void RefreshChanged();
+
   // IDispResource interface
   virtual void OnResetDevice();
 
