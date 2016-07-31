@@ -56,23 +56,23 @@ void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
       CLog::Log(LOGERROR, "CVideoSyncAndroid: timeout waiting for sync");
       return;
     }
-
-#if 0
-    int64_t nowtime = CurrentHostCounter();
+    uint64_t vsynctime = CXBMCApp::GetVsyncTime();
 
     //calculate how many vblanks happened
-    int64_t FT = (nowtime - lastSync);
+    int64_t FT = (vsynctime - lastSync);
     double VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
-    int NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
+    double NrVBlanks = VBlankTime * m_fps;
 
-    CLog::Log(LOGDEBUG, "CVideoSyncAndroid heartbeat: %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
+//    CLog::Log(LOGDEBUG, "CVideoSyncAndroid heartbeat: %lld(%f fps), %f", FT, 1.0/((double)FT/1000000000), NrVBlanks);
 
-    //save the timestamp of this vblank so we can calculate how many happened next time
-    lastSync = nowtime;
-#endif
+    int iNrVBlanks = MathUtils::round_int(NrVBlanks);
+    if (iNrVBlanks >= 1)
+    {
+      //save the timestamp of this vblank so we can calculate how many happened next time
+      lastSync = vsynctime;
 
-    uint64_t now = CurrentHostCounter();
-    UpdateClock(1, now);
+      UpdateClock(iNrVBlanks, vsynctime);
+    }
   }
 }
 
