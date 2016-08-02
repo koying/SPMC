@@ -509,10 +509,6 @@ if test "$platform_os" == "android"; then
     AC_MSG_ERROR(verify ndk path)
   fi
  
-  if [ ! test -f $prefix/$deps_dir/include/langinfo.h ]; then
-    touch $prefix/$deps_dir/include/langinfo.h
-  fi
- 
   #not all sort versions support -V - probe it...
   SORT_PARAMS=""
   sort -V /dev/null > /dev/null 2>&1 && SORT_PARAMS="-V"
@@ -537,6 +533,11 @@ fi
 # Some dumb checks to see if paths might be correct.
 if [ ! `mkdir -p $prefix/$deps_dir/include` ]; then
   AC_MSG_ERROR(unable to create $prefix/$deps_dir/include. verify that the path and permissions are correct.)
+fi
+if test "$platform_os" == "android"; then
+  if [ ! test -f $prefix/$deps_dir/include/langinfo.h ]; then
+    touch $prefix/$deps_dir/include/langinfo.h
+  fi
 fi
 
 if [ ! `mkdir -p $prefix/$deps_dir/lib` ]; then
