@@ -3,11 +3,7 @@ DEPS= ../../Makefile.include Makefile
 
 # lib name, version
 LIBNAME=curl
-ifeq (osx, $(findstring osx, $(OS)))
-VERSION=7.21.6
-else
-VERSION=7.39.0
-endif
+VERSION=7.49.1
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.bz2
 # configuration settings
@@ -41,12 +37,6 @@ $(LIBDYLIB): $(PLATFORM)
 	# make sure to also install libcurl.pc, we need to do
 	# this because we are selectively installing only libcurl
 	$(MAKE) -C $(PLATFORM) install-pkgconfigDATA
-ifeq ($(OS),android)
-	rm -f $(PREFIX)/lib/libcurl.la $(PREFIX)/lib/libcurl.so $(PREFIX)/lib/libcurl.so.5
-	mv -f $(PREFIX)/lib/libcurl.so.5.3.0 $(PREFIX)/lib/libcurl.so
-	$(RPL) -e "libcurl.so.5" "libcurl.so\x00\x00" $(PREFIX)/lib/libcurl.so
-	-$(READELF) --dynamic $(PREFIX)/lib/libcurl.so | grep ibrary
-endif
 	touch $@
 
 clean:
