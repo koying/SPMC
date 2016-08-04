@@ -215,6 +215,9 @@ bool CAddon::ReloadSettings()
 
 bool CAddon::LoadUserSettings()
 {
+  if (!CFile::Exists(m_userSettingsPath))
+    return false;
+
   m_userSettingsLoaded = false;
   CXBMCTinyXML doc;
   if (doc.LoadFile(m_userSettingsPath))
