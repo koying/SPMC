@@ -23,25 +23,37 @@
 #include "AndroidPowerSyscall.h"
 #include "android/activity/XBMCApp.h"
 #include "filesystem/File.h"
+#include "utils/log.h"
+
 #include <stdlib.h>
 #include <unistd.h>
 
 CAndroidPowerSyscall::CAndroidPowerSyscall()
 {
+  static const char *su_locations[] = {
+    "/system/bin/su",
+    "/system/xbin/su",
+    "/su/bin/su",
+    "/su/xbin/su",
+    NULL
+  };
+
   m_isRooted = false;
-  m_su_path = "/system/bin/su";
+  m_su_path = "";
+
+  for (const char **ptr = su_locations; *ptr; ptr++)
+  {
+    if (XFILE::CFile::Exists(*ptr))
+    {
+      CLog::Log(LOGDEBUG,"CAndroidPowerSyscall: su found at %s", *ptr);
+      m_su_path = *ptr;
+      m_isRooted = true;
+    }
+  }
+
   m_hasCEC = false;
   // CEC control path for Amazon FireTV, might apply to other devices
   m_cec_path = "/sys/devices/virtual/graphics/fb0/cec";
-
-  if (XFILE::CFile::Exists(m_su_path))
-    m_isRooted = true;
-  else
-  {
-    m_su_path = "/system/xbin/su";
-    if (XFILE::CFile::Exists(m_su_path))
-      m_isRooted = true;
-  }
 
   if (XFILE::CFile::Exists(m_cec_path))
     m_hasCEC = true;
