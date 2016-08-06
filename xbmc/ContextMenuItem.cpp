@@ -34,7 +34,10 @@ std::string CContextMenuItem::GetLabel() const
     return "";
 
   if (StringUtils::IsNaturalNumber(m_label))
-    return m_addon->GetString(std::stoi(m_label));
+  {
+    int value = atoi(m_label.c_str());
+    return m_addon->GetString(value);
+  }
 
   return m_label;
 }
