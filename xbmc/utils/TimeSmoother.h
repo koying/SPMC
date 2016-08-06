@@ -21,7 +21,6 @@
 #pragma once
 
 #include <vector>
-#include <boost/circular_buffer.hpp>
 
 /*! \brief Class to smooth timestamps
  
@@ -123,7 +122,7 @@ protected:
    \param threshold the threshold to determine whether a data point is close to a given bin as a proportion of bin mean
    \param minbinsize the minimum bin size of each bin
    */
-  static void BinData(const boost::circular_buffer<double> &data, std::vector<double> &bins, const double threshold, const unsigned int minbinsize);
+  static void BinData(const std::vector<double> &data, std::vector<double> &bins, const double threshold, const unsigned int minbinsize);
 
   /*! \brief Given a real value, find a rational convergent
    Uses a continued fraction expansion of value to determine the numerator and denominator of a rational convergent
@@ -152,7 +151,7 @@ protected:
    \param bins the bins to use for approximating the data
    \param intBins the integer representation of the bins
    */
-  static void GetIntRepresentation(const boost::circular_buffer<double> &data, std::vector<unsigned int> &intData, const std::vector<double> &bins, const std::vector<unsigned int> &intBins);
+  static void GetIntRepresentation(const std::vector<double> &data, std::vector<unsigned int> &intData, const std::vector<double> &bins, const std::vector<unsigned int> &intBins);
 
   /*! \brief Given a set of data, and an integer representation of that data, estimate the period of the data
    Essentially we solve a linear regression d_i = \theta*z_i, where d_i is the original data, and z_i is the integer
@@ -163,7 +162,7 @@ protected:
    \param intData an integral representation of the data
    \return the period of the data
    */
-  static double EstimatePeriod(const boost::circular_buffer<double> &data, const std::vector<unsigned int> &intData);
+  static double EstimatePeriod(const std::vector<double> &data, const std::vector<unsigned int> &intData);
 
   /*! \brief Compute the next frame time
    \param currentTime the current time
@@ -176,12 +175,12 @@ private:
   static const unsigned int num_periods = 100;     ///< \brief number of previous period estimates to use for the average period
   static const unsigned int num_stamps = 3;        ///< \brief number of previous time stamps to keep to optimize next time point
 
-  boost::circular_buffer<double> m_diffs;   ///< \brief the recently received differences
-  boost::circular_buffer<double> m_periods; ///< \brief the recently evaluated periods
+  std::vector<double> m_diffs;   ///< \brief the recently received differences
+  std::vector<double> m_periods; ///< \brief the recently evaluated periods
   double m_period;                          ///< \brief the running average of m_periods
 
   double m_lastFrameTime;                   ///< \brief the last frame time
 
-  boost::circular_buffer<double> m_prevIn;  ///< \brief the previous timestamps coming in
-  boost::circular_buffer<double> m_prevOut; ///< \brief the previous timestamps going out
+  std::vector<double> m_prevIn;  ///< \brief the previous timestamps coming in
+  std::vector<double> m_prevOut; ///< \brief the previous timestamps going out
 };
