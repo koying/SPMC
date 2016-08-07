@@ -1845,3 +1845,10 @@ int CCurlFile::IoControl(EIoControl request, void* param)
 
   return -1;
 }
+
+double CCurlFile::GetDownloadSpeed()
+{
+  double res = 0.0f;
+  g_curlInterface.easy_getinfo(m_state->m_easyHandle, CURLINFO_SPEED_DOWNLOAD, &res);
+  return res;
+}

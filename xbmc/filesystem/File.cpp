@@ -985,6 +985,13 @@ bool CFile::Touch(const std::string& fileName)
   return newfile.OpenForWrite(fileName);
 }
 
+double CFile::GetDownloadSpeed()
+{
+  if (m_pFile)
+    return m_pFile->GetDownloadSpeed();
+  return 0.0f;
+}
+
 //*********************************************************************************************
 //*************** Stream IO for CFile objects *************************************************
 //*********************************************************************************************

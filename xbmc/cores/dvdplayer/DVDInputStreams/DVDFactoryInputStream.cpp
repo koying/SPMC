@@ -33,6 +33,7 @@
 #ifdef ENABLE_DVDINPUTSTREAM_STACK
 #include "DVDInputStreamStack.h"
 #endif
+#include "DVDInputStreamMPD.h"
 #include "FileItem.h"
 #include "storage/MediaManager.h"
 #include "URL.h"
@@ -46,6 +47,10 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
 
   item.SetMimeType(content);
 
+  if (item.IsType(".mpd"))
+  {
+    return new CDVDInputStreamMPD();
+  }
   if(item.IsDiscImage())
   {
 #ifdef HAVE_LIBBLURAY

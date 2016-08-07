@@ -12,6 +12,9 @@ SRCS += DVDDemuxVobsub.cpp
 SRCS += DVDDemuxCC.cpp
 SRCS += DVDFactoryDemuxer.cpp
 
+# MPD
+SRCS += DVDDemuxMPD.cpp
+
 LIB = DVDDemuxers.a
 
 include @abs_top_srcdir@/Makefile.include
