@@ -291,13 +291,7 @@ static void ParseSegmentTemplate(const char **attr, std::string baseURL, DASHTre
     attr += 2;
   }
   tpl.presentationTimeOffset = tpl.timescale ? (double)pto / tpl.timescale : 0;
-
-  //We only support templates with id and number so far.......
-  if ((adp && tpl.media.find("$RepresentationID$") == std::string::npos && tpl.media.find("$Bandwidth$") == std::string::npos)
-  || (tpl.media.find("$Number") == std::string::npos && tpl.media.find("$Time") == std::string::npos))
-    tpl.media.clear();
-  else
-    tpl.media = baseURL + tpl.media;
+  tpl.media = baseURL + tpl.media;
 }
 
 static time_t getTime(const char* timeStr)
