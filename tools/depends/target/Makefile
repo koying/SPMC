@@ -15,7 +15,8 @@ DEPENDS = \
 	python26 libshairplay \
 	libplist libcec libbluray tinyxml dummy-libxbmc \
 	libamplayer libssh taglib libusb libnfs \
-	pythonmodule-pil libxslt ffmpeg platform crossguid libdcadec giflib
+	pythonmodule-pil libxslt ffmpeg platform crossguid libdcadec giflib \
+	bento4
 
 FFMPEG_DEPENDS = gnutls libdcadec
 

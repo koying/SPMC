@@ -1,5 +1,5 @@
-/home/cbro/android-toolchains/android-14/sysroot/usr/include
 /opt/android-dev/android-toolchain-arm-21-r12b/sysroot/usr/include
+/home/cloud9/spmc-build/arm-linux-androideabi-21/include
 
 addons/library.xbmc.addon
 addons/library.xbmc.codec
@@ -2863,3 +2863,4 @@ xbmc/video/jobs
 xbmc/video/videosync
 tools/android/packaging/xbmc/src/org/xbmc/kodi
 system/shaders
+xbmc/cores/dvdplayer/DVDInputStreams/dash

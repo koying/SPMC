@@ -12,8 +12,20 @@ SRCS=	DVDFactoryInputStream.cpp \
 	DVDInputStreamRTMP.cpp \
 	DVDInputStreamPVRManager.cpp \
 	DVDInputStreamStack.cpp \
-	InputStreamMultiSource.cpp\
+        InputStreamMultiSource.cpp\
 	DVDStateSerializer.cpp \
+
+# MPD
+SRCS += \
+        DVDInputStreamMPD.cpp\
+        dash/DASHStream.cpp \
+        dash/DASHTree.cpp \
+        dash/DASHCodecHandler.cpp \
+        dash/DASHByteStream.cpp \
+        dash/DASHFragmentedSampleReader.cpp \
+        dash/DASHSession.cpp \
+        dash/helpers.cpp \
+        dash/oscompat.cpp
 
 LIB=	DVDInputStreams.a
 
