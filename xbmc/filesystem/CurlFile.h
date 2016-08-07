@@ -63,6 +63,7 @@ namespace XFILE
       virtual std::string GetContent()                           { return m_state->m_httpheader.GetValue("content-type"); }
       virtual int IoControl(EIoControl request, void* param);
       virtual std::string GetContentCharset(void)                { return GetServerReportedCharset(); }
+      virtual double GetDownloadSpeed();
 
       bool Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
       bool Get(const std::string& strURL, std::string& strHTML);

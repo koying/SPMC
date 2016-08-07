@@ -1165,6 +1165,7 @@ if test "$target_platform" = "target_android" ; then
   AC_CHECK_LIB([jnigraphics],     [main],, AC_MSG_ERROR($missing_library))
   AC_CHECK_LIB([mediandk],     [main],, AC_MSG_ERROR($missing_library))
 fi
+LIBS="$LIBS -lexpat -lap4"
 PKG_CHECK_MODULES([LIBXML], [libxml-2.0],
   [INCLUDES="$INCLUDES $LIBXML_CFLAGS"; LIBS="$LIBS $LIBXML_LIBS"],
   AC_MSG_ERROR($missing_library))

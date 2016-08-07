@@ -30,6 +30,7 @@
 #include "DVDDemuxBXA.h"
 #include "DVDDemuxCDDA.h"
 #include "DVDDemuxPVRClient.h"
+#include "DVDDemuxMPD.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 
@@ -39,6 +40,16 @@ CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool
 {
   if (!pInputStream)
     return NULL;
+
+  // Try to open the MPD demuxer
+  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_MPD))
+  {
+    std::unique_ptr<CDVDDemuxMPD> demuxer(new CDVDDemuxMPD());
+    if (demuxer->Open(pInputStream))
+      return demuxer.release();
+    else
+      return NULL;
+  }
 
   // Try to open the AirTunes demuxer
   if (pInputStream->IsStreamType(DVDSTREAM_TYPE_FILE) && pInputStream->GetContent().compare("audio/x-xbmc-pcm") == 0 )

@@ -187,6 +187,7 @@ public:
   static bool Copy(const std::string& strFileName, const std::string& strDest, XFILE::IFileCallback* pCallback = NULL, void* pContext = NULL);
   static bool SetHidden(const std::string& fileName, bool hidden);
   static bool Touch(const std::string& fileName);
+  double GetDownloadSpeed();
 
 private:
   unsigned int m_flags;
