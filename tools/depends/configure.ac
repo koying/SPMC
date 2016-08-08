@@ -138,12 +138,12 @@ case $host in
     use_sdk="${use_sdk:-android-23}"
     use_ndk="${use_ndk:-android-21}"
     deps_dir="$use_host-$use_ndk"
-    platform_cflags="-DANDROID -Os -fexceptions -fPIC"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC -Wno-switch"
     if test "x$use_cpu" = "xarmeabi-v7a"; then
       platform_cflags+=" -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=neon"
     fi
     platform_ldflags="-L$prefix/$deps_dir/lib/$use_ndk"
-    platform_cxxflags="$platform_cflags -frtti"
+    platform_cxxflags="$platform_cflags -frtti -Wno-reorder"
     platform_includes="-I$prefix/$deps_dir/include/$use_ndk"
     platform_os="android"
     #android builds are always cross
@@ -173,9 +173,9 @@ case $host in
     use_sdk="${use_sdk:-android-23}"
     use_ndk="${use_ndk:-android-21}"
     deps_dir="$use_host-$use_ndk"
-    platform_cflags="-DANDROID -Os -fexceptions -fPIC"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC -Wino-switch"
     platform_ldflags="-L$prefix/$deps_dir/lib/$use_ndk"
-    platform_cxxflags="$platform_cflags -frtti"
+    platform_cxxflags="$platform_cflags -frtti -Wno-reorder"
     platform_includes="-I$prefix/$deps_dir/include/$use_ndk"
     platform_os="android"
     #android builds are always cross
