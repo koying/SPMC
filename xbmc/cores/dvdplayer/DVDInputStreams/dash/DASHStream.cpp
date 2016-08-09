@@ -71,11 +71,11 @@ bool DASHStream::download_segment()
 
       char fmt[16];
       if (np == npe)
-        strcpy(fmt, "%d");
+        strcpy(fmt, "%" PRIu64);
       else
         strcpy(fmt, media.substr(np, npe - np).c_str());
 
-      sprintf(rangebuf, fmt, static_cast<int>(current_seg_->range_end_));
+      sprintf(rangebuf, fmt, static_cast<uint64_t>(current_seg_->range_end_));
       media.replace(np - lenReplace, npe - np + lenReplace + 1, rangebuf);
       strURL = media;
     }
