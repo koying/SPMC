@@ -485,7 +485,8 @@ start(void *data, const char *el, const char **attr)
           if (dash->currentNode_ & DASHTree::MPDNODE_SEGMENTTIMELINE)
           {
             // <S t="3600" d="900000" r="2398"/>
-            unsigned int t(0), d(0), r(1);
+            unsigned int d(0), r(1);
+            static uint64_t t(0);
             for (; *attr;)
             {
               if (strcmp((const char*)*attr, "t") == 0)
