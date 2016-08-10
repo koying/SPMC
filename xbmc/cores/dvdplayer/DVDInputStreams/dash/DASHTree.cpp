@@ -460,6 +460,7 @@ start(void *data, const char *el, const char **attr)
                 sscanf((const char*)*(attr + 1), "%u-%u" , &dash->current_representation_->indexRangeMin_, &dash->current_representation_->indexRangeMax_);
               else if (strcmp((const char*)*attr, "indexRangeExact") == 0 && strcmp((const char*)*(attr + 1), "true") == 0)
                 dash->current_representation_->flags_ |= DASHTree::Representation::INDEXRANGEEXACT;
+              dash->current_representation_->flags_ |= DASHTree::Representation::SEGMENTBASE;
               attr += 2;
             }
             if((dash->current_representation_->flags_ & DASHTree::Representation::INDEXRANGEEXACT) && dash->current_representation_->indexRangeMax_)
@@ -857,6 +858,8 @@ end(void *data, const char *el)
                   return;
                 }
               }
+              else if (dash->current_representation_->flags_ & DASHTree::Representation::SEGMENTBASE)
+                return;
               delete dash->current_representation_;
               dash->current_adaptationset_->repesentations_.pop_back();
             }
