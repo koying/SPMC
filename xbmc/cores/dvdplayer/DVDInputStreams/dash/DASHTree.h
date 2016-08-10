@@ -83,7 +83,7 @@ namespace dash
 
     struct SegmentTemplate
     {
-      SegmentTemplate() :duration(0), startNumber(0), timescale(0), presentationTimeOffset(0){};
+      SegmentTemplate() :duration(0), startNumber(1), timescale(0), presentationTimeOffset(0){};
       std::string initialization;
       std::string media;
       unsigned int startNumber;
@@ -111,6 +111,7 @@ namespace dash
       static const unsigned int TIMELINE = 4;
       static const unsigned int INITIALIZATION = 8;
       static const unsigned int TIMETEMPLATE = 16;
+      static const unsigned int SEGMENTBASE = 32;
       uint32_t flags_;
 
       uint32_t indexRangeMin_, indexRangeMax_;
@@ -136,7 +137,7 @@ namespace dash
 
       const uint32_t get_segment_pos(const Segment *segment)const
       {
-        return segments_.pos(segment);
+        return segments_.data.empty() ? 0: segments_.pos(segment);
       }
     }*current_representation_;
 
