@@ -47,7 +47,7 @@ bool DASHStream::download_segment()
   std::string strURL;
   char rangebuf[128], *rangeHeader(0);
 
-  if (!(current_rep_->flags_ & DASHTree::Representation::INDEXRANGEEXACT))
+  if (!(current_rep_->flags_ & DASHTree::Representation::SEGMENTBASE))
   {
     if (!(current_rep_->flags_ & DASHTree::Representation::TEMPLATE))
     {
