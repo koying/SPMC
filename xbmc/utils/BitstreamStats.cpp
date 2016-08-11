@@ -59,14 +59,14 @@ void BitstreamStats::Start()
   m_tmStart = CurrentHostCounter();
 }
 
-void BitstreamStats::CalculateBitrate()
+void BitstreamStats::CalculateBitrate(bool force)
 {
   int64_t tmNow;
   tmNow = CurrentHostCounter();
 
   double elapsed = (double)(tmNow - m_tmStart) / (double)m_tmFreq;
   // only update once every 2 seconds
-  if (elapsed >= 2)
+  if (force || elapsed >= 2)
   {
     m_dBitrate = (double)m_nBitCount / elapsed;
 
