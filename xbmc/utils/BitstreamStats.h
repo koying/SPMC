@@ -45,7 +45,7 @@ public:
   inline double GetMinBitrate() const { return m_dMinBitrate; }
 
   void Start();
-  void CalculateBitrate();
+  void CalculateBitrate(bool force = false);
 
 private:
   double m_dBitrate;
