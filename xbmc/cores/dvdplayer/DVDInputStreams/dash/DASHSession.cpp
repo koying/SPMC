@@ -25,6 +25,8 @@
 
 #include "system.h"
 #include "utils/log.h"
+#include "utils/URIUtils.h"
+#include "filesystem/File.h"
 
 CDASHSession::CDASHSession(const char *strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
   :single_sample_decryptor_(0)
@@ -40,15 +42,16 @@ CDASHSession::CDASHSession(const char *strURL, int width, int height, const char
   , changed_(false)
   , manual_streams_(false)
 {
-  std::string fn(profile_path_ + "bandwidth.bin");
-  FILE* f = fopen(fn.c_str(), "rb");
-  if (f)
+  XFILE::CFile f;
+
+  std::string fn = URIUtils::AddFileToFolder(profile_path_, "bandwidth.bin");
+  if (f.Open(fn, READ_NO_CACHE))
   {
     double val;
-    fread(&val, sizeof(double), 1, f);
+    f.Read((void*)&val, sizeof(double));
     dashtree_.bandwidth_ = static_cast<uint32_t>(val * 8);
     dashtree_.set_download_speed(val);
-    fclose(f);
+    f.Close();
   }
   else
     dashtree_.bandwidth_ = 4000000;
@@ -91,14 +94,17 @@ CDASHSession::~CDASHSession()
 //    decrypter_ = 0;
 //  }
 
-  std::string fn(profile_path_ + "bandwidth.bin");
-  FILE* f = fopen(fn.c_str(), "wb");
-  if (f)
+  XFILE::CFile f;
+
+  std::string fn = URIUtils::AddFileToFolder(profile_path_, "bandwidth.bin");
+  if (f.OpenForWrite(fn, READ_NO_CACHE))
   {
     double val(dashtree_.get_average_download_speed());
-    fwrite((const char*)&val, sizeof(double), 1, f);
-    fclose(f);
+    f.Write((const void*)&val, sizeof(double));
+    f.Close();
   }
+  else
+    CLog::Log(LOGERROR, "CDASHSession - Cannot write bandwidth.bin");
 }
 
 CDASHSession::STREAM::STREAM(dash::DASHTree& t, dash::DASHTree::StreamType s)
@@ -225,6 +231,13 @@ bool CDASHSession::initialize()
   }
 
   uint32_t min_bandwidth(0), max_bandwidth(0);
+  /*
+  {
+    int buf;
+    xbmc->GetSetting("MINBANDWIDTH", (char*)&buf); min_bandwidth = buf;
+    xbmc->GetSetting("MAXBANDWIDTH", (char*)&buf); max_bandwidth = buf;
+  }
+  */
 
   // create CDASHSession::STREAM objects. One for each AdaptationSet
   const dash::DASHTree::AdaptationSet *adp;
