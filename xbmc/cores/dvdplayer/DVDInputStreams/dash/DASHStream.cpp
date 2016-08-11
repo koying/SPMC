@@ -19,6 +19,7 @@
 #include "URL.h"
 #include "filesystem/File.h"
 #include "utils/log.h"
+#include "utils/BitstreamStats.h"
 
 #include "ap4/Ap4.h"
 
@@ -202,7 +203,7 @@ bool DASHStream::seek_time(double seek_seconds, double current_seconds, bool &ne
     return false;
 
   uint32_t choosen_seg(~0);
-  
+
   uint64_t sec_in_ts = static_cast<uint64_t>(seek_seconds * current_rep_->timescale_);
   choosen_seg = 0; //Skip initialization
   while (choosen_seg < current_rep_->segments_.data.size() && sec_in_ts > current_rep_->get_segment(choosen_seg)->startPTS_)
@@ -242,14 +243,14 @@ bool DASHStream::download(const char* url, const char* rangeHeader)
   if (rangeHeader)
     uUrl.SetProtocolOption("Range", rangeHeader);
 
-  CFile* file = new CFile();
-  if (!file->Open(uUrl, READ_CHUNKED | READ_NO_CACHE | READ_AUDIO_VIDEO))
+  CFile file;;
+  if (!file.Open(uUrl, READ_NO_CACHE | READ_AUDIO_VIDEO | READ_BITRATE))
     return false;
 
   // read the file
   char *buf = (char*)malloc(1024*1024);
   size_t nbRead, nbReadOverall = 0;
-  while ((nbRead = file->Read(buf, 1024 * 1024)) > 0 && ~nbRead && write_data(buf, nbRead))
+  while ((nbRead = file.Read(buf, 1024 * 1024)) > 0 && ~nbRead && write_data(buf, nbRead))
     nbReadOverall+= nbRead;
   free(buf);
 
@@ -259,19 +260,11 @@ bool DASHStream::download(const char* url, const char* rangeHeader)
     return false;
   }
 
-  double current_download_speed_ = file->GetDownloadSpeed();
-  //Calculate the new downloadspeed to 1MB
-  static const size_t ref_packet = 1024 * 1024;
-  if (nbReadOverall >= ref_packet)
-    set_download_speed(current_download_speed_);
-  else
-  {
-    double ratio = (double)nbReadOverall / ref_packet;
-    set_download_speed((get_download_speed() * (1.0 - ratio)) + current_download_speed_*ratio);
-  }
+  BitstreamStats* stats = file.GetBitstreamStats();
+  stats->CalculateBitrate(true);
+  set_download_speed(stats->GetBitrate());
 
-  file->Close();
-  delete file;
+  file.Close();
 
   CLog::Log(LOGDEBUG, "Download %s finished, average download speed: %0.4lf", url, get_download_speed());
 
@@ -359,7 +352,7 @@ bool DASHStream::select_stream(bool force, bool justInit, unsigned int repId)
     for (std::vector<DASHTree::Representation*>::const_iterator br(current_adp_->repesentations_.begin()), er(current_adp_->repesentations_.end()); br != er; ++br)
     {
       unsigned int score;
-      if ((*br)->bandwidth_ <= bandwidth_ 
+      if ((*br)->bandwidth_ <= bandwidth_
         && ((score = abs(static_cast<int>((*br)->width_ * (*br)->height_) - static_cast<int>(width_ * height_))
         + static_cast<unsigned int>(sqrt(bandwidth_ - (*br)->bandwidth_))) < bestScore))
       {
@@ -372,7 +365,7 @@ bool DASHStream::select_stream(bool force, bool justInit, unsigned int repId)
   }
   else
     new_rep = current_adp_->repesentations_[repId -1];
-  
+
   if (!new_rep)
     new_rep = min_rep;
 
