@@ -9860,3 +9860,7 @@ xbmc/cores/dvdplayer/DVDInputStreams/dash/helpers.cpp
 xbmc/cores/dvdplayer/DVDInputStreams/dash/helpers.h
 xbmc/cores/dvdplayer/DVDInputStreams/dash/oscompat.cpp
 xbmc/cores/dvdplayer/DVDInputStreams/dash/oscompat.h
+xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxMPD.cpp
+xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxMPD.h
+xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamMPD.cpp
+xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamMPD.h
