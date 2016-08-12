@@ -99,7 +99,7 @@ public:
 
   virtual void GetStreamInfo(std::string& strInfo)
   {
-    strInfo = "";
+    strInfo = sStreamInfo;
   }
 
   virtual void GetStreamName(std::string& strInfo);
@@ -122,6 +122,8 @@ public:
   bool disabled; // set when stream is disabled. (when no decoder exists)
 
   int  changes; // increment on change which player may need to know about
+
+  std::string sStreamInfo;
 
   enum EFlags
   { FLAG_NONE             = 0x0000 
