@@ -21,6 +21,7 @@
 #include "URL.h"
 #include "filesystem/File.h"
 #include "utils/log.h"
+#include "utils/URIUtils.h"
 
 using namespace dash;
 using namespace XFILE;
@@ -1088,8 +1089,11 @@ bool DASHTree::download(const char* url)
 {
   // open the file
   CURL uUrl(url);
-  uUrl.SetProtocolOption("seekable", "0");
-  uUrl.SetProtocolOption("acceptencoding", "gzip");
+  if (URIUtils::IsInternetStream(uUrl))
+  {
+    uUrl.SetProtocolOption("seekable", "0");
+    uUrl.SetProtocolOption("acceptencoding", "gzip");
+  }
 
   CFile* file = new CFile();
   if (!file->Open(uUrl, READ_CHUNKED | READ_NO_CACHE))
