@@ -47,7 +47,7 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
 
   item.SetMimeType(content);
 
-  if (item.IsType(".mpd"))
+  if (item.GetMimeType() == "video/vnd.mpeg.dash.mpd" || item.IsType(".mpd"))
   {
     return new CDVDInputStreamMPD();
   }
