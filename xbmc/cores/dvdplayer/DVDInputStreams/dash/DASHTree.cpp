@@ -403,7 +403,7 @@ start(void *data, const char *el, const char **attr)
                   s.range_end_ = dash->current_representation_->segments_.data.back().range_end_ + 1;
                 s.range_begin_ = s.startPTS_ = t;
                 s.startPTS_ -= (dash->base_time_)*dash->current_representation_->segtpl_.timescale;
-                
+
                 for (; r; --r)
                 {
                   dash->current_representation_->segments_.data.push_back(s);
@@ -639,7 +639,7 @@ start(void *data, const char *el, const char **attr)
         dash->current_adaptationset_->base_url_ = dash->current_period_->base_url_;
         dash->adp_pssh_.second.clear();
         dash->adpChannelCount_ = 0;
-        
+
         for (; *attr;)
         {
           if (strcmp((const char*)*attr, "contentType") == 0)
@@ -917,19 +917,18 @@ end(void *data, const char *el)
           || ((dash->encryptionState_ & DASHTree::ENCRYTIONSTATE_ENCRYPTED) && dash->adp_pssh_.second.empty())
           || dash->current_adaptationset_->repesentations_.empty())
           {
-            CLog::Log(LOGDEBUG, "popping adapatation - type:%d, representations:%d", dash->current_adaptationset_->type_, dash->current_adaptationset_->repesentations_.size());
             delete dash->current_adaptationset_;
             dash->current_period_->adaptationSets_.pop_back();
           }
           else
           {
             dash->pssh_ = dash->adp_pssh_;
-            
+
             if (dash->current_adaptationset_->segment_durations_.data.empty()
               && !dash->current_adaptationset_->segtpl_.media.empty())
             {
-              for (std::vector<DASHTree::Representation*>::iterator 
-                b(dash->current_adaptationset_->repesentations_.begin()), 
+              for (std::vector<DASHTree::Representation*>::iterator
+                b(dash->current_adaptationset_->repesentations_.begin()),
                 e(dash->current_adaptationset_->repesentations_.end()); b != e; ++b)
               {
                 if (!(*b)->duration_ || !(*b)->timescale_)
@@ -1001,7 +1000,7 @@ bool DASHTree::open(const char *url)
   strXMLText_.clear();
 
   bool ret = download(url);
-  
+
   XML_ParserFree(parser_);
   parser_ = 0;
 
@@ -1081,7 +1080,6 @@ void DASHTree::SetFragmentDuration(const AdaptationSet* adp, const Representatio
 
 bool DASHTree::empty()
 {
-  CLog::Log(LOGDEBUG, "DASHTree::empty period: %x - adapations: %d", current_period_, current_period_->adaptationSets_.size());
   return (!current_period_ || current_period_->adaptationSets_.empty());
 }
 
@@ -1109,8 +1107,6 @@ bool DASHTree::download(const char* url)
 
   file->Close();
   delete file;
-
-  CLog::Log(LOGDEBUG, "Download %s finished", url);
 
   return nbRead == 0;
 }
