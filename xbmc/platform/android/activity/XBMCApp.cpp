@@ -976,7 +976,8 @@ void CXBMCApp::onVolumeChanged(int volume)
 void CXBMCApp::onAudioFocusChange(int focusChange)
 {
   CXBMCApp::android_printf("Audio Focus changed: %d", focusChange);
-  if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS)
+  if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS ||
+      focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT)
   {
     m_hasAudioFocus = false;
     unregisterMediaButtonEventReceiver();
@@ -984,6 +985,15 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
     if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
   }
+/*
+  else if (focusChange == CJNIAudioManager::AUDIOFOCUS_GAIN)
+  {
+    m_hasAudioFocus = true;
+    registerMediaButtonEventReceiver();
+    if (g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->IsPaused())
+      CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+  }
+*/
 }
 
 void CXBMCApp::doFrame(int64_t frameTimeNanos)
