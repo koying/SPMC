@@ -26,6 +26,7 @@
 #include "system.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
 #include "filesystem/File.h"
 
 CDASHSession::CDASHSession(const char *strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
@@ -347,29 +348,6 @@ void CDASHSession::UpdateStream(STREAM &stream)
 {
   const dash::DASHTree::Representation *rep(stream.stream_.getRepresentation());
 
-  if (stream.dmuxstrm->type == STREAM_VIDEO)
-  {
-    CDemuxStreamVideo* vstrm = static_cast<CDemuxStreamVideo*>(stream.dmuxstrm);
-    vstrm->iWidth = rep->width_;
-    vstrm->iHeight = rep->height_;
-    vstrm->fAspect = rep->aspect_;
-    vstrm->iFpsRate = rep->fpsRate_;
-    vstrm->iFpsScale = rep->fpsScale_;
-
-    if (!vstrm->ExtraSize && rep->codec_private_data_.size())
-    {
-      vstrm->ExtraSize = rep->codec_private_data_.size();
-      vstrm->ExtraData = (uint8_t*)malloc(vstrm->ExtraSize);
-      memcpy((void*)vstrm->ExtraData, rep->codec_private_data_.data(), vstrm->ExtraSize);
-    }
-  }
-  else if (stream.dmuxstrm->type == STREAM_AUDIO)
-  {
-    CDemuxStreamAudio* astrm = static_cast<CDemuxStreamAudio*>(stream.dmuxstrm);
-    astrm->iSampleRate = rep->samplingRate_;
-    astrm->iChannels = rep->channelCount_;
-  }
-
   // we currently use only the first track!
   std::string::size_type pos = rep->codecs_.find(",");
   if (pos == std::string::npos)
@@ -399,6 +377,31 @@ void CDASHSession::UpdateStream(STREAM &stream)
     CLog::Log(LOGERROR, "UpdateStream: cannot find codec %s (%s)", stream.codecName.c_str(), rep->codecs_.c_str());
 
   stream.bandwidth = rep->bandwidth_;
+
+  if (stream.dmuxstrm->type == STREAM_VIDEO)
+  {
+    CDemuxStreamVideo* vstrm = static_cast<CDemuxStreamVideo*>(stream.dmuxstrm);
+    vstrm->iWidth = rep->width_;
+    vstrm->iHeight = rep->height_;
+    vstrm->fAspect = rep->aspect_;
+    vstrm->iFpsRate = rep->fpsRate_;
+    vstrm->iFpsScale = rep->fpsScale_;
+    vstrm->sStreamInfo = StringUtils::Format("MPD Video: %s / %d x %d / %d kbps", stream.codecName.c_str(), rep->width_, rep->height_, rep->bandwidth_ / 1024);
+
+    if (!vstrm->ExtraSize && rep->codec_private_data_.size())
+    {
+      vstrm->ExtraSize = rep->codec_private_data_.size();
+      vstrm->ExtraData = (uint8_t*)malloc(vstrm->ExtraSize);
+      memcpy((void*)vstrm->ExtraData, rep->codec_private_data_.data(), vstrm->ExtraSize);
+    }
+  }
+  else if (stream.dmuxstrm->type == STREAM_AUDIO)
+  {
+    CDemuxStreamAudio* astrm = static_cast<CDemuxStreamAudio*>(stream.dmuxstrm);
+    astrm->iSampleRate = rep->samplingRate_;
+    astrm->iChannels = rep->channelCount_;
+    astrm->sStreamInfo = StringUtils::Format("MPD Audio: %s / %d ch / %d Hz / %d kbps", stream.codecName.c_str(), rep->channelCount_, rep->samplingRate_, rep->bandwidth_ / 1024);
+  }
 }
 
 bool CDASHSession::CheckChange(bool bSet)
