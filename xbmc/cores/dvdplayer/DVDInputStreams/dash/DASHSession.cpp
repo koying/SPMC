@@ -51,11 +51,11 @@ CDASHSession::CDASHSession(const char *strURL, int width, int height, const char
     double val;
     f.Read((void*)&val, sizeof(double));
     dashtree_.bandwidth_ = static_cast<uint32_t>(val * 8);
-    dashtree_.set_download_speed(val);
     f.Close();
   }
   else
     dashtree_.bandwidth_ = 4000000;
+  dashtree_.set_download_speed(dashtree_.bandwidth_);
   CLog::Log(LOGDEBUG, "Initial bandwidth: %u ", dashtree_.bandwidth_);
 
   int buf = 0;
