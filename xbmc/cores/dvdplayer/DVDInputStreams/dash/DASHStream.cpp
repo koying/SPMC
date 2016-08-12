@@ -266,8 +266,6 @@ bool DASHStream::download(const char* url, const char* rangeHeader)
 
   file.Close();
 
-  CLog::Log(LOGDEBUG, "Download %s finished, average download speed: %0.4lf", url, get_download_speed());
-
   return nbRead == 0;
 }
 

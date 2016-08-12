@@ -56,7 +56,7 @@ CDASHSession::CDASHSession(const char *strURL, int width, int height, const char
   else
     dashtree_.bandwidth_ = 4000000;
   dashtree_.set_download_speed(dashtree_.bandwidth_);
-  CLog::Log(LOGDEBUG, "Initial bandwidth: %u ", dashtree_.bandwidth_);
+  CLog::Log(LOGDEBUG, "CDASHSession - Initial bandwidth: %u ", dashtree_.bandwidth_);
 
   int buf = 0;
   switch (buf)

@@ -42,8 +42,6 @@ CDVDDemuxMPD::~CDVDDemuxMPD()
 
 bool CDVDDemuxMPD::Open(CDVDInputStream* pInput)
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
-
   if (m_MPDsession)
     return false;
 
@@ -56,27 +54,22 @@ bool CDVDDemuxMPD::Open(CDVDInputStream* pInput)
 
 void CDVDDemuxMPD::Dispose()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
 }
 
 void CDVDDemuxMPD::Reset()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
 }
 
 void CDVDDemuxMPD::Abort()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
 }
 
 void CDVDDemuxMPD::Flush()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
 }
 
 DemuxPacket*CDVDDemuxMPD::Read()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
   if (!m_MPDsession)
     return NULL;
 
@@ -101,7 +94,7 @@ DemuxPacket*CDVDDemuxMPD::Read()
     p->iSize = sr->GetSampleDataSize();
     memcpy(p->pData, sr->GetSampleData(), p->iSize);
 
-    CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
+    //CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
 
     sr->ReadSample();
     return p;
@@ -111,18 +104,14 @@ DemuxPacket*CDVDDemuxMPD::Read()
 
 bool CDVDDemuxMPD::SeekTime(int time, bool backwards, double* startpts)
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
   if (!m_MPDsession)
     return false;
-
-  CLog::Log(LOGINFO, "DemuxSeekTime (%d)", time);
 
   return m_MPDsession->SeekTime(static_cast<double>(time)*0.001f, 0, !backwards);
 }
 
 void CDVDDemuxMPD::SetSpeed(int speed)
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
 }
 
 int CDVDDemuxMPD::GetNrOfStreams()
@@ -131,14 +120,11 @@ int CDVDDemuxMPD::GetNrOfStreams()
   if (m_MPDsession)
     n = m_MPDsession->GetStreamCount();
 
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s - %d", __FUNCTION__, n);
   return n;
 }
 
 CDemuxStream* CDVDDemuxMPD::GetStream(int streamid)
 {
-  CLog::Log(LOGDEBUG, "DemuxGetStream(%d)", streamid);
-
   CDASHSession::STREAM *stream(m_MPDsession->GetStream(streamid));
   if (!stream)
   {
@@ -146,7 +132,6 @@ CDemuxStream* CDVDDemuxMPD::GetStream(int streamid)
     return nullptr;
   }
 
-  CLog::Log(LOGDEBUG, ">>> %d", stream->dmuxstrm->type);
   return stream->dmuxstrm;
 }
 
@@ -220,7 +205,6 @@ void CDVDDemuxMPD::EnableStream(int streamid, bool enable)
         m_MPDsession->CheckChange(true);
       }
     }
-    CLog::Log(LOGDEBUG, ">>>> OK");
     return;
   }
   CLog::Log(LOGDEBUG, ">>>> ERROR");
@@ -242,5 +226,4 @@ void CDVDDemuxMPD::GetStreamCodecName(int iStreamId, std::string& strName)
   CDASHSession::STREAM *stream(m_MPDsession->GetStream(iStreamId));
   if (stream)
     strName = stream->codecName;
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s - %s", __FUNCTION__, strName.c_str());
 }
