@@ -45,13 +45,12 @@ CDVDInputStreamMPD::CDVDInputStreamMPD()
 
 CDVDInputStreamMPD::~CDVDInputStreamMPD()
 {
+  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
   Close();
 }
 
 bool CDVDInputStreamMPD::Open(const char* strFile, const std::string& content, bool contentLookup)
 {
-  CLog::Log(LOGDEBUG, "CDVDInputStreamMPD::%s", __FUNCTION__);
-
   // Find larger possible resolution
   RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
   for (unsigned int i=0; i<CDisplaySettings::GetInstance().ResolutionInfoSize(); ++i)
@@ -88,12 +87,10 @@ bool CDVDInputStreamMPD::Open(const char* strFile, const std::string& content, b
 
 void CDVDInputStreamMPD::Close()
 {
-  CLog::Log(LOGDEBUG, "CDVDInputStreamMPD::%s", __FUNCTION__);
 }
 
 int CDVDInputStreamMPD::GetTotalTime()
 {
-  CLog::Log(LOGDEBUG, "CDVDInputStreamMPD::%s", __FUNCTION__);
   if (!m_AP4session)
     return 0;
 
@@ -102,7 +99,6 @@ int CDVDInputStreamMPD::GetTotalTime()
 
 int CDVDInputStreamMPD::GetTime()
 {
-  CLog::Log(LOGDEBUG, "CDVDInputStreamMPD::%s", __FUNCTION__);
   if (!m_AP4session)
     return 0;
 
