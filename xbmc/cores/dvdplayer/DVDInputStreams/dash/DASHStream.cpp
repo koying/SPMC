@@ -48,15 +48,19 @@ bool DASHStream::download_segment()
   std::string strURL;
   char rangebuf[128], *rangeHeader(0);
 
-  if (!(current_rep_->flags_ & DASHTree::Representation::SEGMENTBASE))
+  if ((current_rep_->flags_ & DASHTree::Representation::SEGMENTBASE))
   {
-    if (!(current_rep_->flags_ & DASHTree::Representation::TEMPLATE))
-    {
-      sprintf(rangebuf, "/range/%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
-      strURL = current_rep_->url_ + rangebuf;
-      absolute_position_ = current_seg_->range_begin_;
-    }
-    else if (~current_seg_->range_end_) //templated segment
+    strURL = current_rep_->url_;
+    sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
+    rangeHeader = rangebuf;
+  }
+  else  if ((current_rep_->flags_ & DASHTree::Representation::SEGMENTMEDIA))
+  {
+    strURL = current_rep_->url_ + current_seg_->media_;
+  }
+  else  if ((current_rep_->flags_ & DASHTree::Representation::TEMPLATE))
+  {
+    if (~current_seg_->range_end_) //templated segment
     {
       std::string media = current_rep_->segtpl_.media;
       std::string::size_type lenReplace(7);
@@ -85,9 +89,9 @@ bool DASHStream::download_segment()
   }
   else
   {
-    strURL = current_rep_->url_;
-    sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
-    rangeHeader = rangebuf;
+    sprintf(rangebuf, "/range/%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
+    strURL = current_rep_->url_ + rangebuf;
+    absolute_position_ = current_seg_->range_begin_;
   }
 
   return download(strURL.c_str(), rangeHeader);

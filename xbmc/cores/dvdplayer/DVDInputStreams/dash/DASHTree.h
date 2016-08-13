@@ -79,6 +79,7 @@ namespace dash
       void SetRange(const char *range);
       uint64_t range_begin_;
       uint64_t range_end_;
+      std::string media_;
       uint64_t startPTS_;
     };
 
@@ -113,6 +114,7 @@ namespace dash
       static const unsigned int INITIALIZATION = 8;
       static const unsigned int TIMETEMPLATE = 16;
       static const unsigned int SEGMENTBASE = 32;
+      static const unsigned int SEGMENTMEDIA = 64;
       uint32_t flags_;
 
       uint32_t indexRangeMin_, indexRangeMax_;
@@ -184,7 +186,7 @@ namespace dash
     uint32_t bandwidth_;
 
     double download_speed_, average_download_speed_;
-    
+
     std::pair<std::string, std::string> pssh_, adp_pssh_;
 
     enum
