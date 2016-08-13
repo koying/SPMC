@@ -21,6 +21,7 @@
  *
  */
 
+#include <cstdint>
 #include <float.h>
 
 #include "DASHFragmentObserver.h"
