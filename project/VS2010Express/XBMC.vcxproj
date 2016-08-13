@@ -86,7 +86,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/IGNORE:4089 /ignore:4254 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>d3d11.lib;DInput8.lib;DSound.lib;winmm.lib;CrossGuidd.lib;Mpr.lib;Iphlpapi.lib;PowrProf.lib;setupapi.lib;dwmapi.lib;yajl.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;DInput8.lib;DSound.lib;winmm.lib;CrossGuidd.lib;Mpr.lib;Iphlpapi.lib;PowrProf.lib;setupapi.lib;dwmapi.lib;yajl.lib;dxguid.lib;libexpat.lib;ap4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
       <IgnoreSpecificDefaultLibraries>libcpmt;libc;msvcrt;libcmt;msvcrtd;msvcprtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
@@ -264,9 +264,21 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxCC.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxCDDA.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMPD.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMultiSource.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxPVRClient.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHByteStream.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHCodecHandler.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHFragmentedSampleReader.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHSession.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHStream.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHTree.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\helpers.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\oscompat.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamBluray.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMPD.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamPVRManager.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\InputStreamMultiSource.cpp" />
     <ClCompile Include="..\..\xbmc\cores\FFmpeg.cpp" />
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\OverlayRendererGUI.cpp" />
     <ClCompile Include="..\..\xbmc\cores\VideoRenderers\RenderCapture.cpp" />
@@ -940,6 +952,20 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxBXA.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxCC.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxCDDA.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMPD.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMultiSource.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHByteStream.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHCodecHandler.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHFragmentedSampleReader.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHFragmentObserver.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHSession.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHStream.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHTree.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\helpers.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\oscompat.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMPD.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\InputStreamMultiSource.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\InputStreamMultiStreams.h" />
     <ClInclude Include="..\..\xbmc\cores\FFmpeg.h" />
     <ClInclude Include="..\..\xbmc\cores\VideoRenderers\OverlayRendererGUI.h" />
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogKeyboardGeneric.h" />
