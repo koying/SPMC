@@ -23,6 +23,8 @@
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 
+//#define DEBUG_VERBOSE 1
+
 using namespace dash;
 using namespace XFILE;
 
@@ -320,6 +322,16 @@ static time_t getTime(const char* timeStr)
 static void XMLCALL
 start(void *data, const char *el, const char **attr)
 {
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG, "start - %s", el);
+  const char ** it = attr;
+  for (; *it;)
+  {
+    CLog::Log(LOGDEBUG, ">>> %s = %s", (const char*)*it, (const char*)*(it + 1));
+    it += 2;
+  }
+#endif
+
   DASHTree *dash(reinterpret_cast<DASHTree*>(data));
 
   if (dash->currentNode_ & DASHTree::MPDNODE_MPD)
@@ -753,6 +765,10 @@ static void ReplacePlaceHolders(std::string &rep, const std::string &id, uint32_
 static void XMLCALL
 end(void *data, const char *el)
 {
+#ifdef DEBUG_VERBOSE
+  CLog::Log(LOGDEBUG, "end - %s", el);
+#endif
+
   DASHTree *dash(reinterpret_cast<DASHTree*>(data));
 
   if (dash->currentNode_ & DASHTree::MPDNODE_MPD)
