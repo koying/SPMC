@@ -50,7 +50,7 @@ CDASHSession::CDASHSession(const char *strURL, int width, int height, const char
   {
     double val;
     f.Read((void*)&val, sizeof(double));
-    dashtree_.bandwidth_ = static_cast<uint32_t>(val * 8);
+    dashtree_.bandwidth_ = static_cast<uint32_t>(val);
     f.Close();
   }
   else
@@ -98,7 +98,7 @@ CDASHSession::~CDASHSession()
   XFILE::CFile f;
 
   std::string fn = URIUtils::AddFileToFolder(profile_path_, "bandwidth.bin");
-  if (f.OpenForWrite(fn, READ_NO_CACHE))
+  if (f.OpenForWrite(fn, true))
   {
     double val(dashtree_.get_average_download_speed());
     f.Write((const void*)&val, sizeof(double));

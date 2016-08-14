@@ -24,7 +24,7 @@
 #include "DVDInputStream.h"
 #include "dash/DASHSession.h"
 
-class DemuxPacket;
+struct DemuxPacket;
 class CDemuxStream;
 
 class CDVDInputStreamMPD
