@@ -21,8 +21,6 @@
 
 #include "JNIBase.h"
 
-#include "AudioDeviceInfo.h"
-
 class CJNIAudioManagerAudioFocusChangeListener : public CJNIBase
 {
 public:
@@ -55,8 +53,6 @@ public:
   int abandonAudioFocus (const CJNIAudioManagerAudioFocusChangeListener &listener);
   bool isBluetoothA2dpOn();
   bool isWiredHeadsetOn();
-  
-  CJNIAudioDeviceInfos getDevices(int flags);
 
   static void PopulateStaticFields();
   static int STREAM_MUSIC;
@@ -65,10 +61,6 @@ public:
   static int AUDIOFOCUS_LOSS;
   static int AUDIOFOCUS_REQUEST_GRANTED;
   static int AUDIOFOCUS_REQUEST_FAILED;
-  
-  static int GET_DEVICES_ALL;
-  static int GET_DEVICES_INPUTS;
-  static int GET_DEVICES_OUTPUTS;
 
 private:
   CJNIAudioManager();

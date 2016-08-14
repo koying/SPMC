@@ -20,6 +20,8 @@
 
 #include "JNIMainActivity.h"
 
+#include "android/jni/Activity.h"
+#include "android/jni/Intent.h"
 #include "android/jni/jutils/jutils-details.hpp"
 
 using namespace jni;
@@ -58,24 +60,6 @@ void CJNIMainActivity::_callNative(JNIEnv *env, jobject context, jlong funcAddr,
   (void)env;
   (void)context;
   ((void (*)(CVariant *))funcAddr)((CVariant *)variantAddr);
-}
-
-void CJNIMainActivity::_onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices)
-{
-  (void)env;
-  (void)context;
-  if (m_appInstance)
-  {
-    m_appInstance->onAudioDeviceAdded(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
-  }
-}
-
-void CJNIMainActivity::_onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices)
-{
-  (void)env;
-  (void)context;
-  if (m_appInstance)
-    m_appInstance->onAudioDeviceRemoved(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
 }
 
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
