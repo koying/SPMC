@@ -132,7 +132,7 @@ AP4_Result CDASHFragmentedSampleReader::SeekSample(AP4_UI32 track_id, AP4_UI64 t
 AP4_Result CDASHFragmentedSampleReader::ReadSample()
 {
   AP4_Result result;
-  if (AP4_FAILED(result = ReadNextSample(m_Track->GetId(), m_sample_, m_Protected_desc ? m_encrypted : m_sample_data_)))
+  if (AP4_FAILED(result = ReadNextSample(m_Track->GetId(), m_sample_, m_Protected_desc ? m_encrypted_data_ : m_sample_data_)))
   {
     if (result == AP4_ERROR_EOS) {
       m_eos = true;
@@ -147,9 +147,9 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
 //      // Make sure that the decrypter is NOT allocating memory!
 //      // If decrypter and addon are compiled with different DEBUG / RELEASE
 //      // options freeing HEAP memory will fail.
-//      m_sample_data_.Reserve(m_encrypted.GetDataSize());
+//      m_sample_data_.Reserve(m_encrypted_data_.GetDataSize());
 //      m_SingleSampleDecryptor->SetKeyId(m_DefaultKey?16:0, m_DefaultKey);
-//      if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
+//      if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted_data_, m_sample_data_, NULL)))
 //      {
 //        CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
 //        Reset(true);

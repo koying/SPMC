@@ -9864,3 +9864,5 @@ xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxMPD.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxMPD.h
 xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamMPD.cpp
 xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamMPD.h
+xbmc/cores/dvdplayer/Makefile.in
+xbmc/cores/dvdplayer/DVDDecrypt/IDVDDecrypt.h

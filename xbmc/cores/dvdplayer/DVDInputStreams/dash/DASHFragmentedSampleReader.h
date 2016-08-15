@@ -71,7 +71,7 @@ private:
   double m_presentationTimeOffset;
 
   AP4_Sample     m_sample_;
-  AP4_DataBuffer m_encrypted, m_sample_data_;
+  AP4_DataBuffer m_encrypted_data_, m_sample_data_;
 
   CDASHCodecHandler *m_codecHandler;
   const AP4_UI08 *m_DefaultKey;
