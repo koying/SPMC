@@ -1003,8 +1003,6 @@
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\oscompat.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMPD.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMPD.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMultiSource.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\InputStreamMultiSource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\xbmc\addons\AddonCallbacksAudioDSP.h" />
@@ -2058,9 +2056,6 @@
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\oscompat.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMPD.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMPD.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMultiSource.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\InputStreamMultiSource.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\InputStreamMultiStreams.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\xbmc\interfaces\swig\AddonModuleXbmc.i" />
