@@ -1827,7 +1827,7 @@ void CDVDPlayer::HandlePlaySpeed()
     // due to i.e. discontinuities of pts the stream may have drifted away
     // from clock too far for audio to sync back.
     if (m_CurrentAudio.id >= 0 && m_CurrentAudio.inited &&
-        m_dvdPlayerAudio->IsStalled() && m_dvdPlayerVideo->GetLevel() > 50)
+      m_dvdPlayerAudio->IsStalled() && m_dvdPlayerAudio->GetLevel() == 0 && m_dvdPlayerVideo->GetLevel() > 50)
     {
       CLog::Log(LOGDEBUG,"CDVDPlayer::HandlePlaySpeed - audio stream stalled, triggering re-sync");
       TriggerResync();
