@@ -2,7 +2,6 @@
 
 /*
  *      Copyright (C) 2016 Christian Browet
- *      Copyright (C) 2016-2016 peak3d
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -22,40 +21,19 @@
  */
 
 #include "DVDInputStream.h"
-#include "dash/DASHSession.h"
 
-class DemuxPacket;
-class CDemuxStream;
-
-class CDVDInputStreamMPD
+class CDVDInputStreamNULL
     : public CDVDInputStream
-    , public CDVDInputStream::IDisplayTime
-    , public CDVDInputStream::ISeekTime
 {
 public:
-  CDVDInputStreamMPD(CFileItem& fileitem);
-  virtual ~CDVDInputStreamMPD();
+  CDVDInputStreamNULL(CFileItem& fileitem)
+    : CDVDInputStream(DVDSTREAM_TYPE_NULL, fileitem)
+  {}
+  virtual ~CDVDInputStreamNULL() {}
 
-  /* CDVDInputStream */
-  virtual bool Open();
-  virtual void Close();
   virtual int Read(uint8_t* buf, int buf_size) { return -1; }
   virtual int64_t Seek(int64_t offset, int whence) { return -1; }
   virtual bool Pause(double dTime) { return false; }
   virtual bool IsEOF() { return false; }
   virtual int64_t GetLength() { return -1; }
-
-  /* IDisplayTime */
-  virtual int GetTotalTime();
-  virtual int GetTime();
-
-  /* ISeekTime */
-  virtual bool SeekTime(int ms) { return false; }
-
-  const std::shared_ptr<CDASHSession> GetDashSession() const;
-
-protected:
-  void FillStreams();
-
-  std::shared_ptr<CDASHSession> m_AP4session;
 };
