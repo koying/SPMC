@@ -993,15 +993,14 @@
     <ClCompile Include="..\..\xbmc\XbmcContext.cpp" />
     <ClCompile Include="..\..\xbmc\utils\test\TestGlobalsHandlingPattern1.h" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthroughRaw.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHByteStream.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHCodecHandler.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHFragmentedSampleReader.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHSession.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHStream.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHTree.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\helpers.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\oscompat.cpp" />
-    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMPD.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHByteStream.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHCodecHandler.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHFragmentedSampleReader.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHSession.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHStream.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHTree.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\helpers.cpp" />
+    <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\oscompat.cpp" />
     <ClCompile Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMPD.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -2045,16 +2044,16 @@
     <ClInclude Include="..\..\xbmc\windows\GUIWindowWeather.h" />
     <ClInclude Include="..\..\xbmc\XBApplicationEx.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDCodecs\Audio\DVDAudioCodecPassthroughRaw.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHByteStream.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHCodecHandler.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHFragmentedSampleReader.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHFragmentObserver.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHSession.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHStream.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\DASHTree.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\helpers.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\dash\oscompat.h" />
-    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamMPD.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHByteStream.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHCodecHandler.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHFragmentedSampleReader.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHFragmentObserver.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHSession.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHStream.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\DASHTree.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\helpers.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\dash\oscompat.h" />
+    <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDInputStreams\DVDInputStreamNULL.h" />
     <ClInclude Include="..\..\xbmc\cores\dvdplayer\DVDDemuxers\DVDDemuxMPD.h" />
   </ItemGroup>
   <ItemGroup>

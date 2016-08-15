@@ -32,7 +32,7 @@
 #ifdef ENABLE_DVDINPUTSTREAM_STACK
 #include "DVDInputStreamStack.h"
 #endif
-#include "DVDInputStreamMPD.h"
+#include "DVDInputStreamNULL.h"
 #include "FileItem.h"
 #include "storage/MediaManager.h"
 #include "URL.h"
@@ -46,7 +46,7 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
 
   if (fileitem.GetMimeType() == "video/vnd.mpeg.dash.mpd" || fileitem.IsType(".mpd"))
   {
-    return new CDVDInputStreamMPD(fileitem);
+    return new CDVDInputStreamNULL(fileitem);
   }
 
   if(fileitem.IsDiscImage())

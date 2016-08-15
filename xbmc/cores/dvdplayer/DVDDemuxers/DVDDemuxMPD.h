@@ -22,9 +22,8 @@
  */
 
 #include "DVDDemux.h"
-#include "DVDInputStreams/DVDInputStreamMPD.h"
 
-class DASHSession;
+#include "dash/DASHSession.h"
 
 class CDVDDemuxMPD : public CDVDDemux
 {
@@ -42,7 +41,7 @@ public:
   void SetSpeed(int iSpeed);
   virtual void EnableStream(int id, bool enable) override;
 
-  int GetStreamLength() { return 0; }
+  int GetStreamLength();
   CDemuxStream* GetStream(int iStreamId);
   int GetNrOfStreams();
   std::string GetFileName();

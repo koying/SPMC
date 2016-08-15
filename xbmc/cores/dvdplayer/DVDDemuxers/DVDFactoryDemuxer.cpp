@@ -42,7 +42,7 @@ CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool
     return NULL;
 
   // Try to open the MPD demuxer
-  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_MPD))
+  if (pInputStream->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInputStream->GetFileItem().IsType(".mpd"))
   {
     std::unique_ptr<CDVDDemuxMPD> demuxer(new CDVDDemuxMPD());
     if (demuxer->Open(pInputStream))

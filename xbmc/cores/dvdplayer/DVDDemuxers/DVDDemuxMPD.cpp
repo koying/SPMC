@@ -21,10 +21,18 @@
 
 #include "DVDDemuxMPD.h"
 
-#include "DVDInputStreams/dash/DASHByteStream.h"
-
 #include "DVDDemuxPacket.h"
 #include "DVDDemuxUtils.h"
+#include "DVDInputStreams/DVDInputStream.h"
+
+#include "dash/DASHByteStream.h"
+
+#include "guilib/GraphicContext.h"
+#include "settings/DisplaySettings.h"
+
+#ifdef TARGET_ANDROID
+#include "android/jni/SystemProperties.h"
+#endif
 
 #include "utils/StringUtils.h"
 #include "utils/log.h"
@@ -42,14 +50,38 @@ CDVDDemuxMPD::~CDVDDemuxMPD()
 
 bool CDVDDemuxMPD::Open(CDVDInputStream* pInput)
 {
-  if (m_MPDsession)
+  // Find larger possible resolution
+  RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
+  for (unsigned int i=0; i<CDisplaySettings::GetInstance().ResolutionInfoSize(); ++i)
+  {
+    RESOLUTION_INFO res = CDisplaySettings::GetInstance().GetResolutionInfo(i);
+    if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+      res_info = res;
+  }
+#ifdef TARGET_ANDROID
+  #include "android/jni/SystemProperties.h"
+
+  // Android might go even higher via surface
+  std::string displaySize = CJNISystemProperties::get("sys.display-size", "");
+  if (!displaySize.empty())
+  {
+    std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
+    if (aSize.size() == 2)
+    {
+      res_info.iWidth = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
+      res_info.iHeight = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
+    }
+  }
+#endif
+  CLog::Log(LOGINFO, "CDVDInputStreamMPD - matching against %d x %d", res_info.iWidth, res_info.iHeight);
+  m_MPDsession.reset(new CDASHSession(pInput->GetFileName(), res_info.iWidth, res_info.iHeight, "", "", "special://profile/"));
+
+  if (!m_MPDsession->initialize())
+  {
+    m_MPDsession = nullptr;
     return false;
-
-  CDVDInputStreamMPD* MPDinputstream = dynamic_cast<CDVDInputStreamMPD*>(pInput);
-  if (MPDinputstream)
-    m_MPDsession = MPDinputstream->GetDashSession();
-
-  return ((bool)m_MPDsession);
+  }
+  return true;
 }
 
 void CDVDDemuxMPD::Dispose()
@@ -209,6 +241,14 @@ void CDVDDemuxMPD::EnableStream(int streamid, bool enable)
   }
   CLog::Log(LOGDEBUG, ">>>> ERROR");
   return stream->disable();
+}
+
+int CDVDDemuxMPD::GetStreamLength()
+{
+  if (!m_MPDsession)
+    return 0;
+
+  return static_cast<int>(m_MPDsession->GetTotalTime()*1000);
 }
 
 std::string CDVDDemuxMPD::GetFileName()

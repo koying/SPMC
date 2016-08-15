@@ -41,7 +41,7 @@ enum DVDStreamType
   DVDSTREAM_TYPE_MPLS   = 10,
   DVDSTREAM_TYPE_BLURAY = 11,
   DVDSTREAM_TYPE_PVRMANAGER = 12,
-  DVDSTREAM_TYPE_MPD = 13,
+  DVDSTREAM_TYPE_NULL = 13,
 };
 
 #define SEEK_POSSIBLE 0x10 // flag used to check if protocol allows seeks
@@ -156,7 +156,8 @@ public:
   virtual int64_t Seek(int64_t offset, int whence) = 0;
   virtual bool Pause(double dTime) = 0;
   virtual int64_t GetLength() = 0;
-  virtual std::string& GetContent() { return m_content; };
+  virtual std::string& GetContent() { return m_content; }
+  virtual const CFileItem& GetFileItem() { return m_item; }
   virtual std::string GetFileName();
   virtual CURL GetURL();
   virtual ENextStream NextStream() { return NEXTSTREAM_NONE; }
