@@ -4627,8 +4627,7 @@ void CApplication::ProcessSlow()
   // check for any idle curl connections
   g_curlInterface.CheckIdle();
 
-  if (!m_pPlayer->IsPlayingVideo())
-    g_largeTextureManager.CleanupUnusedImages();
+  g_largeTextureManager.CleanupUnusedImages();
 
   g_TextureManager.FreeUnusedTextures(5000);
 
