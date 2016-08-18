@@ -12,7 +12,6 @@ SRCS=	DVDFactoryInputStream.cpp \
 	DVDInputStreamRTMP.cpp \
 	DVDInputStreamPVRManager.cpp \
 	DVDInputStreamStack.cpp \
-        InputStreamMultiSource.cpp\
 	DVDStateSerializer.cpp \
 
 # MPD

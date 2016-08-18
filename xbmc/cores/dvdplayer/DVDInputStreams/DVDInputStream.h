@@ -42,7 +42,6 @@ enum DVDStreamType
   DVDSTREAM_TYPE_BLURAY = 11,
   DVDSTREAM_TYPE_PVRMANAGER = 12,
   DVDSTREAM_TYPE_MPD = 13,
-  DVDSTREAM_TYPE_MULTIFILES = 14,
 };
 
 #define SEEK_POSSIBLE 0x10 // flag used to check if protocol allows seeks

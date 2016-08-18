@@ -26,7 +26,6 @@
 #include "DVDInputStreamFFmpeg.h"
 #include "DVDInputStreamPVRManager.h"
 #include "DVDInputStreamRTMP.h"
-#include "InputStreamMultiSource.h"
 #ifdef HAVE_LIBBLURAY
 #include "DVDInputStreamBluray.h"
 #endif
@@ -123,9 +122,4 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
 
   // our file interface handles all these types of streams
   return (new CDVDInputStreamFile());
-}
-
-CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, const std::vector<std::string>& filenames, const std::string& content, bool contentlookup)
-{
-  return (new CInputStreamMultiSource(pPlayer, filenames));
 }
