@@ -674,41 +674,44 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   // Enumerate audio devices on API >= 23
   if (CJNIAudioManager::GetSDKVersion() >= 23)
   {
+      // Warning: getDevices has a race with HDMI enumeration after a refresh rate switch
+      /*
       CJNIAudioManager audioManager(CJNIContext::getSystemService("audio"));
       CJNIAudioDeviceInfos devices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
-      
+
       for (auto dev : devices)
       {
         CLog::Log(LOGDEBUG, "--- Found device: %s", dev.getProductName().toString().c_str());
         CLog::Log(LOGDEBUG, "    id: %d, type: %d, isSink: %s, isSource: %s", dev.getId(), dev.getType(), dev.isSink() ? "true" : "false", dev.isSource() ? "true" : "false");
 
         std::ostringstream oss;
-        for (auto i : dev.getChannelCounts())        
+        for (auto i : dev.getChannelCounts())
           oss << i << " / ";
         CLog::Log(LOGDEBUG, "    channel counts: %s", oss.str().c_str());
-        
+
         oss.clear(); oss.str("");
-        for (auto i : dev.getChannelIndexMasks())        
+        for (auto i : dev.getChannelIndexMasks())
           oss << i << " / ";
         CLog::Log(LOGDEBUG, "    channel index masks: %s", oss.str().c_str());
 
         oss.clear(); oss.str("");
-        for (auto i : dev.getChannelMasks())        
+        for (auto i : dev.getChannelMasks())
           oss << i << " / ";
         CLog::Log(LOGDEBUG, "    channel masks: %s", oss.str().c_str());
 
         oss.clear(); oss.str("");
-        for (auto i : dev.getEncodings())        
+        for (auto i : dev.getEncodings())
           oss << i << " / ";
         CLog::Log(LOGDEBUG, "    encodings: %s", oss.str().c_str());
 
         oss.clear(); oss.str("");
-        for (auto i : dev.getSampleRates())        
+        for (auto i : dev.getSampleRates())
           oss << i << " / ";
         CLog::Log(LOGDEBUG, "    sample rates: %s", oss.str().c_str());
       }
+      */
   }
-  
+
   m_sink_sampleRates.clear();
   m_sink_sampleRates.insert(CJNIAudioTrack::getNativeOutputSampleRate(CJNIAudioManager::STREAM_MUSIC));
 

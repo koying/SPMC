@@ -417,6 +417,7 @@ void CXBMCApp::CheckHeadsetPlugged()
 {
   bool oldstate = m_headsetPlugged;
   
+  CLog::Log(LOGDEBUG, "CXBMCApp::CheckHeadsetPlugged");
   CJNIAudioManager audioManager(getSystemService("audio"));
   m_headsetPlugged = audioManager.isWiredHeadsetOn() || audioManager.isBluetoothA2dpOn();
 
