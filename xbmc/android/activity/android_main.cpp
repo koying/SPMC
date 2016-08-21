@@ -29,6 +29,14 @@
 
 #include "android/activity/JNIMainActivity.h"
 
+static struct sigaction old_sa[NSIG];
+
+void android_sigaction(int signal, siginfo_t *info, void *reserved)
+{
+  CJNIMainActivity::startCrashHandler();
+  old_sa[signal].sa_handler(signal);
+}
+
 // copied from new android_native_app_glue.c
 static void process_input(struct android_app* app, struct android_poll_source* source) {
     AInputEvent* event = NULL;
@@ -186,6 +194,22 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     };
     env->RegisterNatives(cAudioFocusChangeListener, &mOnAudioFocusChange, 1);
   }
+
+#if !defined(HAVE_BREAKPAD)
+  // Try to catch crashes...
+  struct sigaction handler;
+  memset(&handler, 0, sizeof(sigaction));
+  handler.sa_sigaction = android_sigaction;
+  handler.sa_flags = SA_RESETHAND;
+#define CATCHSIG(X) sigaction(X, &handler, &old_sa[X])
+  CATCHSIG(SIGILL);
+  CATCHSIG(SIGABRT);
+  CATCHSIG(SIGBUS);
+  CATCHSIG(SIGFPE);
+  CATCHSIG(SIGSEGV);
+  CATCHSIG(SIGSTKFLT);
+  CATCHSIG(SIGPIPE);
+#endif
 
   return version;
 }
