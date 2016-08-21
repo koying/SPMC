@@ -2864,3 +2864,4 @@ xbmc/video/videosync
 tools/android/packaging/xbmc/src/org/xbmc/kodi
 system/shaders
 xbmc/cores/dvdplayer/DVDInputStreams/dash
+tools/android/packaging/xbmc/res/layout

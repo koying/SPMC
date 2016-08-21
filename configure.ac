@@ -121,6 +121,7 @@ APP_PACKAGE=${APP_PACKAGE-$(${AWK} '/APP_PACKAGE/ {print $2}' version.txt)}
 APP_NAME=${APP_NAME-$(${AWK} '/APP_NAME/ {print $2}' version.txt)}
 APP_NAME_LC=$(echo $APP_NAME | ${AWK} '{print tolower($0)}')
 APP_NAME_UC=$(echo $APP_NAME | ${AWK} '{print toupper($0)}')
+APP_EMAIL=${APP_NAME-$(${AWK} '/EMAIL/ {print $2}' version.txt)}
 APP_VERSION_MAJOR=${APP_VERSION_MAJOR-$(${AWK} '/VERSION_MAJOR/ {print $2}' version.txt)}
 APP_VERSION_MINOR=${APP_VERSION_MINOR-$(${AWK} '/VERSION_MINOR/ {print $2}' version.txt)}
 APP_VERSION_TAG=${APP_VERSION_TAG-$(${AWK} '/VERSION_TAG/ {print $2}' version.txt)}
@@ -138,6 +139,7 @@ if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSI
   AC_SUBST(APP_NAME)
   AC_SUBST(APP_NAME_LC)
   AC_SUBST(APP_NAME_UC)
+  AC_SUBST(APP_EMAIL)
   AC_SUBST(APP_VERSION)
   AC_SUBST(APP_VERSION_MAJOR)
   AC_SUBST(APP_VERSION_MINOR)
@@ -2442,6 +2444,7 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProperties.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCCrashHandler.java \
     tools/android/packaging/xbmc/activity_main.xml \
     tools/android/packaging/xbmc/searchable.xml \
     tools/android/packaging/xbmc/strings.xml \

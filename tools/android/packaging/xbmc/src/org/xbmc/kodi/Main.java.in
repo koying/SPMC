@@ -39,25 +39,25 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
 
-  private class MyAudioDeviceCallback extends AudioDeviceCallback 
+  private class MyAudioDeviceCallback extends AudioDeviceCallback
   {
-    public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) 
+    public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices)
     {
-      if (addedDevices.length != 0) 
+      if (addedDevices.length != 0)
         _onAudioDeviceAdded(addedDevices);
     }
 
-    public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) 
+    public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices)
     {
-      if (removedDevices.length != 0) 
+      if (removedDevices.length != 0)
         _onAudioDeviceRemoved(removedDevices);
     }
   }
 
-  private Runnable leanbackUpdateRunnable = new Runnable() 
+  private Runnable leanbackUpdateRunnable = new Runnable()
   {
     @Override
-    public void run() 
+    public void run()
     {
       Log.d(TAG, "Updating recommendations");
       new Thread()
@@ -70,14 +70,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       handler.postDelayed(this, 60*60*1000);
     }
   };
-  
+
   /** A signal handler in native code has been triggered. As our last gasp,
    * launch the crash handler (in its own process), because when we return
    * from this function the process will soon exit. */
-  void nativeCrashed()
+  void startCrashHandler()
   {
     new RuntimeException("crashed here (native trace should follow after the Java trace)").printStackTrace();
-    startActivity(new Intent(this, CrashHandler.class));
+    startActivity(new Intent(this, XBMCCrashHandler.class));
   }
 
   public Main()
