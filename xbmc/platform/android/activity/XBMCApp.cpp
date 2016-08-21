@@ -122,7 +122,42 @@ uint64_t CXBMCApp::m_vsynctime = 0;
 CEvent CXBMCApp::m_vsyncEvent;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
 std::vector<GLuint> CXBMCApp::m_texturePool;
+CJNIAudioDeviceInfos CXBMCApp::m_audiodevices;
 
+void LogAudoDevices(const char* stage, const CJNIAudioDeviceInfos& devices)
+{
+  CLog::Log(LOGDEBUG, "--- Audio device list: %s", stage);
+  for (auto dev : devices)
+  {
+    CLog::Log(LOGDEBUG, "--- Found device: %s", dev.getProductName().toString().c_str());
+    CLog::Log(LOGDEBUG, "    id: %d, type: %d, isSink: %s, isSource: %s", dev.getId(), dev.getType(), dev.isSink() ? "true" : "false", dev.isSource() ? "true" : "false");
+
+    std::ostringstream oss;
+    for (auto i : dev.getChannelCounts())
+      oss << i << " / ";
+    CLog::Log(LOGDEBUG, "    channel counts: %s", oss.str().c_str());
+
+    oss.clear(); oss.str("");
+    for (auto i : dev.getChannelIndexMasks())
+      oss << i << " / ";
+    CLog::Log(LOGDEBUG, "    channel index masks: %s", oss.str().c_str());
+
+    oss.clear(); oss.str("");
+    for (auto i : dev.getChannelMasks())
+      oss << i << " / ";
+    CLog::Log(LOGDEBUG, "    channel masks: %s", oss.str().c_str());
+
+    oss.clear(); oss.str("");
+    for (auto i : dev.getEncodings())
+      oss << i << " / ";
+    CLog::Log(LOGDEBUG, "    encodings: %s", oss.str().c_str());
+
+    oss.clear(); oss.str("");
+    for (auto i : dev.getSampleRates())
+      oss << i << " / ";
+    CLog::Log(LOGDEBUG, "    sample rates: %s", oss.str().c_str());
+  }
+}
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIMainActivity(nativeActivity)
@@ -205,6 +240,13 @@ void CXBMCApp::onResume()
   else
     g_application.WakeUpScreenSaverAndDPMS();
 
+  m_audiodevices.clear();
+  if (CJNIAudioManager::GetSDKVersion() >= 23)
+  {
+    CJNIAudioManager audioManager(getSystemService("audio"));
+    m_audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
+    LogAudoDevices("OnResume", m_audiodevices);
+  }
   CheckHeadsetPlugged();
 
   unregisterMediaButtonEventReceiver();
@@ -214,14 +256,14 @@ void CXBMCApp::onResume()
     CSingleLock lock(m_applicationsMutex);
     m_applications.clear();
   }
-  
+
   m_isResumed = true;
 }
 
 void CXBMCApp::onPause()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
-  
+
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
@@ -426,17 +468,16 @@ bool CXBMCApp::ReleaseAudioFocus()
 void CXBMCApp::CheckHeadsetPlugged()
 {
   bool oldstate = m_headsetPlugged;
-  
+
+  CLog::Log(LOGDEBUG, "CXBMCApp::CheckHeadsetPlugged");
   CJNIAudioManager audioManager(getSystemService("audio"));
   m_headsetPlugged = audioManager.isWiredHeadsetOn() || audioManager.isBluetoothA2dpOn();
 
-  if (CJNIAudioManager::GetSDKVersion() >= 23)
+  if (!m_audiodevices.empty())
   {
-    CJNIAudioDeviceInfos devices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
-    
-    for (auto dev : devices)
+    for (auto dev : m_audiodevices)
     {
-      if (StringUtils::CompareNoCase(dev.getProductName().toString(), "SHIELD Android TV") == 0 && dev.getType() == CJNIAudioDeviceInfo::TYPE_DOCK)
+      if (dev.getType() == CJNIAudioDeviceInfo::TYPE_DOCK && dev.isSink() && StringUtils::CompareNoCase(dev.getProductName().toString(), "SHIELD Android TV") == 0)
       {
         // SHIELD specifics: Gamepad headphone is inserted
         m_headsetPlugged = true;
@@ -700,7 +741,7 @@ bool CXBMCApp::StartActivity(const std::string &package, const std::string &inte
     if (!jniURI)
       return false;
 
-    newIntent.setDataAndType(jniURI, dataType); 
+    newIntent.setDataAndType(jniURI, dataType);
   }
 
   newIntent.setPackage(package);
@@ -827,7 +868,7 @@ float CXBMCApp::GetSystemVolume()
   CJNIAudioManager audioManager(getSystemService("audio"));
   if (audioManager)
     return (float)audioManager.getStreamVolume() / GetMaxSystemVolume();
-  else 
+  else
   {
     android_printf("CXBMCApp::GetSystemVolume: Could not get Audio Manager");
     return 0;
@@ -867,6 +908,13 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
   {
+    m_audiodevices.clear();
+    if (CJNIAudioManager::GetSDKVersion() >= 23)
+    {
+      CJNIAudioManager audioManager(getSystemService("audio"));
+      m_audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
+      LogAudoDevices("Connectivity changed", m_audiodevices);
+    }
     CheckHeadsetPlugged();
   }
   else if (action == "android.intent.action.MEDIA_BUTTON")
@@ -953,11 +1001,15 @@ void CXBMCApp::onActivityResult(int requestCode, int resultCode, CJNIIntent resu
 
 void CXBMCApp::onAudioDeviceAdded(CJNIAudioDeviceInfos devices)
 {
+  m_audiodevices = devices;
+  LogAudoDevices("onAudioDeviceAdded", m_audiodevices);
   CheckHeadsetPlugged();
 }
 
 void CXBMCApp::onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)
 {
+  m_audiodevices = devices;
+  LogAudoDevices("onAudioDeviceRemoved", m_audiodevices);
   CheckHeadsetPlugged();
 }
 

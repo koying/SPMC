@@ -141,7 +141,7 @@ public:
   static int android_printf(const char *format, ...);
   static void BringToFront();
   static std::vector<GLuint> &GetTexturePool();
-  
+
   static int GetBatteryLevel();
   static bool EnableWakeLock(bool on);
   static bool HasFocus() { return m_hasFocus; }
@@ -234,6 +234,8 @@ private:
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;
   static std::vector<GLuint> m_texturePool;
+
+  static CJNIAudioDeviceInfos m_audiodevices;
 
   static uint64_t m_vsynctime;
   static CEvent m_vsyncEvent;
