@@ -2,6 +2,7 @@ APP_NAME SPMC
 APP_PACKAGE com.semperpax.spmc
 COMPANY_NAME Semperpax
 WEBSITE http://spmc.semperpax.com/
+EMAIL support@semperpax.com
 VERSION_MAJOR 16
 VERSION_MINOR 4
 VERSION_TAG 80

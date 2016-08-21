@@ -9866,3 +9866,5 @@ xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreamNULL.h
 xbmc/cores/dvdplayer/Makefile.in
 xbmc/cores/dvdplayer/DVDDemuxers/Makefile.in
 xbmc/cores/dvdplayer/DVDInputStreams/Makefile
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCCrashHandler.java.in
+tools/android/packaging/xbmc/res/layout/crash_handler.xml
