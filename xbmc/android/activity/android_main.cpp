@@ -103,7 +103,51 @@ void dump_stack(void)
 
 void android_sigaction(int signal, siginfo_t *info, void *reserved)
 {
-  dump_stack();
+#if defined(__arm__)
+  const ucontext_t* uc = reinterpret_cast<const ucontext_t*>(reserved);
+  void **bp = reinterpret_cast<void**>(uc->uc_mcontext.arm_sp);
+  void *ip = reinterpret_cast<void*>(uc->uc_mcontext.arm_ip);
+#endif
+
+  CXBMCApp::android_printf("Segmentation Fault!");
+  CXBMCApp::android_printf("info.si_signo = %d", signal);
+  CXBMCApp::android_printf("info.si_errno = %d", info->si_errno);
+  CXBMCApp::android_printf("info.si_addr  = %p", info->si_addr);
+
+  CXBMCApp::android_printf("------------");
+  CXBMCApp::android_printf("Stack trace:");
+
+  Dl_info dlinfo;
+  int f=0;
+  while(bp && ip) {
+    if(!dladdr(ip, &dlinfo))
+      break;
+
+    const char *symname = dlinfo.dli_sname;
+
+    int status;
+    char * tmp = __cxxabiv1::__cxa_demangle(symname, NULL, 0, &status);
+
+    if (status == 0 && tmp)
+      symname = tmp;
+
+    CXBMCApp::android_printf("Stack trace: % 2d: %p <%s+%lu> (%s)",
+               ++f,
+               ip,
+               symname,
+               (unsigned long)ip - (unsigned long)dlinfo.dli_saddr,
+               dlinfo.dli_fname);
+
+      if (tmp)
+          free(tmp);
+
+      if(dlinfo.dli_sname && !strcmp(dlinfo.dli_sname, "main"))
+          break;
+
+      ip = bp[1];
+      bp = (void**)bp[0];
+  }
+
   CJNIMainActivity::startCrashHandler();
   old_sa[signal].sa_handler(signal);
 }
@@ -271,7 +315,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   struct sigaction handler;
   memset(&handler, 0, sizeof(struct sigaction));
   handler.sa_sigaction = android_sigaction;
-  handler.sa_flags = SA_RESETHAND;
+  handler.sa_flags = SA_RESETHAND | SA_SIGINFO;
 #define CATCHSIG(X) sigaction(X, &handler, &old_sa[X])
   CATCHSIG(SIGILL);
   CATCHSIG(SIGABRT);
