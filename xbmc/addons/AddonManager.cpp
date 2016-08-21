@@ -1048,17 +1048,25 @@ AddonPtr CAddonMgr::GetAddonFromDescriptor(const cp_plugin_info_t *info,
     return AddonPtr(new CAddon(info));
   }
 
+  AddonPtr addon;
   // grab a relevant extension point, ignoring our kodi.addon.metadata extension point
   for (unsigned int i = 0; i < info->num_extensions; ++i)
   {
-    if (0 != strcmp("xbmc.addon.metadata" , info->extensions[i].ext_point_id) && //<! backword compatibilty
+    if (!addon && 
+        0 != strcmp("xbmc.addon.metadata" , info->extensions[i].ext_point_id) && //<! backword compatibilty
         0 != strcmp("kodi.addon.metadata" , info->extensions[i].ext_point_id) &&
         (type.empty() || 0 == strcmp(type.c_str(), info->extensions[i].ext_point_id)))
     { // note that Factory takes care of whether or not we have platform support
-      return Factory(&info->extensions[i]);
+      addon = Factory(&info->extensions[i]);
+    }
+    else if (addon && 0 == strcmp("xbmc.addon.datasource" , info->extensions[i].ext_point_id))
+    {
+      std::string datadir = GetExtValue(info->extensions[i].configuration, "url");
+      if (!datadir.empty())
+        addon->Props().path = datadir;
     }
   }
-  return AddonPtr();
+  return addon;
 }
 
 // FIXME: This function may not be required

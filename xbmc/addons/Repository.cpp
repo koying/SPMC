@@ -159,6 +159,12 @@ std::string CRepository::GetAddonHash(const AddonPtr& addon) const
   return checksum;
 }
 
+#define SET_IF_EMPTY(x,y) \
+  { \
+    if (x.empty()) \
+       x = y; \
+  }
+
 #define SET_IF_NOT_EMPTY(x,y) \
   { \
     if (!x.empty()) \
@@ -206,7 +212,7 @@ bool CRepository::Parse(const DirInfo& dir, VECADDONS& addons)
       if (dir.zipped)
       {
         std::string file = StringUtils::Format("%s/%s-%s.zip", addon->ID().c_str(), addon->ID().c_str(), addon->Version().asString().c_str());
-        addon->Props().path = URIUtils::AddFileToFolder(dir.datadir,file);
+        SET_IF_EMPTY(addon->Props().path, URIUtils::AddFileToFolder(dir.datadir,file));
         SET_IF_NOT_EMPTY(addon->Props().icon,URIUtils::AddFileToFolder(dir.datadir,addon->ID()+"/icon.png"))
         file = StringUtils::Format("%s/changelog-%s.txt", addon->ID().c_str(), addon->Version().asString().c_str());
         SET_IF_NOT_EMPTY(addon->Props().changelog,URIUtils::AddFileToFolder(dir.datadir,file))
@@ -214,7 +220,7 @@ bool CRepository::Parse(const DirInfo& dir, VECADDONS& addons)
       }
       else
       {
-        addon->Props().path = URIUtils::AddFileToFolder(dir.datadir,addon->ID()+"/");
+        SET_IF_EMPTY(addon->Props().path, URIUtils::AddFileToFolder(dir.datadir,addon->ID()+"/"));
         SET_IF_NOT_EMPTY(addon->Props().icon,URIUtils::AddFileToFolder(dir.datadir,addon->ID()+"/icon.png"))
         SET_IF_NOT_EMPTY(addon->Props().changelog,URIUtils::AddFileToFolder(dir.datadir,addon->ID()+"/changelog.txt"))
         SET_IF_NOT_EMPTY(addon->Props().fanart,URIUtils::AddFileToFolder(dir.datadir,addon->ID()+"/fanart.jpg"))
