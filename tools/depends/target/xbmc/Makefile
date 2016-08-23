@@ -13,7 +13,7 @@ CONFIGURE = cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/ ;\
   ./configure --prefix=$(PREFIX) $(DEBUG)
 
 ifeq ($(OS),android)
-CONFIGURE += --enable-codec=amcodec --disable-libcec
+CONFIGURE += --enable-codec=amcodec --disable-libcec --enable-breakpad
 endif
 
 ifeq ($(Configuration),Release)
