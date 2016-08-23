@@ -27,9 +27,14 @@
 #include "utils/StringUtils.h"
 #include "CompileInfo.h"
 
-#include <unwind.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
+
+#if defined(HAVE_BREAKPAD)
+#include "client/linux/handler/minidump_descriptor.h"
+#include "client/linux/handler/exception_handler.h"
+#endif
+
 
 #include "android/activity/JNIMainActivity.h"
 
@@ -41,138 +46,9 @@ struct android_backtrace_state
   void **end;
 };
 
-_Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context, void* arg)
-{
-  android_backtrace_state* state = (android_backtrace_state *)arg;
-  uintptr_t pc = _Unwind_GetIP(context);
-  if (pc)
-  {
-    if (state->current == state->end)
-    {
-      return _URC_END_OF_STACK;
-    }
-    else
-    {
-      *state->current++ = reinterpret_cast<void*>(pc);
-    }
-  }
-  return _URC_NO_REASON;
-}
-
-void dump_stack(void)
-{
-  CXBMCApp::android_printf("------------------");
-  CXBMCApp::android_printf("android stack dump");
-
-  const int max = 100;
-  void* buffer[max];
-
-  android_backtrace_state state;
-  state.current = buffer;
-  state.end = buffer + max;
-
-  _Unwind_Backtrace(android_unwind_callback, &state);
-
-  int count = (int)(state.current - buffer);
-
-  for (int idx = 0; idx < count; idx++)
-  {
-    const void* addr = buffer[idx];
-    const char* symbol = "";
-
-    Dl_info info;
-    if (dladdr(addr, &info) && info.dli_sname)
-    {
-      symbol = info.dli_sname;
-    }
-    int status = 0;
-    char *demangled = __cxxabiv1::__cxa_demangle(symbol, 0, 0, &status);
-
-    CXBMCApp::android_printf("%03d: 0x%p %s",
-            idx,
-            addr,
-            (NULL != demangled && 0 == status) ?
-              demangled : symbol);
-
-    if (NULL != demangled)
-      free(demangled);
-  }
-
-  CXBMCApp::android_printf("android stack dump done");
-}
-
 void android_sigaction(int signal, siginfo_t *info, void *reserved)
 {
-  CXBMCApp::android_printf("Segmentation Fault!");
-  CXBMCApp::android_printf("info.si_signo = %d", signal);
-  CXBMCApp::android_printf("info.si_errno = %d", info->si_errno);
-  CXBMCApp::android_printf("info.si_addr  = %p", info->si_addr);
-
-#if defined(__arm__)
-  //cast/extract the necessary structures
-  ucontext_t* context = (ucontext_t*)reserved;
-  unw_tdep_context_t *unw_ctx = (unw_tdep_context_t*)&uc;
-  sigcontext* sig_ctx = &context->uc_mcontext;
-  //we need to store all the general purpose registers so that libunwind can resolve
-  //    the stack correctly, so we read them from the sigcontext into the unw_context
-  unw_ctx->regs[UNW_ARM_R0] = sig_ctx->arm_r0;
-  unw_ctx->regs[UNW_ARM_R1] = sig_ctx->arm_r1;
-  unw_ctx->regs[UNW_ARM_R2] = sig_ctx->arm_r2;
-  unw_ctx->regs[UNW_ARM_R3] = sig_ctx->arm_r3;
-  unw_ctx->regs[UNW_ARM_R4] = sig_ctx->arm_r4;
-  unw_ctx->regs[UNW_ARM_R5] = sig_ctx->arm_r5;
-  unw_ctx->regs[UNW_ARM_R6] = sig_ctx->arm_r6;
-  unw_ctx->regs[UNW_ARM_R7] = sig_ctx->arm_r7;
-  unw_ctx->regs[UNW_ARM_R8] = sig_ctx->arm_r8;
-  unw_ctx->regs[UNW_ARM_R9] = sig_ctx->arm_r9;
-  unw_ctx->regs[UNW_ARM_R10] = sig_ctx->arm_r10;
-  unw_ctx->regs[UNW_ARM_R11] = sig_ctx->arm_fp;
-  unw_ctx->regs[UNW_ARM_R12] = sig_ctx->arm_ip;
-  unw_ctx->regs[UNW_ARM_R13] = sig_ctx->arm_sp;
-  unw_ctx->regs[UNW_ARM_R14] = sig_ctx->arm_lr;
-  unw_ctx->regs[UNW_ARM_R15] = sig_ctx->arm_pc;
-  //s << "base pc: 0x" << std::hex << sig_ctx->arm_pc << std::endl;
-  CXBMCApp::android_printf("base pc: = %p", (void*)sig_ctx->arm_pc);
-#elif defined(__i386__)
-  ucontext_t* context = (ucontext_t*)reserved;
-#endif
-  
-  CXBMCApp::android_printf("------------");
-  CXBMCApp::android_printf("Stack trace:");
-
-  Dl_info dlinfo;
-  int f=0;
-  while(bp && ip) {
-    if(!dladdr(ip, &dlinfo))
-      break;
-
-    const char *symname = dlinfo.dli_sname;
-
-    int status;
-    char * tmp = __cxxabiv1::__cxa_demangle(symname, NULL, 0, &status);
-
-    if (status == 0 && tmp)
-      symname = tmp;
-
-    CXBMCApp::android_printf("Stack trace: % 2d: %p <%s+%lu> (%s)",
-               ++f,
-               ip,
-               symname,
-               (unsigned long)ip - (unsigned long)dlinfo.dli_saddr,
-               dlinfo.dli_fname);
-
-      if (tmp)
-          free(tmp);
-
-      if(dlinfo.dli_sname && !strcmp(dlinfo.dli_sname, "main"))
-          break;
-
-      ip = bp[1];
-      bp = (void**)bp[0];
-  }
-
   CJNIMainActivity::startCrashHandler();
-  old_sa[signal].sa_handler(signal);
 }
 
 // copied from new android_native_app_glue.c
@@ -198,6 +74,16 @@ extern void android_main(struct android_app* state)
   {
     // make sure that the linker doesn't strip out our glue
     app_dummy();
+
+#if defined(HAVE_BREAKPAD)
+  google_breakpad::MinidumpDescriptor descriptor(google_breakpad::MinidumpDescriptor::kMicrodumpOnConsole);
+  google_breakpad::ExceptionHandler eh(descriptor,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       true,
+                                       -1);
+#endif
 
     // revector inputPollSource.process so we can shut up
     // its useless verbose logging on new events (see ouya)
