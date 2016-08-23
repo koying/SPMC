@@ -103,17 +103,40 @@ void dump_stack(void)
 
 void android_sigaction(int signal, siginfo_t *info, void *reserved)
 {
-#if defined(__arm__)
-  const ucontext_t* uc = reinterpret_cast<const ucontext_t*>(reserved);
-  void **bp = reinterpret_cast<void**>(uc->uc_mcontext.arm_sp);
-  void *ip = reinterpret_cast<void*>(uc->uc_mcontext.arm_ip);
-#endif
-
   CXBMCApp::android_printf("Segmentation Fault!");
   CXBMCApp::android_printf("info.si_signo = %d", signal);
   CXBMCApp::android_printf("info.si_errno = %d", info->si_errno);
   CXBMCApp::android_printf("info.si_addr  = %p", info->si_addr);
 
+#if defined(__arm__)
+  //cast/extract the necessary structures
+  ucontext_t* context = (ucontext_t*)reserved;
+  unw_tdep_context_t *unw_ctx = (unw_tdep_context_t*)&uc;
+  sigcontext* sig_ctx = &context->uc_mcontext;
+  //we need to store all the general purpose registers so that libunwind can resolve
+  //    the stack correctly, so we read them from the sigcontext into the unw_context
+  unw_ctx->regs[UNW_ARM_R0] = sig_ctx->arm_r0;
+  unw_ctx->regs[UNW_ARM_R1] = sig_ctx->arm_r1;
+  unw_ctx->regs[UNW_ARM_R2] = sig_ctx->arm_r2;
+  unw_ctx->regs[UNW_ARM_R3] = sig_ctx->arm_r3;
+  unw_ctx->regs[UNW_ARM_R4] = sig_ctx->arm_r4;
+  unw_ctx->regs[UNW_ARM_R5] = sig_ctx->arm_r5;
+  unw_ctx->regs[UNW_ARM_R6] = sig_ctx->arm_r6;
+  unw_ctx->regs[UNW_ARM_R7] = sig_ctx->arm_r7;
+  unw_ctx->regs[UNW_ARM_R8] = sig_ctx->arm_r8;
+  unw_ctx->regs[UNW_ARM_R9] = sig_ctx->arm_r9;
+  unw_ctx->regs[UNW_ARM_R10] = sig_ctx->arm_r10;
+  unw_ctx->regs[UNW_ARM_R11] = sig_ctx->arm_fp;
+  unw_ctx->regs[UNW_ARM_R12] = sig_ctx->arm_ip;
+  unw_ctx->regs[UNW_ARM_R13] = sig_ctx->arm_sp;
+  unw_ctx->regs[UNW_ARM_R14] = sig_ctx->arm_lr;
+  unw_ctx->regs[UNW_ARM_R15] = sig_ctx->arm_pc;
+  //s << "base pc: 0x" << std::hex << sig_ctx->arm_pc << std::endl;
+  CXBMCApp::android_printf("base pc: = %p", (void*)sig_ctx->arm_pc);
+#elif defined(__i386__)
+  ucontext_t* context = (ucontext_t*)reserved;
+#endif
+  
   CXBMCApp::android_printf("------------");
   CXBMCApp::android_printf("Stack trace:");
 
