@@ -624,6 +624,9 @@ WORD    cbSize;
 #define SPEAKER_TOP_BACK_CENTER       0x10000
 #define SPEAKER_TOP_BACK_RIGHT        0x20000
 
+namespace XBMC
+{
+  
 typedef struct tGUID
 {
   DWORD Data1;
@@ -631,19 +634,21 @@ typedef struct tGUID
   BYTE  Data4[8];
 } __attribute__((__packed__)) GUID;
 
-static const GUID KSDATAFORMAT_SUBTYPE_UNKNOWN = {
+}
+
+static const XBMC::GUID KSDATAFORMAT_SUBTYPE_UNKNOWN = {
   WAVE_FORMAT_UNKNOWN,
   0x0000, 0x0000,
   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 };
 
-static const GUID KSDATAFORMAT_SUBTYPE_PCM = {
+static const XBMC::GUID KSDATAFORMAT_SUBTYPE_PCM = {
   WAVE_FORMAT_PCM,
   0x0000, 0x0010,
   {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
 };
 
-static const GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = {
+static const XBMC::GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = {
   WAVE_FORMAT_IEEE_FLOAT,
   0x0000, 0x0010,
   {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
@@ -659,7 +664,7 @@ typedef struct tWAVEFORMATEXTENSIBLE
     WORD wReserved;
   } Samples;
   DWORD dwChannelMask;
-  GUID SubFormat;
+  XBMC::GUID SubFormat;
 } __attribute__((__packed__)) WAVEFORMATEXTENSIBLE;
 
 
