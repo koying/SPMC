@@ -16,7 +16,7 @@ DEPENDS = \
 	libplist libcec libbluray tinyxml dummy-libxbmc \
 	libamplayer libssh taglib libusb libnfs \
 	pythonmodule-pil libxslt ffmpeg platform crossguid libdcadec giflib \
-	bento4
+	bento4 google-breakpad
 
 FFMPEG_DEPENDS = gnutls libdcadec
 

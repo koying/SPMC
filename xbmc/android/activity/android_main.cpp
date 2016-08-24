@@ -27,85 +27,20 @@
 #include "utils/StringUtils.h"
 #include "CompileInfo.h"
 
-#include <unwind.h>
-#include <dlfcn.h>
-#include <cxxabi.h>
+#if defined(HAVE_BREAKPAD)
+#include "client/linux/handler/minidump_descriptor.h"
+#include "client/linux/handler/exception_handler.h"
+#endif
 
 #include "android/activity/JNIMainActivity.h"
 
 static struct sigaction old_sa[NSIG];
 
-struct android_backtrace_state
+static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
+                          void* context, bool succeeded) 
 {
-  void **current;
-  void **end;
-};
-
-_Unwind_Reason_Code android_unwind_callback(struct _Unwind_Context* context, void* arg)
-{
-  android_backtrace_state* state = (android_backtrace_state *)arg;
-  uintptr_t pc = _Unwind_GetIP(context);
-  if (pc)
-  {
-    if (state->current == state->end)
-    {
-      return _URC_END_OF_STACK;
-    }
-    else
-    {
-      *state->current++ = reinterpret_cast<void*>(pc);
-    }
-  }
-  return _URC_NO_REASON;
-}
-
-void dump_stack(void)
-{
-  CXBMCApp::android_printf("------------------");
-  CXBMCApp::android_printf("android stack dump");
-
-  const int max = 100;
-  void* buffer[max];
-
-  android_backtrace_state state;
-  state.current = buffer;
-  state.end = buffer + max;
-
-  _Unwind_Backtrace(android_unwind_callback, &state);
-
-  int count = (int)(state.current - buffer);
-
-  for (int idx = 0; idx < count; idx++)
-  {
-    const void* addr = buffer[idx];
-    const char* symbol = "";
-
-    Dl_info info;
-    if (dladdr(addr, &info) && info.dli_sname)
-    {
-      symbol = info.dli_sname;
-    }
-    int status = 0;
-    char *demangled = __cxxabiv1::__cxa_demangle(symbol, 0, 0, &status);
-
-    CXBMCApp::android_printf("%03d: 0x%p %s",
-            idx,
-            addr,
-            (NULL != demangled && 0 == status) ?
-              demangled : symbol);
-
-    if (NULL != demangled)
-      free(demangled);
-  }
-
-  CXBMCApp::android_printf("android stack dump done");
-}
-
-void android_sigaction(int signal, siginfo_t *info, void *reserved)
-{
-  dump_stack();
   CJNIMainActivity::startCrashHandler();
-  old_sa[signal].sa_handler(signal);
+  return succeeded;
 }
 
 // copied from new android_native_app_glue.c
@@ -132,7 +67,17 @@ extern void android_main(struct android_app* state)
     // make sure that the linker doesn't strip out our glue
     app_dummy();
 
-    // revector inputPollSource.process so we can shut up
+#if defined(HAVE_BREAKPAD)
+    google_breakpad::MinidumpDescriptor descriptor(google_breakpad::MinidumpDescriptor::kMicrodumpOnConsole);
+    google_breakpad::ExceptionHandler eh(descriptor,
+                                        NULL,
+                                        dumpCallback,
+                                        NULL,
+                                        true,
+                                        -1);
+#endif
+
+  // revector inputPollSource.process so we can shut up
     // its useless verbose logging on new events (see ouya)
     // and fix the error in handling multiple input events.
     // see https://code.google.com/p/android/issues/detail?id=41755
@@ -265,22 +210,6 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     };
     env->RegisterNatives(cAudioFocusChangeListener, &mOnAudioFocusChange, 1);
   }
-
-#if !defined(HAVE_BREAKPAD)
-  // Try to catch crashes...
-  struct sigaction handler;
-  memset(&handler, 0, sizeof(struct sigaction));
-  handler.sa_sigaction = android_sigaction;
-  handler.sa_flags = SA_RESETHAND;
-#define CATCHSIG(X) sigaction(X, &handler, &old_sa[X])
-  CATCHSIG(SIGILL);
-  CATCHSIG(SIGABRT);
-  CATCHSIG(SIGBUS);
-  CATCHSIG(SIGFPE);
-  CATCHSIG(SIGSEGV);
-  CATCHSIG(SIGSTKFLT);
-  CATCHSIG(SIGPIPE);
-#endif
 
   return version;
 }

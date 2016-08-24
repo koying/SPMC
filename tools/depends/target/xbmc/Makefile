@@ -24,10 +24,11 @@ CONFIGURE += $(CONFIG_EXTRA)
 
 all: $(SOURCE)/lib$(APP_NAME).so
 
-release: DEBUG=--enable-debug=no
+release: DEBUG = --enable-debug=no
+release: CONFIGURE += --enable-breakpad
 release: $(SOURCE)/lib$(APP_NAME).so
 
-debug: DEBUG=--enable-debug=yes
+debug: DEBUG = --enable-debug=yes
 debug: $(SOURCE)/lib$(APP_NAME).so
 
 $(SOURCE)/lib$(APP_NAME).so:
