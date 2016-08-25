@@ -4,7 +4,8 @@
     <string name="app_name">@APP_NAME@</string>
     <string name="search_hint">@APP_NAME@</string>
     <string name="email_subject">@APP_NAME@ v{0} on {1} / {2} / {3}</string>
-    <string name="starting_email">Starting email client...</string>
+    <string name="getting_log">Getting logs...</string>
+    <string name="pushing_log">Pushing the paste...</string>
     <string name="unknown_version">UNKNOWN</string>
 
     <!-- Crash report dialog -->
@@ -14,7 +15,7 @@
     <string name="crashtitle">Well, this is embarrassing...</string>
     <string name="report">Report</string>
     <string name="close">Close</string>
-    <string name="getting_log">Getting log...</string>
     <string name="crashed">Sorry, @APP_NAME@ encountered a problem and had to close. Would you like to send a crash report, which may help the author to fix the problem?</string>
     <string name="get_log_failed">Could not read the log. Meanwhile, send an ordinary bug report to {0}, describing what you did and what happened, and I may still be able to help you.</string>
+    <string name="push_log_success">The log has been successfully posted. You can see it at {0}</string>
 </resources>

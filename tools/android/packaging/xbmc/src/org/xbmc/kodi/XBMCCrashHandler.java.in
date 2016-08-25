@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.MailTo;
@@ -39,6 +40,9 @@ import java.util.concurrent.TimeoutException;
 public class XBMCCrashHandler extends Activity
 {
   public static final String TAG = "XBMCCrashHandler";
+
+  private static final String Sticky_url = "http://paste.semperpax.com";
+
   protected void onCreate(Bundle state)
   {
     super.onCreate(state);
@@ -56,16 +60,16 @@ public class XBMCCrashHandler extends Activity
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
-        final AsyncTask task = new AsyncTask<Void,String,Boolean>()
+        final AsyncTask task = new AsyncTask<Void,String,String>()
         {
-          String log;
+          String log = "";
           Process process;
 
 
           @Override
-          protected Boolean doInBackground(Void... v)
+          protected String doInBackground(Void... v)
           {
-            log += "========= Debug log ===========";
+            log += "========= Debug log ===========\n";
             String sXbmcdataPath = XBMCProperties.getStringProperty("xbmc.data", "");
             if (sXbmcdataPath.isEmpty())
             {
@@ -82,12 +86,12 @@ public class XBMCCrashHandler extends Activity
               fin.close();
             } catch (Exception e) {
               e.printStackTrace();
-              return false;
+              return "";
             }
 
-            log += "========= end Debug log ===========";
+            log += "========= end Debug log ===========\n";
 
-            log += "============ logcat ===============";
+            log += "============ logcat ===============\n";
             try {
               process = Runtime.getRuntime().exec(new String[]{"logcat","-d","-v","threadtime"});
               log += readAllOf(process.getInputStream());
@@ -95,9 +99,9 @@ public class XBMCCrashHandler extends Activity
               e.printStackTrace();
               Toast.makeText(XBMCCrashHandler.this, e.toString(), Toast.LENGTH_LONG).show();
             }
-            log += "========== end logcat ============";
+            log += "========== end logcat ============\n";
 
-            publishProgress(getString(R.string.starting_email));
+            publishProgress(getString(R.string.pushing_log));
 
             return postLog(XBMCCrashHandler.this, true, log);
           }
@@ -115,11 +119,42 @@ public class XBMCCrashHandler extends Activity
           }
 
           @Override
-          protected void onPostExecute(Boolean result)
+          protected void onPostExecute(String id)
           {
             progress.dismiss();
-            if (result) {
-              finish();
+            if (!id.isEmpty())
+            {
+              new AlertDialog.Builder(XBMCCrashHandler.this)
+                      .setMessage(MessageFormat.format(getString(R.string.push_log_success), Sticky_url + "/" + id))
+                      .setCancelable(true)
+                      .setIcon(android.R.drawable.ic_dialog_info)
+                      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                      {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                          dialog.dismiss();
+                          finish();
+                        }
+                      })
+                      .show();
+            }
+            else
+            {
+              new AlertDialog.Builder(XBMCCrashHandler.this)
+                      .setMessage(MessageFormat.format(getString(R.string.get_log_failed), getString(R.string.crash_email)))
+                      .setCancelable(true)
+                      .setIcon(android.R.drawable.ic_dialog_alert)
+                      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                      {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                          dialog.dismiss();
+                          finish();
+                        }
+                      })
+                      .show();
             }
           }
         }.execute();
@@ -128,7 +163,6 @@ public class XBMCCrashHandler extends Activity
         {
           public void run()
           {
-            /*
             if (task.getStatus() == AsyncTask.Status.FINISHED) return;
             // It's probably one of these devices where some fool broke logcat.
             progress.dismiss();
@@ -138,7 +172,6 @@ public class XBMCCrashHandler extends Activity
               .setCancelable(true)
               .setIcon(android.R.drawable.ic_dialog_alert)
               .show();
-              */
           }
         }, 3000);
       }
@@ -173,18 +206,19 @@ public class XBMCCrashHandler extends Activity
     return log.toString();
   }
 
-  static boolean postLog(Context c, boolean isCrash, String body)
+  static String postLog(Context c, boolean isCrash, String body)
   {
-    boolean ret = false;
+    String id = "";
     StringBuilder strbuilder = new StringBuilder();
 
     try
     {
       JSONObject jreq = new JSONObject();
       jreq.put("data", body);
-      jreq.put("language", "Text");
+      jreq.put("language", "text");
+      jreq.put("project", "spmclogs");
 
-      String json_create_url = "http://paste.semperpax.com/api/json/create";
+      String json_create_url = Sticky_url + "/api/json/create";
       URL url = new URL(json_create_url);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
@@ -211,30 +245,31 @@ public class XBMCCrashHandler extends Activity
           reader.close();
           connection.disconnect();
 
-          Log.d(TAG, "JSON out: " + strbuilder.toString());
-          ret = true;
+          String resp = strbuilder.toString();
+          Log.d(TAG, "JSON out: " + resp);
+
+          JSONObject jresp = new JSONObject(resp);
+          id = jresp.getJSONObject("result").getString("id");
 
         } else
         {
           Log.e(TAG, "Failed to read JSON");
-          ret = false;
         }
       }
       catch (Exception e)
       {
         e.printStackTrace();
-        ret = false;
       }
       finally
       {
         connection.disconnect();
-        return ret;
+        return id;
       }
     } catch (Exception e)
     {
       Log.e(TAG, "Failed to publish log");
       e.printStackTrace();
-      return false;
+      return id;
     }
   }
 
