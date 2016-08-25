@@ -11,18 +11,28 @@ import android.net.MailTo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -46,21 +56,50 @@ public class XBMCCrashHandler extends Activity
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
-        final AsyncTask task = new AsyncTask<Void,Void,Void>()
+        final AsyncTask task = new AsyncTask<Void,String,Boolean>()
         {
           String log;
           Process process;
+
+
           @Override
-          protected Void doInBackground(Void... v)
+          protected Boolean doInBackground(Void... v)
           {
+            log += "========= Debug log ===========";
+            String sXbmcdataPath = XBMCProperties.getStringProperty("xbmc.data", "");
+            if (sXbmcdataPath.isEmpty())
+            {
+              sXbmcdataPath = Environment.getExternalStorageDirectory()
+                      + "/Android/data/" + getPackageName() + "/files";
+            }
+            String sXbmcLog = sXbmcdataPath + "/.spmc/temp/spmc.log";
+
+            File fl = new File(sXbmcLog);
+            FileInputStream fin = null;
+            try {
+              fin = new FileInputStream(fl);
+              log += readAllOf(fin);
+              fin.close();
+            } catch (Exception e) {
+              e.printStackTrace();
+              return false;
+            }
+
+            log += "========= end Debug log ===========";
+
+            log += "============ logcat ===============";
             try {
               process = Runtime.getRuntime().exec(new String[]{"logcat","-d","-v","threadtime"});
-              log = readAllOf(process.getInputStream());
+              log += readAllOf(process.getInputStream());
             } catch (IOException e) {
               e.printStackTrace();
               Toast.makeText(XBMCCrashHandler.this, e.toString(), Toast.LENGTH_LONG).show();
             }
-            return null;
+            log += "========== end logcat ============";
+
+            publishProgress(getString(R.string.starting_email));
+
+            return postLog(XBMCCrashHandler.this, true, log);
           }
 
           @Override
@@ -70,13 +109,16 @@ public class XBMCCrashHandler extends Activity
           }
 
           @Override
-          protected void onPostExecute(Void v)
+          protected void onProgressUpdate(String... sProgress)
           {
-              progress.setMessage(getString(R.string.starting_email));
-            boolean ok = tryEmailAuthor(XBMCCrashHandler.this, true,
-                getString(R.string.crash_preamble)+"\n\n\n\nLog:\n"+log);
+            progress.setMessage(sProgress[0]);
+          }
+
+          @Override
+          protected void onPostExecute(Boolean result)
+          {
             progress.dismiss();
-            if (ok) {
+            if (result) {
               finish();
             }
           }
@@ -86,6 +128,7 @@ public class XBMCCrashHandler extends Activity
         {
           public void run()
           {
+            /*
             if (task.getStatus() == AsyncTask.Status.FINISHED) return;
             // It's probably one of these devices where some fool broke logcat.
             progress.dismiss();
@@ -95,6 +138,7 @@ public class XBMCCrashHandler extends Activity
               .setCancelable(true)
               .setIcon(android.R.drawable.ic_dialog_alert)
               .show();
+              */
           }
         }, 3000);
       }
@@ -127,6 +171,71 @@ public class XBMCCrashHandler extends Activity
       log.append("\n");
     }
     return log.toString();
+  }
+
+  static boolean postLog(Context c, boolean isCrash, String body)
+  {
+    boolean ret = false;
+    StringBuilder strbuilder = new StringBuilder();
+
+    try
+    {
+      JSONObject jreq = new JSONObject();
+      jreq.put("data", body);
+      jreq.put("language", "Text");
+
+      String json_create_url = "http://paste.semperpax.com/api/json/create";
+      URL url = new URL(json_create_url);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setDoOutput(true);
+      connection.setDoInput(true);
+      connection.setRequestProperty("Content-Type", "application/json");
+      connection.setRequestMethod("POST");
+
+      OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+      writer.write(jreq.toString());
+      writer.close();
+
+      try
+      {
+        int statusCode = connection.getResponseCode();
+        if (statusCode == 200)
+        {
+          InputStream content = connection.getInputStream();
+          BufferedReader reader = new BufferedReader(new InputStreamReader(content, "UTF-8"));
+          String line;
+          while ((line = reader.readLine()) != null)
+          {
+            strbuilder.append(line);
+          }
+          reader.close();
+          connection.disconnect();
+
+          Log.d(TAG, "JSON out: " + strbuilder.toString());
+          ret = true;
+
+        } else
+        {
+          Log.e(TAG, "Failed to read JSON");
+          ret = false;
+        }
+      }
+      catch (Exception e)
+      {
+        e.printStackTrace();
+        ret = false;
+      }
+      finally
+      {
+        connection.disconnect();
+        return ret;
+      }
+    } catch (Exception e)
+    {
+      Log.e(TAG, "Failed to publish log");
+      e.printStackTrace();
+      return false;
+    }
   }
 
   static boolean tryEmailAuthor(Context c, boolean isCrash, String body)

@@ -76,7 +76,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
    * from this function the process will soon exit. */
   void startCrashHandler()
   {
-    new RuntimeException("crashed here (native trace should follow after the Java trace)").printStackTrace();
+    Log.e("Main", "Launching crash handler");
     startActivity(new Intent(this, XBMCCrashHandler.class));
   }
 

@@ -34,12 +34,20 @@
 
 #include "android/activity/JNIMainActivity.h"
 
-static struct sigaction old_sa[NSIG];
-
-static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
-                          void* context, bool succeeded) 
+static void *startCrashHandler(void* arg)
 {
   CJNIMainActivity::startCrashHandler();
+  return NULL;
+}
+
+static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
+                          void* context, bool succeeded)
+{
+  // Issue with breakpad to use JNI from callback. Have to use a thread
+  // https://code.google.com/p/android/issues/detail?id=162663
+  pthread_t t;
+  pthread_create(&t, NULL, startCrashHandler, NULL);
+  pthread_join(t, NULL);
   return succeeded;
 }
 
@@ -67,17 +75,7 @@ extern void android_main(struct android_app* state)
     // make sure that the linker doesn't strip out our glue
     app_dummy();
 
-#if defined(HAVE_BREAKPAD)
-    google_breakpad::MinidumpDescriptor descriptor(google_breakpad::MinidumpDescriptor::kMicrodumpOnConsole);
-    google_breakpad::ExceptionHandler eh(descriptor,
-                                        NULL,
-                                        dumpCallback,
-                                        NULL,
-                                        true,
-                                        -1);
-#endif
-
-  // revector inputPollSource.process so we can shut up
+    // revector inputPollSource.process so we can shut up
     // its useless verbose logging on new events (see ouya)
     // and fix the error in handling multiple input events.
     // see https://code.google.com/p/android/issues/detail?id=41755
@@ -87,6 +85,16 @@ extern void android_main(struct android_app* state)
     CXBMCApp xbmcApp(state->activity);
     if (xbmcApp.isValid())
     {
+#if defined(HAVE_BREAKPAD)
+      google_breakpad::MinidumpDescriptor descriptor(google_breakpad::MinidumpDescriptor::kMicrodumpOnConsole);
+      google_breakpad::ExceptionHandler eh(descriptor,
+                                        NULL,
+                                        dumpCallback,
+                                        NULL,
+                                        true,
+                                        -1);
+#endif
+
       IInputHandler inputHandler;
       eventLoop.run(xbmcApp, inputHandler);
     }
