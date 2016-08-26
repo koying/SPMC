@@ -9,13 +9,13 @@
     <string name="unknown_version">UNKNOWN</string>
 
     <!-- Crash report dialog -->
-    <string name="crash_email">@APP_NAME@</string>
+    <string name="crash_email">@APP_EMAIL@</string>
     <string name="crash_subject">Crash: @APP_NAME@ v{0} on {1} / {2} / {3}</string>
     <string name="crash_preamble">Please describe what you were doing just before the crash if possible, and then press Send:</string>
     <string name="crashtitle">Well, this is embarrassing...</string>
     <string name="report">Report</string>
     <string name="close">Close</string>
-    <string name="crashed">Sorry, @APP_NAME@ encountered a problem and had to close. Would you like to send a crash report, which may help the author to fix the problem?</string>
+    <string name="crashed">Sorry, @APP_NAME@ encountered a problem and had to close.\n Would you like to send a crash report, which may help the author to fix the problem?</string>
     <string name="get_log_failed">Could not read the log. Meanwhile, send an ordinary bug report to {0}, describing what you did and what happened, and I may still be able to help you.</string>
-    <string name="push_log_success">The log has been successfully posted. You can see it at {0}</string>
+    <string name="push_log_success">The log has been successfully posted.\n The id is {0}.\nYou can view it at\n {1}</string>
 </resources>
