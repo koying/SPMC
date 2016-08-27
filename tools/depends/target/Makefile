@@ -15,7 +15,8 @@ DEPENDS = \
 	libamplayer libssh taglib libusb libnfs \
 	pythonmodule-pil pythonmodule-setuptools \
 	libxslt ffmpeg platform crossguid \
-        libdvdread libdvdnav libdvdcss p8-platform
+        libdvdread libdvdnav libdvdcss p8-platform \
+	google-breakpad
 
 
 FFMPEG_DEPENDS = gnutls

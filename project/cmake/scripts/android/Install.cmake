@@ -31,6 +31,7 @@ set(package_files strings.xml
                   src/org/xbmc/kodi/Main.java
                   src/org/xbmc/kodi/Splash.java
                   src/org/xbmc/kodi/XBMCBroadcastReceiver.java
+                  src/org/xbmc/kodi/XBMCCrashHandler.java
                   src/org/xbmc/kodi/XBMCImageContentProvider.java
                   src/org/xbmc/kodi/XBMCInputDeviceListener.java
                   src/org/xbmc/kodi/XBMCJsonRPC.java
