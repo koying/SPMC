@@ -70,7 +70,16 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       handler.postDelayed(this, 60*60*1000);
     }
   };
-  
+
+  /** A signal handler in native code has been triggered. As our last gasp,
+   * launch the crash handler (in its own process), because when we return
+   * from this function the process will soon exit. */
+  void startCrashHandler()
+  {
+    Log.e("Main", "Launching crash handler");
+    startActivity(new Intent(this, XBMCCrashHandler.class));
+  }
+
   public Main()
   {
     super();

@@ -62,18 +62,6 @@ extern "C" int XBMC_Run(bool renderGUI)
     return status;
   }
 
-#if defined(HAVE_BREAKPAD)
-  // Must have our TEMP dir fixed first
-  std::string tempPath = CSpecialProtocol::TranslatePath("special://temp/");
-  google_breakpad::MinidumpDescriptor descriptor(tempPath.c_str());
-  google_breakpad::ExceptionHandler eh(descriptor,
-                                       NULL,
-                                       NULL,
-                                       NULL,
-                                       true,
-                                       -1);
-#endif
-
 #ifdef TARGET_RASPBERRY_PI
   if(!g_RBP.Initialize())
     return false;

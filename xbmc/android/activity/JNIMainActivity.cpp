@@ -84,6 +84,12 @@ void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVarian
                     "runNativeOnUiThread", "(JJ)V", (jlong)callback, (jlong)variant);
 }
 
+void CJNIMainActivity::startCrashHandler()
+{
+  call_method<void>(m_context,
+                    "startCrashHandler", "()V");
+}
+
 void CJNIMainActivity::_onVolumeChanged(JNIEnv *env, jobject context, jint volume)
 {
   (void)env;
