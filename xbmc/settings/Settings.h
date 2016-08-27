@@ -385,7 +385,7 @@ public:
   static const std::string SETTING_SOURCE_MUSIC;
   static const std::string SETTING_SOURCE_PICTURES;
   static const std::string SETTING_THUMBNAILS_CLEANUP;
- 
+
   static const std::string SETTING_MYSQL_ENABLED;
   static const std::string SETTING_MYSQL_HOST;
   static const std::string SETTING_MYSQL_PORT;
@@ -393,7 +393,7 @@ public:
   static const std::string SETTING_MYSQL_PASS;
   static const std::string SETTING_MYSQL_VIDEO;
   static const std::string SETTING_MYSQL_MUSIC;
-  
+
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
 
