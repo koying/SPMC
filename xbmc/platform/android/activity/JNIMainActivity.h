@@ -45,6 +45,7 @@ public:
   static void registerMediaButtonEventReceiver();
   static void unregisterMediaButtonEventReceiver();
   static void startCrashHandler();
+  static void uploadLog();
 
   CJNIRect getDisplayRect();
   
