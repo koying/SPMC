@@ -169,7 +169,7 @@ CEGLNativeTypeAndroid::CEGLNativeTypeAndroid()
 
 CEGLNativeTypeAndroid::~CEGLNativeTypeAndroid()
 {
-} 
+}
 
 bool CEGLNativeTypeAndroid::CheckCompatibility()
 {
@@ -288,6 +288,9 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 {
   EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
   if (!nativeWindow)
+    return false;
+
+  if (!*nativeWindow)
     return false;
 
   if (s_hasModeApi)
