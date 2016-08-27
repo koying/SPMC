@@ -28,6 +28,14 @@
         </setting>
       </group>
     </category>
+    <category id="logging">
+      <group id="3">
+        <setting id="debug.uploadlog" type="action" label="39106" help="39107">
+          <level>1</level>
+          <control type="button" format="action" />
+        </setting>
+      </group>
+    </category>
   </section>
   <section id="interface">
     <category id="regional">
