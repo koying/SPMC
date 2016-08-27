@@ -29,6 +29,11 @@
 
 #include "CompileInfo.h"
 #include "EventLoop.h"
+#if defined(HAVE_BREAKPAD)
+#include "client/linux/handler/minidump_descriptor.h"
+#include "client/linux/handler/exception_handler.h"
+#endif
+
 #include "platform/android/activity/JNIMainActivity.h"
 #include "platform/android/activity/JNIXBMCVideoView.h"
 #include "utils/StringUtils.h"
@@ -75,6 +80,24 @@ int start_logger(const char *app_name)
   return 0;
 }
 
+#if defined(HAVE_BREAKPAD)
+static void *startCrashHandler(void* arg)
+{
+  CJNIMainActivity::startCrashHandler();
+  return NULL;
+}
+
+static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
+                          void* context, bool succeeded)
+{
+  // Issue with breakpad to use JNI from callback. Have to use a thread
+  // https://code.google.com/p/android/issues/detail?id=162663
+  pthread_t t;
+  pthread_create(&t, NULL, startCrashHandler, NULL);
+  pthread_join(t, NULL);
+  return succeeded;
+}
+#endif
 
 // copied from new android_native_app_glue.c
 static void process_input(struct android_app* app, struct android_poll_source* source) {
@@ -110,7 +133,16 @@ extern void android_main(struct android_app* state)
     CXBMCApp xbmcApp(state->activity);
     if (xbmcApp.isValid())
     {
-      start_logger("Kodi");
+      start_logger("SPMC");
+#if defined(HAVE_BREAKPAD)
+      google_breakpad::MinidumpDescriptor descriptor(google_breakpad::MinidumpDescriptor::kMicrodumpOnConsole);
+      google_breakpad::ExceptionHandler eh(descriptor,
+                                        NULL,
+                                        dumpCallback,
+                                        NULL,
+                                        true,
+                                        -1);
+#endif
 
       IInputHandler inputHandler;
       eventLoop.run(xbmcApp, inputHandler);
