@@ -74,6 +74,12 @@ void CJNIMainActivity::startCrashHandler()
                     "startCrashHandler", "()V");
 }
 
+void CJNIMainActivity::uploadLog()
+{
+  call_method<void>(m_context,
+                    "uploadLog", "()V");
+}
+
 void CJNIMainActivity::_onVolumeChanged(JNIEnv *env, jobject context, jint volume)
 {
   (void)env;
