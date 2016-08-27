@@ -34,6 +34,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -p1 < ../python-osx-environ-fix.patch
 	cd $(PLATFORM); patch -p0 < ../Python-2.6.5-ffi-static.patch
 	cd $(PLATFORM); patch -p0 < ../python-android-binmodule.patch
+	cd $(PLATFORM); patch -p1 < ../Python-no-abort.patch
 ifeq ($(OS),ios)
 	cd $(PLATFORM); patch -p0 < ../Python-2.6.5-urllib.diff
 endif
