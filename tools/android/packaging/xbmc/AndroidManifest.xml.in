@@ -88,6 +88,13 @@
                 android:value="@APP_NAME_LC@" />
         </activity>
 
+        <activity
+            android:name=".XBMCCrashHandler"
+            android:process=":XBMCCrashHandler"
+            android:stateNotNeeded="true"
+            android:exported="false"
+            android:configChanges="keyboard|keyboardHidden|orientation" />
+
         <receiver android:name=".XBMCBroadcastReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.DREAMING_STOPPED" />

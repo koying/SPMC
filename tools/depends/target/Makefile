@@ -16,6 +16,7 @@ DEPENDS = \
 	pythonmodule-pil pythonmodule-setuptools \
 	libxslt ffmpeg platform crossguid \
         libdvdread libdvdnav libdvdcss
+	google-breakpad
 
 
 FFMPEG_DEPENDS = gnutls

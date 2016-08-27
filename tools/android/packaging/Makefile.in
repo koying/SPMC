@@ -86,9 +86,9 @@ xbmc/assets:
 	mkdir -p xbmc/assets
 
 symbols: libs
-ifeq (0,1)
+ifeq (1,@USE_BREAKPAD@)
 	for f in xbmc/obj/local/$(CPU)/*.so; do sh ./make_symbols.sh $$f; done
-	tar -cjf Kodi.symbols-$(CPU)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
+	tar -cjf spmc.symbols-$(CPU)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
 endif
 
 shared:
