@@ -18263,6 +18263,15 @@ msgctxt "#39004"
 msgid "Export"
 msgstr ""
 
-msgctxt "#3905"
+msgctxt "#39005"
 msgid "Exports nfo, thumbnail & fanart near the media file"
 msgstr ""
+
+msgctxt "#39006"
+msgid "Upload debug log..."
+msgstr ""
+
+msgctxt "#39007"
+msgid "Upload the current debug log"
+msgstr ""
+

@@ -1489,6 +1489,10 @@ void CApplication::OnSettingAction(const CSetting *setting)
     g_windowManager.ActivateWindow(WINDOW_SCREEN_CALIBRATION);
   else if (settingId == CSettings::SETTING_VIDEOSCREEN_TESTPATTERN)
     g_windowManager.ActivateWindow(WINDOW_TEST_PATTERN);
+#ifdef TARGET_ANDROID
+  else if (settingId == CSettings::SETTING_DEBUG_UPLOADLOG)
+    CXBMCApp::uploadLog();
+#endif
 }
 
 bool CApplication::OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode)

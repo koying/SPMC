@@ -68,5 +68,13 @@
         </setting>
       </group>
     </category>
+    <category id="logging">
+      <group id="3">
+        <setting id="debug.uploadlog" type="action" label="39006" help="39007">
+          <level>1</level>
+          <control type="button" format="action" />
+        </setting>
+      </group>
+    </category>
   </section>
 </settings>

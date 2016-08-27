@@ -46,6 +46,7 @@ public:
   static void unregisterMediaButtonEventReceiver();
   static void screenOn();
   static void startCrashHandler();
+  static void uploadLog();
 
   CJNISurface getVideoViewSurface();
   void clearVideoView();
