@@ -1519,6 +1519,10 @@ void CApplication::OnSettingAction(const CSetting *setting)
   }
   else if (settingId == CSettings::SETTING_SOURCE_PICTURES)
     g_windowManager.ActivateWindow(WINDOW_PICTURES);
+#ifdef TARGET_ANDROID
+  else if (settingId == CSettings::SETTING_DEBUG_UPLOADLOG)
+    CXBMCApp::uploadLog();
+#endif
 }
 
 bool CApplication::OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode)
