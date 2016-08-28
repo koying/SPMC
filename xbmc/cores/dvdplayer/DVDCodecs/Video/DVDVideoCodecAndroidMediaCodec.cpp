@@ -181,28 +181,10 @@ CDVDMediaCodecInfo::CDVDMediaCodecInfo(
 , m_codec(codec)
 , m_surfacetexture(surfacetexture)
 , m_frameready(frameready)
-, m_scaleX(1.0)
-, m_scaleY(1.0)
 {
   // paranoid checks
   assert(m_index >= 0);
   assert(m_codec != NULL);
-
-  CJNIWindow window = CXBMCApp::getWindow();
-  if (window)
-  {
-    CJNIView view(window.getDecorView());
-    if (view)
-    {
-      CJNIDisplay display = view.getDisplay();
-      if (display)
-      {
-        CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
-        m_scaleX = (double)display.getWidth() / gui.Width();
-        m_scaleY = (double)display.getHeight() / gui.Height();
-      }
-    }
-  }
 }
 
 CDVDMediaCodecInfo::~CDVDMediaCodecInfo()
@@ -334,10 +316,32 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
 
   if (DestRect != cur_rect)
   {
-    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
-      CLog::Log(LOGDEBUG, "RenderUpdate: %f+%f-%fx%f  scale(%fx%f)", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height(), m_scaleX, m_scaleY);
+    float scaleX = 1.0;
+    float scaleY = 1.0;
 
-    CXBMCApp::get()->setVideoViewSurfaceRect(DestRect.x1 * m_scaleX, DestRect.y1 * m_scaleY, DestRect.x2 * m_scaleX, DestRect.y2 * m_scaleY);
+    CJNIWindow window = CXBMCApp::getWindow();
+    if (window)
+    {
+      CJNIView view(window.getDecorView());
+      if (view)
+      {
+        CJNIDisplay display = view.getDisplay();
+        if (display)
+        {
+          CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
+          scaleX = (double)display.getWidth() / gui.Width();
+          scaleY = (double)display.getHeight() / gui.Height();
+
+          CLog::Log(LOGDEBUG, "RenderUpdate: GUI  - %fx%f", gui.Width(), gui.Height());
+          CLog::Log(LOGDEBUG, "RenderUpdate: Disp - %dx%d  scale(%fx%f)", display.getWidth(), display.getHeight(), scaleX, scaleY);
+        }
+      }
+    }
+
+    CRect adjRect(DestRect.x1 * scaleX, DestRect.y1 * scaleY, DestRect.x2 * scaleX, DestRect.y2 * scaleY);
+    CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
+
+    CXBMCApp::get()->setVideoViewSurfaceRect(adjRect.x1, adjRect.y1, adjRect.x2, adjRect.y2);
     cur_rect = DestRect;
     
     // setVideoViewSurfaceRect is async, so skip rendering this frame
@@ -656,8 +660,6 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
     return;
 
   m_opened = false;
-
-  g_renderManager.RegisterRenderUpdateCallBack((const void*)NULL, NULL);
 
   // release any retained demux packets
   if (m_demux_pkt.pData)
