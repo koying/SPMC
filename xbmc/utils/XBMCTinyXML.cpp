@@ -274,3 +274,26 @@ bool CXBMCTinyXML::Test()
   }
   return false;
 }
+
+
+bool CXBMCTinyXMLRedactedPrinter::VisitEnter(const TiXmlElement &element, const TiXmlAttribute *firstAttribute)
+{
+  if (StringUtils::StartsWithNoCase(element.ValueStr(), "user") || StringUtils::StartsWithNoCase(element.ValueStr(), "pass"))
+    m_isRedacted = true;
+
+  return TiXmlPrinter::VisitEnter(element, firstAttribute);
+}
+
+bool CXBMCTinyXMLRedactedPrinter::VisitExit(const TiXmlElement &element)
+{
+  m_isRedacted = false;
+  return TiXmlPrinter::VisitExit(element);
+}
+
+bool CXBMCTinyXMLRedactedPrinter::Visit(const TiXmlText &text)
+{
+  if (!m_isRedacted)
+    return TiXmlPrinter::Visit(text);
+
+  return true;
+}
