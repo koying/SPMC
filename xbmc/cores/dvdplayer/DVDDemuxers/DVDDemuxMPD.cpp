@@ -33,6 +33,10 @@
 #ifdef TARGET_ANDROID
 #include "android/jni/SystemProperties.h"
 #endif
+#ifdef TARGET_WINDOWS
+#pragma comment(lib, "libexpat.lib")
+#pragma comment(lib, "ap4.lib")
+#endif
 
 #include "utils/StringUtils.h"
 #include "utils/log.h"
