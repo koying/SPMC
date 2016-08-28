@@ -64,6 +64,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "settings/VideoSettings.h"
+#include "settings/DisplaySettings.h"
 #include "utils/StringUtils.h"
 
 CDVDVideoCodec* CDVDFactoryCodec::OpenCodec(CDVDVideoCodec* pCodec, CDVDStreamInfo &hints, CDVDCodecOptions &options )
@@ -273,8 +274,8 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
 #endif
 
 #if defined(TARGET_ANDROID)
-  // Only give priority to Surface in 4K
-  if (!hint.software && hint.height > 1080 && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
+  // Only give priority to Surface if video size > gui size
+  if (!hint.software && hint.width > CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
   {
     switch(hint.codec)
     {
