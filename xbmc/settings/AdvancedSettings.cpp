@@ -497,7 +497,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
   CLog::Log(LOGNOTICE, "Loaded settings file from %s", file.c_str());
 
   // Dump contents of AS.xml to debug log
-  TiXmlPrinter printer;
+  CXBMCTinyXMLRedactedPrinter printer;
   printer.SetLineBreak("\n");
   printer.SetIndent("  ");
   advancedXML.Accept(&printer);
