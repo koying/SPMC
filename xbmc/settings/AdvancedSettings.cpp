@@ -535,7 +535,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
   }
 
   // Dump contents of copied AS.xml to debug log
-  TiXmlPrinter printer;
+  CXBMCTinyXMLRedactedPrinter printer;
   printer.SetLineBreak("\n");
   printer.SetIndent("  ");
   advancedXMLCopy.Accept(&printer);
