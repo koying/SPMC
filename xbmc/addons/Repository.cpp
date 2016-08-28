@@ -161,7 +161,7 @@ std::string CRepository::GetAddonHash(const AddonPtr& addon) const
 
 #define SET_IF_EMPTY(x,y) \
   { \
-    if (x.empty()) \
+    if (x.empty() || x == "memory") \
        x = y; \
   }
 
