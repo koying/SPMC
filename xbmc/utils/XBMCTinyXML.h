@@ -72,3 +72,20 @@ protected:
   std::string m_SuggestedCharset;
   std::string m_UsedCharset;
 };
+
+class CXBMCTinyXMLRedactedPrinter : public TiXmlPrinter
+{
+public:
+  CXBMCTinyXMLRedactedPrinter()
+    : TiXmlPrinter()
+    , m_isRedacted(false)
+  {}
+
+  virtual bool VisitEnter( const TiXmlElement& element, const TiXmlAttribute* firstAttribute );
+  virtual bool VisitExit( const TiXmlElement& element );
+
+  virtual bool Visit( const TiXmlText& text );
+
+protected:
+  bool m_isRedacted;
+};
