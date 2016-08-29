@@ -46,6 +46,13 @@
 #include "pictures/GUIViewStatePictures.h"
 #include "pictures/PictureThumbLoader.h"
 
+// below for screensaver enable/disable function
+#if defined(TARGET_ANDROID)
+#include "platform/android/activity/XBMCApp.h"
+#elif defined(TARGET_DARWIN_TVOS)
+#include "platform/darwin/DarwinUtils.h"
+#endif
+
 using namespace XFILE;
 using namespace KODI::MESSAGING;
 
@@ -288,6 +295,12 @@ void CGUIWindowSlideShow::OnDeinitWindow(int nextWindowID)
   }
   g_infoManager.ResetCurrentSlide();
 
+#if defined(TARGET_ANDROID)
+  // enable android screensaver
+  CXBMCApp::EnableWakeLock(false);
+#elif defined(TARGET_DARWIN_TVOS)
+  CDarwinUtils::EnableOSScreenSaver(true);
+#endif
   CGUIWindow::OnDeinitWindow(nextWindowID);
 }
 
@@ -384,6 +397,12 @@ bool CGUIWindowSlideShow::InSlideShow() const
 
 void CGUIWindowSlideShow::StartSlideShow()
 {
+#if defined(TARGET_ANDROID)
+  // disable android screensaver
+  CXBMCApp::EnableWakeLock(true);
+#elif defined(TARGET_DARWIN_TVOS)
+  CDarwinUtils::EnableOSScreenSaver(false);
+#endif
   m_bSlideShow = true;
   m_iDirection = 1;
   if (m_slides->Size())
