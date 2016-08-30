@@ -35,7 +35,6 @@
 #include "utils/CPUInfo.h"
 #include "utils/log.h"
 #include "settings/AdvancedSettings.h"
-#include "settings/DisplaySettings.h"
 #include "guilib/GraphicContext.h"
 #include "platform/android/activity/XBMCApp.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
