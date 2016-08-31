@@ -50,7 +50,7 @@ CDASHSession::CDASHSession(const std::string& strURL, int width, int height, con
   {
     double val;
     f.Read((void*)&val, sizeof(double));
-    dashtree_.bandwidth_ = static_cast<uint32_t>(val * 8);
+    dashtree_.bandwidth_ = static_cast<uint32_t>(val);
     f.Close();
   }
   else
