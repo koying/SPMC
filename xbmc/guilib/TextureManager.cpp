@@ -260,6 +260,9 @@ bool CGUITextureManager::HasTexture(const std::string &textureName, std::string 
   if (size) *size = 0;
   if (path) *path = textureName;
 
+  if (textureName.empty())
+    return false;
+
   if (!CanLoad(textureName))
     return false;
 
@@ -297,6 +300,10 @@ const CTextureArray& CGUITextureManager::Load(const std::string& strTextureName,
   static CTextureArray emptyTexture;
   int bundle = -1;
   int size = 0;
+
+  if (strTextureName.empty())
+    return emptyTexture;
+
   if (!HasTexture(strTextureName, &strPath, &bundle, &size))
     return emptyTexture;
 
@@ -622,6 +629,8 @@ std::string CGUITextureManager::GetTexturePath(const std::string &textureName, b
       }
     }
   }
+
+  CLog::Log(LOGERROR, "CGUITextureManager::GetTexturePath: could not find texture '%s'", textureName.c_str());
   return "";
 }
 
