@@ -27,9 +27,6 @@
 
 #include "dash/DASHByteStream.h"
 
-#include "guilib/GraphicContext.h"
-#include "settings/DisplaySettings.h"
-
 #ifdef TARGET_ANDROID
 #include "android/jni/SystemProperties.h"
 #endif
