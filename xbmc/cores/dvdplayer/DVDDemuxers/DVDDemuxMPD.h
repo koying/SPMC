@@ -33,7 +33,7 @@ public:
   CDVDDemuxMPD();
   virtual ~CDVDDemuxMPD();
 
-  bool Open(CDVDInputStream* pInput);
+  bool Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t maxHeight);
   void Dispose();
   void Reset();
   void Abort();
