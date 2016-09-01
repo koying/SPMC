@@ -844,6 +844,39 @@ bool CDVDPlayer::OpenDemuxStream()
   return true;
 }
 
+void CDVDPlayer::OpenDefaultSubtitleStreams(bool reset)
+{
+  bool valid = false;
+  SelectionStreams streams;
+
+  // enable  or disable subtitles
+  bool visible = CMediaSettings::GetInstance().GetCurrentVideoSettings().m_SubtitleOn;
+
+  // open subtitle stream
+  SelectionStream as = m_SelectionStreams.Get(STREAM_AUDIO, GetAudioStream());
+  PredicateSubtitlePriority psp(as.language);
+  streams = m_SelectionStreams.Get(STREAM_SUBTITLE, psp);
+  valid   = false;
+  CloseStream(m_CurrentSubtitle, false);
+  for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
+  {
+    if(OpenStream(m_CurrentSubtitle, it->id, it->source))
+    {
+      valid = true;
+      if(!psp.relevant(*it))
+        visible = false;
+      else if(it->flags & CDemuxStream::FLAG_FORCED)
+        visible = true;
+    }
+  }
+  if(!valid)
+    CloseStream(m_CurrentSubtitle, false);
+
+  if (!dynamic_cast<CDVDInputStreamNavigator*>(m_pInputStream) || m_PlayerOptions.state.empty())
+    SetSubtitleVisibleInternal(visible); // only set subtitle visibility if state not stored by dvd navigator, because navigator will restore it (if visible)
+
+}
+
 void CDVDPlayer::OpenDefaultStreams(bool reset)
 {
   // if input stream dictate, we will open later
@@ -880,31 +913,8 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   if(!valid)
     CloseStream(m_CurrentAudio, true);
 
-  // enable  or disable subtitles
-  bool visible = CMediaSettings::GetInstance().GetCurrentVideoSettings().m_SubtitleOn;
 
-  // open subtitle stream
-  SelectionStream as = m_SelectionStreams.Get(STREAM_AUDIO, GetAudioStream());
-  PredicateSubtitlePriority psp(as.language);
-  streams = m_SelectionStreams.Get(STREAM_SUBTITLE, psp);
-  valid   = false;
-  CloseStream(m_CurrentSubtitle, false);
-  for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
-  {
-    if(OpenStream(m_CurrentSubtitle, it->id, it->source))
-    {
-      valid = true;
-      if(!psp.relevant(*it))
-        valid = false;
-      else if(it->flags & CDemuxStream::FLAG_FORCED)
-        visible = true;
-    }
-  }
-  if(!valid)
-    CloseStream(m_CurrentSubtitle, false);
-
-  if (!dynamic_cast<CDVDInputStreamNavigator*>(m_pInputStream) || m_PlayerOptions.state.size() == 0)
-    SetSubtitleVisibleInternal(visible); // only set subtitle visibility if state not stored by dvd navigator, because navigator will restore it (if visible)
+  OpenDefaultSubtitleStreams(reset);
 
   // open teletext stream
   streams = m_SelectionStreams.Get(STREAM_TELETEXT);
@@ -1484,7 +1494,7 @@ void CDVDPlayer::Process()
           {
             m_SelectionStreams.Clear(STREAM_SUBTITLE, STREAM_SOURCE_VIDEOMUX);
             m_SelectionStreams.Update(NULL, m_pCCDemuxer, "");
-            OpenDefaultStreams(false);
+            OpenDefaultSubtitleStreams(false);
           }
           CDemuxStream *pSubStream = m_pCCDemuxer->GetStream(pkt->iStreamId);
           if (pSubStream && m_CurrentSubtitle.id == pkt->iStreamId && m_CurrentSubtitle.source == STREAM_SOURCE_VIDEOMUX)

@@ -389,6 +389,7 @@ protected:
 
   bool OpenInputStream();
   bool OpenDemuxStream();
+  void OpenDefaultSubtitleStreams(bool reset);
   void OpenDefaultStreams(bool reset = true);
 
   void UpdateApplication(double timeout);
