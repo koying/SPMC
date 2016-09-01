@@ -75,9 +75,8 @@
 #include "android/jni/ContentResolver.h"
 #include "android/jni/MediaStore.h"
 #include "android/jni/Build.h"
-#if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
-#endif
+#include "utils/RKutils.h"
 #include "android/jni/Window.h"
 #include "android/jni/WindowManager.h"
 #include "android/jni/KeyEvent.h"
@@ -674,6 +673,22 @@ CPointInt CXBMCApp::GetMaxDisplayResolution()
     for (size_t i = 0; i < probe_str.size(); i++)
     {
       if(aml_mode_to_resolution(probe_str[i].c_str(), &res))
+      {
+        if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+          res_info = res;
+      }
+    }
+  }
+
+  // RK, same
+  if (SysfsUtils::GetString("/sys/class/display/display0.HDMI/modes", valstr) == 0)
+  {
+    std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
+
+    RESOLUTION_INFO res;
+    for (size_t i = 0; i < probe_str.size(); i++)
+    {
+      if(rk_mode_to_resolution(probe_str[i].c_str(), &res))
       {
         if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
           res_info = res;
