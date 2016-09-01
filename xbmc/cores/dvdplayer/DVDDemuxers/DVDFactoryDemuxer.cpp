@@ -34,6 +34,12 @@
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 
+#include "guilib/GraphicContext.h"
+#include "settings/DisplaySettings.h"
+#ifdef TARGET_ANDROID
+#include "android/activity/XBMCApp.h"
+#endif
+
 using namespace PVR;
 
 CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool fileinfo)
@@ -45,7 +51,20 @@ CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool
   if (pInputStream->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInputStream->GetFileItem().IsType(".mpd"))
   {
     std::unique_ptr<CDVDDemuxMPD> demuxer(new CDVDDemuxMPD());
-    if (demuxer->Open(pInputStream, 9999, 9999))
+#ifdef TARGET_ANDROID
+    CPointInt maxres = CXBMCApp::GetMaxDisplayResolution();
+#else
+    // Find larger possible resolution
+    RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
+    for (unsigned int i=0; i<CDisplaySettings::GetInstance().ResolutionInfoSize(); ++i)
+    {
+      RESOLUTION_INFO res = CDisplaySettings::GetInstance().GetResolutionInfo(i);
+      if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+        res_info = res;
+    }
+    CPointInt maxres = CPointInt(res_info.iWidth, res_info.iHeight);
+#endif
+    if (demuxer->Open(pInputStream, maxres.x, maxres.y))
       return demuxer.release();
     else
       return NULL;

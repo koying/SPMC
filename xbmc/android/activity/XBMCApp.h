@@ -37,6 +37,7 @@
 #include "android/jni/AudioDeviceInfo.h"
 #include "threads/Event.h"
 #include "interfaces/IAnnouncer.h"
+#include "guilib/Geometry.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -157,6 +158,7 @@ public:
   static void SetRefreshRate(float rate);
   static void SetDisplayMode(int mode);
   static int GetDPI();
+  static CPointInt GetMaxDisplayResolution();
 
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
 
