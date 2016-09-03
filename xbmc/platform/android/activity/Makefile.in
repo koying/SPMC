@@ -26,7 +26,7 @@ LIB        = activity.a
 $(LIB): $(OBJS)
 
 $(APP_GLUE):
-	$(CC) -c -I$(GLUEPATH) -o $@ $(GLUEPATH)/$(APP_GLUE:.o=.c)
+	$(CC) -c -DHAVE_INTTYPES_H -I$(GLUEPATH) -o $@ $(GLUEPATH)/$(APP_GLUE:.o=.c)
 
 $(CPU_OBJ):
 	$(CC) -c -I$(CPUPATH) -o $@ $(CPUPATH)/$(CPU_OBJ:.o=.c)

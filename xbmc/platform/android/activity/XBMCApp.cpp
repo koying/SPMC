@@ -31,8 +31,6 @@
 #include <android/configuration.h>
 #include <jni.h>
 
-#include "XBMCApp.h"
-
 #include "input/MouseStat.h"
 #include "input/XBMC_keysym.h"
 #include "input/Key.h"
