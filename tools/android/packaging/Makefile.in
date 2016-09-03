@@ -24,19 +24,18 @@ ifneq ($(strip $(SIGN_KEYPASS)),)
 SIGN_KEYPASS_OPT=-keypass $(SIGN_KEYPASS)
 endif
 
-X86OVERRIDES=XBMC_OVERRIDE_HOST=i686-android-linux XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_X86_TOOLCHAIN)
-ARMOVERRIDES=XBMC_OVERRIDE_HOST=arm-linux-androideabi XBMC_OVERRIDE_TOOLCHAIN=$(XBMC_ARM_TOOLCHAIN)
-
 #this fixes a android ndk fuckup where the pathes to
 #prebuilt stuff follow different name shemes for
 #arm and x86
 ifeq ($(findstring i686,$(CPU)),i686)
 ARCH=x86
-CPU=x86
-endif
-ifeq ($(findstring arm,$(CPU)),arm)
+ABI=x86
+else ifeq ($(findstring arm64,$(CPU)),arm64)
+ARCH=arm64
+ABI=arm64-v8a
+else ifeq ($(findstring arm,$(CPU)),arm)
 ARCH=arm
-CPU=armeabi-v7a
+ABI=armeabi-v7a
 endif
 
 #older ndk x86
@@ -53,7 +52,7 @@ GDBPATH=$(NDKROOT)/prebuilt/android-$(ARCH)/gdbserver/gdbserver
 endif
 
 SRCLIBS = $(addprefix $(PREFIX)/lib/,$(OBJS)) $(addprefix $(PREFIX)/lib/$(SDK_PLATFORM)/,$(PLATFORM_OBJS))
-DSTLIBS = $(CPU)/lib/lib@APP_NAME_LC@.so $(addprefix $(CPU)/lib/,$(OBJS)) $(addprefix $(CPU)/lib/,$(PLATFORM_OBJS))
+DSTLIBS = $(ABI)/lib/lib@APP_NAME_LC@.so $(addprefix $(ABI)/lib/,$(OBJS)) $(addprefix $(ABI)/lib/,$(PLATFORM_OBJS))
 libs= $(DSTLIBS)
 
 all: apk
@@ -75,8 +74,8 @@ xbmc/assets:
 
 symbols: libs
 ifeq (1,@USE_BREAKPAD@)
-	for f in xbmc/obj/local/$(CPU)/*.so; do sh ./make_symbols.sh $$f; done
-	tar -cjf spmc.symbols-$(CPU)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
+	for f in xbmc/obj/local/$(ABI)/*.so; do sh ./make_symbols.sh $$f; done
+	tar -cjf spmc.symbols-$(ABI)-`$(XBMCROOT)/tools/darwin/packaging/gitrev-posix`.tar.bz2 symbols
 endif
 
 shared:
@@ -104,7 +103,7 @@ python: | xbmc/assets
 
 res:
 	mkdir -p xbmc/gen/@APP_PACKAGE_DIR@ xbmc/res xbmc/res/raw xbmc/res/values images
-	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
+	@echo "native_arch=$(ABI)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(XBMCROOT)/media/Splash.png xbmc/res/drawable/splash.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
 	cp -fp media/drawable-ldpi/ic_launcher.png xbmc/res/drawable-ldpi/ic_launcher.png
@@ -122,23 +121,23 @@ res:
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
-	rm -rf xbmc/lib/$(CPU) xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
-	mkdir -p xbmc/lib/$(CPU) xbmc/assets/python2.6/lib/ xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
-	cp -fp $(SRCLIBS) xbmc/obj/local/$(CPU)/
-	cp -fp $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so xbmc/obj/local/$(CPU)/
-	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	find $(PREFIX)/lib/@APP_NAME_LC@/system -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
-	cd xbmc/obj/local/$(CPU)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
-	cp -fp xbmc/obj/local/$(CPU)/*.so xbmc/lib/$(CPU)/
-	$(STRIP) --strip-unneeded xbmc/lib/$(CPU)/*.so
+	rm -rf xbmc/lib/$(ABI) xbmc/libs/$(ABI) xbmc/obj/local/$(ABI)
+	mkdir -p xbmc/lib/$(ABI) xbmc/assets/python2.6/lib/ xbmc/libs/$(ABI) xbmc/obj/local/$(ABI)
+	cp -fp $(SRCLIBS) xbmc/obj/local/$(ABI)/
+	cp -fp $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so xbmc/obj/local/$(ABI)/
+	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
+	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
+	find $(PREFIX)/lib/@APP_NAME_LC@/system -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
+	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
+	cd xbmc/obj/local/$(ABI)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
+	cp -fp xbmc/obj/local/$(ABI)/*.so xbmc/lib/$(ABI)/
+	$(STRIP) --strip-unneeded xbmc/lib/$(ABI)/*.so
 	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/libs
-	install -p $(GDBPATH) ./xbmc/libs/$(CPU)/gdbserver
-	echo "set solib-search-path ./obj/local/$(CPU)" > ./xbmc/libs/$(CPU)/gdb.setup
+	install -p $(GDBPATH) ./xbmc/libs/$(ABI)/gdbserver
+	echo "set solib-search-path ./obj/local/$(ABI)" > ./xbmc/libs/$(ABI)/gdb.setup
 	echo "directory $(TOOLCHAIN)/sysroot/usr/include $(NDKROOT)/sources/android/native_app_glue" \
-	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/libs/$(CPU)/gdb.setup
-	cp -fp xbmc/libs/$(CPU)/* xbmc/lib/$(CPU)
+	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/libs/$(ABI)/gdb.setup
+	cp -fp xbmc/libs/$(ABI)/* xbmc/lib/$(ABI)
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
@@ -148,15 +147,15 @@ xbmc/classes.dex: res
 
 package: libs symbols python xbmc/classes.dex
 	@echo "Creating package..."
-	@cp images/@APP_NAME@app-debug-skeleton.apk images/@APP_NAME@app-debug-$(CPU)-unaligned.apk
-	@cd xbmc; $(ZIP) -r -q ../images/@APP_NAME@app-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
+	@cp images/@APP_NAME@app-debug-skeleton.apk images/@APP_NAME@app-debug-$(ABI)-unaligned.apk
+	@cd xbmc; $(ZIP) -r -q ../images/@APP_NAME@app-debug-$(ABI)-unaligned.apk lib/$(ABI) assets classes.dex
 
 apk-sign:
 	@echo "Signing..."
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/@APP_NAME@app-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
-	@$(ZIPALIGN) -f 4 images/@APP_NAME@app-debug-$(CPU)-unaligned.apk $(XBMCROOT)/@APP_NAME@app-$(CPU)-debug.apk
-	@rm images/@APP_NAME@app-debug-$(CPU)-unaligned.apk
-	@echo "$(XBMCROOT)/@APP_NAME_LC@app-$(CPU)-debug.apk created"
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/@APP_NAME@app-debug-$(ABI)-unaligned.apk $(SIGN_KEY)
+	@$(ZIPALIGN) -f 4 images/@APP_NAME@app-debug-$(ABI)-unaligned.apk $(XBMCROOT)/@APP_NAME@app-$(ABI)-debug.apk
+	@rm images/@APP_NAME@app-debug-$(ABI)-unaligned.apk
+	@echo "$(XBMCROOT)/@APP_NAME_LC@app-$(ABI)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/lib@APP_NAME_LC@.so: $(SRCLIBS)
 	$(MAKE) -C ../../depends/target/xbmc
