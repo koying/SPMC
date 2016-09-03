@@ -11,7 +11,7 @@ ARCHIVE=$(SOURCE).tar.gz
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; ./configure --prefix=$(PREFIX) \
 	--disable-shared --disable-stack-for-recursion \
 	--enable-pcre8 --disable-pcre16 --disable-pcre32 \
-	--enable-jit --enable-utf --enable-unicode-properties \
+	--disable-jit --enable-utf --enable-unicode-properties \
 	--enable-newline-is-anycrlf
 
 
