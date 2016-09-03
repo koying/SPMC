@@ -18,6 +18,8 @@
  *
  */
 
+#include "XBMCApp.h"
+
 #include <sstream>
 
 #include <unistd.h>
@@ -28,8 +30,6 @@
 #include <android/native_window.h>
 #include <android/configuration.h>
 #include <jni.h>
-
-#include "XBMCApp.h"
 
 #include "input/MouseStat.h"
 #include "input/XBMC_keysym.h"

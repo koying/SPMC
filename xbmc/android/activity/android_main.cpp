@@ -18,6 +18,8 @@
  *
  */
 
+#include "system.h"
+
 #include <stdlib.h>
 #include <errno.h>
 #include <android_native_app_glue.h>
@@ -28,6 +30,7 @@
 #include "CompileInfo.h"
 
 #if defined(HAVE_BREAKPAD)
+#define __STDC_FORMAT_MACROS
 #include "client/linux/handler/minidump_descriptor.h"
 #include "client/linux/handler/exception_handler.h"
 #endif
