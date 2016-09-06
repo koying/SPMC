@@ -1,5 +1,6 @@
+#pragma once
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2011-2013 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -18,38 +19,6 @@
  *
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "guilib/Resolution.h"
 
-#if defined(__ARM_NEON__) && !defined(__LP64__)
-  void yuv420_2_rgb8888_neon
-  (
-    uint8_t *dst_ptr,
-    const uint8_t *y_ptr,
-    const uint8_t *u_ptr,
-    const uint8_t *v_ptr,
-    int width,
-    int height,
-    int y_pitch,
-    int uv_pitch,
-    int rgb_pitch
-  );
-
-  void yuv422_2_rgb8888_neon
-  (
-    uint8_t *dst_ptr,
-    const uint8_t *y_ptr,
-    const uint8_t *u_ptr,
-    const uint8_t *v_ptr,
-    int width,
-    int height,
-    int y_pitch,
-    int uv_pitch,
-    int rgb_pitch
-  );
-#endif
-
-#ifdef __cplusplus
-}
-#endif
+bool rk_mode_to_resolution(const char *mode, RESOLUTION_INFO *res);

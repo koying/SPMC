@@ -139,6 +139,22 @@ case $host in
     #android builds are always cross
     cross_compiling="yes"
   ;;
+  aarch64*-*linux-android*)
+    if test "x$use_cpu" = "xauto"; then
+      use_cpu="arm64"
+    fi
+    use_sdk="${use_sdk:-android-23}"
+    use_ndk="${use_ndk:-android-21}"
+    deps_dir="$use_host-$use_ndk"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC -Wno-switch"
+    platform_cflags+=" -mfix-cortex-a53-835769"
+    platform_ldflags="-L$prefix/$deps_dir/lib/$use_ndk"
+    platform_cxxflags="$platform_cflags -frtti -Wno-reorder"
+    platform_includes="-I$prefix/$deps_dir/include/$use_ndk"
+    platform_os="android"
+    #android builds are always cross
+    cross_compiling="yes"
+  ;;
   i*86*-linux-android*)
     if test "x$use_cpu" = "xauto"; then
       use_cpu=$host_cpu
@@ -204,7 +220,7 @@ case $host in
       4.* | 4.*.*)
         platform_cc=llvm-gcc-4.2
         platform_cxx=llvm-g++-4.2
-        ;; 
+        ;;
       *)
         platform_cc=clang
         platform_cxx=clang++
@@ -279,7 +295,7 @@ case $host in
             use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
             ;;
         esac
-        
+
 	case $use_sdk in
           4.*);;
           5.*);;
@@ -433,7 +449,7 @@ if test "$platform_os" == "android"; then
   if [ ! test -f $use_ndk_path/sources/android/native_app_glue/android_native_app_glue.h ]; then
     AC_MSG_ERROR(verify ndk path)
   fi
- 
+
   #not all sort versions support -V - probe it...
   SORT_PARAMS=""
   sort -V /dev/null > /dev/null 2>&1 && SORT_PARAMS="-V"

@@ -9872,3 +9872,5 @@ tools/android/packaging/xbmc/res/values/colors.xml
 tools/android/packaging/xbmc/res/values/strings.xml
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCCrashHandler.java
 version.txt
+xbmc/utils/RKutils.h
+xbmc/utils/RKutils.cpp

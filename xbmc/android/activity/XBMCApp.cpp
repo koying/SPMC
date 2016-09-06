@@ -18,6 +18,8 @@
  *
  */
 
+#include "XBMCApp.h"
+
 #include <sstream>
 
 #include <unistd.h>
@@ -28,8 +30,6 @@
 #include <android/native_window.h>
 #include <android/configuration.h>
 #include <jni.h>
-
-#include "XBMCApp.h"
 
 #include "input/MouseStat.h"
 #include "input/XBMC_keysym.h"
@@ -42,11 +42,14 @@
 #include "xbmc.h"
 #include "windowing/WinEvents.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/GraphicContext.h"
+#include "settings/DisplaySettings.h"
 #include "utils/log.h"
 #include "messaging/ApplicationMessenger.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "utils/URIUtils.h"
+#include "utils/SysfsUtils.h"
 #include "AppParamParser.h"
 #include "XbmcContext.h"
 #include <android/bitmap.h>
@@ -72,12 +75,12 @@
 #include "android/jni/ContentResolver.h"
 #include "android/jni/MediaStore.h"
 #include "android/jni/Build.h"
-#if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
-#endif
+#include "utils/RKutils.h"
 #include "android/jni/Window.h"
 #include "android/jni/WindowManager.h"
 #include "android/jni/KeyEvent.h"
+#include "android/jni/SystemProperties.h"
 #include "AndroidKey.h"
 
 #include "CompileInfo.h"
@@ -635,6 +638,66 @@ int CXBMCApp::GetDPI()
   AConfiguration_delete(config);
 
   return dpi;
+}
+
+CPointInt CXBMCApp::GetMaxDisplayResolution()
+{
+  // Find larger possible resolution
+  RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
+  for (unsigned int i=0; i<CDisplaySettings::GetInstance().ResolutionInfoSize(); ++i)
+  {
+    RESOLUTION_INFO res = CDisplaySettings::GetInstance().GetResolutionInfo(i);
+    if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+      res_info = res;
+  }
+
+  // Android might go even higher via surface
+  std::string displaySize = CJNISystemProperties::get("sys.display-size", "");
+  if (!displaySize.empty())
+  {
+    std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
+    if (aSize.size() == 2)
+    {
+      res_info.iWidth = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
+      res_info.iHeight = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
+    }
+  }
+
+  // AML, always different
+  std::string valstr;
+  if (SysfsUtils::GetString("/sys/class/amhdmitx/amhdmitx0/disp_cap", valstr) == 0)
+  {
+    std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
+
+    RESOLUTION_INFO res;
+    for (size_t i = 0; i < probe_str.size(); i++)
+    {
+      if(aml_mode_to_resolution(probe_str[i].c_str(), &res))
+      {
+        if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+          res_info = res;
+      }
+    }
+  }
+
+  // RK, same
+  if (SysfsUtils::GetString("/sys/class/display/display0.HDMI/modes", valstr) == 0)
+  {
+    std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
+
+    RESOLUTION_INFO res;
+    for (size_t i = 0; i < probe_str.size(); i++)
+    {
+      if(rk_mode_to_resolution(probe_str[i].c_str(), &res))
+      {
+        if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+          res_info = res;
+      }
+    }
+  }
+
+
+  return CPointInt(res_info.iWidth, res_info.iHeight);
 }
 
 void CXBMCApp::OnPlayBackStarted()

@@ -514,6 +514,6 @@ _sqlite3 _sqlite/connection.c  \
 
 _ctypes _ctypes/callbacks.c  _ctypes/callproc.c  _ctypes/cfield.c  _ctypes/_ctypes.c  \
         _ctypes/malloc_closure.c  _ctypes/stgdict.c \
-        -I$(prefix)/include/ffi -L$(prefix)/lib -lffi
+        -I$(prefix)/include/ffi -L$(prefix)/lib -L$(prefix)/lib64 -lffi
 
 #bz2 bz2module.c -I$(prefix)/include -L$(prefix)/lib -lbz2

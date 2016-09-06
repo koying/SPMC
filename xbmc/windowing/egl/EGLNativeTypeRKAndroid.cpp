@@ -29,7 +29,7 @@
 #include "android/jni/Build.h"
 #include "utils/StringUtils.h"
 #include "utils/SysfsUtils.h"
-#include "utils/RegExp.h"
+#include "utils/RKutils.h"
 
 bool CEGLNativeTypeRKAndroid::CheckCompatibility()
 {
@@ -43,57 +43,13 @@ bool CEGLNativeTypeRKAndroid::CheckCompatibility()
   return false;
 }
 
-bool CEGLNativeTypeRKAndroid::SysModeToResolution(std::string mode, RESOLUTION_INFO *res) const
-{
-  if (!res)
-    return false;
-
-  res->iWidth = 0;
-  res->iHeight= 0;
-
-  if(mode.empty())
-    return false;
-
-  std::string fromMode = mode;
-  if (!isdigit(mode[0]))
-    fromMode = StringUtils::Mid(mode, 2);
-  StringUtils::Trim(fromMode);
-
-  CRegExp split(true);
-  split.RegComp("([0-9]+)x([0-9]+)([pi])-([0-9]+)");
-  if (split.RegFind(fromMode) < 0)
-    return false;
-
-  int w = atoi(split.GetMatch(1).c_str());
-  int h = atoi(split.GetMatch(2).c_str());
-  std::string p = split.GetMatch(3);
-  int r = atoi(split.GetMatch(4).c_str());
-
-  res->iWidth = w;
-  res->iHeight= h;
-  res->iScreenWidth = w;
-  res->iScreenHeight= h;
-  res->fRefreshRate = r;
-  res->dwFlags = p[0] == 'p' ? D3DPRESENTFLAG_PROGRESSIVE : D3DPRESENTFLAG_INTERLACED;
-
-  res->iScreen       = 0;
-  res->bFullScreen   = true;
-  res->iSubtitles    = (int)(0.965 * res->iHeight);
-  res->fPixelRatio   = 1.0f;
-  res->strMode       = StringUtils::Format("%dx%d @ %.2f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
-                                           res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
-  res->strId         = mode;
-
-  return res->iWidth > 0 && res->iHeight> 0;
-}
-
 bool CEGLNativeTypeRKAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 {
   CEGLNativeTypeAndroid::GetNativeResolution(&m_fb_res);
 
   std::string mode;
   RESOLUTION_INFO hdmi_res;
-  if (SysfsUtils::GetString("/sys/class/display/display0.HDMI/mode", mode) == 0 && SysModeToResolution(mode, &hdmi_res))
+  if (SysfsUtils::GetString("/sys/class/display/display0.HDMI/mode", mode) == 0 && rk_mode_to_resolution(mode.c_str(), &hdmi_res))
   {
     m_curHdmiResolution = mode;
     *res = hdmi_res;
@@ -196,7 +152,7 @@ bool CEGLNativeTypeRKAndroid::ProbeResolutions(std::vector<RESOLUTION_INFO> &res
   RESOLUTION_INFO res;
   for (size_t i = 0; i < probe_str.size(); i++)
   {
-    if(SysModeToResolution(probe_str[i].c_str(), &res))
+    if(rk_mode_to_resolution(probe_str[i].c_str(), &res))
     {
       res.iWidth = m_fb_res.iWidth;
       res.iHeight = m_fb_res.iHeight;

@@ -27,9 +27,6 @@
 
 #include "dash/DASHByteStream.h"
 
-#include "guilib/GraphicContext.h"
-#include "settings/DisplaySettings.h"
-
 #ifdef TARGET_ANDROID
 #include "android/jni/SystemProperties.h"
 #endif
@@ -52,33 +49,10 @@ CDVDDemuxMPD::~CDVDDemuxMPD()
   CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
 }
 
-bool CDVDDemuxMPD::Open(CDVDInputStream* pInput)
+bool CDVDDemuxMPD::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t maxHeight)
 {
-  // Find larger possible resolution
-  RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
-  for (unsigned int i=0; i<CDisplaySettings::GetInstance().ResolutionInfoSize(); ++i)
-  {
-    RESOLUTION_INFO res = CDisplaySettings::GetInstance().GetResolutionInfo(i);
-    if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
-      res_info = res;
-  }
-#ifdef TARGET_ANDROID
-  #include "android/jni/SystemProperties.h"
-
-  // Android might go even higher via surface
-  std::string displaySize = CJNISystemProperties::get("sys.display-size", "");
-  if (!displaySize.empty())
-  {
-    std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
-    if (aSize.size() == 2)
-    {
-      res_info.iWidth = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
-      res_info.iHeight = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
-    }
-  }
-#endif
-  CLog::Log(LOGINFO, "CDVDInputStreamMPD - matching against %d x %d", res_info.iWidth, res_info.iHeight);
-  m_MPDsession.reset(new CDASHSession(pInput->GetFileName(), res_info.iWidth, res_info.iHeight, "", "", "special://profile/"));
+  CLog::Log(LOGINFO, "CDVDInputStreamMPD - matching against %d x %d", maxWidth, maxHeight);
+  m_MPDsession.reset(new CDASHSession(pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
 
   if (!m_MPDsession->initialize())
   {

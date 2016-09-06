@@ -58,27 +58,6 @@ CDASHSession::CDASHSession(const std::string& strURL, int width, int height, con
   dashtree_.set_download_speed(dashtree_.bandwidth_);
   CLog::Log(LOGDEBUG, "CDASHSession - Initial bandwidth: %u ", dashtree_.bandwidth_);
 
-  int buf = 0;
-  switch (buf)
-  {
-  case 0:
-    maxwidth_ = 0xFFFF;
-    maxheight_ = 0xFFFF;
-    break;
-  case 2:
-    maxwidth_ = 1920;
-    maxheight_ = 1080;
-    break;
-  default:
-    maxwidth_ = 1280;
-    maxheight_ = 720;
-  }
-  if (width_ > maxwidth_)
-    width_ = maxwidth_;
-
-  if (height_ > maxheight_)
-    height_ = maxheight_;
-
   manual_streams_ = false;
 }
 

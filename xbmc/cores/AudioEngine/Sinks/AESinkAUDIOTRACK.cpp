@@ -278,9 +278,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         break;
 
       case AE_FMT_AC3:
+#ifdef HAS_LIBAMCODEC
         if (aml_present() && HasAmlHD())
           m_encoding              = CJNIAudioFormat::ENCODING_AC3;
         else
+#endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
@@ -290,6 +292,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         break;
 
       case AE_FMT_EAC3:
+#ifdef HAS_LIBAMCODEC
         if (aml_present() && HasAmlHD())
         {
           m_encoding              = CJNIAudioFormat::ENCODING_E_AC3;
@@ -297,6 +300,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
           m_sink_sampleRate       = 48000;
         }
         else
+#endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
           {
@@ -309,9 +313,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         break;
 
       case AE_FMT_DTS:
+#ifdef HAS_LIBAMCODEC
         if (aml_present() && HasAmlHD())
           m_encoding              = CJNIAudioFormat::ENCODING_DTS;
         else
+#endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
@@ -321,9 +327,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         break;
 
       case AE_FMT_DTSHD:
+#ifdef HAS_LIBAMCODEC
         if (aml_present() && HasAmlHD())
           m_encoding              = CJNIAudioFormat::ENCODING_DTSHD_MA;
         else
+#endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
           {
@@ -336,9 +344,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
         break;
 
       case AE_FMT_TRUEHD:
+#ifdef HAS_LIBAMCODEC
         if (aml_present() && HasAmlHD())
           m_encoding              = CJNIAudioFormat::ENCODING_TRUEHD;
         else
+#endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
           {
@@ -382,7 +392,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   int atChannelMask = AEChannelMapToAUDIOTRACKChannelMask(m_format.m_channelLayout);
   m_format.m_channelLayout  = AUDIOTRACKChannelMaskToAEChannelMap(atChannelMask);
 
-  if (m_passthrough && (aml_present() || m_encoding == CJNIAudioFormat::ENCODING_IEC61937))
+#ifdef HAS_LIBAMCODEC
+  if (m_passthrough && aml_present())
+    atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
+#endif
+  if (m_encoding == CJNIAudioFormat::ENCODING_IEC61937)
     atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
 
   while (!m_at_jni)
