@@ -70,7 +70,7 @@ namespace XBMCAddon
      * handle           : integer - handle the plugin was started with.\n
      * succeeded        : [opt] bool - True=script completed successfully(Default)/False=Script did not.\n
      * updateListing    : [opt] bool - True=this folder should update the current listing/False=Folder is a subfolder(Default).\n
-     * cacheToDisc      : [opt] bool - True=Folder will cache if extended time(default)/False=this folder will never cache to disc.
+     * cacheToDisc      : [opt] bool - Allow folder to be cached(default)/False=this folder will never cache to disc.
      * 
      * example:
      *   - xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=False)
