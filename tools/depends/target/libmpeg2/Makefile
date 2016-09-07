@@ -39,7 +39,6 @@ ifeq ($(OS),ios)
 	;;\
 	esac
 endif
-	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)
