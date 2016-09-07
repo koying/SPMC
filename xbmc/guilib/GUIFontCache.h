@@ -125,7 +125,7 @@ public:
   CGUIFontCache(CGUIFontTTFBase &font);
 
   ~CGUIFontCache();
-
+ 
   Value &Lookup(Position &pos,
                 const vecColors &colors, const vecText &text,
                 uint32_t alignment, float maxPixelWidth,
@@ -178,7 +178,7 @@ struct CVertexBuffer
 #endif
   BufferHandleType bufferHandle; // this is really a GLuint
   size_t size;
-  CVertexBuffer() : bufferHandle(0), size(0), m_font(NULL) {}
+  CVertexBuffer() : bufferHandle(NULL), size(0), m_font(NULL) {}
   CVertexBuffer(BufferHandleType bufferHandle, size_t size, const CGUIFontTTFBase *font) : bufferHandle(bufferHandle), size(size), m_font(font) {}
   CVertexBuffer(const CVertexBuffer &other) : bufferHandle(other.bufferHandle), size(other.size), m_font(other.m_font)
   {
