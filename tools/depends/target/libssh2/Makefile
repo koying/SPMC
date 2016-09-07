@@ -35,12 +35,6 @@ $(LIBDYLIB): $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 	$(MAKE) -C $(PLATFORM) install
-ifeq ($(OS),android)
-	rm -f $(PREFIX)/lib/libssh2.la $(PREFIX)/lib/libssh2.so $(PREFIX)/lib/libssh2.so.1
-	mv -f $(PREFIX)/lib/libssh2.so.1.0.1 $(PREFIX)/lib/libssh2.so
-	$(RPL) -e "libssh2.so.1" "libssh2.so\x00\x00" $(PREFIX)/lib/libssh2.so
-	-$(READELF) --dynamic $(PREFIX)/lib/libssh2.so | grep ibrary
-endif
 	touch $@
 
 clean:

@@ -25,6 +25,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 ifeq ($(OS),android)
 	cd $(PLATFORM); patch -p0 < ../01-android.patch
 endif
+	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)
@@ -32,12 +33,6 @@ $(LIBDYLIB): $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 	$(MAKE) -C $(PLATFORM) install
-ifeq ($(OS),android)
-	rm -f $(PREFIX)/lib/libgif.la $(PREFIX)/lib/libgif.so $(PREFIX)/lib/libgif.so.7
-	mv -f $(PREFIX)/lib/libgif.so.7.0.0 $(PREFIX)/lib/libgif.so
-	$(RPL) -e "libgif.so.7" "libgif.so\x00\x00" $(PREFIX)/lib/libgif.so
-	-$(READELF) --dynamic $(PREFIX)/lib/libgif.so | grep ibrary
-endif
 	touch $@
 clean:
 	$(MAKE) -C $(PLATFORM) clean
