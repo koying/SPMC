@@ -58,7 +58,9 @@ private:
   jni::CJNIAudioTrack  *m_at_jni;
   double                m_duration_written;
   double                m_last_duration_written;
-  uint32_t              m_last_head_pos;
+  uint64_t              m_last_head_pos;
+  uint32_t              m_head_pos_wrap_count;
+  uint32_t              m_head_pos_reset;
 
   static std::set<unsigned int>       m_sink_sampleRates;
   std::vector<double>                 m_smoothedDelayVec;

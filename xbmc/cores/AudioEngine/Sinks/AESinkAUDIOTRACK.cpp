@@ -182,6 +182,8 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   m_last_head_pos = 0;
   m_sink_delay = 0;
   m_lastAddTimeMs = 0;
+  m_head_pos_wrap_count = 0;
+  m_head_pos_reset = 0;
 }
 
 CAESinkAUDIOTRACK::~CAESinkAUDIOTRACK()
@@ -495,6 +497,8 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_duration_written = 0;
   m_last_duration_written = 0;
   m_last_head_pos = 0;
+  m_head_pos_wrap_count = 0;
+  m_head_pos_reset = 0;
   m_sink_delay = 0;
   m_lastAddTimeMs = 0;
 
@@ -521,7 +525,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-  uint32_t head_pos = 0;
+  uint64_t head_pos = 0;
   double frameDiffMilli = 0;
   if (CJNIBuild::SDK_INT >= 23)
   {
@@ -543,6 +547,22 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     // for wrap saftey, we need to do all ops on it in 32bit integer math.
     head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
   }
+
+  if (CJNIBuild::SDK_INT < 23 && (m_encoding == CJNIAudioFormat::ENCODING_AC3 || m_encoding == CJNIAudioFormat::ENCODING_E_AC3))
+  {
+    // According to exoplayer (https://github.com/google/ExoPlayer/blob/706c6908ec57005044f4b4a9f5b80266cad9eda3/library/src/main/java/com/google/android/exoplayer/audio/AudioTrack.java#L1159)
+    // AC3 / EAC3 RAW pos can reset to zero when paused
+    if (head_pos == 0 && m_at_jni->getPlayState() == CJNIAudioTrack::PLAYSTATE_PAUSED)
+      m_head_pos_reset = m_last_head_pos;
+  }
+  head_pos += m_head_pos_reset;
+
+  if (m_last_head_pos > head_pos)
+  {
+    // Wrapped
+    m_head_pos_wrap_count++;
+  }
+  head_pos = head_pos + (m_head_pos_wrap_count << 32);
 
   if (!head_pos)
   {
@@ -669,6 +689,8 @@ void CAESinkAUDIOTRACK::Drain()
   m_duration_written = 0;
   m_last_duration_written = 0;
   m_last_head_pos = 0;
+  m_head_pos_wrap_count = 0;
+  m_head_pos_reset = 0;
   m_sink_delay = 0;
   m_lastAddTimeMs = 0;
 }
