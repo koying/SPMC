@@ -20,7 +20,7 @@ ifeq ($(findstring osx,$(ARCH)), osx)
 	$(CXX) $(LDFLAGS) -bundle -undefined dynamic_lookup -lpng -ljpeg -ltiff -lz -o $@ \
 		CxImage/*.o jasper/*/*.o jbig/*.o raw/*.o
 else
-	$(CXX) $(CFLAGS) $(LDFLAGS) -shared -o $(SLIB) -Wl,--whole-archive $(SLIBS) \
+	$(CXX) $(CFLAGS) $(LDFLAGS) -shared -Wl,-soname,$(SO) -o $(SLIB) -Wl,--whole-archive $(SLIBS) \
 		-Wl,--no-whole-archive -lpng -ljasper -ljpeg -ltiff -lz -Wl,--unresolved-symbols=ignore-all
 endif
 
