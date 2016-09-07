@@ -30,7 +30,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	cd $(PLATFORM); patch -p0 < ../01-fix_fpermissive.patch
 	cd $(PLATFORM); patch -p0 < ../02-fixandroid.patch
-	cd $(PLATFORM); autoreconf -vif
+	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 ifeq ($(CPU),arm64)
 	cd $(PLATFORM); patch -p0 < ../03-fixtvos.patch
