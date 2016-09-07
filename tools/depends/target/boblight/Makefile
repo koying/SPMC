@@ -30,7 +30,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	cd $(PLATFORM); patch -p0 < ../01-fix_fpermissive.patch
 	cd $(PLATFORM); patch -p0 < ../02-fixandroid.patch
-	cd $(PLATFORM); autoreconf -vif
+	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 ifeq ($(CPU),arm64)
 	cd $(PLATFORM); patch -p0 < ../03-fixtvos.patch
@@ -42,12 +42,6 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
-ifeq ($(OS),android)
-	rm -f $(PLATFORM)/src/.libs/libboblight.la $(PLATFORM)/src/.libs/libboblight.so $(PLATFORM)/src/.libs/libboblight.so.0
-	mv -f $(PLATFORM)/src/.libs/libboblight.so.0.0.0 $(PLATFORM)/src/.libs/libboblight.so
-	$(RPL) -e "libboblight.so.0" "libboblight.so\x00\x00" $(PLATFORM)/src/.libs/libboblight.so
-	-$(READELF) --dynamic $(PLATFORM)/src/.libs/libboblight.so | grep ibrary
-endif
 ifeq ($(OS),ios)
 ifeq ($(TARGET_PLATFORM),appletvos)
 	#deploy into source tree for tvos - we distribute libboblight with the bundle...
