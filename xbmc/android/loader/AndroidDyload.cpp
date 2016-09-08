@@ -12,7 +12,7 @@
 #include "CompileInfo.h"
 using namespace std;
 
-//#define DEBUG_SPEW
+#define DEBUG_SPEW
 
 std::list<recursivelib> CAndroidDyload::m_recursivelibs;
 solib CAndroidDyload::m_libs;
@@ -172,7 +172,7 @@ void CAndroidDyload::GetDeps(string filename, strings *results)
   }
 
   if(!data)
-  { 
+  {
     close(fd);
     return;
   }
@@ -296,7 +296,7 @@ int CAndroidDyload::Close(void *handle)
   CSingleLock lock(m_depsLock);
   for (std::list<recursivelib>::iterator i = m_recursivelibs.begin(); i != m_recursivelibs.end(); ++i)
   {
-    if (i->handle == handle) 
+    if (i->handle == handle)
     {
       for (std::list<recursivelibdep>::iterator j = i->deps.begin(); j != i->deps.end(); ++j)
       {
