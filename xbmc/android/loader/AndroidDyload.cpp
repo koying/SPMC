@@ -159,6 +159,7 @@ void CAndroidDyload::GetDeps(string filename, strings *results)
 
   lseek(fd, header.e_shoff, SEEK_SET);
 
+  CXBMCApp::android_printf("ELF: shnum %d", header.e_shnum);
   for(i = 0; i < header.e_shnum; i++)
   {
     Elf32_Shdr sheader;
@@ -180,6 +181,7 @@ void CAndroidDyload::GetDeps(string filename, strings *results)
 
   if(!data)
   {
+    CXBMCApp::android_printf("ELF: no data");
     close(fd);
     return;
   }
@@ -193,6 +195,7 @@ void CAndroidDyload::GetDeps(string filename, strings *results)
 
     if (sheader.sh_type == SHT_DYNAMIC)
     {
+      CXBMCApp::android_printf("ELF: SHT_DYNSYM", i);
       unsigned int j;
 
       lseek(fd, sheader.sh_offset, SEEK_SET);
@@ -203,6 +206,7 @@ void CAndroidDyload::GetDeps(string filename, strings *results)
         if(cur.d_tag == DT_NEEDED)
         {
           char *final = data + cur.d_un.d_val;
+          CXBMCApp::android_printf("ELF: DT_NEEDED %s", final);
           results->push_back(final);
         }
       }
