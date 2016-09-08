@@ -195,6 +195,7 @@ bool CAddonDll<TheDll, TheStruct, TheProps>::LoadDll()
   {
     delete m_pDll;
     m_pDll = NULL;
+    CLog::Log(LOGERROR, "ADDON: Could not load %s", m_strLibName.c_str());
     new CAddonStatusHandler(ID(), ADDON_STATUS_UNKNOWN, "Can't load Dll", false);
     return false;
   }
