@@ -57,6 +57,7 @@ string CAndroidDyload::FindLib(const string &filename, bool checkSystem)
 
   // Check xbmc package libs
   path = (localLibs+"/"+filename.substr(filename.find_last_of('/') +1));
+  CXBMCApp::android_printf("xb_dlopen: FindLib 1: %s", path.c_str());
   if (stat((path).c_str(), &st) == 0)
     return(path);
 
@@ -68,10 +69,12 @@ string CAndroidDyload::FindLib(const string &filename, bool checkSystem)
     path = (*j+"/"+filename.substr(filename.find_last_of('/') +1));
     if (stat((path).c_str(), &st) == 0)
     {
+      CXBMCApp::android_printf("xb_dlopen: FindLib 2: %s", path.c_str());
       if (checkSystem)
         return(path);
       else
       {
+        CXBMCApp::android_printf("xb_dlopen: FindLib 3: %s", path.c_str());
         if (dirname == *j)
           return "";
       }
@@ -80,8 +83,12 @@ string CAndroidDyload::FindLib(const string &filename, bool checkSystem)
 
   // Nothing found yet, try the full given path.
   if (stat((filename).c_str(), &st) == 0)
+  {
+    CXBMCApp::android_printf("xb_dlopen: FindLib 4: %s", filename.c_str());
     return(filename);
+  }
 
+  CXBMCApp::android_printf("xb_dlopen: FindLib - no lib");
   return "";
 }
 
@@ -228,6 +235,12 @@ void* CAndroidDyload::Open(const char * path)
 #if defined(DEBUG_SPEW)
     CXBMCApp::android_printf("xb_dlopen: opening lib: %s", filename.c_str());
     Dump();
+#endif
+  }
+  else
+  {
+#if defined(DEBUG_SPEW)
+    CXBMCApp::android_printf("xb_dlopen: error opening lib: %s", filename.c_str());
 #endif
   }
   return handle;
