@@ -27,6 +27,13 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#ifdef TARGET_ANDROID
+#include "android/activity/XBMCApp.h"
+#define ERR_PRINTF(...) CXBMCApp::android_printf(__VA_ARGS__)
+#else
+#define ERR_PRINTF(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
 #ifdef _WIN32                   // windows
 #ifndef _SSIZE_T_DEFINED
 typedef intptr_t      ssize_t;
@@ -34,9 +41,9 @@ typedef intptr_t      ssize_t;
 #endif // !_SSIZE_T_DEFINED
 
 #if defined(BUILD_KODI_ADDON)
-	#include "platform/windows/dlfcn-win32.h"
+        #include "platform/windows/dlfcn-win32.h"
 #else
-	#include "dlfcn-win32.h"
+        #include "dlfcn-win32.h"
 #endif
 
 #define ADDON_DLL               "\\library.xbmc.addon\\libXBMC_addon" ADDON_HELPER_EXT
@@ -146,125 +153,125 @@ namespace ADDON
       m_libXBMC_addon = dlopen(libBasePath.c_str(), RTLD_LAZY);
       if (m_libXBMC_addon == NULL)
       {
-        fprintf(stderr, "Unable to load %s\n", dlerror());
+        ERR_PRINTF("Unable to load %s\n", dlerror());
         return false;
       }
 
       XBMC_register_me = (void* (*)(void *HANDLE))
         dlsym(m_libXBMC_addon, "XBMC_register_me");
-      if (XBMC_register_me == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_register_me == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_unregister_me = (void (*)(void* HANDLE, void* CB))
         dlsym(m_libXBMC_addon, "XBMC_unregister_me");
-      if (XBMC_unregister_me == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_unregister_me == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_log = (void (*)(void* HANDLE, void* CB, const addon_log_t loglevel, const char *msg))
         dlsym(m_libXBMC_addon, "XBMC_log");
-      if (XBMC_log == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_log == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_get_setting = (bool (*)(void* HANDLE, void* CB, const char* settingName, void *settingValue))
         dlsym(m_libXBMC_addon, "XBMC_get_setting");
-      if (XBMC_get_setting == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_get_setting == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_queue_notification = (void (*)(void* HANDLE, void* CB, const queue_msg_t loglevel, const char *msg))
         dlsym(m_libXBMC_addon, "XBMC_queue_notification");
-      if (XBMC_queue_notification == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_queue_notification == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_wake_on_lan = (bool (*)(void* HANDLE, void *CB, const char *mac))
         dlsym(m_libXBMC_addon, "XBMC_wake_on_lan");
-      if (XBMC_wake_on_lan == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_wake_on_lan == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_unknown_to_utf8 = (char* (*)(void* HANDLE, void* CB, const char* str))
         dlsym(m_libXBMC_addon, "XBMC_unknown_to_utf8");
-      if (XBMC_unknown_to_utf8 == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_unknown_to_utf8 == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_get_localized_string = (char* (*)(void* HANDLE, void* CB, int dwCode))
         dlsym(m_libXBMC_addon, "XBMC_get_localized_string");
-      if (XBMC_get_localized_string == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_get_localized_string == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_free_string = (void (*)(void* HANDLE, void* CB, char* str))
         dlsym(m_libXBMC_addon, "XBMC_free_string");
-      if (XBMC_free_string == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_free_string == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_get_dvd_menu_language = (char* (*)(void* HANDLE, void* CB))
         dlsym(m_libXBMC_addon, "XBMC_get_dvd_menu_language");
-      if (XBMC_get_dvd_menu_language == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_get_dvd_menu_language == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_open_file = (void* (*)(void* HANDLE, void* CB, const char* strFileName, unsigned int flags))
         dlsym(m_libXBMC_addon, "XBMC_open_file");
-      if (XBMC_open_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_open_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_open_file_for_write = (void* (*)(void* HANDLE, void* CB, const char* strFileName, bool bOverWrite))
         dlsym(m_libXBMC_addon, "XBMC_open_file_for_write");
-      if (XBMC_open_file_for_write == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_open_file_for_write == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_read_file = (ssize_t (*)(void* HANDLE, void* CB, void* file, void* lpBuf, size_t uiBufSize))
         dlsym(m_libXBMC_addon, "XBMC_read_file");
-      if (XBMC_read_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_read_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_read_file_string = (bool (*)(void* HANDLE, void* CB, void* file, char *szLine, int iLineLength))
         dlsym(m_libXBMC_addon, "XBMC_read_file_string");
-      if (XBMC_read_file_string == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_read_file_string == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_write_file = (ssize_t (*)(void* HANDLE, void* CB, void* file, const void* lpBuf, size_t uiBufSize))
         dlsym(m_libXBMC_addon, "XBMC_write_file");
-      if (XBMC_write_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_write_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_flush_file = (void (*)(void* HANDLE, void* CB, void* file))
         dlsym(m_libXBMC_addon, "XBMC_flush_file");
-      if (XBMC_flush_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_flush_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_seek_file = (int64_t (*)(void* HANDLE, void* CB, void* file, int64_t iFilePosition, int iWhence))
         dlsym(m_libXBMC_addon, "XBMC_seek_file");
-      if (XBMC_seek_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_seek_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_truncate_file = (int (*)(void* HANDLE, void* CB, void* file, int64_t iSize))
         dlsym(m_libXBMC_addon, "XBMC_truncate_file");
-      if (XBMC_truncate_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_truncate_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_get_file_position = (int64_t (*)(void* HANDLE, void* CB, void* file))
         dlsym(m_libXBMC_addon, "XBMC_get_file_position");
-      if (XBMC_get_file_position == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_get_file_position == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_get_file_length = (int64_t (*)(void* HANDLE, void* CB, void* file))
         dlsym(m_libXBMC_addon, "XBMC_get_file_length");
-      if (XBMC_get_file_length == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_get_file_length == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_close_file = (void (*)(void* HANDLE, void* CB, void* file))
         dlsym(m_libXBMC_addon, "XBMC_close_file");
-      if (XBMC_close_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_close_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_get_file_chunk_size = (int (*)(void* HANDLE, void* CB, void* file))
         dlsym(m_libXBMC_addon, "XBMC_get_file_chunk_size");
-      if (XBMC_get_file_chunk_size == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_get_file_chunk_size == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_file_exists = (bool (*)(void* HANDLE, void* CB, const char *strFileName, bool bUseCache))
         dlsym(m_libXBMC_addon, "XBMC_file_exists");
-      if (XBMC_file_exists == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_file_exists == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_stat_file = (int (*)(void* HANDLE, void* CB, const char *strFileName, struct __stat64* buffer))
         dlsym(m_libXBMC_addon, "XBMC_stat_file");
-      if (XBMC_stat_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_stat_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_delete_file = (bool (*)(void* HANDLE, void* CB, const char *strFileName))
         dlsym(m_libXBMC_addon, "XBMC_delete_file");
-      if (XBMC_delete_file == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_delete_file == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_can_open_directory = (bool (*)(void* HANDLE, void* CB, const char* strURL))
         dlsym(m_libXBMC_addon, "XBMC_can_open_directory");
-      if (XBMC_can_open_directory == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_can_open_directory == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_create_directory = (bool (*)(void* HANDLE, void* CB, const char* strPath))
         dlsym(m_libXBMC_addon, "XBMC_create_directory");
-      if (XBMC_create_directory == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_create_directory == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_directory_exists = (bool (*)(void* HANDLE, void* CB, const char* strPath))
         dlsym(m_libXBMC_addon, "XBMC_directory_exists");
-      if (XBMC_directory_exists == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_directory_exists == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       XBMC_remove_directory = (bool (*)(void* HANDLE, void* CB, const char* strPath))
         dlsym(m_libXBMC_addon, "XBMC_remove_directory");
-      if (XBMC_remove_directory == NULL) { fprintf(stderr, "Unable to assign function %s\n", dlerror()); return false; }
+      if (XBMC_remove_directory == NULL) { ERR_PRINTF("Unable to assign function %s\n", dlerror()); return false; }
 
       m_Callbacks = XBMC_register_me(m_Handle);
       return m_Callbacks != NULL;

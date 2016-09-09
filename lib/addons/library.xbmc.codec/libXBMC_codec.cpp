@@ -41,12 +41,12 @@ DLLEXPORT void* CODEC_register_me(void *hdl)
 {
   CB_CODECLib *cb = NULL;
   if (!hdl)
-    fprintf(stderr, "libXBMC_codec-ERROR: %s is called with NULL handle\n", __FUNCTION__);
+    ERR_PRINTF("libXBMC_codec-ERROR: %s is called with NULL handle\n", __FUNCTION__);
   else
   {
     cb = ((AddonCB*)hdl)->CODECLib_RegisterMe(((AddonCB*)hdl)->addonData);
     if (!cb)
-      fprintf(stderr, "libXBMC_codec-ERROR: %s can't get callback table from XBMC\n", __FUNCTION__);
+      ERR_PRINTF("libXBMC_codec-ERROR: %s can't get callback table from XBMC\n", __FUNCTION__);
   }
   return cb;
 }
