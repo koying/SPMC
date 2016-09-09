@@ -5,7 +5,7 @@ set(PLATFORM "@target_platform@")
 if("${OS}" STREQUAL "linux")
   set(CMAKE_SYSTEM_NAME Linux)
 elseif("${OS}" STREQUAL "android")
-  set(CMAKE_SYSTEM_NAME Linux)
+  set(CMAKE_SYSTEM_NAME Android)
 endif()
 
 set(CMAKE_FIND_ROOT_PATH @CMAKE_FIND_ROOT_PATH@)
