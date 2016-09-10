@@ -2867,3 +2867,12 @@ xbmc/cores/dvdplayer/DVDInputStreams/dash
 tools/android/packaging/xbmc/res/layout
 tools/android/packaging/xbmc/res/values
 .
+lib/addons/library.xbmc.addon
+lib/addons/library.kodi.adsp
+lib/addons/library.kodi.audioengine
+lib/addons/library.kodi.guilib
+lib/addons/library.xbmc.codec
+lib/addons/library.xbmc.pvr
+lib/cximage-6.0
+lib/libmpeg2
+lib/libUPnP
