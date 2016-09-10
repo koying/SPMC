@@ -19,7 +19,7 @@ ifeq ($(findstring osx,$(ARCH)), osx)
 	-bundle -undefined dynamic_lookup -o $@ \
 	@abs_top_srcdir@/xbmc/cores/DllLoader/exports/wrapper.o $(OBJS)
 else
-	$(CXX) $(CFLAGS) $(LDFLAGS) -shared -g -o $(LIB_SHARED) $(OBJS)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -Wl,-soname,$(LIBNAME)-$(ARCH).so -shared -g -o $(LIB_SHARED) $(OBJS)
 endif
 
 $(GENERATED_ADDON_GUILIB) : $(LIB_INTERFACE)
