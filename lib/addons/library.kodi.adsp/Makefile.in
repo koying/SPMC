@@ -17,7 +17,7 @@ $(LIB_SHARED): $(OBJS)
 ifeq ($(findstring osx,$(ARCH)), osx)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -dynamiclib -o $@ $(OBJS)
 else
-	$(CXX) $(CFLAGS) $(LDFLAGS) -shared -g -o $(LIB_SHARED) $(OBJS)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -Wl,-soname,$(LIBNAME)-$(ARCH).so -shared -g -o $(LIB_SHARED) $(OBJS)
 endif
 
 CLEAN_FILES = \
