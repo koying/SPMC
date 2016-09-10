@@ -117,8 +117,12 @@ CAddonDll<TheDll, TheStruct, TheProps>::CAddonDll(const AddonProps &props)
 
 template<class TheDll, typename TheStruct, typename TheProps>
 CAddonDll<TheDll, TheStruct, TheProps>::CAddonDll(const CAddonDll<TheDll, TheStruct, TheProps> &rhs)
-  : CAddon(rhs),
-    m_bIsChild(true)
+  : CAddon(rhs)
+#ifdef TARGET_ANDROID
+  , m_bIsChild(false)
+#else
+  , m_bIsChild(true)
+#endif
 {
   m_pStruct           = rhs.m_pStruct;
   m_initialized       = rhs.m_initialized;
