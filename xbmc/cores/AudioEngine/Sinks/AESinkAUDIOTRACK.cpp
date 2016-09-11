@@ -562,8 +562,11 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
 
 #if defined(HAS_LIBAMCODEC)
   if (aml_present() && (m_encoding == CJNIAudioFormat::ENCODING_E_AC3 || m_encoding == CJNIAudioFormat::ENCODING_DTSHD_MA || m_encoding == CJNIAudioFormat::ENCODING_TRUEHD))
-    head_pos /= m_sink_frameSize;  // AML returns pos in bytes for those
+    head_pos >>= 2;  // On 2 chans rather than 8
+  else
 #endif
+    if (m_encoding == CJNIAudioFormat::ENCODING_IEC61937 && (m_format.m_dataFormat == AE_FMT_DTSHD || m_format.m_dataFormat == AE_FMT_TRUEHD))
+      head_pos >>= 2;  // On 2 chans rather than 8
 
   double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
   if (m_duration_written != m_last_duration_written && head_pos != m_last_head_pos)
