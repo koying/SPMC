@@ -539,7 +539,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     int64_t systime = CJNISystem::nanoTime();
     if (m_at_jni->getTimestamp(ts))
     {
-      head_pos = (uint32_t)ts.get_framePosition();
+      head_pos = ts.get_framePosition();
       frameDiffMilli = (systime - ts.get_nanoTime()) / 1000000000.0;
 
       if (g_advancedSettings.CanLogComponent(LOGAUDIO))
@@ -552,6 +552,12 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     // return a 32bit "int" that you should "interpret as unsigned."  As such,
     // for wrap saftey, we need to do all ops on it in 32bit integer math.
     head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
+    if (m_last_head_pos > head_pos)
+    {
+      // Wrapped
+      m_head_pos_wrap_count++;
+    }
+    head_pos = head_pos + (m_head_pos_wrap_count << 32);
   }
 
   if (CJNIBuild::SDK_INT < 23 && (m_encoding == CJNIAudioFormat::ENCODING_AC3 || m_encoding == CJNIAudioFormat::ENCODING_E_AC3))
@@ -562,13 +568,6 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
       m_head_pos_reset = m_last_head_pos;
   }
   head_pos += m_head_pos_reset;
-
-  if (m_last_head_pos > head_pos)
-  {
-    // Wrapped
-    m_head_pos_wrap_count++;
-  }
-  head_pos = head_pos + (m_head_pos_wrap_count << 32);
 
   if (!head_pos)
   {
