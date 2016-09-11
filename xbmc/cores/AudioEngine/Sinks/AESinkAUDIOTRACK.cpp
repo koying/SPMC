@@ -287,10 +287,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 #endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
-          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
-            m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
@@ -308,10 +305,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 #endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
-          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
-            m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
@@ -325,10 +319,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 #endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
-          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
-            m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
@@ -342,10 +333,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 #endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
-          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
-            m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
@@ -359,10 +347,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 #endif
         {
           if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
-          {
             m_encoding              = CJNIAudioFormat::ENCODING_IEC61937;
-            m_format.m_channelLayout = AE_CH_LAYOUT_2_0;
-          }
           else
             m_format.m_dataFormat   = AE_FMT_S16LE;
         }
