@@ -69,7 +69,7 @@ public:
 
   this_type operator-(const this_type &point) const
   {
-    CPointGen<T> ans;
+    this_type ans;
     ans.x = x - point.x;
     ans.y = y - point.y;
     return ans;
@@ -87,6 +87,21 @@ public:
     if (x != point.x) return true;
     if (y != point.y) return true;
     return false;
+  };
+
+  this_type operator*(const this_type &point)
+  {
+    this_type ans;
+    ans.x = x * point.x;
+    ans.y = y * point.y;
+    return ans;
+  };
+
+  const this_type &operator*=(const this_type &point)
+  {
+    x *= point.x;
+    y *= point.y;
+    return *this;
   };
 
   T x, y;
