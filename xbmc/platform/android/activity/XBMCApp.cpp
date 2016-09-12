@@ -596,6 +596,30 @@ CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
   return CRect(srcRect.x1 * scaleX, srcRect.y1 * scaleY, srcRect.x2 * scaleX, srcRect.y2 * scaleY);
 }
 
+CPoint CXBMCApp::GetDroidToGuiRatio()
+{
+  float scaleX = 1.0;
+  float scaleY = 1.0;
+
+  CJNIWindow window = CXBMCApp::getWindow();
+  if (window)
+  {
+    CJNIView view(window.getDecorView());
+    if (view)
+    {
+      CJNIDisplay display = view.getDisplay();
+      if (display)
+      {
+        CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
+        scaleX = gui.Width() / (double)display.getWidth();
+        scaleY = gui.Height() / (double)display.getHeight();
+      }
+    }
+  }
+
+  return CPoint(scaleX, scaleY);
+}
+
 void CXBMCApp::OnPlayBackStarted()
 {
   AcquireAudioFocus();
