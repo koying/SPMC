@@ -163,6 +163,8 @@ public:
   static CPointInt GetMaxDisplayResolution();
 
   static CRect MapRenderToDroid(const CRect& srcRect);
+  static CPoint GetDroidToGuiRatio();
+
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
 
   // Playback callbacks
