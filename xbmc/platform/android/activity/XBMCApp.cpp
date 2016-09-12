@@ -50,7 +50,8 @@
 #include "AppParamParser.h"
 #include "platform/XbmcContext.h"
 #include <android/bitmap.h>
-#include "cores/AudioEngine/AEFactory.h"
+#include "cores/AudioEngine/AEFactory.h"i
+#include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "platform/android/activity/IInputDeviceCallbacks.h"
 #include "platform/android/activity/IInputDeviceEventHandler.h"
 #include "platform/android/jni/JNIThreading.h"
@@ -81,6 +82,8 @@
 #include "platform/android/jni/Window.h"
 #include "platform/android/jni/WindowManager.h"
 #include "platform/android/jni/KeyEvent.h"
+#include "android/platform/jni/Display.h"
+#include "android/platform/jni/View.h"
 #include "AndroidKey.h"
 
 #include "CompileInfo.h"
@@ -644,6 +647,90 @@ int CXBMCApp::GetDPI()
   AConfiguration_delete(config);
 
   return dpi;
+}
+
+CPointInt CXBMCApp::GetMaxDisplayResolution()
+{
+  // Find larger possible resolution
+  RESOLUTION_INFO res_info = CDisplaySettings::GetInstance().GetResolutionInfo(g_graphicsContext.GetVideoResolution());
+  for (unsigned int i=0; i<CDisplaySettings::GetInstance().ResolutionInfoSize(); ++i)
+  {
+    RESOLUTION_INFO res = CDisplaySettings::GetInstance().GetResolutionInfo(i);
+    if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+      res_info = res;
+  }
+
+  // Android might go even higher via surface
+  std::string displaySize = CJNISystemProperties::get("sys.display-size", "");
+  if (!displaySize.empty())
+  {
+    std::vector<std::string> aSize = StringUtils::Split(displaySize, "x");
+    if (aSize.size() == 2)
+    {
+      res_info.iWidth = StringUtils::IsInteger(aSize[0]) ? atoi(aSize[0].c_str()) : 0;
+      res_info.iHeight = StringUtils::IsInteger(aSize[1]) ? atoi(aSize[1].c_str()) : 0;
+    }
+  }
+
+  // AML, always different
+  std::string valstr;
+  if (SysfsUtils::GetString("/sys/class/amhdmitx/amhdmitx0/disp_cap", valstr) == 0)
+  {
+    std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
+
+    RESOLUTION_INFO res;
+    for (size_t i = 0; i < probe_str.size(); i++)
+    {
+      if(aml_mode_to_resolution(probe_str[i].c_str(), &res))
+      {
+        if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+          res_info = res;
+      }
+    }
+  }
+
+  // RK, same
+  if (SysfsUtils::GetString("/sys/class/display/display0.HDMI/modes", valstr) == 0)
+  {
+    std::vector<std::string> probe_str = StringUtils::Split(valstr, "\n");
+
+    RESOLUTION_INFO res;
+    for (size_t i = 0; i < probe_str.size(); i++)
+    {
+      if(rk_mode_to_resolution(probe_str[i].c_str(), &res))
+      {
+        if (res.iWidth > res_info.iWidth || res.iHeight > res_info.iHeight)
+          res_info = res;
+      }
+    }
+  }
+
+
+  return CPointInt(res_info.iWidth, res_info.iHeight);
+}
+
+CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
+{
+  float scaleX = 1.0;
+  float scaleY = 1.0;
+
+  CJNIWindow window = CXBMCApp::getWindow();
+  if (window)
+  {
+    CJNIView view(window.getDecorView());
+    if (view)
+    {
+      CJNIDisplay display = view.getDisplay();
+      if (display)
+      {
+        RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
+        scaleX = (double)display.getWidth() / renderRes.iWidth;
+        scaleY = (double)display.getHeight() / renderRes.iHeight;
+      }
+    }
+  }
+
+  return CRect(srcRect.x1 * scaleX, srcRect.y1 * scaleY, srcRect.x2 * scaleX, srcRect.y2 * scaleY);
 }
 
 void CXBMCApp::OnPlayBackStarted()

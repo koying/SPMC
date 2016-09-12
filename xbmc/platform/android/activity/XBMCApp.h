@@ -169,6 +169,7 @@ public:
   static void SetDisplayMode(int mode);
   static int GetDPI();
 
+  static CRect MapRenderToDroid(const CRect& srcRect);
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
 
   // Playback callbacks

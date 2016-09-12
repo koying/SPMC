@@ -35,7 +35,6 @@
 #include "utils/CPUInfo.h"
 #include "utils/log.h"
 #include "settings/AdvancedSettings.h"
-#include "guilib/GraphicContext.h"
 #include "platform/android/activity/XBMCApp.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
@@ -46,9 +45,6 @@
 #include "platform/android/jni/Surface.h"
 #include "platform/android/jni/SurfaceTexture.h"
 #include "android/activity/AndroidFeatures.h"
-#include "platform/android/jni/View.h"
-#include "platform/android/jni/Window.h"
-#include "platform/android/jni/Display.h"
 #include "platform/android/jni/Build.h"
 
 #include "utils/StringUtils.h"
@@ -316,32 +312,10 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
 
   if (DestRect != cur_rect)
   {
-    float scaleX = 1.0;
-    float scaleY = 1.0;
-
-    CJNIWindow window = CXBMCApp::getWindow();
-    if (window)
-    {
-      CJNIView view(window.getDecorView());
-      if (view)
-      {
-        CJNIDisplay display = view.getDisplay();
-        if (display)
-        {
-          RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
-          scaleX = (double)display.getWidth() / renderRes.iWidth;
-          scaleY = (double)display.getHeight() / renderRes.iHeight;
-
-          CLog::Log(LOGDEBUG, "RenderUpdate: GUI  - %fx%f", renderRes.iWidth, renderRes.iHeight);
-          CLog::Log(LOGDEBUG, "RenderUpdate: Disp - %dx%d  scale(%fx%f)", display.getWidth(), display.getHeight(), scaleX, scaleY);
-        }
-      }
-    }
-
-    CRect adjRect(DestRect.x1 * scaleX, DestRect.y1 * scaleY, DestRect.x2 * scaleX, DestRect.y2 * scaleY);
-    CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
-
+    CRect adjRect = CXBMCApp::MapRenderToDroid(DestRect);
     CXBMCApp::get()->setVideoViewSurfaceRect(adjRect.x1, adjRect.y1, adjRect.x2, adjRect.y2);
+    CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height());
+    CLog::Log(LOGDEBUG, "RenderUpdate: Adj  - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
     cur_rect = DestRect;
 
     // setVideoViewSurfaceRect is async, so skip rendering this frame
