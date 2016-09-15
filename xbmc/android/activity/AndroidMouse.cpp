@@ -23,6 +23,7 @@
 #include "XBMCApp.h"
 #include "Application.h"
 #include "guilib/GUIWindowManager.h"
+#include "windowing/WindowingFactory.h"
 #include "windowing/WinEvents.h"
 #include "input/MouseStat.h"
 
@@ -31,10 +32,14 @@
 CAndroidMouse::CAndroidMouse()
   : m_lastButtonState(0)
 {
+  g_Windowing.Register(this);
+
+  m_droid2guiRatio = CXBMCApp::GetDroidToGuiRatio();
 }
 
 CAndroidMouse::~CAndroidMouse()
 {
+  g_Windowing.Unregister(this);
 }
 
 bool CAndroidMouse::onMouseEvent(AInputEvent* event)
@@ -50,23 +55,28 @@ bool CAndroidMouse::onMouseEvent(AInputEvent* event)
 #ifdef DEBUG_VERBOSE
   CXBMCApp::android_printf("%s idx:%i, id:%i", __PRETTY_FUNCTION__, mousePointerIdx, mousePointerId);
 #endif
-  float x = AMotionEvent_getX(event, mousePointerIdx);
-  float y = AMotionEvent_getY(event, mousePointerIdx);
+  CPoint in(AMotionEvent_getX(event, mousePointerIdx), AMotionEvent_getY(event, mousePointerIdx));
+  CPoint out = in * m_droid2guiRatio;
 
   switch (mouseAction)
   {
     case AMOTION_EVENT_ACTION_UP:
     case AMOTION_EVENT_ACTION_DOWN:
-      MouseButton(x,y,mouseAction,AMotionEvent_getButtonState(event));
+      MouseButton(out.x, out.y, mouseAction, AMotionEvent_getButtonState(event));
       return true;
     case AMOTION_EVENT_ACTION_SCROLL:
-      MouseWheel(x, y, AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, mousePointerIdx));
+      MouseWheel(out.x, out.y, AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, mousePointerIdx));
       return true;
     default:
-      MouseMove(x,y);
+      MouseMove(out.x, out.y);
       return true;
   }
   return false;
+}
+
+void CAndroidMouse::OnResetDevice()
+{
+  m_droid2guiRatio = CXBMCApp::GetDroidToGuiRatio();
 }
 
 void CAndroidMouse::MouseMove(float x, float y)
