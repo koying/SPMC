@@ -48,7 +48,7 @@
 
 // below for screensaver enable/disable function
 #if defined(TARGET_ANDROID)
-#include "platform/android/activity/XBMCApp.h"
+#include "android/activity/XBMCApp.h"
 #elif defined(TARGET_DARWIN_TVOS)
 #include "platform/darwin/DarwinUtils.h"
 #endif
@@ -263,7 +263,7 @@ void CGUIWindowSlideShow::Reset()
 }
 
 void CGUIWindowSlideShow::OnDeinitWindow(int nextWindowID)
-{ 
+{
   if (m_Resolution != CDisplaySettings::GetInstance().GetCurrentResolution())
   {
     //FIXME: Use GUI resolution for now
@@ -561,7 +561,7 @@ void CGUIWindowSlideShow::Process(unsigned int currentTime, CDirtyRegionList &re
         CLog::Log(LOGDEBUG, "Loading the thumb %s for next video %d: %s", picturePath.c_str(), m_iNextSlide, item->GetPath().c_str());
       else
         CLog::Log(LOGDEBUG, "Loading the next image %d: %s", m_iNextSlide, item->GetPath().c_str());
-      
+
       int maxWidth, maxHeight;
       GetCheckedSize((float)res.iWidth * m_fZoom,
                      (float)res.iHeight * m_fZoom,
@@ -576,7 +576,7 @@ void CGUIWindowSlideShow::Process(unsigned int currentTime, CDirtyRegionList &re
       return;
     bSlideShow = false;
   }
-  
+
   // render the current image
   if (m_Image[m_iCurrentPic].IsLoaded())
   {
@@ -714,7 +714,7 @@ EVENT_RESULT CGUIWindowSlideShow::OnMouseEvent(const CPoint &point, const CMouse
       result |= EVENT_RESULT_PAN_VERTICAL;
 
     return (EVENT_RESULT)result;
-  }  
+  }
   else if (event.m_id == ACTION_GESTURE_BEGIN)
   {
     m_firstGesturePoint = point;
@@ -1171,7 +1171,7 @@ void CGUIWindowSlideShow::OnLoadPic(int iPic, int iSlideNumber, const std::strin
     CLog::Log(LOGDEBUG, "Finished background loading slot %d, %d: %s", iPic, iSlideNumber, m_slides->Get(iSlideNumber)->GetPath().c_str());
     m_Image[iPic].SetTexture(iSlideNumber, pTexture, GetDisplayEffect(iSlideNumber));
     m_Image[iPic].SetOriginalSize(pTexture->GetOriginalWidth(), pTexture->GetOriginalHeight(), bFullSize);
-    
+
     m_Image[iPic].m_bIsComic = false;
     if (URIUtils::IsInRAR(m_slides->Get(m_iCurrentSlide)->GetPath()) || URIUtils::IsInZIP(m_slides->Get(m_iCurrentSlide)->GetPath())) // move to top for cbr/cbz
     {
@@ -1217,7 +1217,7 @@ int CGUIWindowSlideShow::CurrentSlide() const
 }
 
 void CGUIWindowSlideShow::AddFromPath(const std::string &strPath,
-                                      bool bRecursive, 
+                                      bool bRecursive,
                                       SortBy method, SortOrder order, SortAttribute sortAttributes,
                                       const std::string &strExtensions)
 {
@@ -1236,10 +1236,10 @@ void CGUIWindowSlideShow::AddFromPath(const std::string &strPath,
   }
 }
 
-void CGUIWindowSlideShow::RunSlideShow(const std::string &strPath, 
+void CGUIWindowSlideShow::RunSlideShow(const std::string &strPath,
                                        bool bRecursive /* = false */, bool bRandom /* = false */,
                                        bool bNotRandom /* = false */, const std::string &beginSlidePath /* = "" */,
-                                       bool startSlideShow /* = true */, SortBy method /* = SortByLabel */, 
+                                       bool startSlideShow /* = true */, SortBy method /* = SortByLabel */,
                                        SortOrder order /* = SortOrderAscending */, SortAttribute sortAttributes /* = SortAttributeNone */,
                                        const std::string &strExtensions)
 {
@@ -1266,7 +1266,7 @@ void CGUIWindowSlideShow::RunSlideShow(const std::string &strPath,
 
   if (startSlideShow)
     StartSlideShow();
-  else 
+  else
   {
     CVariant param;
     param["player"]["speed"] = 0;
