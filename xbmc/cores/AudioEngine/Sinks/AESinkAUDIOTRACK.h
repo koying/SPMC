@@ -28,6 +28,7 @@ class AERingBuffer;
 namespace jni
 {
 class CJNIAudioTrack;
+class CJNIMediaSync;
 };
 
 class CAESinkAUDIOTRACK : public IAESink
@@ -55,6 +56,7 @@ protected:
   static bool HasAmlHD();
 
 private:
+  jni::CJNIMediaSync   *m_mediasync;
   jni::CJNIAudioTrack  *m_at_jni;
   double                m_duration_written;
   double                m_last_duration_written;

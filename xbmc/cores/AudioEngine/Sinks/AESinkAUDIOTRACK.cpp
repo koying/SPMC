@@ -36,6 +36,7 @@
 #include "android/jni/AudioTrack.h"
 #include "android/jni/Build.h"
 #include "android/jni/System.h"
+#include "android/jni/MediaSync.h"
 
 #include <algorithm>
 #include <iostream>
@@ -199,7 +200,8 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
 {
   m_sink_frameSize = 0;
   m_audiotrackbuffer_sec = 0.0;
-  m_at_jni = NULL;
+  m_at_jni = nullptr;
+  m_mediasync = nullptr;
   m_duration_written = 0;
   m_last_duration_written = 0;
   m_last_head_pos = 0;
@@ -474,6 +476,11 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
   format                    = m_format;
 
+  m_mediasync               = new CJNIMediaSync();
+  m_mediasync->setAudioTrack(*m_at_jni);
+  CJNIPlaybackParams pb; pb.setSpeed(1.0f);
+  m_mediasync->setPlaybackParams(pb);
+
   // Force volume to 100% for passthrough
   if (m_passthrough && WantsIEC61937())
   {
@@ -500,12 +507,19 @@ void CAESinkAUDIOTRACK::Deinitialize()
   if (!m_at_jni)
     return;
 
+  CJNIPlaybackParams pb; pb.setSpeed(0.0f);
+  m_mediasync->setPlaybackParams(pb);
+  m_mediasync->release();
+  delete m_mediasync;
+  m_mediasync = nullptr;
+
   if (IsInitialized())
   {
     CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::stopiing audiotrack");
     m_at_jni->stop();
     m_at_jni->flush();
   }
+
   m_at_jni->release();
 
   m_duration_written = 0;
@@ -533,89 +547,20 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
+  CJNIMediaTimestamp tso = m_mediasync->getTimestamp();
+  if (!tso)
   {
-    status.SetDelay(m_sink_delay);
+    status.SetDelay(0);
     return;
   }
 
-  uint64_t head_pos = 0;
-  double frameDiffMilli = 0;
-  if (CJNIBuild::SDK_INT >= 23)
-  {
-    CJNIAudioTimestamp ts;
-    int64_t systime = CJNISystem::nanoTime();
-    if (m_at_jni->getTimestamp(ts))
-    {
-      head_pos = ts.get_framePosition();
-      frameDiffMilli = (systime - ts.get_nanoTime()) / 1000000000.0;
-
-      if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-        CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay timestamp: pos(%lld) time(%lld) diff(%f)", ts.get_framePosition(), ts.get_nanoTime(), frameDiffMilli);
-    }
-  }
-  if (!head_pos)
-  {
-    // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
-    // return a 32bit "int" that you should "interpret as unsigned."  As such,
-    // for wrap saftey, we need to do all ops on it in 32bit integer math.
-    head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
-    if (m_last_head_pos > head_pos)
-    {
-      // Wrapped
-      m_head_pos_wrap_count++;
-    }
-    head_pos = head_pos + (m_head_pos_wrap_count << 32);
-  }
-
-  if (CJNIBuild::SDK_INT < 23 && (m_encoding == CJNIAudioFormat::ENCODING_AC3 || m_encoding == CJNIAudioFormat::ENCODING_E_AC3))
-  {
-    // According to exoplayer (https://github.com/google/ExoPlayer/blob/706c6908ec57005044f4b4a9f5b80266cad9eda3/library/src/main/java/com/google/android/exoplayer/audio/AudioTrack.java#L1159)
-    // AC3 / EAC3 RAW pos can reset to zero when paused
-    if (head_pos == 0 && m_at_jni->getPlayState() == CJNIAudioTrack::PLAYSTATE_PAUSED)
-      m_head_pos_reset = m_last_head_pos;
-  }
-  head_pos += m_head_pos_reset;
-
-  if (!head_pos)
-  {
-    status.SetDelay(m_duration_written);
-    return;
-  }
-
-#if defined(HAS_LIBAMCODEC)
-  if (aml_present() && (m_encoding == CJNIAudioFormat::ENCODING_E_AC3 || m_encoding == CJNIAudioFormat::ENCODING_DTSHD_MA || m_encoding == CJNIAudioFormat::ENCODING_TRUEHD))
-    head_pos >>= 2;  // On 2 chans rather than 8
-  else
-#endif
-    if (m_encoding == CJNIAudioFormat::ENCODING_IEC61937 && (m_format.m_dataFormat == AE_FMT_DTSHD || m_format.m_dataFormat == AE_FMT_TRUEHD))
-      head_pos >>= 2;  // On 2 chans rather than 8
-
-  double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
-  if (m_duration_written != m_last_duration_written && head_pos != m_last_head_pos)
-  {
-    m_smoothedDelayVec.push_back(delay - frameDiffMilli);
-    if (m_smoothedDelayCount <= SMOOTHED_DELAY_MAX)
-      m_smoothedDelayCount++;
-    else
-      m_smoothedDelayVec.erase(m_smoothedDelayVec.begin());
-
-    m_last_duration_written = m_duration_written;
-    m_last_head_pos = head_pos;
-  }
-
-  double smootheDelay = 0;
-  for (double d : m_smoothedDelayVec)
-    smootheDelay += d;
-  smootheDelay /= m_smoothedDelayCount;
-
-  if (m_passthrough && !WantsIEC61937() && m_smoothedDelayCount == SMOOTHED_DELAY_MAX && !m_sink_delay)
-    m_sink_delay = smootheDelay;
+  uint64_t ts = tso.getAnchorMediaTimeUs();
+  double delay = m_duration_written - ((double)ts / 1000000);
 
   if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_duration_written/head_pos %f/%u %f(%f)", m_duration_written, head_pos, smootheDelay, delay);
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay dur(%f) ts(%llu) tss(%llu) tsc(%f) delay(%f)", m_duration_written, ts, tso.getAnchorSytemNanoTime() / 1000, tso.getMediaClockRate(), delay);
 
-    status.SetDelay(smootheDelay);
+  status.SetDelay(delay);
 }
 
 double CAESinkAUDIOTRACK::GetLatency()
@@ -657,25 +602,8 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
   int written = 0;
   if (frames)
   {
-    // android will auto pause the playstate when it senses idle,
-    // check it and set playing if it does this. Do this before
-    // writing into its buffer.
-    if (m_at_jni->getPlayState() != CJNIAudioTrack::PLAYSTATE_PLAYING)
-      m_at_jni->play();
-    unsigned int toWrite = size;
-    while (toWrite > 0)
-    {
-      int bsize = std::min(toWrite, m_buffer_size);
-      int len = m_at_jni->write((char*)(&out_buf[written]), 0, bsize);
-      // int len = m_at_jni->write((char*)(&out_buf[written]), bsize, (int64_t)(m_duration_written * 1000000));  // by timestamp
-      if (len < 0)
-      {
-        CLog::Log(LOGERROR, "CAESinkAUDIOTRACK::AddPackets write returned error:  %d(%d)", len, written);
-        return INT_MAX;
-      }
-      written += len;
-      toWrite -= len;
-    }
+    static uint32_t bufferid = 0;
+    m_mediasync->queueAudio(out_buf, size, (int)bufferid++, (int64_t)(m_duration_written * 1000000));
     written = frames * m_format.m_frameSize;     // Be sure to report to AE everything has been written
 
     double duration = (double)(written / m_format.m_frameSize) / m_format.m_sampleRate;
@@ -685,12 +613,13 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
       m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
     int32_t diff = XbmcThreads::SystemClockMillis() - m_lastAddTimeMs;
     int32_t sleep_ms = (duration * 1000.0) - diff;
-    m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
     if (sleep_ms > 0)
       usleep(sleep_ms * 1000.0);
 
     if (g_advancedSettings.CanLogComponent(LOGAUDIO))
       CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d(%d;%d)", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs, diff, sleep_ms);
+
+    m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
   }
   return (unsigned int)(written/m_format.m_frameSize);
 }
@@ -700,10 +629,13 @@ void CAESinkAUDIOTRACK::Drain()
   if (!m_at_jni)
     return;
 
+  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Drain");
+
   // TODO: does this block until last samples played out?
   // we should not return from drain as long the device is in playing state
-  m_at_jni->stop();
-  m_duration_written = 0;
+//  m_mediasync->flush();   must have callback or exception
+//  m_duration_written = 0;
   m_last_duration_written = 0;
   m_last_head_pos = 0;
   m_head_pos_wrap_count = 0;
