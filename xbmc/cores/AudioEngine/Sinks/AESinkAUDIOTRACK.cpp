@@ -153,12 +153,35 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
 
   try
   {
-    jniAt = new CJNIAudioTrack(stream,
-                               sampleRate,
-                               channelMask,
-                               encoding,
-                               bufferSize,
-                               CJNIAudioTrack::MODE_STREAM);
+#if 0
+    // Create Audiotrack per attribute
+    if (CJNIAudioTrack::GetSDKVersion() >= 21)
+    {
+      CJNIAudioFormatBuilder fmtbuilder;
+      fmtbuilder.setChannelMask(channelMask);
+      fmtbuilder.setEncoding(encoding);
+      fmtbuilder.setSampleRate(sampleRate);
+
+      CJNIAudioAttributesBuilder attrbuilder;
+      attrbuilder.setUsage(CJNIAudioAttributes::USAGE_MEDIA);
+      attrbuilder.setContentType(CJNIAudioAttributes::CONTENT_TYPE_MOVIE);
+      // Force direct output
+      attrbuilder.setFlags(CJNIAudioAttributes::FLAG_HW_AV_SYNC);
+
+      jniAt = new CJNIAudioTrack(attrbuilder.build(),
+                                 fmtbuilder.build(),
+                                 bufferSize,
+                                 CJNIAudioTrack::MODE_STREAM,
+                                 0);
+    }
+    else
+#endif
+      jniAt = new CJNIAudioTrack(stream,
+                                 sampleRate,
+                                 channelMask,
+                                 encoding,
+                                 bufferSize,
+                                 CJNIAudioTrack::MODE_STREAM);
   }
   catch (const std::invalid_argument& e)
   {
@@ -644,6 +667,7 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     {
       int bsize = std::min(toWrite, m_buffer_size);
       int len = m_at_jni->write((char*)(&out_buf[written]), 0, bsize);
+      // int len = m_at_jni->write((char*)(&out_buf[written]), bsize, (int64_t)(m_duration_written * 1000000));  // by timestamp
       if (len < 0)
       {
         CLog::Log(LOGERROR, "CAESinkAUDIOTRACK::AddPackets write returned error:  %d(%d)", len, written);
