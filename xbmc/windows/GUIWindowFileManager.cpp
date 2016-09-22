@@ -487,13 +487,16 @@ bool CGUIWindowFileManager::Update(int iList, const std::string &strDirectory)
 
   if (strDirectory.empty())
   {
-//#ifdef TARGET_ANDROID
-//    CFileItemPtr pContentItem(new CFileItem("content:///", true));
-//    pContentItem->SetLabel(g_localizeStrings.Get(20073));
-//    pContentItem->SetArt("thumb", "DefaultFolder.png");
-//    pContentItem->SetLabelPreformated(true);
-//    m_vecItems[iList]->Add(pContentItem);
-//#endif
+#ifdef TARGET_ANDROID
+    if (AndroidDocument == "yes")
+    {
+      CFileItemPtr pContentItem(new CFileItem("content:///", true));
+      pContentItem->SetLabel(g_localizeStrings.Get(20073));
+      pContentItem->SetArt("thumb", "DefaultFolder.png");
+      pContentItem->SetLabelPreformated(true);
+      m_vecItems[iList]->Add(pContentItem);
+    }
+#endif
     CFileItemPtr pItem(new CFileItem("special://profile/", true));
     pItem->SetLabel(g_localizeStrings.Get(20070));
     pItem->SetArt("thumb", "DefaultFolder.png");
@@ -703,7 +706,7 @@ void CGUIWindowFileManager::OnCopy(int iList)
   if (!CGUIDialogYesNo::ShowAndGetInput(CVariant{120}, CVariant{123}))
     return;
 
-  AddJob(new CFileOperationJob(CFileOperationJob::ActionCopy, 
+  AddJob(new CFileOperationJob(CFileOperationJob::ActionCopy,
                                 *m_vecItems[iList],
                                 m_Directory[1 - iList]->GetPath(),
                                 true, 16201, 16202));
@@ -794,7 +797,7 @@ void CGUIWindowFileManager::OnShowInfo(int iList)
   {
     CFileItemPtr pItem = m_vecItems[iList]->Get(i);
     if (pItem->IsSelected())
-    { 
+    {
       selItem = pItem;
       break;
     }
@@ -1109,7 +1112,7 @@ void CGUIWindowFileManager::OnPopupMenu(int list, int item, bool bContextDriven 
         if (pItem2->m_bIsFolder)
         {
           folderSize = CalculateFolderSize(pItem2->GetPath(), progress);
-        } 
+        }
         else if (pItem2->IsVideoDb() || pItem2->IsMusicDb())
         {
           std::string strFileNameAndPath;
@@ -1121,7 +1124,7 @@ void CGUIWindowFileManager::OnPopupMenu(int list, int item, bool bContextDriven 
           if (strFileNameAndPath.empty())
             continue;
 
-          if (URIUtils::IsStack(strFileNameAndPath)) 
+          if (URIUtils::IsStack(strFileNameAndPath))
             continue;
 
           CFile f;
