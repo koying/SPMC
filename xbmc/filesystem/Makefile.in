@@ -77,6 +77,8 @@ SRCS += ZeroconfDirectory.cpp
 SRCS += ZipDirectory.cpp
 SRCS += ZipFile.cpp
 SRCS += ZipManager.cpp
+SRCS += StorageDirectory.cpp
+SRCS += StorageFile.cpp
 
 ifeq (@USE_ANDROID@,1)
 SRCS += APKDirectory.cpp

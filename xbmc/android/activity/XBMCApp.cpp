@@ -84,6 +84,8 @@
 #include "android/jni/SystemProperties.h"
 #include "android/jni/Display.h"
 #include "android/jni/View.h"
+#include "android/jni/StorageManager.h"
+
 #include "AndroidKey.h"
 
 #include "CompileInfo.h"
@@ -114,6 +116,7 @@ bool CXBMCApp::m_hasFocus = false;
 bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
+CCriticalSection CXBMCApp::m_apiMutex;
 CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
@@ -121,6 +124,7 @@ uint64_t CXBMCApp::m_vsynctime = 0;
 CEvent CXBMCApp::m_vsyncEvent;
 std::vector<GLuint> CXBMCApp::m_texturePool;
 CJNIAudioDeviceInfos CXBMCApp::m_audiodevices;
+VECSOURCES CXBMCApp::m_removableDrives;
 
 void LogAudoDevices(const char* stage, const CJNIAudioDeviceInfos& devices)
 {
@@ -932,6 +936,97 @@ bool CXBMCApp::GetStorageUsage(const std::string &path, std::string &usage)
   return true;
 }
 
+void CXBMCApp::InvalidateRemovableDrives()
+{
+  CSingleLock lock(m_apiMutex);
+  m_removableDrives.clear();
+}
+
+bool CXBMCApp::GetRemovableDrives(VECSOURCES& removableDrives)
+{
+  CSingleLock lock(m_apiMutex);
+
+  // Uses non-public API: be extra carefull
+  bool inError = false;
+
+  if (m_removableDrives.empty())
+  {
+    CJNIStorageManager manager(CJNIContext::getSystemService("storage"));
+    if (xbmc_jnienv()->ExceptionCheck())
+    {
+      xbmc_jnienv()->ExceptionClear();
+      inError = true;
+    }
+
+    if (!inError)
+    {
+      CJNIStorageVolumes vols = manager.getVolumeList();
+      if (xbmc_jnienv()->ExceptionCheck())
+      {
+        xbmc_jnienv()->ExceptionClear();
+        inError = true;
+      }
+
+      if (!inError)
+      {
+        for (auto vol : vols)
+        {
+          //        CLog::Log(LOGDEBUG, "-- Volume: %s(%s) -- %s", vol.getPath().c_str(), vol.getUserLabel().c_str(), vol.getState().c_str());
+          bool removable = vol.isRemovable();
+          if (xbmc_jnienv()->ExceptionCheck())
+          {
+            xbmc_jnienv()->ExceptionClear();
+            inError = true;
+            break;
+          }
+          std::string state = vol.getState();
+          if (xbmc_jnienv()->ExceptionCheck())
+          {
+            xbmc_jnienv()->ExceptionClear();
+            inError = true;
+            break;
+          }
+
+          if (removable && state == CJNIEnvironment::MEDIA_MOUNTED)
+          {
+            CMediaSource share;
+            share.strPath = vol.getPath();
+            if (xbmc_jnienv()->ExceptionCheck())
+            {
+              xbmc_jnienv()->ExceptionClear();
+              inError = true;
+              break;
+            }
+            share.strDiskUniqueId = vol.getUuid();
+            if (xbmc_jnienv()->ExceptionCheck())
+            {
+              xbmc_jnienv()->ExceptionClear();
+              inError = true;
+              break;
+            }
+            share.strName = vol.getUserLabel();
+            if (xbmc_jnienv()->ExceptionCheck())
+            {
+              xbmc_jnienv()->ExceptionClear();
+              inError = true;
+              break;
+            }
+            StringUtils::Trim(share.strName);
+            if (share.strName.empty() || share.strName == "?" || StringUtils::CompareNoCase(share.strName, "null") == 0)
+              share.strName = URIUtils::GetFileName(share.strPath);
+            share.m_ignore = true;
+            m_removableDrives.push_back(share);
+          }
+        }
+      }
+    }
+  }
+  if (!inError)
+    removableDrives.insert(removableDrives.end(), m_removableDrives.begin(), m_removableDrives.end());
+
+  return !inError;
+}
+
 // Used in Application.cpp to figure out volume steps
 int CXBMCApp::GetMaxSystemVolume()
 {
@@ -1072,6 +1167,10 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
       params.push_back("return");
       CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_MUSIC_NAV, 0, nullptr, "", params);
     }
+  }
+  else if (action == "android.intent.action.MEDIA_MOUNTED" || action == "android.intent.action.MEDIA_REMOVED")
+  {
+    InvalidateRemovableDrives();
   }
 }
 
