@@ -693,7 +693,8 @@ void CPartyModeManager::AddToHistory(int type, int songID)
 void CPartyModeManager::GetRandomSelection(std::vector< std::pair<int,int> >& in, unsigned int number, std::vector< std::pair<int,int> >& out)
 {
   number = std::min(number, (unsigned int)in.size());
-  std::random_shuffle(in.begin(), in.end());
+  std::mt19937 r{std::random_device{}()};
+  std::shuffle(in.begin(), in.end(), r);
   out.assign(in.begin(), in.begin() + number);
 }
 
@@ -712,7 +713,7 @@ void CPartyModeManager::Announce()
   if (g_application.m_pPlayer->IsPlaying())
   {
     CVariant data;
-    
+
     data["player"]["playerid"] = g_playlistPlayer.GetCurrentPlaylist();
     data["property"]["partymode"] = m_bEnabled;
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Player, "xbmc", "OnPropertyChanged", data);

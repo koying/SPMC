@@ -247,7 +247,10 @@ void CGUIMultiImage::OnDirectoryLoaded()
 {
   // Randomize or sort our images if necessary
   if (m_randomized)
-    random_shuffle(m_files.begin(), m_files.end());
+  {
+    std::mt19937 r{std::random_device{}()};
+    std::shuffle(m_files.begin(), m_files.end(), r);
+  }
   else
     sort(m_files.begin(), m_files.end());
 

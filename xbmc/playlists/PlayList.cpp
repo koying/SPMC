@@ -276,7 +276,8 @@ void CPlayList::Shuffle(int iPosition)
     CLog::Log(LOGDEBUG,"%s shuffling at pos:%i", __FUNCTION__, iPosition);
 
     ivecItems it = m_vecItems.begin() + iPosition;
-    std::random_shuffle(it, m_vecItems.end());
+    std::mt19937 r{std::random_device{}()};
+    std::shuffle(it, m_vecItems.end(), r);
 
     // the list is now shuffled!
     m_bShuffled = true;
