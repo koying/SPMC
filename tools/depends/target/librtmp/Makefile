@@ -1,9 +1,9 @@
 include ../../Makefile.include
-DEPS= ../../Makefile.include Makefile prefix.patch
+DEPS= ../../Makefile.include Makefile prefix.patch ksv_2015-12-15_Patch.diff
 
 # lib name, version
 LIBNAME=rtmpdump
-VERSION=a107cef9b392616dff54fabfd37f985ee2190a6f
+VERSION=fa8646daeb19dfd12c181f7d19de708d623704c0
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
 # configuration settings
@@ -27,7 +27,9 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	cd $(PLATFORM); patch -p0 < ../prefix.patch
-	cd $(PLATFORM)/librtmp; patch -p0 < ../../libm.patch
+	cd $(PLATFORM); patch -p0 < ../ksv_2015-12-15_Patch.diff
+# Changes already in above patch
+#	cd $(PLATFORM)/librtmp; patch -p0 < ../../libm.patch
 	sed -i -e 's|CC=|#CC=|' $(PLATFORM)/librtmp/Makefile
 	sed -i -e 's|LD=|#LD=|' $(PLATFORM)/librtmp/Makefile
 	sed -i -e 's|AR=|#AR=|' $(PLATFORM)/librtmp/Makefile
