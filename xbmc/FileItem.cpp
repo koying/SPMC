@@ -19,6 +19,7 @@
  */
 
 #include <cstdlib>
+#include <random>
 
 #include "FileItem.h"
 #include "guilib/LocalizeStrings.h"
