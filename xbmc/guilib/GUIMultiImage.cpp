@@ -30,6 +30,8 @@
 #include "WindowIDs.h"
 #include "utils/StringUtils.h"
 
+#include <random>
+
 using namespace XFILE;
 
 CGUIMultiImage::CGUIMultiImage(int parentID, int controlID, float posX, float posY, float width, float height, const CTextureInfo& texture, unsigned int timePerImage, unsigned int fadeTime, bool randomized, bool loop, unsigned int timeToPauseAtEnd)

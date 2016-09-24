@@ -21,6 +21,7 @@
 #include "PartyModeManager.h"
 
 #include <algorithm>
+#include <random>
 
 #include "Application.h"
 #include "dialogs/GUIDialogOK.h"
