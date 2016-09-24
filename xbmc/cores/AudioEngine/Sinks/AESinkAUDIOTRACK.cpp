@@ -154,7 +154,7 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
 
   try
   {
-#if 0
+#if 1
     // Create Audiotrack per attribute
     if (CJNIAudioTrack::GetSDKVersion() >= 21)
     {
