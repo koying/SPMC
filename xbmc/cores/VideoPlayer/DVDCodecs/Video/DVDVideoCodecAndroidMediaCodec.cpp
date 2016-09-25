@@ -133,7 +133,7 @@ public:
   CNULL_Listener() : CJNISurfaceTextureOnFrameAvailableListener(jni::jhobject(NULL)) {};
 
 protected:
-  virtual void OnFrameAvailable(CJNISurfaceTexture &surface) {};
+  virtual void OnFrameAvailable() {};
 };
 
 class CDVDMediaCodecOnFrameAvailable : public CEvent, CJNISurfaceTextureOnFrameAvailableListener
@@ -153,7 +153,7 @@ public:
   }
 
 protected:
-  virtual void OnFrameAvailable(CJNISurfaceTexture &surface)
+  virtual void OnFrameAvailable()
   {
     Set();
   }
