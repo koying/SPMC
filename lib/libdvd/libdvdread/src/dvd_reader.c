@@ -961,8 +961,8 @@ static int DVDFileStatVOBUDF( dvd_reader_t *dvd, int title,
 {
   char filename[ MAX_UDF_FILE_NAME_LEN ];
   uint32_t size;
-  off_t tot_size;
-  off_t parts_size[ 9 ];
+  off64_t tot_size;
+  off64_t parts_size[ 9 ];
   int nr_parts = 0;
   int n;
 
@@ -1007,8 +1007,8 @@ static int DVDFileStatVOBPath( dvd_reader_t *dvd, int title,
   char filename[ MAX_UDF_FILE_NAME_LEN ];
   char full_path[ PATH_MAX + 1 ];
   struct stat fileinfo;
-  off_t tot_size;
-  off_t parts_size[ 9 ];
+  off64_t tot_size;
+  off64_t parts_size[ 9 ];
   int nr_parts = 0;
   int n;
 

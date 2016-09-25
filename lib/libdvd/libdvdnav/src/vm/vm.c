@@ -164,19 +164,19 @@ static int os2_open(const char *name, int oflag)
 
 static void dvd_read_name(char *name, char *serial, const char *device) {
     /* Because we are compiling with _FILE_OFFSET_BITS=64
-     * all off_t are 64bit.
+     * all off64_t are 64bit.
      */
-    off_t off;
+    off64_t off;
     int fd, i;
     uint8_t data[DVD_VIDEO_LB_LEN];
 
     /* Read DVD name */
     fd = open(device, O_RDONLY);
     if (fd > 0) {
-      off = lseek( fd, 32 * (off_t) DVD_VIDEO_LB_LEN, SEEK_SET );
-      if( off == ( 32 * (off_t) DVD_VIDEO_LB_LEN ) ) {
+      off = lseek64( fd, 32 * (off64_t) DVD_VIDEO_LB_LEN, SEEK_SET );
+      if( off == ( 32 * (off64_t) DVD_VIDEO_LB_LEN ) ) {
         off = read( fd, data, DVD_VIDEO_LB_LEN );
-        if (off == ( (off_t) DVD_VIDEO_LB_LEN )) {
+        if (off == ( (off64_t) DVD_VIDEO_LB_LEN )) {
           fprintf(MSG_OUT, "libdvdnav: DVD Title: ");
           for(i=25; i < 73; i++ ) {
             if((data[i] == 0)) break;

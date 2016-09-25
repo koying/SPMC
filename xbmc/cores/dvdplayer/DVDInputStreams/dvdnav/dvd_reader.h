@@ -73,9 +73,9 @@ typedef struct dvd_file_s dvd_file_t;
  * Public type that is used to provide statistics on a handle.
  */
 typedef struct {
-  off_t size;          /**< Total size of file in bytes */
+  off64_t size;          /**< Total size of file in bytes */
   int nr_parts;        /**< Number of file parts */
-  off_t parts_size[9]; /**< Size of each part in bytes */
+  off64_t parts_size[9]; /**< Size of each part in bytes */
 } dvd_stat_t;
 
 /**

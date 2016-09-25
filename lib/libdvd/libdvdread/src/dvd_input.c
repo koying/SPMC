@@ -192,9 +192,9 @@ static char *file_error(dvd_input_t dev)
  */
 static int file_seek(dvd_input_t dev, int blocks)
 {
-  off_t pos;
+  off64_t pos;
 
-  pos = lseek(dev->fd, (off_t)blocks * (off_t)DVD_VIDEO_LB_LEN, SEEK_SET);
+  pos = lseek64(dev->fd, (off64_t)blocks * (off64_t)DVD_VIDEO_LB_LEN, SEEK_SET);
   if(pos < 0) {
       return pos;
   }
@@ -237,8 +237,8 @@ static int file_read(dvd_input_t dev, void *buffer, int blocks, int flags)
       /* Nothing more to read.  Return all of the whole blocks, if any.
        * Adjust the file position back to the previous block boundary. */
       size_t bytes = (size_t)blocks * DVD_VIDEO_LB_LEN - len;
-      off_t over_read = -(bytes % DVD_VIDEO_LB_LEN);
-      /*off_t pos =*/ lseek(dev->fd, over_read, SEEK_CUR);
+      off64_t over_read = -(bytes % DVD_VIDEO_LB_LEN);
+      /*off64_t pos =*/ lseek64(dev->fd, over_read, SEEK_CUR);
       /* should have pos % 2048 == 0 */
       return (int) (bytes / DVD_VIDEO_LB_LEN);
     }
