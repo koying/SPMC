@@ -871,6 +871,67 @@ void CCurlFile::ParseAndCorrectUrl(CURL &url2)
     m_url = url2.Get();
 }
 
+bool CCurlFile::Delete(const std::string& strURL, const std::string& strData, std::string& strHTML)
+{
+  CURL url2(strURL);
+  ParseAndCorrectUrl(url2);
+
+  assert(m_state->m_easyHandle == NULL);
+  g_curlInterface.easy_aquire(
+    url2.GetProtocol().c_str(), url2.GetHostName().c_str(), &m_state->m_easyHandle, NULL);
+
+  SetCommonOptions(m_state);
+  SetRequestHeaders(m_state);
+
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
+  // grrr, not in curl docs but use CURLOPT_POSTFIELDS for content body.
+  if (!strData.empty())
+    g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_POSTFIELDS, strData.c_str());
+
+  CURLcode result = g_curlInterface.easy_perform(m_state->m_easyHandle);
+  if (result != CURLE_OK)
+  {
+    long code;
+    if (g_curlInterface.easy_getinfo(m_state->m_easyHandle, CURLINFO_RESPONSE_CODE, &code) == CURLE_OK)
+      CLog::Log(LOGERROR, "CCurlFile::Delete - Failed: HTTP returned error %ld for %s", code, url2.GetRedacted().c_str());
+  }
+
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, NULL);
+  g_curlInterface.easy_release(&m_state->m_easyHandle, NULL);
+
+  return result == CURLE_OK;
+}
+
+bool CCurlFile::Put(const std::string& strURL, const std::string& strData, std::string& strHTML)
+{
+  CURL url2(strURL);
+  ParseAndCorrectUrl(url2);
+
+  assert(m_state->m_easyHandle == NULL);
+  g_curlInterface.easy_aquire(
+    url2.GetProtocol().c_str(), url2.GetHostName().c_str(), &m_state->m_easyHandle, NULL);
+
+  SetCommonOptions(m_state);
+  SetRequestHeaders(m_state);
+
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, "PUT");
+  // grrr, not in curl docs but use CURLOPT_POSTFIELDS for content body.
+  if (!strData.empty())
+    g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_POSTFIELDS, strData.c_str());
+
+  CURLcode result = g_curlInterface.easy_perform(m_state->m_easyHandle);
+  if (result != CURLE_OK)
+  {
+    long code;
+    if (g_curlInterface.easy_getinfo(m_state->m_easyHandle, CURLINFO_RESPONSE_CODE, &code) == CURLE_OK)
+      CLog::Log(LOGERROR, "CCurlFile::Put - Failed: HTTP returned error %ld for %s", code, url2.GetRedacted().c_str());
+  }
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, NULL);
+  g_curlInterface.easy_release(&m_state->m_easyHandle, NULL);
+
+  return result == CURLE_OK;
+}
+
 bool CCurlFile::Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML)
 {
   m_postdata = strPostData;

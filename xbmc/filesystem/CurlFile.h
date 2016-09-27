@@ -67,6 +67,8 @@ namespace XFILE
       virtual std::string GetContentCharset(void)                { return GetServerReportedCharset(); }
       virtual double GetDownloadSpeed();
 
+      bool Delete(const std::string& strURL, const std::string& strData, std::string& strHTML);
+      bool Put(const std::string& strURL, const std::string& strData, std::string& strHTML);
       bool Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
       bool Get(const std::string& strURL, std::string& strHTML);
       bool ReadData(std::string& strHTML);
