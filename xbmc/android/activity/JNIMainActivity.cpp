@@ -86,6 +86,14 @@ void CJNIMainActivity::_onVideoViewLost(JNIEnv *env, jobject context)
     m_appInstance->onVideoViewLost();
 }
 
+void CJNIMainActivity::_onCaptureAvailable(JNIEnv *env, jobject context, jobject image)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onCaptureAvailable(CJNIImage(jhobject(image)));
+}
+
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
 {
   call_method<void>(m_context,
@@ -162,4 +170,10 @@ void CJNIMainActivity::screenOn()
 {
   call_method<void>(m_context,
                     "screenOn", "()V");
+}
+
+void CJNIMainActivity::takeScreenshot()
+{
+  call_method<void>(m_context,
+                    "takeScreenshot", "()V");
 }

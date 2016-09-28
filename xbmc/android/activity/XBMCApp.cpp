@@ -94,6 +94,7 @@
 #define GIGABYTES       1073741824
 
 using namespace std;
+using namespace jni;
 using namespace KODI::MESSAGING;
 using namespace ANNOUNCEMENT;
 
@@ -117,6 +118,7 @@ bool CXBMCApp::m_headsetPlugged = false;
 CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
+CCaptureEvent CXBMCApp::m_captureEvent;
 uint64_t CXBMCApp::m_vsynctime = 0;
 CEvent CXBMCApp::m_vsyncEvent;
 std::vector<GLuint> CXBMCApp::m_texturePool;
@@ -1087,6 +1089,12 @@ void CXBMCApp::onActivityResult(int requestCode, int resultCode, CJNIIntent resu
   }
 }
 
+void CXBMCApp::onCaptureAvailable(CJNIImage image)
+{
+  m_captureEvent.SetImage(image);
+  m_captureEvent.Set();
+}
+
 void CXBMCApp::onAudioDeviceAdded(CJNIAudioDeviceInfos devices)
 {
   m_audiodevices = devices;
@@ -1122,6 +1130,18 @@ int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, C
     ret = event->GetResultCode();
   }
   delete event;
+  return ret;
+}
+
+bool CXBMCApp::WaitForCapture(CJNIImage& image)
+{
+  bool ret = false;
+  if (m_captureEvent.WaitMSec(3000))
+  {
+    image = m_captureEvent.GetImage();
+    ret = true;
+  }
+  m_captureEvent.Reset();
   return ret;
 }
 

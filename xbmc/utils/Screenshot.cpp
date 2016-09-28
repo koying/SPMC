@@ -33,6 +33,11 @@
 #include "xbmc/linux/RBP.h"
 #endif
 
+#ifdef TARGET_ANDROID
+#include "android/activity/XBMCApp.h"
+#include "android/jni/Image.h"
+#endif
+
 #ifdef HAS_VIDEO_PLAYBACK
 #include "cores/VideoRenderers/RenderManager.h"
 #endif
@@ -73,7 +78,41 @@ CScreenshotSurface::~CScreenshotSurface()
 
 bool CScreenshotSurface::capture()
 {
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(TARGET_ANDROID)
+  jni::CJNIImage image;
+  CXBMCApp::takeScreenshot();
+  if (CXBMCApp::WaitForCapture(image))
+  {
+    if (image)
+    {
+      m_width = image.getWidth();
+      m_height = image.getHeight();
+
+      std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
+      CJNIByteBuffer bytebuffer = planes[0].getBuffer();
+      m_stride = planes[0].getRowStride();
+
+      //make a new buffer and copy the read image to it with the Y axis inverted
+      m_buffer = new unsigned char[m_stride * m_height];
+      void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
+      memcpy(m_buffer, buf_ptr, m_stride * m_height);
+      image.close();
+
+      // we need to save in BGRA order so XOR Swap RGBA -> BGRA
+      for (int y = 0; y < m_height; y++)
+      {
+        unsigned char* swap_pixels = m_buffer + (y * m_stride);
+        for (int x = 0; x < m_width; x++, swap_pixels+=4)
+        {
+          std::swap(swap_pixels[0], swap_pixels[2]);
+        }
+      }
+
+    }
+  }
+  else
+    return false;
+#elif defined(TARGET_RASPBERRY_PI)
   g_RBP.GetDisplaySize(m_width, m_height);
   m_buffer = g_RBP.CaptureDisplay(m_width, m_height, &m_stride, true, false);
   if (!m_buffer)
@@ -186,7 +225,7 @@ bool CScreenshotSurface::capture()
   }
 
   delete [] surface;
-  
+
 #if defined(HAS_LIBAMCODEC)
   // Captures the current visible videobuffer and blend it into m_buffer (captured overlay)
   CScreenshotAML::CaptureVideoFrame(m_buffer, m_width, m_height);
@@ -208,7 +247,6 @@ bool CScreenshotSurface::capture()
 
 void CScreenShot::TakeScreenshot(const std::string &filename, bool sync)
 {
-
   CScreenshotSurface surface;
   if (!surface.capture())
   {

@@ -10,6 +10,7 @@ import android.graphics.PixelFormat;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,11 +35,13 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCVideoView mVideoView = null;
   private XBMCJsonRPC mJsonRPC = null;
+  private XBMCProjection mProjection = null;
   private RelativeLayout mVideoLayout = null;
   private View thisView = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
   private int mNewIntentDelay = 0;
+  private int mProjectionIntentId = 0;
 
   native void _onNewIntent(Intent intent);
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
@@ -46,7 +49,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
   native void _onVideoViewLost();
-
+  native void _onCaptureAvailable(Image img);
 
   private class MyAudioDeviceCallback extends AudioDeviceCallback
   {
@@ -217,6 +220,11 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
   }
 
+  public void takeScreenshot()
+  {
+    mProjection.takeScreenshot();
+  }
+
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
@@ -249,6 +257,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       audioManager.registerAudioDeviceCallback(new MyAudioDeviceCallback(), null);
     }
     mJsonRPC = new XBMCJsonRPC();
+
+    mProjection = new XBMCProjection(this);
+    mProjectionIntentId = mProjection.startProjection();
 
     // Delayed Intent
     if (getIntent().getData() != null)
@@ -371,6 +382,13 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onActivityResult(int requestCode, int resultCode,
       Intent resultData)
   {
+    if (requestCode == mProjectionIntentId)
+    {
+      if (resultCode == RESULT_OK)
+        mProjection.Initialize(resultCode, resultData);
+      return;
+    }
+
     _onActivityResult(requestCode, resultCode, resultData);
   }
 

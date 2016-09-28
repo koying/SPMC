@@ -86,6 +86,17 @@ protected:
   int m_resultcode;
 };
 
+class CCaptureEvent : public CEvent
+{
+public:
+  CCaptureEvent() {}
+  jni::CJNIImage GetImage() const { return m_image; }
+  void SetImage(const jni::CJNIImage &image) { m_image = image; }
+
+protected:
+  jni::CJNIImage m_image;
+};
+
 class CXBMCApp
     : public IActivityHandler
     , public CJNIMainActivity
@@ -104,6 +115,7 @@ public:
   virtual void onReceive(CJNIIntent intent);
   virtual void onNewIntent(CJNIIntent intent);
   virtual void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData);
+  virtual void onCaptureAvailable(jni::CJNIImage image);
   virtual void onVolumeChanged(int volume);
   virtual void onAudioFocusChange(int focusChange);
   virtual void doFrame(int64_t frameTimeNanos);
@@ -167,6 +179,7 @@ public:
   static CPoint GetDroidToGuiRatio();
 
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
+  static bool WaitForCapture(jni::CJNIImage& image);
 
   // Playback callbacks
   static void OnPlayBackStarted();
@@ -212,6 +225,7 @@ private:
   static CCriticalSection m_applicationsMutex;
   static std::vector<androidPackage> m_applications;
   static std::vector<CActivityResultEvent*> m_activityResultEvents;
+  static CCaptureEvent m_captureEvent;
 
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;
