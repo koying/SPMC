@@ -52,8 +52,48 @@ bool CRenderCaptureBase::UseOcclusionQuery()
     return true;
 }
 
+#if defined(xxTARGET_ANDROID)
+CRenderCaptureDroid::CRenderCaptureDroid()
+{
+}
 
-#if defined(HAS_IMXVPU)
+CRenderCaptureDroid::~CRenderCaptureDroid()
+{
+  delete[] m_pixels;
+}
+
+void CRenderCaptureDroid::BeginRender()
+{
+  m_asyncChecked = true;
+  m_asyncSupported = true;
+
+  if (m_bufferSize != m_width * m_height * 4)
+  {
+    delete[] m_pixels;
+    m_bufferSize = m_width * m_height * 4;
+    m_pixels = new uint8_t[m_bufferSize];
+  }
+}
+
+void CRenderCaptureDroid::EndRender()
+{
+  if (m_flags & CAPTUREFLAG_IMMEDIATELY)
+    ReadOut();
+  else
+    SetState(CAPTURESTATE_NEEDSREADOUT);
+}
+
+void* CRenderCaptureDroid::GetRenderBuffer()
+{
+    return m_pixels;
+}
+
+void CRenderCaptureDroid::ReadOut()
+{
+  SetState(CAPTURESTATE_DONE);
+}
+
+#elif defined(HAS_IMXVPU)
 CRenderCaptureIMX::CRenderCaptureIMX()
 {
 }
@@ -101,12 +141,12 @@ CRenderCaptureDispmanX::CRenderCaptureDispmanX()
 
 CRenderCaptureDispmanX::~CRenderCaptureDispmanX()
 {
-	delete[] m_pixels;
+        delete[] m_pixels;
 }
 
 int CRenderCaptureDispmanX::GetCaptureFormat()
 {
-	return CAPTUREFORMAT_BGRA;
+        return CAPTUREFORMAT_BGRA;
 }
 
 void CRenderCaptureDispmanX::BeginRender()
@@ -115,9 +155,9 @@ void CRenderCaptureDispmanX::BeginRender()
 
 void CRenderCaptureDispmanX::EndRender()
 {
-	m_pixels = g_RBP.CaptureDisplay(m_width, m_height, NULL, true);
+        m_pixels = g_RBP.CaptureDisplay(m_width, m_height, NULL, true);
 
-	SetState(CAPTURESTATE_DONE);
+        SetState(CAPTURESTATE_DONE);
 }
 
 void* CRenderCaptureDispmanX::GetRenderBuffer()

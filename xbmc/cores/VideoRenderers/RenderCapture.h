@@ -172,8 +172,31 @@ class CRenderCaptureBase
     bool             m_asyncChecked;
 };
 
+#if defined(xxTARGET_ANDROID)
+#include "android/activity/XBMCApp.h"
 
-#if defined(HAS_IMXVPU)
+class CRenderCaptureDroid : public CRenderCaptureBase
+{
+public:
+  CRenderCaptureDroid();
+  ~CRenderCaptureDroid();
+
+  int   GetCaptureFormat() { return CAPTUREFORMAT_RGBA; }
+
+  void  BeginRender();
+  void  EndRender();
+  void  ReadOut();
+
+  void* GetRenderBuffer();
+};
+
+class CRenderCapture : public CRenderCaptureDroid
+{
+public:
+  CRenderCapture() {}
+};
+
+#elif defined(HAS_IMXVPU)
 #include "../dvdplayer/DVDCodecs/Video/DVDVideoCodecIMX.h"
 
 class CRenderCaptureIMX : public CRenderCaptureBase
@@ -269,7 +292,7 @@ class CRenderCaptureDX : public CRenderCaptureBase, public ID3DResource
     void BeginRender();
     void EndRender();
     void ReadOut();
-    
+
     virtual void OnDestroyDevice();
     virtual void OnLostDevice();
     virtual void OnCreateDevice() {};

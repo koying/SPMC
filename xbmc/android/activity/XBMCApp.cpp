@@ -1136,7 +1136,7 @@ int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, C
 bool CXBMCApp::WaitForCapture(CJNIImage& image)
 {
   bool ret = false;
-  if (m_captureEvent.WaitMSec(3000))
+  if (m_captureEvent.WaitMSec(500))
   {
     image = m_captureEvent.GetImage();
     ret = true;
