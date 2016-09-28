@@ -9889,3 +9889,12 @@ lib/libmpeg2/Makefile.am
 lib/libmpeg2/configure.ac
 lib/libUPnP/Makefile.in
 lib/UnrarXLib/Makefile
+xbmc/android/jni/Image.h
+xbmc/android/jni/Image.cpp
+xbmc/android/jni/AudioAttributes.cpp
+xbmc/android/jni/AudioAttributes.h
+xbmc/android/jni/MediaSync.cpp
+xbmc/android/jni/MediaSync.h
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java.in
+xbmc/system.h
