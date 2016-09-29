@@ -177,3 +177,15 @@ void CJNIMainActivity::takeScreenshot()
   call_method<void>(m_context,
                     "takeScreenshot", "()V");
 }
+
+void CJNIMainActivity::startCapture(int width, int height)
+{
+  call_method<void>(m_context,
+                    "startCapture", "(II)V", width, height);
+}
+
+void CJNIMainActivity::stopCapture()
+{
+  call_method<void>(m_context,
+                    "stopCapture", "()V");
+}

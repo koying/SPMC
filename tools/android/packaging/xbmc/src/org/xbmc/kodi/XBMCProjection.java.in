@@ -64,8 +64,29 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
 
   private VirtualDisplay createVirtualDisplay(int width, int height)
   {
-    mWidth = width;
-    mHeight = height;
+    Point size = new Point();
+    mActivity.getWindowManager().getDefaultDisplay().getSize(size);
+    if (size.x != width || size.y != height)
+    {
+      float dratio = size.x / size.y;
+      float cratio = width / height;
+
+      if (dratio >= cratio)
+      {
+        mWidth = width;
+        mHeight = (int) (height / dratio);
+      }
+      else
+      {
+        mHeight = height;
+        mWidth = (int) (width * dratio);
+      }
+    }
+    else
+    {
+      mWidth = width;
+      mHeight = height;
+    }
 
     if (mImageReader == null)
     {

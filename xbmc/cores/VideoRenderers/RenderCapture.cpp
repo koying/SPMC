@@ -23,6 +23,13 @@
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
 
+#if defined(TARGET_ANDROID)
+#include "android/activity/XBMCApp.h"
+extern "C" {
+#include "libswscale/swscale.h"
+}
+#endif
+
 CRenderCaptureBase::CRenderCaptureBase()
 {
   m_state          = CAPTURESTATE_FAILED;
@@ -52,13 +59,14 @@ bool CRenderCaptureBase::UseOcclusionQuery()
     return true;
 }
 
-#if defined(xxTARGET_ANDROID)
+#if defined(TARGET_ANDROID)
 CRenderCaptureDroid::CRenderCaptureDroid()
 {
 }
 
 CRenderCaptureDroid::~CRenderCaptureDroid()
 {
+  CXBMCApp::stopCapture();
   delete[] m_pixels;
 }
 
@@ -90,6 +98,40 @@ void* CRenderCaptureDroid::GetRenderBuffer()
 
 void CRenderCaptureDroid::ReadOut()
 {
+  jni::CJNIImage image;
+  CXBMCApp::startCapture(m_width, m_height);
+  if (CXBMCApp::WaitForCapture(image))
+  {
+    if (image)
+    {
+      int iWidth = image.getWidth();
+      int iHeight = image.getHeight();
+
+      std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
+      CJNIByteBuffer bytebuffer = planes[0].getBuffer();
+
+      struct SwsContext *context = sws_getContext(iWidth, iHeight, PIX_FMT_RGBA,
+                                                             m_width, m_height, PIX_FMT_BGRA,
+                                                             SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+      void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
+
+      int stride = planes[0].getRowStride();
+      uint8_t *src[] = { (uint8_t*)buf_ptr, 0, 0, 0 };
+      int     srcStride[] = { stride, 0, 0, 0 };
+
+      uint8_t *dst[] = { m_pixels, 0, 0, 0 };
+      int     dstStride[] = { stride, 0, 0, 0 };
+
+      if (context)
+      {
+        sws_scale(context, src, srcStride, 0, iHeight, dst, dstStride);
+        sws_freeContext(context);
+      }
+
+      image.close();
+    }
+  }
   SetState(CAPTURESTATE_DONE);
 }
 

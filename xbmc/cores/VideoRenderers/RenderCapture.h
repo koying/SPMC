@@ -172,8 +172,7 @@ class CRenderCaptureBase
     bool             m_asyncChecked;
 };
 
-#if defined(xxTARGET_ANDROID)
-#include "android/activity/XBMCApp.h"
+#if defined(TARGET_ANDROID)
 
 class CRenderCaptureDroid : public CRenderCaptureBase
 {
@@ -181,7 +180,7 @@ public:
   CRenderCaptureDroid();
   ~CRenderCaptureDroid();
 
-  int   GetCaptureFormat() { return CAPTUREFORMAT_RGBA; }
+  int   GetCaptureFormat() { return CAPTUREFORMAT_BGRA; }
 
   void  BeginRender();
   void  EndRender();
