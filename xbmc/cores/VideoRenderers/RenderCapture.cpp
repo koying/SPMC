@@ -81,6 +81,7 @@ void CRenderCaptureDroid::BeginRender()
     m_bufferSize = m_width * m_height * 4;
     m_pixels = new uint8_t[m_bufferSize];
   }
+  CXBMCApp::startCapture(m_width, m_height);
 }
 
 void CRenderCaptureDroid::EndRender()
@@ -99,7 +100,6 @@ void* CRenderCaptureDroid::GetRenderBuffer()
 void CRenderCaptureDroid::ReadOut()
 {
   jni::CJNIImage image;
-  CXBMCApp::startCapture(m_width, m_height);
   if (CXBMCApp::WaitForCapture(image))
   {
     if (image)
@@ -116,12 +116,11 @@ void CRenderCaptureDroid::ReadOut()
 
       void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
 
-      int stride = planes[0].getRowStride();
       uint8_t *src[] = { (uint8_t*)buf_ptr, 0, 0, 0 };
-      int     srcStride[] = { stride, 0, 0, 0 };
+      int     srcStride[] = { planes[0].getRowStride(), 0, 0, 0 };
 
       uint8_t *dst[] = { m_pixels, 0, 0, 0 };
-      int     dstStride[] = { stride, 0, 0, 0 };
+      int     dstStride[] = { (int)m_width * 4, 0, 0, 0 };
 
       if (context)
       {
@@ -131,8 +130,12 @@ void CRenderCaptureDroid::ReadOut()
 
       image.close();
     }
+    else
+      SetState(CAPTURESTATE_FAILED);
+    SetState(CAPTURESTATE_DONE);
   }
-  SetState(CAPTURESTATE_DONE);
+  else
+    SetState(CAPTURESTATE_FAILED);
 }
 
 #elif defined(HAS_IMXVPU)

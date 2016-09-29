@@ -222,7 +222,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
   public void takeScreenshot()
   {
-    mProjection.takeScreenshot(128, 128);
+    mProjection.takeScreenshot();
   }
 
   public void startCapture(int width, int height)

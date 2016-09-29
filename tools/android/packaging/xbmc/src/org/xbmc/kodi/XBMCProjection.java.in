@@ -68,8 +68,8 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
     mActivity.getWindowManager().getDefaultDisplay().getSize(size);
     if (size.x != width || size.y != height)
     {
-      float dratio = size.x / size.y;
-      float cratio = width / height;
+      float dratio = (float)size.x / size.y;
+      float cratio = (float)width / height;
 
       if (dratio >= cratio)
       {
@@ -90,7 +90,7 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
 
     if (mImageReader == null)
     {
-      mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 1);
+      mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 4);
       mImageReader.setOnImageAvailableListener(this, mHandler);
     }
     return mMediaProjection.createVirtualDisplay("rendercapture",
@@ -115,11 +115,18 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
   @Override
   public void onImageAvailable(ImageReader reader)
   {
-    final Image image = mImageReader.acquireLatestImage();
-    mActivity._onCaptureAvailable(image);
+    try
+    {
+      final Image image = mImageReader.acquireLatestImage();
+      mActivity._onCaptureAvailable(image);
 
-    if (mScreenshotMode)
-      stopCapture();
+      if (mScreenshotMode)
+        stopCapture();
+    }
+    catch (Exception e)
+    {
+      mActivity._onCaptureAvailable(null);
+    }
   }
 
   /***************/
@@ -153,12 +160,20 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
     if (mMediaProjection == null)
       return;
 
+    if (mVirtualDisplay != null)
+      return;
+
     mScreenshotMode = false;
     mVirtualDisplay = createVirtualDisplay(width, height);
   }
 
   public void stopCapture()
   {
+    if (mImageReader != null)
+    {
+      mImageReader.close();
+      mImageReader = null;
+    }
     if (mVirtualDisplay != null)
     {
       mVirtualDisplay.release();

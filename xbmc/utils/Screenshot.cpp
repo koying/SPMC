@@ -36,6 +36,10 @@
 #ifdef TARGET_ANDROID
 #include "android/activity/XBMCApp.h"
 #include "android/jni/Image.h"
+extern "C" {
+#include "libswscale/swscale.h"
+}
+
 #endif
 
 #ifdef HAS_VIDEO_PLAYBACK
@@ -107,7 +111,6 @@ bool CScreenshotSurface::capture()
           std::swap(swap_pixels[0], swap_pixels[2]);
         }
       }
-
     }
   }
   else
