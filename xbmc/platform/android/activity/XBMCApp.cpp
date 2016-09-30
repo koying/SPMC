@@ -269,11 +269,8 @@ void CXBMCApp::onPause()
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
-      if (getVideosurfaceInUse())
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
-      else
-        if (!g_application.m_pPlayer->IsPaused())
-          CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
+      if (!g_application.m_pPlayer->IsPaused())
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
     }
     else
       registerMediaButtonEventReceiver();
@@ -1125,6 +1122,15 @@ void CXBMCApp::onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)
   m_audiodevices = devices;
   LogAudoDevices("onAudioDeviceRemoved", m_audiodevices);
   CheckHeadsetPlugged();
+}
+
+void CXBMCApp::onVideoViewLost()
+{
+  if (g_application.m_pPlayer->IsPlayingVideo())
+  {
+    if (getVideosurfaceInUse())
+      CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
+  }
 }
 
 int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent &result)

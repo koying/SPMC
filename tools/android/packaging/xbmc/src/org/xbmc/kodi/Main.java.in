@@ -47,6 +47,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _doFrame(long frameTimeNanos);
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
+  native void _onVideoViewLost();
+
 
   private class MyAudioDeviceCallback extends AudioDeviceCallback
   {
@@ -235,6 +237,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
     setContentView(R.layout.activity_main);
     mVideoView = (XBMCVideoView)findViewById(R.id.VideoView1);
+    mVideoView.setActivity(this);
     mVideoView.getHolder().setFormat(PixelFormat.TRANSPARENT);
     mVideoLayout = (RelativeLayout) findViewById(R.id.VideoLayout);
 
