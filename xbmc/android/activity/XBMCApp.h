@@ -109,6 +109,7 @@ public:
   virtual void doFrame(int64_t frameTimeNanos);
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
+  virtual void onVideoViewLost();
 
   bool isValid() { return m_activity != NULL; }
 
