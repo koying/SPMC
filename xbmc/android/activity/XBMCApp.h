@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <queue>
 
 #include <android/native_activity.h>
 
@@ -37,6 +38,7 @@
 #include "android/jni/BroadcastReceiver.h"
 #include "android/jni/AudioManager.h"
 #include "android/jni/AudioDeviceInfo.h"
+#include "android/jni/Image.h"
 #include "threads/Event.h"
 #include "interfaces/IAnnouncer.h"
 #include "guilib/Geometry.h"
@@ -180,6 +182,7 @@ public:
 
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
   static bool WaitForCapture(jni::CJNIImage& image);
+  static bool GetCapture(jni::CJNIImage& img);
 
   // Playback callbacks
   static void OnPlayBackStarted();
@@ -225,7 +228,10 @@ private:
   static CCriticalSection m_applicationsMutex;
   static std::vector<androidPackage> m_applications;
   static std::vector<CActivityResultEvent*> m_activityResultEvents;
+
+  static CCriticalSection m_captureMutex;
   static CCaptureEvent m_captureEvent;
+  static std::queue<jni::CJNIImage> m_captureQueue;
 
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;

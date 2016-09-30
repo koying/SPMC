@@ -124,9 +124,7 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
         stopCapture();
     }
     catch (Exception e)
-    {
-      mActivity._onCaptureAvailable(null);
-    }
+    {}
   }
 
   /***************/

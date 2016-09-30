@@ -100,38 +100,33 @@ void* CRenderCaptureDroid::GetRenderBuffer()
 void CRenderCaptureDroid::ReadOut()
 {
   jni::CJNIImage image;
-  if (CXBMCApp::WaitForCapture(image))
+  if (CXBMCApp::GetCapture(image))
   {
-    if (image)
+    int iWidth = image.getWidth();
+    int iHeight = image.getHeight();
+
+    std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
+    CJNIByteBuffer bytebuffer = planes[0].getBuffer();
+
+    struct SwsContext *context = sws_getContext(iWidth, iHeight, PIX_FMT_RGBA,
+                                                m_width, m_height, PIX_FMT_BGRA,
+                                                SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+    void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
+
+    uint8_t *src[] = { (uint8_t*)buf_ptr, 0, 0, 0 };
+    int     srcStride[] = { planes[0].getRowStride(), 0, 0, 0 };
+
+    uint8_t *dst[] = { m_pixels, 0, 0, 0 };
+    int     dstStride[] = { (int)m_width * 4, 0, 0, 0 };
+
+    if (context)
     {
-      int iWidth = image.getWidth();
-      int iHeight = image.getHeight();
-
-      std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
-      CJNIByteBuffer bytebuffer = planes[0].getBuffer();
-
-      struct SwsContext *context = sws_getContext(iWidth, iHeight, PIX_FMT_RGBA,
-                                                             m_width, m_height, PIX_FMT_BGRA,
-                                                             SWS_FAST_BILINEAR, NULL, NULL, NULL);
-
-      void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
-
-      uint8_t *src[] = { (uint8_t*)buf_ptr, 0, 0, 0 };
-      int     srcStride[] = { planes[0].getRowStride(), 0, 0, 0 };
-
-      uint8_t *dst[] = { m_pixels, 0, 0, 0 };
-      int     dstStride[] = { (int)m_width * 4, 0, 0, 0 };
-
-      if (context)
-      {
-        sws_scale(context, src, srcStride, 0, iHeight, dst, dstStride);
-        sws_freeContext(context);
-      }
-
-      image.close();
+      sws_scale(context, src, srcStride, 0, iHeight, dst, dstStride);
+      sws_freeContext(context);
     }
-    else
-      SetState(CAPTURESTATE_FAILED);
+
+    image.close();
     SetState(CAPTURESTATE_DONE);
   }
   else
