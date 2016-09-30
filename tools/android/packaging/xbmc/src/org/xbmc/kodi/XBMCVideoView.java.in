@@ -17,6 +17,7 @@ import android.content.Context;
 public class XBMCVideoView extends SurfaceView implements
     SurfaceHolder.Callback
 {
+  private Main mActivity;
   private static final String TAG = "XBMCVideoPlayView";
   public boolean mHasHolder = false;
 
@@ -36,6 +37,11 @@ public class XBMCVideoView extends SurfaceView implements
   {
     super(context, attrs, defStyle);
     getHolder().addCallback(this);
+  }
+
+  public void setActivity(Main act)
+  {
+    mActivity = act;
   }
 
   /**
@@ -99,6 +105,9 @@ public class XBMCVideoView extends SurfaceView implements
   @Override
   public void surfaceCreated(SurfaceHolder holder)
   {
+    if (holder != getHolder())
+      return;
+
     Log.d(TAG, "Created");
     mHasHolder = true;
   }
@@ -107,6 +116,9 @@ public class XBMCVideoView extends SurfaceView implements
   public void surfaceChanged(SurfaceHolder holder, int format, int width,
       int height)
   {
+    if (holder != getHolder())
+      return;
+
     Log.d(TAG, "Changed, format:" + format + ", width:" + width
         + ", height:" + height);
   }
@@ -114,7 +126,11 @@ public class XBMCVideoView extends SurfaceView implements
   @Override
   public void surfaceDestroyed(SurfaceHolder holder)
   {
+    if (holder != getHolder())
+      return;
+
     Log.d(TAG, "Destroyed");
     mHasHolder = false;
+    mActivity._onVideoViewLost();
   }
 }
