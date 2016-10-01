@@ -57,6 +57,7 @@ public:
   void setVideoViewSurfaceRect(int l, int t, int r, int b);
 
   static void takeScreenshot();
+  static void startProjection();
   static void startCapture(int width, int height);
   static void stopCapture();
 

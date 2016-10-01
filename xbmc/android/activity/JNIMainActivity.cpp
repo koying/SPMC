@@ -178,6 +178,12 @@ void CJNIMainActivity::takeScreenshot()
                     "takeScreenshot", "()V");
 }
 
+void CJNIMainActivity::startProjection()
+{
+  call_method<void>(m_context,
+                    "startProjection", "()V");
+}
+
 void CJNIMainActivity::startCapture(int width, int height)
 {
   call_method<void>(m_context,

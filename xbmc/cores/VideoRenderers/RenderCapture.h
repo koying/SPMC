@@ -173,6 +173,7 @@ class CRenderCaptureBase
 };
 
 #if defined(TARGET_ANDROID)
+#include "system_gl.h"
 
 class CRenderCaptureDroid : public CRenderCaptureBase
 {

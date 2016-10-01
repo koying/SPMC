@@ -183,6 +183,7 @@ public:
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
   static bool WaitForCapture(jni::CJNIImage& image);
   static bool GetCapture(jni::CJNIImage& img);
+  static void TakeScreenshot();
   static void StopCapture();
 
   // Playback callbacks

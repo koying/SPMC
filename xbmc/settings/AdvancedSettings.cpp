@@ -206,6 +206,8 @@ void CAdvancedSettings::Initialize()
   m_DXVAAllowHqScaling = true;
   m_videoFpsDetect = 1;
   m_videoBusyDialogDelay_ms = 500;
+  m_videoUseDroidProjectionCapture = false;
+
   m_stagefrightConfig.useAVCcodec = -1;
   m_stagefrightConfig.useHEVCcodec = -1;
   m_stagefrightConfig.useVC1codec = -1;
@@ -575,6 +577,8 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     XMLUtils::GetInt(pElement, "percentseekforwardbig", m_videoPercentSeekForwardBig, 0, 100);
     XMLUtils::GetInt(pElement, "percentseekbackwardbig", m_videoPercentSeekBackwardBig, -100, 0);
 
+    XMLUtils::GetBoolean(pElement, "usedroidprojectioncapture", m_videoUseDroidProjectionCapture);
+
     TiXmlElement* pVideoExcludes = pElement->FirstChildElement("excludefromlisting");
     if (pVideoExcludes)
       GetCustomRegexps(pVideoExcludes, m_videoExcludeFromListingRegExps);
@@ -866,7 +870,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
 
   //airtunes + airplay
   XMLUtils::GetInt(pRootElement,     "airtunesport", m_airTunesPort);
-  XMLUtils::GetInt(pRootElement,     "airplayport", m_airPlayPort);  
+  XMLUtils::GetInt(pRootElement,     "airplayport", m_airPlayPort);
 
   XMLUtils::GetBoolean(pRootElement, "handlemounting", m_handleMounting);
 
@@ -1223,7 +1227,7 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
   {
     XMLUtils::GetBoolean(pRootElement, "disableminimize", m_disableminimize);
   }
-  
+
   pElement = pRootElement->FirstChildElement("gui");
   if (pElement)
   {
@@ -1495,14 +1499,14 @@ void CAdvancedSettings::setInternalMYSQL(const bool enable, const bool init)
       g_advancedSettings.m_databaseMusic.port = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_PORT);
       g_advancedSettings.m_databaseMusic.host = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_HOST);
       g_advancedSettings.m_databaseMusic.name = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_MUSIC);
-      
+
       g_advancedSettings.m_databaseVideo.type = "mysql";
       g_advancedSettings.m_databaseVideo.user = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_USER);
       g_advancedSettings.m_databaseVideo.pass = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_PASS);
       g_advancedSettings.m_databaseVideo.port = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_PORT);
       g_advancedSettings.m_databaseVideo.host = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_HOST);
       g_advancedSettings.m_databaseVideo.name = CSettings::GetInstance().GetString(CSettings::SETTING_MYSQL_VIDEO);
-      
+
     }
     else //if not, set ENABLED to false
     {

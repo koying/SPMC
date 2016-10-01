@@ -225,6 +225,11 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mProjection.takeScreenshot();
   }
 
+  public void startProjection()
+  {
+    mProjectionIntentId = mProjection.startProjection();
+  }
+
   public void startCapture(int width, int height)
   {
     mProjection.startCapture(width, height);
@@ -269,7 +274,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mJsonRPC = new XBMCJsonRPC();
 
     mProjection = new XBMCProjection(this);
-    mProjectionIntentId = mProjection.startProjection();
 
     // Delayed Intent
     if (getIntent().getData() != null)

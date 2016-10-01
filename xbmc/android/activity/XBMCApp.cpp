@@ -221,6 +221,7 @@ void CXBMCApp::onStart()
     android_printf("%s: Already running, ignoring request to start", __PRETTY_FUNCTION__);
     return;
   }
+
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -1105,6 +1106,11 @@ bool CXBMCApp::GetCapture(CJNIImage& img)
   img = m_captureQueue.front();
   m_captureQueue.pop();
   return true;
+}
+
+void CXBMCApp::TakeScreenshot()
+{
+  takeScreenshot();
 }
 
 void CXBMCApp::StopCapture()
