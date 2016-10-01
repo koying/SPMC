@@ -39,6 +39,9 @@
 #endif
 #if defined(TARGET_ANDROID)
 #include "android/bionic_supplement/bionic_supplement.h"
+#include "android/activity/XBMCApp.h"
+#include "android/jni/ApplicationInfo.h"
+#include "CompileInfo.h"
 #endif
 #include <stdlib.h>
 #include <algorithm>
@@ -1681,6 +1684,13 @@ std::string CUtil::ResolveExecutablePath()
     strExecutablePath = "";
   else
     strExecutablePath = buf;
+#elif defined(TARGET_ANDROID)
+  strExecutablePath = CXBMCApp::getApplicationInfo().nativeLibraryDir;
+
+  std::string appName = CCompileInfo::GetAppName();
+  std::string libName = "lib" + appName + ".so";
+  StringUtils::ToLower(libName);
+  strExecutablePath += "/" + libName;
 #else
   /* Get our PID and build the name of the link in /proc */
   pid_t pid = getpid();
