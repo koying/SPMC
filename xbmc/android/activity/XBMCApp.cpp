@@ -92,7 +92,7 @@
 #include "interfaces/AnnouncementManager.h"
 
 #define GIGABYTES       1073741824
-#define CAPTURE_QUEUE_MAXDEPTH 4
+#define CAPTURE_QUEUE_MAXDEPTH 3
 
 using namespace std;
 using namespace jni;
@@ -1098,8 +1098,7 @@ void CXBMCApp::onActivityResult(int requestCode, int resultCode, CJNIIntent resu
 
 bool CXBMCApp::GetCapture(CJNIImage& img)
 {
-  CSingleLock lock(m_applicationsMutex);
-
+  CSingleLock lock(m_captureMutex);
   if (m_captureQueue.empty())
     return false;
 
@@ -1108,9 +1107,21 @@ bool CXBMCApp::GetCapture(CJNIImage& img)
   return true;
 }
 
+void CXBMCApp::StopCapture()
+{
+  CSingleLock lock(m_captureMutex);
+  while (!m_captureQueue.empty())
+  {
+    CJNIImage img = m_captureQueue.front();
+    img.close();
+    m_captureQueue.pop();
+  }
+  CJNIMainActivity::stopCapture();
+}
+
 void CXBMCApp::onCaptureAvailable(CJNIImage image)
 {
-  CSingleLock lock(m_applicationsMutex);
+  CSingleLock lock(m_captureMutex);
 
   m_captureQueue.push(image);
   if (m_captureQueue.size() > CAPTURE_QUEUE_MAXDEPTH)

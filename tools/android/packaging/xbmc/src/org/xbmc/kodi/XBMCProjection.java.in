@@ -88,6 +88,11 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
       mHeight = height;
     }
 
+    if (mImageReader != null && (mImageReader.getWidth() != mWidth || mImageReader.getHeight() != mHeight))
+    {
+      mImageReader.close();
+      mImageReader = null;
+    }
     if (mImageReader == null)
     {
       mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 4);
@@ -117,7 +122,7 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
   {
     try
     {
-      final Image image = mImageReader.acquireLatestImage();
+      final Image image = mImageReader.acquireNextImage();
       mActivity._onCaptureAvailable(image);
 
       if (mScreenshotMode)
@@ -167,11 +172,6 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
 
   public void stopCapture()
   {
-    if (mImageReader != null)
-    {
-      mImageReader.close();
-      mImageReader = null;
-    }
     if (mVirtualDisplay != null)
     {
       mVirtualDisplay.release();

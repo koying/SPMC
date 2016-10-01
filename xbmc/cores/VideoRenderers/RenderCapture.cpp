@@ -66,7 +66,7 @@ CRenderCaptureDroid::CRenderCaptureDroid()
 
 CRenderCaptureDroid::~CRenderCaptureDroid()
 {
-  CXBMCApp::stopCapture();
+  CXBMCApp::StopCapture();
   delete[] m_pixels;
 }
 
