@@ -94,6 +94,14 @@ void CJNIMainActivity::_onCaptureAvailable(JNIEnv *env, jobject context, jobject
     m_appInstance->onCaptureAvailable(CJNIImage(jhobject(image)));
 }
 
+void CJNIMainActivity::_onScreenshotAvailable(JNIEnv* env, jobject context, jobject image)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onScreenshotAvailable(CJNIImage(jhobject(image)));
+}
+
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
 {
   call_method<void>(m_context,

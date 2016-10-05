@@ -1136,6 +1136,12 @@ void CXBMCApp::onCaptureAvailable(CJNIImage image)
     img.close();
     m_captureQueue.pop();
   }
+}
+
+void CXBMCApp::onScreenshotAvailable(CJNIImage image)
+{
+  CSingleLock lock(m_captureMutex);
+
   m_captureEvent.SetImage(image);
   m_captureEvent.Set();
 }

@@ -118,6 +118,7 @@ public:
   virtual void onNewIntent(CJNIIntent intent);
   virtual void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData);
   virtual void onCaptureAvailable(jni::CJNIImage image);
+  virtual void onScreenshotAvailable(jni::CJNIImage image);
   virtual void onVolumeChanged(int volume);
   virtual void onAudioFocusChange(int focusChange);
   virtual void doFrame(int64_t frameTimeNanos);
