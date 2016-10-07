@@ -9897,3 +9897,4 @@ xbmc/android/jni/MediaSync.cpp
 xbmc/android/jni/MediaSync.h
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java.in
+xbmc/system.h
