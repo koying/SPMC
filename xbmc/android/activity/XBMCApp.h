@@ -31,6 +31,7 @@
 
 #include "IActivityHandler.h"
 #include "IInputHandler.h"
+#include "storage/IStorageProvider.h"
 
 #include "xbmc.h"
 #include "android/jni/Activity.h"
@@ -154,6 +155,9 @@ public:
    */
   static bool GetExternalStorage(std::string &path, const std::string &type = "");
   static bool GetStorageUsage(const std::string &path, std::string &usage);
+  static void InvalidateRemovableDrives();
+  static bool GetRemovableDrives(VECSOURCES& removableDrives);
+
   static int GetMaxSystemVolume();
   static float GetSystemVolume();
   static void SetSystemVolume(float percent);
@@ -209,9 +213,12 @@ private:
   bool m_firstrun;
   bool m_exiting;
   pthread_t m_thread;
+  static CCriticalSection m_apiMutex;
   static CCriticalSection m_applicationsMutex;
   static std::vector<androidPackage> m_applications;
   static std::vector<CActivityResultEvent*> m_activityResultEvents;
+
+  static VECSOURCES m_removableDrives;
 
   static ANativeWindow* m_window;
   static CEvent m_windowCreated;

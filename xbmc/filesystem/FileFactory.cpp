@@ -85,6 +85,8 @@
 #include "UDFFile.h"
 #include "ImageFile.h"
 #include "ResourceFile.h"
+#include "StorageFile.h"
+
 #include "Application.h"
 #include "URL.h"
 #include "utils/log.h"
@@ -127,13 +129,14 @@ IFile* CFileFactory::CreateLoader(const CURL& url)
   else if (url.IsProtocol("musicdb")) return new CMusicDatabaseFile();
   else if (url.IsProtocol("videodb")) return new CVideoDatabaseFile();
   else if (url.IsProtocol("special")) return new CSpecialProtocolFile();
+  else if (url.IsProtocol("storage")) return new CStorageFile();
   else if (url.IsProtocol("multipath")) return new CMultiPathFile();
   else if (url.IsProtocol("image")) return new CImageFile();
 #ifdef TARGET_POSIX
   else if (url.IsProtocol("file") || url.GetProtocol().empty()) return new CPosixFile();
 #elif defined(TARGET_WINDOWS)
   else if (url.IsProtocol("file") || url.GetProtocol().empty()) return new CWin32File();
-#endif // TARGET_WINDOWS 
+#endif // TARGET_WINDOWS
   else if (url.IsProtocol("filereader")) return new CFileReaderFile();
 #if defined(HAS_FILESYSTEM_CDDA) && defined(HAS_DVD_DRIVE)
   else if (url.IsProtocol("cdda")) return new CFileCDDA();

@@ -42,6 +42,8 @@
 #include "HTTPDirectory.h"
 #include "DAVDirectory.h"
 #include "UDFDirectory.h"
+#include "StorageDirectory.h"
+
 #include "Application.h"
 #include "utils/log.h"
 #include "network/WakeOnAccess.h"
@@ -130,6 +132,7 @@ IDirectory* CDirectoryFactory::Create(const CURL& url)
 #error Local directory access is not implemented for this platform
 #endif
   if (url.IsProtocol("special")) return new CSpecialProtocolDirectory();
+  if (url.IsProtocol("storage")) return new CStorageDirectory();
   if (url.IsProtocol("sources")) return new CSourcesDirectory();
   if (url.IsProtocol("addons")) return new CAddonsDirectory();
 #if defined(HAS_FILESYSTEM_CDDA) && defined(HAS_DVD_DRIVE)
