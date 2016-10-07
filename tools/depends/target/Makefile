@@ -9,13 +9,13 @@ DEPENDS = \
 	libgcrypt bzip2 liblzo2 libzip freetype2 fontconfig \
 	openssl gmp nettle gnutls curl \
 	libjpeg-turbo libpng fribidi libass \
-	libmodplug librtmp libxml2 yajl libmicrohttpd mysql libffi \
+	librtmp libxml2 yajl libmicrohttpd mysql libffi \
 	python27 libshairplay \
 	libplist libcec libbluray tinyxml dummy-libxbmc \
 	libamplayer libssh taglib libusb libnfs \
 	pythonmodule-pil pythonmodule-setuptools \
 	libxslt ffmpeg platform crossguid \
-        libdvdread libdvdnav libdvdcss
+        libdvdread libdvdnav libdvdcss \
 	google-breakpad
 
 
