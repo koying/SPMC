@@ -1,0 +1,170 @@
+package @APP_PACKAGE@;
+
+import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.Image;
+import android.media.ImageReader;
+import android.media.projection.MediaProjection;
+import android.os.Handler;
+import android.os.Looper;
+
+/**
+ * Created by cbro on 9/27/16.
+ */
+public class XBMCProjection implements ImageReader.OnImageAvailableListener
+{
+  private Main mActivity;
+  private MediaProjection mMediaProjection;
+  private VirtualDisplay mVirtualDisplay;
+  private ImageReader mImageReader;
+
+  private Handler mHandler;
+
+  private int mWidth;
+  private int mHeight;
+  private boolean mScreenshotMode;
+
+  public XBMCProjection(Main act, MediaProjection proj)
+  {
+    mActivity = act;
+    mMediaProjection = proj;
+
+        // start capture handling thread
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                mHandler = new Handler();
+                Looper.loop();
+            }
+        }.start();
+  }
+
+  private VirtualDisplay createVirtualDisplay()
+  {
+    Point size = new Point();
+    mActivity.getWindowManager().getDefaultDisplay().getSize(size);
+    return createVirtualDisplay(size.x, size.y);
+  }
+
+  private VirtualDisplay createVirtualDisplay(int width, int height)
+  {
+    Point size = new Point();
+    mActivity.getWindowManager().getDefaultDisplay().getSize(size);
+    if (size.x != width || size.y != height)
+    {
+      float dratio = (float)size.x / size.y;
+      float cratio = (float)width / height;
+
+      if (dratio >= cratio)
+      {
+        mWidth = width;
+        mHeight = (int) (height / dratio);
+      }
+      else
+      {
+        mHeight = height;
+        mWidth = (int) (width * dratio);
+      }
+    }
+    else
+    {
+      mWidth = width;
+      mHeight = height;
+    }
+
+    if (mImageReader != null && (mImageReader.getWidth() != mWidth || mImageReader.getHeight() != mHeight))
+    {
+      mImageReader.close();
+      mImageReader = null;
+    }
+    if (mImageReader == null)
+    {
+      mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 4);
+      mImageReader.setOnImageAvailableListener(this, mHandler);
+    }
+    return mMediaProjection.createVirtualDisplay("rendercapture",
+            mWidth, mHeight, mActivity.getResources().getDisplayMetrics().densityDpi,
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY,
+            mImageReader.getSurface(), null, mHandler);
+  }
+
+  @Override
+  public void onImageAvailable(ImageReader reader)
+  {
+    try
+    {
+      final Image image = mImageReader.acquireNextImage();
+
+      if (mScreenshotMode)
+      {
+        mActivity._onScreenshotAvailable(image);
+        stopCapture();
+      }
+      else
+        mActivity._onCaptureAvailable(image);
+    }
+    catch (Exception e)
+    {}
+  }
+
+  /***************/
+
+  public void takeScreenshot(int width, int height)
+  {
+    if (mMediaProjection == null)
+      return;
+
+    mScreenshotMode = true;
+    mVirtualDisplay = createVirtualDisplay(width, height);
+  }
+
+  public void takeScreenshot()
+  {
+    if (mMediaProjection == null)
+      return;
+
+    mScreenshotMode = true;
+    mVirtualDisplay = createVirtualDisplay();
+  }
+
+  public void startCapture(int width, int height)
+  {
+    if (mMediaProjection == null)
+      return;
+
+    if (mVirtualDisplay != null)
+      return;
+
+    mScreenshotMode = false;
+    mVirtualDisplay = createVirtualDisplay(width, height);
+  }
+
+  public void stopCapture()
+  {
+    if (mVirtualDisplay != null)
+    {
+      mVirtualDisplay.release();
+      mVirtualDisplay = null;
+    }
+  }
+
+  public void stopProjection()
+  {
+    mHandler.post(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        if (mMediaProjection != null)
+        {
+          mMediaProjection.stop();
+        }
+      }
+    });
+  }
+
+}
+

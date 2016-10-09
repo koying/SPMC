@@ -34,6 +34,14 @@
 #include "xbmc/linux/RBP.h"
 #endif
 
+#ifdef TARGET_ANDROID
+#include "platform/android/activity/XBMCApp.h"
+#include <androidjni/Image.h>
+extern "C" {
+#include "libswscale/swscale.h"
+}
+#endif
+
 #ifdef HAS_IMXVPU
 // This has to go into another header file
 #include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecIMX.h"
@@ -49,6 +57,7 @@
 #include "settings/SettingPath.h"
 #include "settings/Settings.h"
 #include "settings/windows/GUIControlSettings.h"
+#include "settings/AdvancedSettings.h"
 
 #if defined(HAS_LIBAMCODEC)
 #include "utils/ScreenshotAML.h"
@@ -71,6 +80,45 @@ CScreenshotSurface::~CScreenshotSurface()
 
 bool CScreenshotSurface::capture()
 {
+#if defined(TARGET_ANDROID)
+  if (g_advancedSettings.m_videoUseDroidProjectionCapture)
+  {
+    jni::CJNIImage image;
+    CXBMCApp::TakeScreenshot();
+    if (CXBMCApp::WaitForCapture(image))
+    {
+      if (image)
+      {
+        m_width = image.getWidth();
+        m_height = image.getHeight();
+
+        std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
+        CJNIByteBuffer bytebuffer = planes[0].getBuffer();
+        m_stride = planes[0].getRowStride();
+
+        //make a new buffer and copy the read image to it with the Y axis inverted
+        m_buffer = new unsigned char[m_stride * m_height];
+        void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
+        memcpy(m_buffer, buf_ptr, m_stride * m_height);
+        image.close();
+
+        // we need to save in BGRA order so XOR Swap RGBA -> BGRA
+        for (int y = 0; y < m_height; y++)
+        {
+          unsigned char* swap_pixels = m_buffer + (y * m_stride);
+          for (int x = 0; x < m_width; x++, swap_pixels+=4)
+          {
+            std::swap(swap_pixels[0], swap_pixels[2]);
+          }
+        }
+      }
+      return true;
+    }
+    else
+      return false;
+  }
+#endif
+
 #if defined(TARGET_RASPBERRY_PI)
   g_RBP.GetDisplaySize(m_width, m_height);
   m_buffer = g_RBP.CaptureDisplay(m_width, m_height, &m_stride, true, false);

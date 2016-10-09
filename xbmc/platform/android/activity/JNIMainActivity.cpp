@@ -62,6 +62,22 @@ void CJNIMainActivity::_callNative(JNIEnv *env, jobject context, jlong funcAddr,
   ((void (*)(CVariant *))funcAddr)((CVariant *)variantAddr);
 }
 
+void CJNIMainActivity::_onCaptureAvailable(JNIEnv *env, jobject context, jobject image)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onCaptureAvailable(CJNIImage(jhobject(image)));
+}
+
+void CJNIMainActivity::_onScreenshotAvailable(JNIEnv* env, jobject context, jobject image)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onScreenshotAvailable(CJNIImage(jhobject(image)));
+}
+
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
 {
   call_method<void>(m_context,
@@ -147,4 +163,28 @@ void CJNIMainActivity::unregisterMediaButtonEventReceiver()
 {
   call_method<void>(m_context,
                     "unregisterMediaButtonEventReceiver", "()V");
+}
+
+void CJNIMainActivity::takeScreenshot()
+{
+  call_method<void>(m_context,
+                    "takeScreenshot", "()V");
+}
+
+void CJNIMainActivity::startProjection()
+{
+  call_method<void>(m_context,
+                    "startProjection", "()V");
+}
+
+void CJNIMainActivity::startCapture(int width, int height)
+{
+  call_method<void>(m_context,
+                    "startCapture", "(II)V", width, height);
+}
+
+void CJNIMainActivity::stopCapture()
+{
+  call_method<void>(m_context,
+                    "stopCapture", "()V");
 }
