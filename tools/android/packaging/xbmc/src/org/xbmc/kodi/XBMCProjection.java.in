@@ -30,7 +30,6 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
   {
     mActivity = act;
     mMediaProjection = proj;
-    mMediaProjection.registerCallback(new XBMCMediaProjectionCallback(), null);
 
         // start capture handling thread
         new Thread() {
@@ -90,19 +89,6 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
             mWidth, mHeight, mActivity.getResources().getDisplayMetrics().densityDpi,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY,
             mImageReader.getSurface(), null, mHandler);
-  }
-
-  private class XBMCMediaProjectionCallback extends MediaProjection.Callback
-  {
-    @Override
-    public void onStop()
-    {
-      if (mVirtualDisplay != null)
-      {
-        mVirtualDisplay.release();
-        mVirtualDisplay = null;
-      }
-    }
   }
 
   @Override
