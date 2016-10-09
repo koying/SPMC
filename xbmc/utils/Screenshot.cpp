@@ -33,6 +33,15 @@
 #include "xbmc/linux/RBP.h"
 #endif
 
+#ifdef TARGET_ANDROID
+#include "android/activity/XBMCApp.h"
+#include "android/jni/Image.h"
+extern "C" {
+#include "libswscale/swscale.h"
+}
+
+#endif
+
 #ifdef HAS_VIDEO_PLAYBACK
 #include "cores/VideoRenderers/RenderManager.h"
 #endif
@@ -51,6 +60,7 @@
 #include "settings/SettingPath.h"
 #include "settings/Settings.h"
 #include "settings/windows/GUIControlSettings.h"
+#include "settings/AdvancedSettings.h"
 
 #if defined(HAS_LIBAMCODEC)
 #include "utils/ScreenshotAML.h"
@@ -73,7 +83,86 @@ CScreenshotSurface::~CScreenshotSurface()
 
 bool CScreenshotSurface::capture()
 {
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(TARGET_ANDROID)
+  if (g_advancedSettings.m_videoUseDroidProjectionCapture)
+  {
+    jni::CJNIImage image;
+    CXBMCApp::TakeScreenshot();
+    if (CXBMCApp::WaitForCapture(image))
+    {
+      if (image)
+      {
+        m_width = image.getWidth();
+        m_height = image.getHeight();
+
+        std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
+        CJNIByteBuffer bytebuffer = planes[0].getBuffer();
+        m_stride = planes[0].getRowStride();
+
+        //make a new buffer and copy the read image to it with the Y axis inverted
+        m_buffer = new unsigned char[m_stride * m_height];
+        void *buf_ptr = xbmc_jnienv()->GetDirectBufferAddress(bytebuffer.get_raw());
+        memcpy(m_buffer, buf_ptr, m_stride * m_height);
+        image.close();
+
+        // we need to save in BGRA order so XOR Swap RGBA -> BGRA
+        for (int y = 0; y < m_height; y++)
+        {
+          unsigned char* swap_pixels = m_buffer + (y * m_stride);
+          for (int x = 0; x < m_width; x++, swap_pixels+=4)
+          {
+            std::swap(swap_pixels[0], swap_pixels[2]);
+          }
+        }
+      }
+    }
+    else
+      return false;
+  }
+  else
+  {
+    g_graphicsContext.BeginPaint();
+    if (g_application.m_pPlayer->IsPlayingVideo())
+    {
+#ifdef HAS_VIDEO_PLAYBACK
+      g_renderManager.SetupScreenshot();
+#endif
+    }
+    g_application.RenderNoPresent();
+    //get current viewport
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    m_width  = viewport[2] - viewport[0];
+    m_height = viewport[3] - viewport[1];
+    m_stride = m_width * 4;
+    unsigned char* surface = new unsigned char[m_stride * m_height];
+
+    //read pixels from the backbuffer
+    glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3], GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)surface);
+    g_graphicsContext.EndPaint();
+
+    //make a new buffer and copy the read image to it with the Y axis inverted
+    m_buffer = new unsigned char[m_stride * m_height];
+    for (int y = 0; y < m_height; y++)
+    {
+      // we need to save in BGRA order so XOR Swap RGBA -> BGRA
+      unsigned char* swap_pixels = surface + (m_height - y - 1) * m_stride;
+      for (int x = 0; x < m_width; x++, swap_pixels+=4)
+      {
+        std::swap(swap_pixels[0], swap_pixels[2]);
+      }
+      memcpy(m_buffer + y * m_stride, surface + (m_height - y - 1) *m_stride, m_stride);
+    }
+
+    delete [] surface;
+
+#if defined(HAS_LIBAMCODEC)
+    // Captures the current visible videobuffer and blend it into m_buffer (captured overlay)
+    CScreenshotAML::CaptureVideoFrame(m_buffer, m_width, m_height);
+#endif
+  }
+#elif defined(TARGET_RASPBERRY_PI)
   g_RBP.GetDisplaySize(m_width, m_height);
   m_buffer = g_RBP.CaptureDisplay(m_width, m_height, &m_stride, true, false);
   if (!m_buffer)

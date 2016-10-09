@@ -40,6 +40,10 @@
 #include "main/posix/MessagePrinter.h"
 #endif
 
+#if defined(TARGET_ANDROID)
+#include "android/activity/XBMCApp.h"
+#endif
+
 extern "C" int XBMC_Run(bool renderGUI)
 {
   int status = -1;
@@ -89,6 +93,11 @@ extern "C" int XBMC_Run(bool renderGUI)
     pEnumerator->RegisterEndpointNotificationCallback(&cMMNC);
     SAFE_RELEASE(pEnumerator);
   }
+#endif
+
+#if defined(TARGET_ANDROID)
+  if (g_advancedSettings.m_videoUseDroidProjectionCapture)
+    CXBMCApp::startProjection();
 #endif
 
   try
