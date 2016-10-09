@@ -163,6 +163,8 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler, CJob
     std::string m_videoPPFFmpegPostProc;
     bool m_videoVDPAUtelecine;
     bool m_videoVDPAUdeintSkipChromaHD;
+    bool m_videoUseDroidProjectionCapture;
+
     bool m_musicUseTimeSeeking;
     int m_musicTimeSeekForward;
     int m_musicTimeSeekBackward;

@@ -38,6 +38,7 @@ set(package_files strings.xml
                   src/org/xbmc/kodi/XBMCMediaContentProvider.java
                   src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java
                   src/org/xbmc/kodi/XBMCOnFrameAvailableListener.java
+                  src/org/xbmc/kodi/XBMCProjection.java
                   src/org/xbmc/kodi/XBMCRecommendationBuilder.java
                   src/org/xbmc/kodi/XBMCSearchableActivity.java
                   src/org/xbmc/kodi/XBMCSettingsContentObserver.java
