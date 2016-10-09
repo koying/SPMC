@@ -22,6 +22,7 @@
 #include <androidjni/Activity.h>
 #include <androidjni/InputManager.h>
 #include <androidjni/Rect.h>
+#include <androidjni/Image.h>
 
 class CJNIMainActivity : public CJNIActivity, public CJNIInputManagerInputDeviceListener
 {
@@ -39,6 +40,8 @@ public:
   static void _onInputDeviceAdded(JNIEnv *env, jobject context, jint deviceId);
   static void _onInputDeviceChanged(JNIEnv *env, jobject context, jint deviceId);
   static void _onInputDeviceRemoved(JNIEnv *env, jobject context, jint deviceId);
+  static void _onCaptureAvailable(JNIEnv *env, jobject context, jobject image);
+  static void _onScreenshotAvailable(JNIEnv *env, jobject context, jobject image);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -49,12 +52,19 @@ public:
 
   CJNIRect getDisplayRect();
   
+  static void takeScreenshot();
+  static void startProjection();
+  static void startCapture(int width, int height);
+  static void stopCapture();
+
 private:
   static CJNIMainActivity *m_appInstance;
 
 protected:
   virtual void onNewIntent(CJNIIntent intent)=0;
   virtual void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData)=0;
+  virtual void onCaptureAvailable(jni::CJNIImage image)=0;
+  virtual void onScreenshotAvailable(jni::CJNIImage image)=0;
   virtual void onVolumeChanged(int volume)=0;
   virtual void onAudioFocusChange(int focusChange)=0;
   virtual void doFrame(int64_t frameTimeNanos)=0;

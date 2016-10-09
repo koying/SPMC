@@ -10,6 +10,9 @@ import android.hardware.input.InputManager;
 import android.graphics.Rect;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
+import android.media.Image;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +34,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 {
   private static final String TAG = "@APP_NAME_UC@";
   public static Main MainActivity = null;
+  private static final int INTENT_RESULT_PROJECT_CODE = 4658;
 
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCInputDeviceListener mInputDeviceListener;
@@ -38,10 +42,16 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private View thisView = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
+  private XBMCProjection mCaptureProjection = null;
+  private XBMCProjection mScreenshotProjection = null;
+  private MediaProjection mMediaProjection;
+  private int mProjectionIntentId = 0;
 
   native void _onNewIntent(Intent intent);
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
   native void _doFrame(long frameTimeNanos);
+  native void _onCaptureAvailable(Image img);
+  native void _onScreenshotAvailable(Image img);
 
   private Runnable leanbackUpdateRunnable = new Runnable()
   {
@@ -176,6 +186,40 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     AudioManager manager = (AudioManager) getSystemService(AUDIO_SERVICE);
     manager.unregisterMediaButtonEventReceiver(new ComponentName(getPackageName(), XBMCBroadcastReceiver.class.getName()));
+  }
+
+  public void takeScreenshot()
+  {
+    if (mMediaProjection == null)
+      return;
+    mScreenshotProjection.takeScreenshot();
+  }
+
+  public void startProjection()
+  {
+    final MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+    startActivityForResult(projectionManager.createScreenCaptureIntent(), INTENT_RESULT_PROJECT_CODE);
+    mProjectionIntentId = INTENT_RESULT_PROJECT_CODE;
+  }
+
+  public void Initialize(int resultCode, Intent resultData)
+  {
+    final MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+    mMediaProjection = projectionManager.getMediaProjection(resultCode, resultData);
+    mCaptureProjection = new XBMCProjection(this, mMediaProjection);
+    mScreenshotProjection = new XBMCProjection(this, mMediaProjection);
+  }
+
+  public void startCapture(int width, int height)
+  {
+    if (mMediaProjection == null)
+      return;
+    mCaptureProjection.startCapture(width, height);
+  }
+
+  public void stopCapture()
+  {
+    mCaptureProjection.stopCapture();
   }
 
   @Override
@@ -315,6 +359,13 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onActivityResult(int requestCode, int resultCode,
       Intent resultData)
   {
+    if (requestCode == mProjectionIntentId)
+    {
+      if (resultCode == RESULT_OK)
+        Initialize(resultCode, resultData);
+      return;
+    }
+
     _onActivityResult(requestCode, resultCode, resultData);
   }
 
