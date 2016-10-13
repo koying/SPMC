@@ -78,6 +78,14 @@ void CJNIMainActivity::_onAudioDeviceRemoved(JNIEnv *env, jobject context, jobje
     m_appInstance->onAudioDeviceRemoved(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
 }
 
+void CJNIMainActivity::_onVideoViewAcquired(JNIEnv *env, jobject context)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onVideoViewAcquired();
+}
+
 void CJNIMainActivity::_onVideoViewLost(JNIEnv *env, jobject context)
 {
   (void)env;

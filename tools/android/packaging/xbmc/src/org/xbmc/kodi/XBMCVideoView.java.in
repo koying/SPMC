@@ -110,6 +110,7 @@ public class XBMCVideoView extends SurfaceView implements
 
     Log.d(TAG, "Created");
     mHasHolder = true;
+    mActivity._onVideoViewAcquired();
   }
 
   @Override

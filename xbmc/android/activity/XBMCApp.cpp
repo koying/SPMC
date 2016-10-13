@@ -1157,6 +1157,11 @@ void CXBMCApp::onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)
   CheckHeadsetPlugged();
 }
 
+void CXBMCApp::onVideoViewAcquired()
+{
+
+}
+
 void CXBMCApp::onVideoViewLost()
 {
   if (g_application.m_pPlayer->IsPlayingVideo())

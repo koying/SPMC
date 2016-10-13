@@ -53,6 +53,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _doFrame(long frameTimeNanos);
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
+  native void _onVideoViewAcquired();
   native void _onVideoViewLost();
   native void _onCaptureAvailable(Image img);
   native void _onScreenshotAvailable(Image img);
