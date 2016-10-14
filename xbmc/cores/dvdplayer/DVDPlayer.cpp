@@ -2442,6 +2442,7 @@ void CDVDPlayer::HandleMessages()
         {
           FlushBuffers(false, start, true);
           offset = DVD_TIME_TO_MSEC(start) - beforeSeek;
+          m_callback.OnPlayBackSeek(beforeSeek, offset);
           m_callback.OnPlayBackSeekChapter(msg.GetChapter());
         }
 
