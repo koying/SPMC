@@ -67,6 +67,16 @@
 
 using namespace KODI::MESSAGING;
 
+enum MEDIACODEC_STATES
+{
+  MEDIACODEC_STATE_UNINITIALIZED,
+  MEDIACODEC_STATE_CONFIGURED,
+  MEDIACODEC_STATE_FLUSHED,
+  MEDIACODEC_STATE_RUNNING,
+  MEDIACODEC_STATE_ENDOFSTREAM,
+  MEDIACODEC_STATE_ERROR
+};
+
 static bool CanSurfaceRenderBlackList(const std::string &name)
 {
   // All devices 'should' be capiable of surface rendering
@@ -341,6 +351,7 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_re
 , m_jnisurface(nullptr)
 , m_render_sw(false)
 , m_render_surface(surface_render)
+, m_state(MEDIACODEC_STATE_UNINITIALIZED)
 {
   memset(&m_videobuffer, 0x00, sizeof(DVDVideoPicture));
   memset(&m_demux_pkt, 0, sizeof(m_demux_pkt));
@@ -694,6 +705,7 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
     AMediaCodec_stop(m_codec);
     AMediaCodec_delete(m_codec);
     m_codec = nullptr;
+    m_state = MEDIACODEC_STATE_UNINITIALIZED;
   }
   ReleaseSurfaceTexture();
 
@@ -715,7 +727,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
   // Handle input, add demuxer packet to input queue, we must accept it or
   // it will be discarded as DVDPlayerVideo has no concept of "try again".
   // we must return VC_BUFFER or VC_PICTURE, default to VC_BUFFER.
-  int rtn = VC_BUFFER;
+  int rtn = (m_state == MEDIACODEC_STATE_ENDOFSTREAM) ? 0 : VC_BUFFER;;
 
   if (!m_opened)
     return VC_ERROR;
@@ -723,21 +735,30 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
   if (m_hints.ptsinvalid)
     pts = DVD_NOPTS_VALUE;
 
-  // must check for an output picture 1st,
-  // otherwise, mediacodec can stall on some devices.
-  if (GetOutputPicture() > 0)
-    rtn |= VC_PICTURE;
-
   if (!pData)
   {
     // Check if we have a saved buffer
-    if (m_demux_pkt.pData)
+    if (m_demux_pkt.pData && m_state != MEDIACODEC_STATE_ENDOFSTREAM)
     {
       pData = m_demux_pkt.pData;
       iSize = m_demux_pkt.iSize;
       pts = m_demux_pkt.pts;
       dts = m_demux_pkt.dts;
     }
+  }
+
+  // must check for an output picture 1st,
+  // otherwise, mediacodec can stall on some devices.
+  int retgp = GetOutputPicture();
+  if (retgp > 0)
+  {
+    rtn |= VC_PICTURE;
+  }
+  else if (retgp == -1)  // EOS
+  {
+    AMediaCodec_flush(m_codec);
+    m_state = MEDIACODEC_STATE_FLUSHED;
+    rtn |= VC_BUFFER;
   }
 
   if (pData)
@@ -747,6 +768,11 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
     int index = AMediaCodec_dequeueInputBuffer(m_codec, timeout_us);
     if (index >= 0)
     {
+      if (m_state == MEDIACODEC_STATE_FLUSHED)
+        m_state = MEDIACODEC_STATE_RUNNING;
+      if (!(m_state == MEDIACODEC_STATE_FLUSHED || m_state == MEDIACODEC_STATE_RUNNING))
+        CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode Dequeue: Wrong state (%d)", m_state);
+
       // we have an input buffer, fill it.
       if (m_bitstream)
       {
@@ -856,7 +882,13 @@ void CDVDVideoCodecAndroidMediaCodec::Reset()
     FlushInternal();
 
     // now we can flush the actual MediaCodec object
-    AMediaCodec_flush(m_codec);
+    if (m_state == MEDIACODEC_STATE_RUNNING)
+    {
+      AMediaCodec_flush(m_codec);
+      m_state = MEDIACODEC_STATE_FLUSHED;
+    }
+    else
+      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Reset Wrong state (%d)", m_state);
 
     // Invalidate our local DVDVideoPicture bits
     m_videobuffer.pts = DVD_NOPTS_VALUE;
@@ -980,6 +1012,7 @@ bool CDVDVideoCodecAndroidMediaCodec::ConfigureMediaCodec(void)
     CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec configure error: %d", mstat);
     return false;
   }
+  m_state = MEDIACODEC_STATE_CONFIGURED;
 
   mstat = AMediaCodec_start(m_codec);
   if (mstat != AMEDIA_OK)
@@ -987,6 +1020,7 @@ bool CDVDVideoCodecAndroidMediaCodec::ConfigureMediaCodec(void)
     CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec start error: %d", mstat);
     return false;
   }
+  m_state = MEDIACODEC_STATE_FLUSHED;
 
   // There is no guarantee we'll get an INFO_OUTPUT_FORMAT_CHANGED (up to Android 4.3)
   // Configure the output with defaults
@@ -1015,7 +1049,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
     {
       CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec:: BUFFER_FLAG_END_OF_STREAM");
       AMediaCodec_releaseOutputBuffer(m_codec, index, false);
-      return 0;
+      return -1;
     }
     if (m_drop)
     {
@@ -1091,17 +1125,18 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
   else if (index == AMEDIACODEC_INFO_OUTPUT_BUFFERS_CHANGED)
   {
     // ignore.
-    rtn = -1;
+    rtn = 0;
   }
   else if (index == AMEDIACODEC_INFO_TRY_AGAIN_LATER)
   {
     // normal dequeueOutputBuffer timeout, ignore it.
-    rtn = -1;
+    rtn = 0;
   }
   else
   {
     // we should never get here
     CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture unknown index(%d)", index);
+    rtn = -2;
   }
 
   return rtn;
