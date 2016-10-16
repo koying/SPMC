@@ -19,8 +19,8 @@ ifeq ($(OS),android)
   endif 
 endif
 
-ifeq ($(Configuration),Release)
 CONFIGURE += --enable-breakpad
+ifeq ($(Configuration),Release)
 DEBUG = --enable-debug=no
 endif
 

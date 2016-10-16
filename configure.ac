@@ -206,6 +206,8 @@ libcap_disabled="== Capabilities detection support disabled. =="
 libcap_not_found="== Could not find libcap. Capabilities detection support disabled. =="
 gtest_enabled="== Google Test Framework will be configured. =="
 gtest_disabled="== Google Test Framework will not be configured. =="
+breakpad_enabled="== Google Breakpad will be configured. =="
+breakpad_disabled="== Google Breakpad Framework will not be configured. =="
 
 libudev_not_found="== Could not find libudev. Will use polling to check for device changes. =="
 libudev_disabled="== udev support disabled. Will use polling to check for device changes. =="
@@ -480,6 +482,12 @@ AC_ARG_ENABLE([gtest],
   [configure Google Test Framework (default is yes)])],
   [configure_gtest=$enableval],
   [configure_gtest=yes])
+
+AC_ARG_ENABLE([breakpad],
+  [AS_HELP_STRING([--enable-breakpad],
+  [configure Google Breakpad (default is no)])],
+  [use_breakpad=$enableval],
+  [use_breakpad=no])
 
 AC_ARG_ENABLE([codec],
   [AS_HELP_STRING([--enable-codec],
@@ -2021,6 +2029,21 @@ else
   SKIP_CONFIG_GTEST=1
 fi
 
+ Google Breakpad
+if test "$use_breakpad" = "yes"; then
+  USE_BREAKPAD=1
+  PKG_CHECK_MODULES([BREAKPAD],    [breakpad-client],
+    [INCLUDES="$INCLUDES $BREAKPAD_CFLAGS"; LIBS="$LIBS $BREAKPAD_LIBS"],
+    AC_MSG_ERROR("breakpad-client not found"))
+  AC_DEFINE([HAVE_BREAKPAD],[1],["Define to 1 if Google Breakpad is installed"])
+  AC_MSG_NOTICE($breakpad_enabled)
+  final_message="$final_message\n  Google Breakpad Configured:\tYes"
+else
+  AC_MSG_NOTICE($breakpad_disabled)
+  final_message="$final_message\n  Google Breakpad Configured:\tNo"
+  USE_BREAKPAD=0
+fi
+
 if test "$use_avahi" = "yes"; then
   final_message="$final_message\n  Avahi:\tYes"
 else
@@ -2368,6 +2391,7 @@ AC_SUBST(HAVE_SSE4)
 AC_SUBST(USE_MMAL)
 AC_SUBST(USE_X11)
 AC_SUBST(USE_OPTICAL_DRIVE)
+AC_SUBST(USE_BREAKPAD)
 
 # pushd and popd are not available in other shells besides bash, so implement
 # our own pushd/popd functions

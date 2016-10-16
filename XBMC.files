@@ -9896,3 +9896,5 @@ xbmc/platform/android/activity/AndroidTouch.cpp
 xbmc/platform/android/activity/AndroidJoyStick.cpp
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCInputDeviceListener.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCInputDeviceListener.java.in
+xbmc/ServiceManager.cpp
+xbmc/ServiceManager.h
