@@ -2259,7 +2259,7 @@ OUTPUT_FILES="Makefile \
     xbmc/platform/darwin/osx/Info.plist \
     xbmc/platform/darwin/ios/Info.plist \
     project/cmake/KodiConfig.cmake \
-    tools/android/packaging/xbmc/AndroidManifest.xml \
+    addons/xbmc.addon/addon.xml \ 
     "
 
 OUTPUT_FILES_DROID=" \
