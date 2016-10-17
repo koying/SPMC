@@ -92,7 +92,8 @@ bool CEGLWrapper::Initialize(const std::string &implementation)
   // that we know will work
   if (
 #if defined(TARGET_ANDROID) && defined(HAS_LIBAMCODEC)
-      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlAndroid>(implementation))
+      ((nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlAndroid>(implementation)) ||
+      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation))) 
 #elif defined(TARGET_ANDROID)
       (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation))
 #elif defined(TARGET_RASPBERRY_PI)
