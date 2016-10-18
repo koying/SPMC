@@ -174,12 +174,10 @@ CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
     exit(1);
     return;
   }
-  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CXBMCApp::~CXBMCApp()
 {
-  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
   m_xbmcappinstance = NULL;
   delete m_wakeLock;
 }
