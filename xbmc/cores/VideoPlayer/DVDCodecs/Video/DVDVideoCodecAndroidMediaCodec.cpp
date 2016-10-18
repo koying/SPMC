@@ -506,8 +506,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       return false;
     m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnivideosurface.get_raw());
     CXBMCApp::get()->setVideosurfaceInUse(true);
-
-    m_formatname += "(S)";
   }
 
 #ifdef DEBUG_EXTRADATA
