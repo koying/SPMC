@@ -70,6 +70,7 @@ public:
   bool                WaitForFrame(int millis);
   // MediaCodec related
   void                ReleaseOutputBuffer(bool render);
+  bool                IsReleased() { return m_isReleased; }
   // SurfaceTexture released
   ssize_t             GetIndex() const;
   int                 GetTextureID() const;
