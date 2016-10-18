@@ -9906,3 +9906,4 @@ xbmc/platform/XbmcContext.cpp
 xbmc/platform/XbmcContext.h
 xbmc/platform/Makefile.in
 xbmc/platform/CMakeLists.txt
+tools/depends/target/xbmc/Makefile

@@ -219,6 +219,11 @@ void CDVDMediaCodecInfo::Validate(bool state)
   m_valid = state;
 }
 
+bool CDVDMediaCodecInfo::WaitForFrame(int millis)
+{
+  return m_frameready->WaitMSec(millis);
+}
+
 void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
 {
   CSingleLock lock(m_section);
@@ -283,7 +288,7 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   // we hook the SurfaceTexture OnFrameAvailable callback
   // using CJNISurfaceTextureOnFrameAvailableListener and wait
   // on a CEvent to fire. 50ms seems to be a good max fallback.
-  m_frameready->WaitMSec(50);
+  WaitForFrame(50);
 
   m_surfacetexture->updateTexImage();
   if (xbmc_jnienv()->ExceptionCheck())
