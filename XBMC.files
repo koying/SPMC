@@ -9898,3 +9898,11 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCInputDeviceListener.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCInputDeviceListener.java.in
 xbmc/ServiceManager.cpp
 xbmc/ServiceManager.h
+xbmc/platform/Platform.cpp
+xbmc/platform/Platform.h
+xbmc/platform/xbmc.cpp
+xbmc/platform/xbmc.h
+xbmc/platform/XbmcContext.cpp
+xbmc/platform/XbmcContext.h
+xbmc/platform/Makefile.in
+xbmc/platform/CMakeLists.txt

@@ -2862,3 +2862,4 @@ tools/android/packaging/xbmc
 xbmc/video/jobs
 xbmc/video/videosync
 tools/android/packaging/xbmc/src/org/xbmc/kodi
+xbmc/platform
