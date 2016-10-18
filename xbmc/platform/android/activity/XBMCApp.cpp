@@ -328,11 +328,11 @@ void CXBMCApp::onLostFocus()
 
 void CXBMCApp::Initialize()
 {
-  // Allocate a pool of texture for MediaCodec
+  // Allocate a pool of texture for MediaCodec non-surface
   GLuint texture_ids[5];
   glGenTextures(5, texture_ids);
   for (int i=0; i<5; ++i)
-    CXBMCApp::GetTexturePool().push_back(texture_ids[i]);
+    m_texturePool.push_back(texture_ids[i]);
 
   g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(CXBMCApp::get());  
 }
@@ -341,11 +341,11 @@ void CXBMCApp::Deinitialize()
 {
   g_application.m_ServiceManager->GetAnnouncementManager().RemoveAnnouncer(CXBMCApp::get());
 
-  while(!CXBMCApp::GetTexturePool().empty())
+  while(!m_texturePool.empty())
   {
-    GLuint texture_id = CXBMCApp::GetTexturePool().back();
+    GLuint texture_id = m_texturePool.back();
     glDeleteTextures(1, &texture_id);
-    CXBMCApp::GetTexturePool().pop_back();
+    m_texturePool.pop_back();
   }
 }
 
@@ -583,9 +583,18 @@ void CXBMCApp::BringToFront()
   }
 }
 
-std::vector<GLuint> &CXBMCApp::GetTexturePool()
+GLuint CXBMCApp::pullTexture()
 {
-  return m_texturePool;
+  if (m_texturePool.empty())
+    return (GLuint) -1;
+  GLuint tex = m_texturePool.back();
+  m_texturePool.pop_back();
+  return tex;
+}
+
+void CXBMCApp::pushTexture(GLuint tex)
+{
+  m_texturePool.push_back(tex);
 }
 
 int CXBMCApp::GetDPI()
