@@ -326,6 +326,29 @@ void CXBMCApp::onLostFocus()
   m_hasFocus = false;
 }
 
+void CXBMCApp::Initialize()
+{
+  // Allocate a pool of texture for MediaCodec
+  GLuint texture_ids[5];
+  glGenTextures(5, texture_ids);
+  for (int i=0; i<5; ++i)
+    CXBMCApp::GetTexturePool().push_back(texture_ids[i]);
+
+  g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(CXBMCApp::get());  
+}
+
+void CXBMCApp::Deinitialize()
+{
+  g_application.m_ServiceManager->GetAnnouncementManager().RemoveAnnouncer(CXBMCApp::get());
+
+  while(!CXBMCApp::GetTexturePool().empty())
+  {
+    GLuint texture_id = CXBMCApp::GetTexturePool().back();
+    glDeleteTextures(1, &texture_id);
+    CXBMCApp::GetTexturePool().pop_back();
+  }
+}
+
 bool CXBMCApp::EnableWakeLock(bool on)
 {
   android_printf("%s: %s", __PRETTY_FUNCTION__, on ? "true" : "false");
