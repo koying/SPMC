@@ -143,7 +143,8 @@ public:
   static int SetBuffersGeometry(int width, int height, int format);
   static int android_printf(const char *format, ...);
   static void BringToFront();
-  static std::vector<GLuint> &GetTexturePool();
+  static GLuint pullTexture();
+  static void pushTexture(GLuint tex);
 
   static int GetBatteryLevel();
   static bool EnableWakeLock(bool on);
