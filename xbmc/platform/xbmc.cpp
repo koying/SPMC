@@ -31,7 +31,6 @@
 #endif
 
 #if defined(TARGET_ANDROID)
-#include "interfaces/AnnouncementManager.h"
 #include "platform/android/activity/XBMCApp.h"
 #endif
 
@@ -65,7 +64,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
     return false;
   g_RBP.LogFirmwareVerison();
 #elif defined(TARGET_ANDROID)
-  g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(CXBMCApp::get());
+  CXBMCApp::get()->Initialize();
 #endif
 
   if (renderGUI && !g_application.CreateGUI())
@@ -123,7 +122,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
 #ifdef TARGET_RASPBERRY_PI
   g_RBP.Deinitialize();
 #elif defined(TARGET_ANDROID)
-  g_application.m_ServiceManager->GetAnnouncementManager().RemoveAnnouncer(CXBMCApp::get());
+  CXBMCApp::get()->Deinitialize();
 #endif
 
   return status;

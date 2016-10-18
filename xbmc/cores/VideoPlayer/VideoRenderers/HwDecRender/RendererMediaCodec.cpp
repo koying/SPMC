@@ -49,21 +49,10 @@ CRendererMediaCodec::CRendererMediaCodec()
     eglClientWaitSyncKHR = (PFNEGLCLIENTWAITSYNCKHRPROC) eglGetProcAddress("eglClientWaitSyncKHR");
   }
 #endif
-  // Allocate a pool of texture for MediaCodec
-  GLuint texture_ids[5];
-  glGenTextures(5, texture_ids);
-  for (int i=0; i<5; ++i)
-    CXBMCApp::GetTexturePool().push_back(texture_ids[i]);
 }
 
 CRendererMediaCodec::~CRendererMediaCodec()
 {
-  while(!CXBMCApp::GetTexturePool().empty())
-  {
-    GLuint texture_id = CXBMCApp::GetTexturePool().back();
-    glDeleteTextures(1, &texture_id);
-    CXBMCApp::GetTexturePool().pop_back();
-  }
 }
 
 void CRendererMediaCodec::AddVideoPictureHW(DVDVideoPicture &picture, int index)

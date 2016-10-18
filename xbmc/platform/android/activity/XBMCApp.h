@@ -133,6 +133,8 @@ public:
   void onGainFocus();
   void onLostFocus();
 
+  void Initialize();
+  void Deinitialize();
 
   static const ANativeWindow** GetNativeWindow(int timeout);
   static int SetBuffersGeometry(int width, int height, int format);
