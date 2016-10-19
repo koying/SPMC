@@ -189,7 +189,7 @@ probably just means a debug key already existed, no cause for alarm.
     $ cd $HOME
     $ git clone git://github.com/xbmc/xbmc.git kodi-android
     $ cd kodi-android
-    $ git submodule update --init xbmc/android/jni
+    $ git submodule update --init xbmc/platform/android/jni
 
 -----------------------------------------------------------------------------
 5. How to compile

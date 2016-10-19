@@ -175,7 +175,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   std::string frameListener = pkgRoot + "/XBMCOnFrameAvailableListener";
   std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
   std::string audioFocusChangeListener = pkgRoot + "/XBMCOnAudioFocusChangeListener";
-  std::string inputDeviceListener = pkgroot + "/XBMCInputDeviceListener";
+  std::string inputDeviceListener = pkgRoot + "/XBMCInputDeviceListener";
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
@@ -193,7 +193,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       (void*)&CJNIMainActivity::_doFrame
     };
     env->RegisterNatives(cMain, &mDoFrame, 1);
-    
+
     JNINativeMethod mOnActivityResult = {
       "_onActivityResult",
       "(IILandroid/content/Intent;)V",

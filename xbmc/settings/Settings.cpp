@@ -55,7 +55,7 @@
 #endif
 #if defined(TARGET_ANDROID)
   #include "SettingAddon.h"
-  #include "android/activity/AndroidFeatures.h"
+  #include "platform/android/activity/AndroidFeatures.h"
 #endif
 #if defined(TARGET_RASPBERRY_PI)
 #include "linux/RBP.h"

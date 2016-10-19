@@ -29,8 +29,8 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "URL.h"
-#include "android/jni/JNIBase.h"
-#include "android/jni/Settings.h"
+#include "platform/android/jni/JNIBase.h"
+#include "platform/android/jni/Settings.h"
 
 using namespace XFILE;
 using namespace jni;

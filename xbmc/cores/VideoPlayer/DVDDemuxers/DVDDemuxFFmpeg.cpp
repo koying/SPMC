@@ -253,7 +253,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
       {
         url.SetProtocol("mmst");
         strFile = url.Get();
-      } 
+      }
     }
     if (result < 0 && avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
     {
@@ -415,9 +415,9 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
   }
 
   // Avoid detecting framerate if advancedsettings.xml says so
-  if (g_advancedSettings.m_videoFpsDetect == 0) 
+  if (g_advancedSettings.m_videoFpsDetect == 0)
       m_pFormatContext->fps_probe_size = 0;
-  
+
   // analyse very short to speed up mjpeg playback start
   if (iformat && (strcmp(iformat->name, "mjpeg") == 0) && m_ioContext->seekable == 0)
     av_opt_set_int(m_pFormatContext, "analyzeduration", 500000, 0);
@@ -511,7 +511,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
     unsigned int nProgram(~0);
     if (m_pFormatContext->nb_programs > 0)
     {
-      
+
       // select the corrrect program if requested
       CVariant programProp(pInput->GetProperty("program"));
       if (!programProp.isNull())
@@ -708,7 +708,7 @@ AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromInput()
         hasCookies = true;
       }
       // other standard headers (see https://en.wikipedia.org/wiki/List_of_HTTP_header_fields) are appended as actual headers
-      else if (name == "accept" || name == "accept-language" || name == "accept-datetime" || 
+      else if (name == "accept" || name == "accept-language" || name == "accept-datetime" ||
                name == "authorization" || name == "cache-control" || name == "connection" || name == "content-md5" ||
                name == "date" || name == "expect" || name == "forwarded" || name == "from" || name == "if-match" ||
                name == "if-modified-since" || name == "if-none-match" || name == "if-range" || name == "if-unmodified-since" ||
@@ -732,7 +732,7 @@ AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromInput()
       // we don't add blindly all options to headers anymore
       // if anybody wants to pass options to ffmpeg, explicitly prefix those
       // to be identified here
-      else 
+      else
       {
         CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::GetFFMpegOptionsFromInput() ignoring header option '%s: %s'", it->first.c_str(), value.c_str());
       }
@@ -1202,7 +1202,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         // content has changed
         stream = AddStream(pPacket->iStreamId);
       }
-      if (m_bSSIF && stream->iPhysicalId == 0x1011)
+      if (m_bSSIF && stream->uniqueId == 0x1011)
       {
         DemuxPacket* newpkt = movePacket(pPacket);
         m_H264queue.push(newpkt);
@@ -1215,7 +1215,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
     }
     else if (stream->type == STREAM_DATA)
     {
-      if (m_bSSIF && stream->iPhysicalId == 0x1012)
+      if (m_bSSIF && stream->uniqueId == 0x1012)
       {
         DemuxPacket* newpkt = movePacket(pPacket);
         m_MVCqueue.push(newpkt);
@@ -1225,7 +1225,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
 #endif
         pPacket = GetMVCPacket();
         if (pPacket->iSize)
-          stream = GetStreamInternal(pPacket->iStreamId);
+          stream = GetStream(pPacket->iStreamId);
       }
     }
     if (!stream)
@@ -1374,7 +1374,7 @@ bool CDVDDemuxFFmpeg::SeekByte(int64_t pos)
 void CDVDDemuxFFmpeg::UpdateCurrentPTS()
 {
   m_currentPts = DVD_NOPTS_VALUE;
-  
+
   int idx = av_find_default_stream_index(m_pFormatContext);
   if (idx >= 0)
   {
@@ -1533,7 +1533,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
         st->iChannelLayout = pStream->codec->channel_layout;
         if (st->iBitsPerSample == 0)
           st->iBitsPerSample = pStream->codec->bits_per_coded_sample;
-  
+
         if(av_dict_get(pStream->metadata, "title", NULL, 0))
           st->m_description = av_dict_get(pStream->metadata, "title", NULL, 0)->value;
 
@@ -1584,11 +1584,13 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
           st->iFpsScale = 0;
         }
 
+        /*
         if (m_bSSIF && pStream->id == 0x1011)
         {
           // Mark stream as MVC
           pStream->codec->codec_tag = AV_CODEC_ID_H264MVC;
         }
+        */
 
         st->iWidth = pStream->codec->width;
         st->iHeight = pStream->codec->height;
@@ -1597,7 +1599,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
         st->iBitsPerPixel = pStream->codec->bits_per_coded_sample;
 
         AVDictionaryEntry *rtag = av_dict_get(pStream->metadata, "rotate", NULL, 0);
-        if (rtag) 
+        if (rtag)
           st->iOrientation = atoi(rtag->value);
 
         // detect stereoscopic mode
@@ -1608,7 +1610,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
         if (!stereoMode.empty())
           st->stereo_mode = stereoMode;
 
-        
+
         if ( m_pInput->IsStreamType(DVDSTREAM_TYPE_DVD) )
         {
           if (pStream->codec->codec_id == AV_CODEC_ID_PROBE)
@@ -1658,10 +1660,10 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
         {
           CDemuxStreamSubtitleFFmpeg* st = new CDemuxStreamSubtitleFFmpeg(this, pStream);
           stream = st;
-      
+
           if(av_dict_get(pStream->metadata, "title", NULL, 0))
             st->m_description = av_dict_get(pStream->metadata, "title", NULL, 0)->value;
-  
+
           break;
         }
       }
@@ -1863,7 +1865,7 @@ void CDVDDemuxFFmpeg::GetChapterName(std::string& strChapterName, int chapterIdx
   if (chapterIdx <= 0 || chapterIdx > GetChapterCount())
     chapterIdx = GetChapter();
   CDVDInputStream::IChapter* ich = dynamic_cast<CDVDInputStream::IChapter*>(m_pInput);
-  if(ich)  
+  if(ich)
     ich->GetChapterName(strChapterName, chapterIdx);
   else
   {
@@ -1885,7 +1887,7 @@ int64_t CDVDDemuxFFmpeg::GetChapterPos(int chapterIdx)
     return 0;
 
   CDVDInputStream::IChapter* ich = dynamic_cast<CDVDInputStream::IChapter*>(m_pInput);
-  if(ich)  
+  if(ich)
     return ich->GetChapterPos(chapterIdx);
 
   return m_pFormatContext->chapters[chapterIdx-1]->start*av_q2d(m_pFormatContext->chapters[chapterIdx-1]->time_base);

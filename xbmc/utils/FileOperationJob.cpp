@@ -192,7 +192,7 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
           CVideoInfoTag* tag = pItem->GetVideoInfoTag();
           if (tag->m_type == "movie")
           {
-            strFileName = StringUtils::Format("%s (%d)", tag->m_strTitle.c_str(), tag->m_iYear);
+            strFileName = StringUtils::Format("%s (%d)", tag->m_strTitle.c_str(), tag->GetYear());
           }
           else if (tag->m_type == "episode")
           {
@@ -202,7 +202,7 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
           {
             strFileName = tag->m_strTitle;
           }
-        } 
+        }
         else
           strFileName = pItem->GetLabel();
 
@@ -223,7 +223,7 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
         {
           MUSIC_INFO::CMusicInfoTag* tag = pItem->GetMusicInfoTag();
           strFileName = StringUtils::Format("%s - %s - %d - %s", StringUtils::Join(tag->m_artist, "+").c_str(), tag->m_strAlbum.c_str(), tag->m_iTrack, tag->m_strTitle.c_str());
-        } 
+        }
         else
           strFileName = pItem->GetLabel();
 
@@ -235,7 +235,7 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
         }
         strFileName = CUtil::MakeLegalFileName(strFileName);
       }
-      
+
       std::string strnewDestFile;
       if (!strDestFile.empty()) // only do this if we have a destination
         strnewDestFile = URIUtils::ChangeBasePath(pItem->GetPath(), strFileName, strDestFile); // Convert (URL) encoding + slashes (if source / target differ)

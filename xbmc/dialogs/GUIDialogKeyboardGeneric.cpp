@@ -41,10 +41,10 @@
 #include "utils/log.h"
 
 #ifdef TARGET_ANDROID
-#include "android/jni/Intent.h"
-#include "android/jni/RecognizerIntent.h"
-#include "android/jni/ArrayList.h"
-#include "android/activity/XBMCApp.h"
+#include "platform/android/jni/Intent.h"
+#include "platform/android/jni/RecognizerIntent.h"
+#include "platform/android/jni/ArrayList.h"
+#include "platform/android/activity/XBMCApp.h"
 
 #define ACTION_RECOGNIZE_SPEECH_REQID 543
 
@@ -394,7 +394,7 @@ void CGUIDialogKeyboardGeneric::Backspace()
     g_charsetConverter.utf8ToW(m_hzcode, tmp);
     tmp.erase(tmp.length() - 1, 1);
     g_charsetConverter.wToUTF8(tmp, m_hzcode);
-    
+
     switch (m_codingtable->GetType())
     {
     case IInputCodingTable::TYPE_WORD_LIST:

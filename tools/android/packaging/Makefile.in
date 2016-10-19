@@ -3,7 +3,7 @@ include ../../depends/Makefile.include
 OBJS = libcurl.so \
   librtmp.so \
   libplist.so libshairplay.so \
-  libnfs.so libass.so libmodplug.so \
+  libnfs.so libass.so \
   libbluray.so libsmbclient.so
 
 PLATFORM_OBJS =
@@ -116,7 +116,7 @@ python: | xbmc/assets
 
 res:
 	mkdir -p xbmc/gen/@APP_PACKAGE_DIR@ xbmc/res xbmc/res/raw xbmc/res/values images
-	@echo "native_arch=$(ARCH)" > xbmc/res/raw/xbmc.properties
+	@echo "native_arch=$(CPU)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(CORE_SOURCE_DIR)/media/Splash.png xbmc/res/drawable/splash.png
 	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
 	cp -fp media/drawable-ldpi/ic_launcher.png xbmc/res/drawable-ldpi/ic_launcher.png
@@ -166,9 +166,9 @@ package: libs python xbmc/classes.dex
 
 apk-sign:
 	@echo "Signing..."
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/@APP_NAME_LC@app-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/@APP_NAME@app-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
 	@$(ZIPALIGN) -f 4 images/@APP_NAME@app-debug-$(CPU)-unaligned.apk $(CORE_SOURCE_DIR)/@APP_NAME@app-$(CPU)-debug.apk
-	@rm images/@APP_NAME_LC@app-debug-$(CPU)-unaligned.apk
+	@rm images/@APP_NAME@app-debug-$(CPU)-unaligned.apk
 	@echo "$(CORE_SOURCE_DIR)/@APP_NAME@app-$(CPU)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/lib@APP_NAME_LC@.so: $(SRCLIBS)

@@ -117,8 +117,6 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
         return false;
       }
       m_pFormatName = "am-h264";
-      if (m_hints.codec_tag == AV_CODEC_ID_H264MVC)
-        m_pFormatName = "am-h264mvc";
       // convert h264-avcC to h264-annex-b as h264-avcC
       // under streamers can have issues when seeking.
       if (m_hints.extradata)
@@ -428,7 +426,7 @@ void CDVDVideoCodecAmlogic::FrameQueuePush(double dts, double pts)
     }
   }
   m_queue_depth++;
-  pthread_mutex_unlock(&m_queue_mutex);	
+  pthread_mutex_unlock(&m_queue_mutex);
 }
 
 void CDVDVideoCodecAmlogic::FrameRateTracking(uint8_t *pData, int iSize, double dts, double pts)
@@ -507,7 +505,7 @@ void CDVDVideoCodecAmlogic::FrameRateTracking(uint8_t *pData, int iSize, double 
     if (cur_pts == DVD_NOPTS_VALUE)
       cur_pts = m_frame_queue->dts;
 
-    pthread_mutex_unlock(&m_queue_mutex);	
+    pthread_mutex_unlock(&m_queue_mutex);
 
     float duration = cur_pts - m_last_pts;
     m_last_pts = cur_pts;

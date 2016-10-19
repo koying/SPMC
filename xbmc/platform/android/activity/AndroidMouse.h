@@ -35,7 +35,7 @@ public:
   bool onMouseEvent(AInputEvent* event);
 
   // IDispResource Intf
-  virtual void OnResetDevice() override;
+  virtual void OnResetDisplay() override;
 
 protected:
 

@@ -21,7 +21,7 @@
 #include "system.h"
 
 #include "AndroidContentDirectory.h"
-#include "android/activity/XBMCApp.h"
+#include "platform/android/activity/XBMCApp.h"
 #include "FileItem.h"
 #include "File.h"
 #include "utils/URIUtils.h"
@@ -31,12 +31,12 @@
 #include "URL.h"
 #include "CompileInfo.h"
 
-#include "android/jni/Intent.h"
-#include "android/jni/URI.h"
-#include "android/jni/DocumentsContract.h"
-#include "android/jni/Document.h"
-#include "android/jni/ContentResolver.h"
-#include "android/jni/Cursor.h"
+#include "platform/android/jni/Intent.h"
+#include "platform/android/jni/URI.h"
+#include "platform/android/jni/DocumentsContract.h"
+#include "platform/android/jni/Document.h"
+#include "platform/android/jni/ContentResolver.h"
+#include "platform/android/jni/Cursor.h"
 
 #define ACTION_OPEN_DOCUMENT_TREE_REQID 421
 

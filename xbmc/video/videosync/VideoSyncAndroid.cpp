@@ -60,7 +60,7 @@ void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
 
     //calculate how many vblanks happened
     int64_t FT = (vsynctime - lastSync);
-    double VBlankTime = FT / (double)g_VideoReferenceClock.GetFrequency();
+    double VBlankTime = FT / (double)CurrentHostFrequency();
     double NrVBlanks = VBlankTime * m_fps;
 
 //    CLog::Log(LOGDEBUG, "CVideoSyncAndroid heartbeat: %lld(%f fps), %f", FT, 1.0/((double)FT/1000000000), NrVBlanks);
@@ -71,7 +71,7 @@ void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
       //save the timestamp of this vblank so we can calculate how many happened next time
       lastSync = vsynctime;
 
-      UpdateClock(iNrVBlanks, vsynctime);
+      UpdateClock(iNrVBlanks, vsynctime, m_refClock);
     }
   }
 }
@@ -95,7 +95,7 @@ void CVideoSyncAndroid::RefreshChanged()
   CLog::Log(LOGDEBUG, "CVideoSyncAndroid::%s Detected new refreshrate: %f hertz", __FUNCTION__, m_fps);
 }
 
-void CVideoSyncAndroid::OnResetDevice()
+void CVideoSyncAndroid::OnResetDisplay()
 {
   m_abort = true;
 }
@@ -105,16 +105,17 @@ void CVideoSyncAndroid::FrameCallback(int64_t frameTimeNanos)
   int           NrVBlanks;
   double        VBlankTime;
   int64_t       nowtime = CurrentHostCounter();
-  
+
   //calculate how many vblanks happened
-  VBlankTime = (double)(nowtime - m_LastVBlankTime) / (double)CurrentHostFrequency();
+  int64_t FT = nowtime - m_LastVBlankTime;
+  VBlankTime = (double)(FT) / (double)CurrentHostFrequency();
   NrVBlanks = MathUtils::round_int(VBlankTime * m_fps);
   if (NrVBlanks > 1)
     CLog::Log(LOGDEBUG, "CVideoSyncAndroid::FrameCallback late: %lld(%f fps), %d", FT, 1.0/((double)FT/1000000000), NrVBlanks);
 
   //save the timestamp of this vblank so we can calculate how many happened next time
   m_LastVBlankTime = nowtime;
-  
+
   //update the vblank timestamp, update the clock and send a signal that we got a vblank
   UpdateClock(NrVBlanks, nowtime, m_refClock);
 }

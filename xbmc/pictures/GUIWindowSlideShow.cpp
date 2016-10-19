@@ -53,7 +53,7 @@
 
 // below for screensaver enable/disable function
 #if defined(TARGET_ANDROID)
-#include "android/activity/XBMCApp.h"
+#include "platform/android/activity/XBMCApp.h"
 #elif defined(TARGET_DARWIN_TVOS)
 #include "platform/darwin/DarwinUtils.h"
 #endif

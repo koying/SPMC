@@ -192,9 +192,6 @@ public:
   static void UnregisterInputDeviceEventHandler();
   static bool onInputDeviceEvent(const AInputEvent* event);
 
-  static void InitFrameCallback(CVideoSyncAndroid *syncImpl);
-  static void DeinitFrameCallback();
-
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }
 

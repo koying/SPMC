@@ -127,7 +127,7 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
       {
         message.SetStringParam("");
       }
-      
+
       if (!CGUIWindowVideoBase::OnMessage(message))
         return false;
 
@@ -146,7 +146,7 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
             if (url.GetOption("showinfo") == "true")
             {
               ADDON::ScraperPtr scrapper;
-              OnItemInfo(pItem.get(), scrapper);
+              OnItemInfo(*pItem, scrapper);
             }
             break;
           }
@@ -195,7 +195,7 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
             item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
           }
           ADDON::ScraperPtr scrapper;
-          OnItemInfo(item, scrapper);
+          OnItemInfo(*item, scrapper);
         }
       }
 
@@ -335,7 +335,7 @@ int CGUIWindowVideoNav::GetFirstUnwatchedItemIndex(bool includeAllSeasons, bool 
 
       CVideoInfoTag *pTag = pItem->GetVideoInfoTag();
 
-      // Does the episode belong to the unwatched season and Is the episode unwatched, and is its epsiode number 
+      // Does the episode belong to the unwatched season and Is the episode unwatched, and is its epsiode number
       // lower than the currently identified first unwatched episode
       if (pTag->m_iSeason == iUnwatchedSeason && pTag->m_playCount == 0 && pTag->m_iEpisode < iUnwatchedEpisode)
       {
@@ -548,7 +548,7 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
     else if (!items.IsVirtualDirectoryRoot())
     { // load info from the database
       std::string label;
-      if (items.GetLabel().empty() && m_rootDir.IsSource(items.GetPath(), CMediaSourceSettings::GetInstance().GetSources("video"), &label)) 
+      if (items.GetLabel().empty() && m_rootDir.IsSource(items.GetPath(), CMediaSourceSettings::GetInstance().GetSources("video"), &label))
         items.SetLabel(label);
       if (!items.IsSourcesPath() && !items.IsLibraryFolder())
         LoadVideoInfo(items);
@@ -652,7 +652,7 @@ void CGUIWindowVideoNav::LoadVideoInfo(CFileItemList &items, CVideoDatabase &dat
         database.GetPlayCounts(items.GetPath(), items);
         fetchedPlayCounts = true;
       }
-      
+
       // preferably use some information from PVR info tag if available
       if (pItem->HasPVRRecordingInfoTag())
         pItem->GetPVRRecordingInfoTag()->CopyClientInfo(pItem->GetVideoInfoTag());
@@ -758,7 +758,7 @@ void CGUIWindowVideoNav::DoSearch(const std::string& strSearch, CFileItemList& i
 
   m_database.GetMusicVideosByAlbum(strSearch, tempItems);
   AppendAndClearSearchItems(tempItems, "[" + g_localizeStrings.Get(558) + "] ", items);
-  
+
   // get matching genres
   m_database.GetMovieGenresByName(strSearch, tempItems);
   AppendAndClearSearchItems(tempItems, "[" + strGenre + " - " + g_localizeStrings.Get(20342) + "] ", items);
@@ -1074,7 +1074,7 @@ bool CGUIWindowVideoNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
         type = "actor";
       else if (button == CONTEXT_BUTTON_SET_ARTIST_THUMB)
         type = MediaTypeArtist;
-      
+
       bool result = CGUIDialogVideoInfo::ManageVideoItemArtwork(m_vecItems->Get(itemNumber), type);
       Refresh();
 
@@ -1149,7 +1149,7 @@ bool CGUIWindowVideoNav::OnClick(int iItem, const std::string &player)
     {
       CGUIDialogOK::ShowAndGetInput(CVariant{257}, CVariant{662});
       return true;
-    }	  
+    }
   }
   else if (StringUtils::StartsWithNoCase(item->GetPath(), "newtag://"))
   {

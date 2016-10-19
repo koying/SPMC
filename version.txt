@@ -1,5 +1,5 @@
-APP_NAME SPMC
-APP_PACKAGE com.semperpax.spmc
+APP_NAME SPMC17
+APP_PACKAGE com.semperpax.spmc17
 COMPANY_NAME Semperpax
 WEBSITE http://spmc.semperpax.com/
 VERSION_MAJOR 17

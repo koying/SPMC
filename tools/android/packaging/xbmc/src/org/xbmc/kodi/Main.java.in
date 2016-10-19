@@ -373,7 +373,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onPause();
   }
-  
+
   @Override
   public void onActivityResult(int requestCode, int resultCode,
       Intent resultData)
@@ -402,13 +402,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       }
     }.start();
     super.onDestroy();
-  }
-  
-  @Override
-  public void doFrame(long frameTimeNanos)
-  {
-    Choreographer.getInstance().postFrameCallback(this);
-    _doFrame(frameTimeNanos);
   }
 
   @Override
