@@ -140,6 +140,7 @@ public:
   static const std::string SETTING_VIDEOPLAYER_ACCELMPEG2;
   static const std::string SETTING_VIDEOPLAYER_ACCELMPEG4;
   static const std::string SETTING_VIDEOPLAYER_ACCELH264;
+  static const std::string SETTING_VIDEOPLAYER_ACCELHEVC;
   static const std::string SETTING_VIDEOPLAYER_LIMITGUIUPDATE;
   static const std::string SETTING_MYVIDEOS_SELECTACTION;
   static const std::string SETTING_MYVIDEOS_EXTRACTFLAGS;

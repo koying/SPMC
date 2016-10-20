@@ -18275,3 +18275,7 @@ msgctxt "#39007"
 msgid "Upload the current debug log"
 msgstr ""
 
+msgctxt "#39008"
+msgid "Accelerate hevc"
+msgstr ""
+

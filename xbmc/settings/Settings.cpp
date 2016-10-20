@@ -188,6 +188,7 @@ const std::string CSettings::SETTING_VIDEOPLAYER_USESTAGEFRIGHT = "videoplayer.u
 const std::string CSettings::SETTING_VIDEOPLAYER_ACCELMPEG2 = "videoplayer.accelmpeg2";
 const std::string CSettings::SETTING_VIDEOPLAYER_ACCELMPEG4 = "videoplayer.accelmpeg4";
 const std::string CSettings::SETTING_VIDEOPLAYER_ACCELH264 = "videoplayer.accelh264";
+const std::string CSettings::SETTING_VIDEOPLAYER_ACCELHEVC = "videoplayer.accelhevc";
 const std::string CSettings::SETTING_VIDEOPLAYER_LIMITGUIUPDATE = "videoplayer.limitguiupdate";
 const std::string CSettings::SETTING_MYVIDEOS_SELECTACTION = "myvideos.selectaction";
 const std::string CSettings::SETTING_MYVIDEOS_EXTRACTFLAGS = "myvideos.extractflags";

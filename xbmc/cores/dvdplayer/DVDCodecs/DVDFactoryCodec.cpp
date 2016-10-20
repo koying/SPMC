@@ -231,6 +231,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
         if (hint.width >CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELH264))
           if ( (pCodec = OpenCodec(new CDVDVideoCodecAmlogic(), hint, options)) ) return pCodec;
         break;
+      case AV_CODEC_ID_HEVC:
+        if (hint.width >CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELHEVC))
+          if ( (pCodec = OpenCodec(new CDVDVideoCodecAmlogic(), hint, options)) ) return pCodec;
+        break;
       default:
         if ( (pCodec = OpenCodec(new CDVDVideoCodecAmlogic(), hint, options)) ) return pCodec;
     }
@@ -294,6 +298,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
       if (hint.width > CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELH264))
         if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(true), hint, options)) ) return pCodec;
       break;
+    case AV_CODEC_ID_HEVC:
+      if (hint.width > CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELHEVC))
+        if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(true), hint, options)) ) return pCodec;
+      break;
     default:
       if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(true), hint, options)) ) return pCodec;
     }
@@ -317,6 +325,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
       if (hint.width > CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELH264))
         if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(false), hint, options)) ) return pCodec;
       break;
+    case AV_CODEC_ID_HEVC:
+      if (hint.width > CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELHEVC))
+        if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(false), hint, options)) ) return pCodec;
+      break;
     default:
       if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(false), hint, options)) ) return pCodec;
     }
@@ -338,6 +350,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
       break;
     case AV_CODEC_ID_H264:
       if (hint.width > CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELH264))
+        if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(true), hint, options)) ) return pCodec;
+      break;
+    case AV_CODEC_ID_HEVC:
+      if (hint.width > CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELHEVC))
         if ( (pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(true), hint, options)) ) return pCodec;
       break;
     default:
