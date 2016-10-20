@@ -57,6 +57,7 @@ using namespace jni;
 
 #define TRUEHD_UNIT 960
 #define SMOOTHED_DELAY_MAX 10
+#define SKIP_DELAY_MAX 10
 
 static const AEChannel KnownChannels[] = { AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_LFE, AE_CH_SL, AE_CH_SR, AE_CH_BL, AE_CH_BR, AE_CH_BC, AE_CH_BLOC, AE_CH_BROC, AE_CH_NULL };
 
@@ -203,6 +204,7 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
   m_duration_written = 0;
   m_last_duration_written = 0;
   m_last_head_pos = 0;
+  m_skip_delay = 0;
   m_sink_delay = 0;
   m_lastAddTimeMs = 0;
   m_head_pos_wrap_count = 0;
@@ -513,6 +515,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
   m_last_head_pos = 0;
   m_head_pos_wrap_count = 0;
   m_head_pos_reset = 0;
+  m_skip_delay = 0;
   m_sink_delay = 0;
   m_lastAddTimeMs = 0;
 
@@ -533,11 +536,14 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     return;
   }
 
-  if (m_passthrough && !WantsIEC61937() && m_sink_delay)
+  if (m_sink_delay && m_skip_delay < SKIP_DELAY_MAX && m_smoothedDelayCount >= SMOOTHED_DELAY_MAX)
   {
     status.SetDelay(m_sink_delay);
+    m_skip_delay++;
     return;
   }
+  else
+    m_skip_delay = 0;
 
   uint64_t head_pos = 0;
   double frameDiffMilli = 0;
@@ -609,13 +615,11 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
     smootheDelay += d;
   smootheDelay /= m_smoothedDelayCount;
 
-  if (m_passthrough && !WantsIEC61937() && m_smoothedDelayCount == SMOOTHED_DELAY_MAX && !m_sink_delay)
-    m_sink_delay = smootheDelay;
-
   if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_duration_written/head_pos %f/%u %f(%f)", m_duration_written, head_pos, smootheDelay, delay);
+    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay m_duration_written/head_pos %f/%llu %f(%f)", m_duration_written, head_pos, smootheDelay, delay);
 
-    status.SetDelay(smootheDelay);
+  status.SetDelay(smootheDelay);
+  m_sink_delay = smootheDelay;
 }
 
 double CAESinkAUDIOTRACK::GetLatency()

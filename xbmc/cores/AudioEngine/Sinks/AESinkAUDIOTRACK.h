@@ -73,6 +73,7 @@ private:
   double             m_audiotrackbuffer_sec;
   int                m_encoding;
   unsigned int       m_buffer_size;
+  int                m_skip_delay;
   double             m_sink_delay;
   uint32_t           m_lastAddTimeMs;
 };
