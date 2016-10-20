@@ -231,8 +231,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     if (mMediaProjection == null)
       return;
-    if (mScreenshotProjection == null)
-      mScreenshotProjection = new XBMCProjection(this, mMediaProjection);
     mScreenshotProjection.takeScreenshot();
   }
 
@@ -247,14 +245,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     final MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
     mMediaProjection = projectionManager.getMediaProjection(resultCode, resultData);
+    mCaptureProjection = new XBMCProjection(this, mMediaProjection);
+    mScreenshotProjection = new XBMCProjection(this, mMediaProjection);
   }
 
   public void startCapture(int width, int height)
   {
     if (mMediaProjection == null)
       return;
-    if (mCaptureProjection == null)
-      mCaptureProjection = new XBMCProjection(this, mMediaProjection);
     mCaptureProjection.startCapture(width, height);
   }
 
