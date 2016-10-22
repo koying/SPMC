@@ -22,6 +22,7 @@
 #include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Interfaces/AE.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
+#include <atomic>
 #include <deque>
 
 extern "C" {
@@ -73,7 +74,7 @@ public:
   int64_t timestamp;
   int clockId;
   int pkt_start_offset;
-  int refCount;
+  std::atomic<int> refCount;
 };
 
 class CActiveAEBufferPool
