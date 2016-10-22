@@ -22,6 +22,7 @@
 #include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Interfaces/AE.h"
 #include "cores/AudioEngine/Engines/ActiveAE/AudioDSPAddons/ActiveAEDSP.h"
+#include <atomic>
 #include <deque>
 #include <memory>
 
@@ -74,7 +75,7 @@ public:
   CActiveAEBufferPool *pool;
   int64_t timestamp;
   int pkt_start_offset;
-  int refCount;
+  std::atomic<int> refCount;
 };
 
 class CActiveAEBufferPool
