@@ -242,7 +242,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
   // try to abort after 30 seconds
   m_timeout.Set(30000);
 
-  if( m_pInput->IsStreamType(DVDSTREAM_TYPE_FFMPEG) )
+  if (m_pInput->IsStreamType(DVDSTREAM_TYPE_FFMPEG))
   {
     // special stream type that makes avformat handle file opening
     // allows internal ffmpeg protocols to be used
@@ -513,6 +513,13 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
   // allow IsProgramChange to return true
   if (skipCreateStreams && GetNrOfStreams() == 0)
     m_program = 0;
+
+  // seems to be a bug in ffmpeg, hls jumps back to start after a couple of seconds
+  // this cures the issue
+  if (m_pFormatContext->iformat && strcmp(m_pFormatContext->iformat->name, "hls,applehttp") == 0)
+  {
+    SeekTime(0);
+  }
 
   return true;
 }
