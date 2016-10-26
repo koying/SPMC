@@ -226,7 +226,7 @@ void CNetworkAndroid::SetNameServers(const std::vector<std::string>& nameServers
 
 void CNetworkAndroid::RetrieveInterfaces()
 {
-  CJNIConnectivityManager connman(CXBMCApp::getSystemService("connection"));
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   std::vector<CJNINetwork> networks = connman.getAllNetworks();
   
   for (auto n : networks)
