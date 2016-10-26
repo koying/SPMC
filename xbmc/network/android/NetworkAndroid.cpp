@@ -31,6 +31,7 @@
 #include "android/jni/WifiInfo.h"
 
 #include "utils/StringUtils.h"
+#include "utils/log.h"
 
 CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, const CJNINetworkInfo& ni, const CJNILinkProperties& lp, const CJNINetworkInterface& intf)
   : m_network(network)
@@ -44,13 +45,13 @@ CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, const CJ
 std::vector<std::string> CNetworkInterfaceAndroid::GetNameServers()
 {
   std::vector<std::string> ret;
-  
+
   CJNIList<CJNIInetAddress> lia = m_lp.getDnsServers();
   for (int i=0; i < lia.size(); ++i)
   {
     ret.push_back(lia.get(i).getHostAddress());
   }
-  
+
   return ret;
 }
 
@@ -90,8 +91,8 @@ std::string CNetworkInterfaceAndroid::GetMacAddress()
 void CNetworkInterfaceAndroid::GetMacAddressRaw(char rawMac[6])
 {
   auto interfaceMacAddrRaw = m_intf.getHardwareAddress();
-  memcpy(rawMac, interfaceMacAddrRaw.data(), 6);  
- 
+  memcpy(rawMac, interfaceMacAddrRaw.data(), 6);
+
 }
 
 bool CNetworkInterfaceAndroid::GetHostMacAddress(unsigned long host, std::string& mac)
@@ -105,12 +106,19 @@ std::string CNetworkInterfaceAndroid::GetCurrentIPAddress()
   CJNIList<CJNILinkAddress> lla = m_lp.getLinkAddresses();
   if (lla.size() == 0)
     return "";
-  
-  CJNILinkAddress la = lla.get(0);
-  CJNIInetAddress ia = la.getAddress();
 
-  std::vector<char> adr = ia.getAddress();  
-  return StringUtils::Format("%u.%u.%u.%u", adr[0], adr[1], adr[2], adr[3]);  
+  int i = 0;
+  for (;i < lla.size(); ++i)
+  {
+    if (lla.get(i).getAddress().getAddress().size() > 4)  // IPV4 only
+      continue;
+    break;
+  }
+  if (i == lla.size())
+    return "";
+
+  CJNILinkAddress la = lla.get(i);
+  return la.getAddress().getHostAddress();
 }
 
 std::string CNetworkInterfaceAndroid::GetCurrentNetmask()
@@ -118,12 +126,22 @@ std::string CNetworkInterfaceAndroid::GetCurrentNetmask()
   CJNIList<CJNILinkAddress> lla = m_lp.getLinkAddresses();
   if (lla.size() == 0)
     return "";
-      
-  CJNILinkAddress la = lla.get(0);
+
+  int i = 0;
+  for (;i < lla.size(); ++i)
+  {
+    if (lla.get(i).getAddress().getAddress().size() > 4)  // IPV4 only
+      continue;
+    break;
+  }
+  if (i == lla.size())
+    return "";
+
+  CJNILinkAddress la = lla.get(i);
 
   int prefix = la.getPrefixLength();
   unsigned long mask = (0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF;
-  return StringUtils::Format("%lu.%lu.%lu.%lu", mask >> 24, (mask >> 16) & 0xFF, (mask >> 8) & 0xFF, mask & 0xFF);  
+  return StringUtils::Format("%lu.%lu.%lu.%lu", mask >> 24, (mask >> 16) & 0xFF, (mask >> 8) & 0xFF, mask & 0xFF);
 }
 
 std::string CNetworkInterfaceAndroid::GetCurrentDefaultGateway()
@@ -134,10 +152,10 @@ std::string CNetworkInterfaceAndroid::GetCurrentDefaultGateway()
     CJNIRouteInfo ri = ris.get(i);
     if (!ri.isDefaultRoute())
       continue;
-    
+
     CJNIInetAddress ia = ri.getGateway();
-    std::vector<char> adr = ia.getAddress();  
-    return StringUtils::Format("%u.%u.%u.%u", adr[0], adr[1], adr[2], adr[3]);  
+    std::vector<char> adr = ia.getAddress();
+    return StringUtils::Format("%u.%u.%u.%u", adr[0], adr[1], adr[2], adr[3]);
   }
   return "";
 }
@@ -145,7 +163,7 @@ std::string CNetworkInterfaceAndroid::GetCurrentDefaultGateway()
 std::string CNetworkInterfaceAndroid::GetCurrentWirelessEssId()
 {
   std::string ret;
-  
+
   if (m_ni.getType() == CJNIConnectivityManager::TYPE_WIFI)
   {
     CJNIWifiManager wm = CXBMCApp::getSystemService("wifi");
@@ -200,7 +218,7 @@ CNetworkInterface* CNetworkAndroid::GetFirstConnectedInterface()
     if (intf->IsEnabled() && intf->IsConnected() && !intf->GetCurrentDefaultGateway().empty())
       return intf;
   }
-  
+
   return nullptr;
 }
 
@@ -215,7 +233,7 @@ std::vector<std::string> CNetworkAndroid::GetNameServers()
   CNetworkInterfaceAndroid* intf = static_cast<CNetworkInterfaceAndroid*>(GetFirstConnectedInterface());
   if (intf)
     return intf->GetNameServers();
-  
+
   return std::vector<std::string>();
 }
 
@@ -228,7 +246,7 @@ void CNetworkAndroid::RetrieveInterfaces()
 {
   CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   std::vector<CJNINetwork> networks = connman.getAllNetworks();
-  
+
   for (auto n : networks)
   {
     CJNINetworkInfo ni = connman.getNetworkInfo(n);
