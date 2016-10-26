@@ -823,6 +823,9 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 
     ptinfo.m_deviceType = AE_DEVTYPE_HDMI;
     // passthrough
+    if (CJNIAudioFormat::ENCODING_IEC61937 != -1)
+      CLog::Log(LOGINFO, "AESinkAUDIOTRACK - ENCODING_IEC61937 detected");
+
     m_sink_sampleRates.insert(44100);
     m_sink_sampleRates.insert(48000);
     ptinfo.m_dataFormats.push_back(AE_FMT_AC3);
