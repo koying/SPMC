@@ -151,7 +151,9 @@ public:
    bool IsLocalHost(const std::string& hostname);
 };
 
-#ifdef HAS_LINUX_NETWORK
+#if defined(TARGET_ANDROID)
+#include "android/NetworkAndroid.h"
+#elif defined(HAS_LINUX_NETWORK)
 #include "linux/NetworkLinux.h"
 #else
 #include "windows/NetworkWin32.h"
