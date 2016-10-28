@@ -2876,3 +2876,4 @@ lib/addons/library.xbmc.pvr
 lib/cximage-6.0
 lib/libmpeg2
 lib/libUPnP
+xbmc/network/android
