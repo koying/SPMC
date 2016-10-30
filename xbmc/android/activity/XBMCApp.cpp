@@ -83,7 +83,6 @@
 #include "android/jni/KeyEvent.h"
 #include "android/jni/SystemProperties.h"
 #include "android/jni/Display.h"
-#include "android/jni/View.h"
 #include "AndroidKey.h"
 
 #include "CompileInfo.h"
@@ -712,21 +711,10 @@ CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
   float scaleX = 1.0;
   float scaleY = 1.0;
 
-  CJNIWindow window = CXBMCApp::getWindow();
-  if (window)
-  {
-    CJNIView view(window.getDecorView());
-    if (view)
-    {
-      CJNIDisplay display = view.getDisplay();
-      if (display)
-      {
-        RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
-        scaleX = (double)display.getWidth() / renderRes.iWidth;
-        scaleY = (double)display.getHeight() / renderRes.iHeight;
-      }
-    }
-  }
+  CJNIRect r = m_xbmcappinstance->getVideoViewSurfaceRect();
+  RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
+  scaleX = (double)r.width() / renderRes.iWidth;
+  scaleY = (double)r.height() / renderRes.iHeight;
 
   return CRect(srcRect.x1 * scaleX, srcRect.y1 * scaleY, srcRect.x2 * scaleX, srcRect.y2 * scaleY);
 }
@@ -736,21 +724,10 @@ CPoint CXBMCApp::GetDroidToGuiRatio()
   float scaleX = 1.0;
   float scaleY = 1.0;
 
-  CJNIWindow window = CXBMCApp::getWindow();
-  if (window)
-  {
-    CJNIView view(window.getDecorView());
-    if (view)
-    {
-      CJNIDisplay display = view.getDisplay();
-      if (display)
-      {
-        CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
-        scaleX = gui.Width() / (double)display.getWidth();
-        scaleY = gui.Height() / (double)display.getHeight();
-      }
-    }
-  }
+  CJNIRect r = m_xbmcappinstance->getVideoViewSurfaceRect();
+  CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
+  scaleX = gui.Width() / (double)r.width();
+  scaleY = gui.Height() / (double)r.height();
 
   return CPoint(scaleX, scaleY);
 }

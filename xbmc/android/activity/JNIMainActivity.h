@@ -24,6 +24,7 @@
 #include "android/jni/Intent.h"
 #include "android/jni/AudioDeviceInfo.h"
 #include "android/jni/Image.h"
+#include "android/jni/Rect.h"
 
 
 class CJNIMainActivity : public CJNIActivity
@@ -56,6 +57,7 @@ public:
 
   CJNISurface getVideoViewSurface();
   void clearVideoView();
+  CJNIRect getVideoViewSurfaceRect();
   void setVideoViewSurfaceRect(int l, int t, int r, int b);
 
   static void takeScreenshot();
