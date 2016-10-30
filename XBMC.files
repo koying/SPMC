@@ -9913,3 +9913,5 @@ Makefile.in
 Makefile.include.in
 xbmc/android/jni/LinkAddress.h
 xbmc/android/jni/LinkAddress.cpp
+xbmc/android/jni/Rect.h
+xbmc/android/jni/Rect.cpp
