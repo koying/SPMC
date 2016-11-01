@@ -471,27 +471,27 @@ void CSlideShowPic::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
   if ((!bFillScreen && fScreenWidth*fPixelRatio > fScreenHeight*fSourceInvAR) || (bFillScreen && fScreenWidth*fPixelRatio < fScreenHeight*fSourceInvAR))
     fScaleInv = fScreenHeight / (m_fWidth * fPixelRatio);
 
-  float fScale = si * si * (fScaleInv - fScaleNorm) + fScaleNorm;
+  m_fScale = si * si * (fScaleInv - fScaleNorm) + fScaleNorm;
   // scale if we need to due to the effect we're using
   if (m_displayEffect == EFFECT_PANORAMA)
   {
     if (m_fWidth > m_fHeight)
-      fScale *= m_fWidth / fScreenWidth * fScreenHeight / m_fHeight;
+      m_fScale *= m_fWidth / fScreenWidth * fScreenHeight / m_fHeight;
     else
-      fScale *= m_fHeight / fScreenHeight * fScreenWidth / m_fWidth;
+      m_fScale *= m_fHeight / fScreenHeight * fScreenWidth / m_fWidth;
   }
   if (m_displayEffect == EFFECT_FLOAT)
-    fScale *= (1.0f + g_advancedSettings.m_slideshowPanAmount * m_iTotalFrames * 0.0001f);
+    m_fScale *= (1.0f + g_advancedSettings.m_slideshowPanAmount * m_iTotalFrames * 0.0001f);
   if (m_displayEffect == EFFECT_ZOOM)
-    fScale *= m_fPosZ;
+    m_fScale *= m_fPosZ;
   // zoom image
-  fScale *= m_fZoomAmount;
+  m_fScale *= m_fZoomAmount;
 
   // calculate the resultant coordinates
   for (int i = 0; i < 4; i++)
   {
-    x[i] *= fScale * 0.5f; // as the offsets x[] and y[] are from center
-    y[i] *= fScale * fPixelRatio * 0.5f;
+    x[i] *= m_fScale * 0.5f; // as the offsets x[] and y[] are from center
+    y[i] *= m_fScale * fPixelRatio * 0.5f;
     // center it
     x[i] += 0.5f * fScreenWidth + fOffsetX;
     y[i] += 0.5f * fScreenHeight + fOffsetY;
@@ -536,8 +536,8 @@ void CSlideShowPic::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
   // add offset from display effects
   for (int i = 0; i < 4; i++)
   {
-    x[i] += m_fPosX * m_fWidth * fScale;
-    y[i] += m_fPosY * m_fHeight * fScale;
+    x[i] += m_fPosX * m_fWidth * m_fScale;
+    y[i] += m_fPosY * m_fHeight * m_fScale;
   }
 
   UpdateVertices(m_ax, m_ay, x, y, dirtyregions);
@@ -570,11 +570,11 @@ void CSlideShowPic::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
   float fSmallY = fOffsetY + fScreenHeight * 0.05f + fSmallHeight * 0.5f;
   fScaleNorm = fSmallWidth / m_fWidth;
   fScaleInv = fSmallWidth / m_fHeight;
-  fScale = si * si * (fScaleInv - fScaleNorm) + fScaleNorm;
+  m_fScale = si * si * (fScaleInv - fScaleNorm) + fScaleNorm;
   for (int i = 0; i < 4; i++)
   {
-    sx[i] *= fScale * 0.5f;
-    sy[i] *= fScale * fPixelRatio * 0.5f;
+    sx[i] *= m_fScale * 0.5f;
+    sy[i] *= m_fScale * fPixelRatio * 0.5f;
   }
   // calculate a black border
   float bx[4];

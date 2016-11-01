@@ -62,6 +62,7 @@ using namespace KODI::MESSAGING;
 #define IMMEDIATE_TRANSISTION_TIME          20
 
 #define PICTURE_MOVE_AMOUNT              0.02f
+#define EBOOK_MOVE_AMOUNT                0.25f
 #define PICTURE_MOVE_AMOUNT_ANALOG       0.01f
 #define PICTURE_MOVE_AMOUNT_TOUCH        0.002f
 #define PICTURE_VIEW_BOX_COLOR      0xffffff00 // YELLOW
@@ -241,6 +242,7 @@ void CGUIWindowSlideShow::Reset()
   m_bPause = false;
   m_bPlayingVideo = false;
   m_bErrorMessage = false;
+  m_bEbookMode = false;
   m_Image[0].UnLoad();
   m_Image[0].Close();
   m_Image[1].UnLoad();
@@ -328,8 +330,11 @@ void CGUIWindowSlideShow::ShowNext()
 
   m_iDirection   = 1;
   m_iNextSlide   = GetNextSlide();
-  m_iZoomFactor  = 1;
-  m_fZoom        = 1.0f;
+  if (!m_bEbookMode)
+  {
+    m_iZoomFactor = 1;
+    m_fZoom = 1.0f;
+  }
   m_fRotate      = 0.0f;
   m_bLoadNextPic = true;
 }
@@ -341,8 +346,11 @@ void CGUIWindowSlideShow::ShowPrevious()
 
   m_iDirection   = -1;
   m_iNextSlide   = GetNextSlide();
-  m_iZoomFactor  = 1;
-  m_fZoom        = 1.0f;
+  if (!m_bEbookMode)
+  {
+    m_iZoomFactor = 1;
+    m_fZoom = 1.0f;
+  }
   m_fRotate      = 0.0f;
   m_bLoadNextPic = true;
 }
@@ -661,8 +669,11 @@ void CGUIWindowSlideShow::Process(unsigned int currentTime, CDirtyRegionList &re
     }
     AnnouncePlayerPlay(m_slides->Get(m_iCurrentSlide));
 
-    m_iZoomFactor = 1;
-    m_fZoom = 1.0f;
+    if (!m_bEbookMode)
+    {
+      m_iZoomFactor = 1;
+      m_fZoom = 1.0f;
+    }
     m_fRotate = 0.0f;
   }
 
@@ -811,22 +822,22 @@ bool CGUIWindowSlideShow::OnAction(const CAction &action)
     if (m_iZoomFactor == 1 || !m_Image[m_iCurrentPic].m_bCanMoveHorizontally)
       ShowNext();
     else
-      Move(PICTURE_MOVE_AMOUNT, 0);
+      Move((m_bEbookMode ? EBOOK_MOVE_AMOUNT : PICTURE_MOVE_AMOUNT), 0);
     break;
 
   case ACTION_MOVE_LEFT:
     if (m_iZoomFactor == 1 || !m_Image[m_iCurrentPic].m_bCanMoveHorizontally)
       ShowPrevious();
     else
-      Move( -PICTURE_MOVE_AMOUNT, 0);
+      Move( -(m_bEbookMode ? EBOOK_MOVE_AMOUNT : PICTURE_MOVE_AMOUNT), 0);
     break;
 
   case ACTION_MOVE_DOWN:
-    Move(0, PICTURE_MOVE_AMOUNT);
+    Move(0, (m_bEbookMode ? EBOOK_MOVE_AMOUNT : PICTURE_MOVE_AMOUNT));
     break;
 
   case ACTION_MOVE_UP:
-    Move(0, -PICTURE_MOVE_AMOUNT);
+    Move(0, -(m_bEbookMode ? EBOOK_MOVE_AMOUNT : PICTURE_MOVE_AMOUNT));
     break;
 
   case ACTION_PAUSE:
@@ -866,11 +877,32 @@ bool CGUIWindowSlideShow::OnAction(const CAction &action)
     break;
 
   case ACTION_ZOOM_OUT:
-    Zoom(m_iZoomFactor - 1);
+    if (m_bEbookMode && m_iZoomFactor > 1)
+      Zoom(1);
+    else
+      Zoom(m_iZoomFactor - 1);
     break;
 
   case ACTION_ZOOM_IN:
-    Zoom(m_iZoomFactor + 1);
+    if (m_bEbookMode && m_iZoomFactor == 1)
+    {
+      float pWidth = m_Image[m_iCurrentPic].GetWidth() * m_Image[m_iCurrentPic].GetScale();
+      float wWidth = g_graphicsContext.GetWidth();
+      float zRatio = wWidth / pWidth;
+      int zf = 0;
+      for (unsigned int i = 1; i < MAX_ZOOM_FACTOR; i++)
+      {
+        if (zRatio > zoomamount[i])
+          continue;
+
+        zf = i-1;
+        break;
+      }
+      if (zf > 0)
+        Zoom(zf + 1);
+    }
+    else
+      Zoom(m_iZoomFactor + 1);
     break;
 
   case ACTION_GESTURE_SWIPE_UP:
@@ -1117,6 +1149,8 @@ void CGUIWindowSlideShow::ZoomRelative(float fZoom, bool immediate /* = false */
   }
 
   m_Image[m_iCurrentPic].Zoom(m_fZoom, immediate);
+  if (m_bEbookMode && m_Image[1-m_iCurrentPic].IsLoaded())
+    m_Image[1-m_iCurrentPic].Zoom(m_fZoom, immediate);
 }
 
 void CGUIWindowSlideShow::Move(float fX, float fY)
@@ -1172,16 +1206,11 @@ void CGUIWindowSlideShow::OnLoadPic(int iPic, int iSlideNumber, const std::strin
     m_Image[iPic].SetTexture(iSlideNumber, pTexture, GetDisplayEffect(iSlideNumber));
     m_Image[iPic].SetOriginalSize(pTexture->GetOriginalWidth(), pTexture->GetOriginalHeight(), bFullSize);
 
-    m_Image[iPic].m_bIsComic = false;
-    if (URIUtils::IsInRAR(m_slides->Get(m_iCurrentSlide)->GetPath()) || URIUtils::IsInZIP(m_slides->Get(m_iCurrentSlide)->GetPath())) // move to top for cbr/cbz
+    if (m_bEbookMode) // move to top for cbr/cbz
     {
-      CURL url(m_slides->Get(m_iCurrentSlide)->GetPath());
-      std::string strHostName = url.GetHostName();
-      if (URIUtils::HasExtension(strHostName, ".cbr|.cbz"))
-      {
-        m_Image[iPic].m_bIsComic = true;
-        m_Image[iPic].Move((float)m_Image[iPic].GetOriginalWidth(),(float)m_Image[iPic].GetOriginalHeight());
-      }
+      m_Image[iPic].m_bIsComic = true;
+      m_Image[iPic].Zoom(m_fZoom, true);
+      m_Image[iPic].Move((float)m_Image[iPic].GetOriginalWidth(), (float)m_Image[iPic].GetOriginalHeight());
     }
   }
   else if (iSlideNumber >= m_slides->Size() || GetPicturePath(m_slides->Get(iSlideNumber).get()) != strFileName)
@@ -1225,6 +1254,11 @@ void CGUIWindowSlideShow::AddFromPath(const std::string &strPath,
   {
     // reset the slideshow
     Reset();
+    CURL url(strPath);
+    if (url.IsProtocol("rar") || url.IsProtocol("zip")) // actually a cbz/cbr
+      SetEbookMode(true);
+    else
+      SetEbookMode(false);
     m_strExtensions = strExtensions;
     if (bRecursive)
     {

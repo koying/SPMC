@@ -103,6 +103,8 @@ public:
   bool IsShuffled() const { return m_bShuffled; }
   int GetDirection() const { return m_iDirection; }
   void SetDirection(int direction); // -1: rewind, 1: forward
+  void SetEbookMode(bool val) { m_bEbookMode = val; } // For cbr/cbz/pdf
+
 private:
   typedef std::set<std::string> path_set;  // set to track which paths we're adding
   void AddItems(const std::string &strPath, path_set *recursivePaths,
@@ -143,6 +145,8 @@ private:
   bool m_bPause;
   bool m_bPlayingVideo;
   bool m_bErrorMessage;
+
+  bool m_bEbookMode;
 
   CFileItemList* m_slides;
 
