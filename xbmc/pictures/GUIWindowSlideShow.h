@@ -101,6 +101,7 @@ public:
   int GetDirection() const { return m_iDirection; }
 
   static void RunSlideShow(std::vector<std::string> paths, int start=0);
+  void SetEbookMode(bool val) { m_bEbookMode = val; } // For cbr/cbz/pdf
 
 private:
   void ShowNext();
@@ -147,6 +148,8 @@ private:
   bool m_bErrorMessage;
 
   std::vector<CFileItemPtr> m_slides;
+
+  bool m_bEbookMode;
 
   CSlideShowPic m_Image[2];
 
