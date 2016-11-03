@@ -244,6 +244,8 @@ static const XBMCKEYTABLE XBMCKeyTable[] =
 , { XBMCK_HOMEPAGE ,              0,    0, XBMCVK_HOMEPAGE,      "homepage" }
 , { XBMCK_CONFIG,                 0,    0, XBMCVK_CONFIG,        "config" }
 , { XBMCK_EPG   ,                 0,    0, XBMCVK_EPG,           "epg" }
+, { XBMCK_CHANNELUP   ,           0,    0, XBMCVK_CHANUP,        "channel_up" }
+, { XBMCK_CHANNELDOWN   ,         0,    0, XBMCVK_CHANDOWN,      "channel_down" }
 };
 
 static int XBMCKeyTableSize = sizeof(XBMCKeyTable)/sizeof(XBMCKEYTABLE);
