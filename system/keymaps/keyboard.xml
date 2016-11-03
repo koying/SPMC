@@ -460,6 +460,8 @@
       <enter>Rotate</enter>
       <r>Rotate</r>
       <backspace mod="longpress">ActivateWindow(Home)</backspace>
+      <channel_up>ZoomIn</channel_up>
+      <channel_down>ZoomOut</channel_down>
     </keyboard>
   </SlideShow>
   <ScreenCalibration>

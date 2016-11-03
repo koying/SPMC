@@ -221,6 +221,9 @@ typedef enum {
   XBMCVK_FAVORITES      = 0xE9,
   XBMCVK_HOMEPAGE       = 0xEA,
   XBMCVK_CONFIG         = 0xEB,
+  XBMCVK_EPG            = 0xEC,
+  XBMCVK_CHANUP         = 0xED,
+  XBMCVK_CHANDOWN       = 0xEE,
 
   XBMCVK_LAST           = 0xFF
 } XBMCVKey;

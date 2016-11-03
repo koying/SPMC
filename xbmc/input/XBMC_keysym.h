@@ -229,10 +229,11 @@ typedef enum {
   XBMCK_FAVORITES   = 0x14d,
   XBMCK_HOMEPAGE    = 0x14e,
   XBMCK_CONFIG      = 0x14f,
+  XBMCK_EPG         = 0x150,
 
   // Add any other keys here
 
-	/* Media keys */
+        /* Media keys */
   XBMCK_EJECT             = 333,
   XBMCK_STOP              = 337,
   XBMCK_RECORD            = 338,
@@ -241,6 +242,8 @@ typedef enum {
   XBMCK_PLAY              = 341,
   XBMCK_SHUFFLE           = 342,
   XBMCK_FASTFORWARD       = 343,
+  XBMCK_CHANNELUP         = 344,
+  XBMCK_CHANNELDOWN       = 345,
 
   XBMCK_LAST
 } XBMCKey;
