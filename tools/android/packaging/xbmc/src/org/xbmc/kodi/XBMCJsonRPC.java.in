@@ -52,12 +52,12 @@ public class XBMCJsonRPC
 
   // {"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "filter": {"field": "playcount", "operator": "is", "value": "0"}, "limits": { "start" : 0, "end": 3}, "properties" : ["imdbnumber", "title", "tagline", "thumbnail", "fanart"], "sort": { "order": "descending", "method": "dateadded", "ignorearticle": true } }, "id": "1"}
   private String RECOMMENDATION_MOVIES_JSON =
-		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
-		  + "\"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, "
-		  + "\"limits\": { \"start\" : 0, \"end\": 10}, "
-		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
-		  + "\"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, "
-		  + "\"id\": \"1\"}";
+                  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
+                  + "\"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, "
+                  + "\"limits\": { \"start\" : 0, \"end\": 10}, "
+                  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
+                  + "\"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, "
+                  + "\"id\": \"1\"}";
 
   private String RECOMMENDATIONS_SHOWS_JSON =
                  "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{\"and\":[{\"field\":\"playcount\",\"operator\":\"is\",\"value\":\"0\"},{\"field\":\"plot\",\"operator\":\"isnot\",\"value\":\"\"}]},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"1\"}";
@@ -66,15 +66,15 @@ public class XBMCJsonRPC
                  "{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetAlbums\", \"params\": { \"limits\": { \"start\" : 0, \"end\": 3}, \"properties\" : [\"title\", \"displayartist\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"1\"}";
 
   private String SEARCH_MOVIES_JSON =
-		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
-		  + "\"params\": { \"filter\": {%s}, "
+                  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
+                  + "\"params\": { \"filter\": {%s}, "
                   + "\"limits\": { \"start\" : 0, \"end\": 10}, "
-		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
-		  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
-		  + "\"id\": \"%s\"}";
+                  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\", \"year\", \"runtime\"], "
+                  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
+                  + "\"id\": \"%s\"}";
 
   private String SEARCH_SHOWS_JSON =
-           "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{%s},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"%s\"}";
+           "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{%s},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\",\"year\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"%s\"}";
 
   private String SEARCH_ALBUMS_JSON =
                  "{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetAlbums\", \"params\": {\"filter\":{%s},\"limits\": { \"start\" : 0, \"end\": 10}, \"properties\" : [\"title\", \"displayartist\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"%s\"}";
@@ -136,7 +136,7 @@ public class XBMCJsonRPC
         {
           Log.e(TAG, "Failed to read JSON");
         }
-      } 
+      }
       catch (Exception e)
       {
         e.printStackTrace();
@@ -308,6 +308,9 @@ public class XBMCJsonRPC
         SearchManager.SUGGEST_COLUMN_TEXT_2,
         SearchManager.SUGGEST_COLUMN_ICON_1,
         SearchManager.SUGGEST_COLUMN_INTENT_DATA,
+        SearchManager.SUGGEST_COLUMN_CONTENT_TYPE,
+        SearchManager.SUGGEST_COLUMN_PRODUCTION_YEAR,
+        SearchManager.SUGGEST_COLUMN_DURATION
     };
     MatrixCursor mc = new MatrixCursor(menuCols);
 
@@ -368,13 +371,28 @@ public class XBMCJsonRPC
           for (int i = 0; i < movies.length() && totCount < limit; ++i)
           {
             JSONObject movie = movies.getJSONObject(i);
+
+            int rYear = 0;
+            long rDur = 0;
+            try
+            {
+              rYear = movie.getInt("year");
+              rDur = movie.getLong("runtime") * 1000;
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
             mc.addRow(new Object[]
             {
-                movie.getString("movieid"),
-                movie.getString("title"),
-                movie.getString("tagline"),
-                XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
-                Uri.parse("videodb://movies/titles/" + movie.getString("movieid") + "?showinfo=true"),
+              movie.getString("movieid"),
+              movie.getString("title"),
+              movie.getString("tagline"),
+              XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
+              Uri.parse("videodb://movies/titles/" + movie.getString("movieid") + "?showinfo=true"),
+              "video/x-matroska",
+              rYear,
+              rDur
             });
             totCount++;
           }
@@ -395,13 +413,27 @@ public class XBMCJsonRPC
           for (int i = 0; i < tvshows.length() && totCount < limit; ++i)
           {
             JSONObject tvshow = tvshows.getJSONObject(i);
+
+            int rYear = 0;
+            long rDur = 0;
+            try
+            {
+              rYear = tvshow.getInt("year");
+            }
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
             mc.addRow(new Object[]
             {
-                tvshow.getString("tvshowid"),
-                tvshow.getString("title"),
-                tvshow.getString("plot"),
-                XBMCImageContentProvider.GetImageUri(getBitmapUrl(tvshow.getString("thumbnail"))).toString(),
-                Uri.parse("videodb://tvshows/titles/" + tvshow.getString("tvshowid") + "?showinfo=true"),
+              tvshow.getString("tvshowid"),
+              tvshow.getString("title"),
+              tvshow.getString("plot"),
+              XBMCImageContentProvider.GetImageUri(getBitmapUrl(tvshow.getString("thumbnail"))).toString(),
+              Uri.parse("videodb://tvshows/titles/" + tvshow.getString("tvshowid") + "?showinfo=true"),
+              "video/x-matroska",
+              rYear,
+              0
             });
             totCount++;
           }
@@ -424,11 +456,14 @@ public class XBMCJsonRPC
             JSONObject album = albums.getJSONObject(i);
             mc.addRow(new Object[]
             {
-                album.getString("albumid"),
-                album.getString("title"),
-                album.getString("displayartist"),
-                XBMCImageContentProvider.GetImageUri(getBitmapUrl(album.getString("thumbnail"))).toString(),
-                Uri.parse("musicdb://albums/" + album.getString("albumid") + "/"),
+              album.getString("albumid"),
+              album.getString("title"),
+              album.getString("displayartist"),
+              XBMCImageContentProvider.GetImageUri(getBitmapUrl(album.getString("thumbnail"))).toString(),
+              Uri.parse("musicdb://albums/" + album.getString("albumid") + "/"),
+              "audio/mpeg",
+              0,
+              0
             });
             totCount++;
           }
@@ -451,11 +486,14 @@ public class XBMCJsonRPC
             JSONObject artist = artists.getJSONObject(i);
             mc.addRow(new Object[]
             {
-                artist.getString("artistid"),
-                artist.getString("artist"),
-                artist.getString("description"),
-                XBMCImageContentProvider.GetImageUri(getBitmapUrl(artist.getString("thumbnail"))).toString(),
-                Uri.parse("musicdb://artists/" + artist.getString("artistid") + "/"),
+              artist.getString("artistid"),
+              artist.getString("artist"),
+              artist.getString("description"),
+              XBMCImageContentProvider.GetImageUri(getBitmapUrl(artist.getString("thumbnail"))).toString(),
+              Uri.parse("musicdb://artists/" + artist.getString("artistid") + "/"),
+              "",
+              0,
+              0
             });
             totCount++;
           }
