@@ -69,7 +69,7 @@ public class XBMCJsonRPC
 		  "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
 		  + "\"params\": { \"filter\": {%s}, "
                   + "\"limits\": { \"start\" : 0, \"end\": 10}, "
-		  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\"], "
+                  + "\"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\", \"mimetype\", \"year\"], "
 		  + "\"sort\": { \"order\": \"ascending\", \"method\": \"title\", \"ignorearticle\": true } }, "
 		  + "\"id\": \"%s\"}";
 
@@ -308,6 +308,8 @@ public class XBMCJsonRPC
         SearchManager.SUGGEST_COLUMN_TEXT_2,
         SearchManager.SUGGEST_COLUMN_ICON_1,
         SearchManager.SUGGEST_COLUMN_INTENT_DATA,
+        SearchManager.SUGGEST_COLUMN_CONTENT_TYPE,
+        SearchManager.SUGGEST_COLUMN_PRODUCTION_YEAR
     };
     MatrixCursor mc = new MatrixCursor(menuCols);
 
@@ -375,6 +377,8 @@ public class XBMCJsonRPC
                 movie.getString("tagline"),
                 XBMCImageContentProvider.GetImageUri(getBitmapUrl(movie.getString("thumbnail"))).toString(),
                 Uri.parse("videodb://movies/titles/" + movie.getString("movieid") + "?showinfo=true"),
+                movie.getString("mimetype"),
+                movie.getString("year"),
             });
             totCount++;
           }
@@ -402,6 +406,8 @@ public class XBMCJsonRPC
                 tvshow.getString("plot"),
                 XBMCImageContentProvider.GetImageUri(getBitmapUrl(tvshow.getString("thumbnail"))).toString(),
                 Uri.parse("videodb://tvshows/titles/" + tvshow.getString("tvshowid") + "?showinfo=true"),
+                "",
+                ""
             });
             totCount++;
           }
@@ -429,6 +435,8 @@ public class XBMCJsonRPC
                 album.getString("displayartist"),
                 XBMCImageContentProvider.GetImageUri(getBitmapUrl(album.getString("thumbnail"))).toString(),
                 Uri.parse("musicdb://albums/" + album.getString("albumid") + "/"),
+                "",
+                ""
             });
             totCount++;
           }
@@ -456,6 +464,8 @@ public class XBMCJsonRPC
                 artist.getString("description"),
                 XBMCImageContentProvider.GetImageUri(getBitmapUrl(artist.getString("thumbnail"))).toString(),
                 Uri.parse("musicdb://artists/" + artist.getString("artistid") + "/"),
+                "",
+                ""
             });
             totCount++;
           }
