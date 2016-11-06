@@ -43,6 +43,8 @@ public class XBMCJsonRPC
   public final static String REQ_ID_SHOWS = "2";
   public final static String REQ_ID_ALBUMS = "3";
   public final static String REQ_ID_ARTISTS = "4";
+  public final static String REQ_ID_MOVIES_ACTOR = "5";
+  public final static String REQ_ID_SHOWS_ACTOR = "6";
 
   private static String TAG = "@APP_NAME@json";
 
@@ -248,6 +250,7 @@ public class XBMCJsonRPC
         JSONObject req = request_object(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
         "\"or\": [" +
         "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"originaltitle\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"set\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
@@ -319,15 +322,13 @@ public class XBMCJsonRPC
       String.format(SEARCH_MOVIES_JSON,
         "\"or\": [" +
         "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"set\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]", REQ_ID_MOVIES) +
-    "," +
+        "{\"operator\": \"contains\", \"field\": \"originaltitle\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"set\", \"value\": \"" + query + "\"}]", REQ_ID_MOVIES) +
+      "," +
       String.format(SEARCH_SHOWS_JSON,
         "\"or\": [" +
         "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]", REQ_ID_SHOWS) +
+        "{\"operator\": \"contains\", \"field\": \"originaltitle\", \"value\": \"" + query + "\"}]", REQ_ID_SHOWS) +
     "," +
       String.format(SEARCH_ALBUMS_JSON,
         "\"or\": [" +
@@ -336,12 +337,24 @@ public class XBMCJsonRPC
     "," +
       String.format(SEARCH_ARTISTS_JSON,
         "\"operator\": \"contains\", \"field\": \"artist\", \"value\": \"" + query + "\"", REQ_ID_ARTISTS) +
+    "," +
+      String.format(SEARCH_MOVIES_JSON,
+        "\"or\": [" +
+         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]", REQ_ID_MOVIES_ACTOR) +
+    "," +
+      String.format(SEARCH_SHOWS_JSON,
+        "\"or\": [" +
+        "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]", REQ_ID_SHOWS_ACTOR) +
     "]";
 
     JSONArray res_array = request_array(str_req);
     if (res_array == null)
       return null;
 
+    int nb_movies = 0;
+    int nb_shows = 0;
     for (int j = 0; j < res_array.length(); ++j)
     {
       String id;
@@ -360,7 +373,7 @@ public class XBMCJsonRPC
         continue;
       }
 
-      if (id.equals(REQ_ID_MOVIES))
+      if (id.equals(REQ_ID_MOVIES) || ((nb_movies + nb_shows) < 3 && id.equals(REQ_ID_MOVIES_ACTOR)))
       {
         searchmovies: try
         {
@@ -396,6 +409,7 @@ public class XBMCJsonRPC
               rYear,
               rDur
             });
+            nb_movies++;
             totCount++;
           }
         } catch (Exception e)
@@ -403,7 +417,7 @@ public class XBMCJsonRPC
           e.printStackTrace();
         }
       }
-      else if (id.equals(REQ_ID_SHOWS))
+      else if (id.equals(REQ_ID_SHOWS) || ((nb_movies + nb_shows) < 3 && id.equals(REQ_ID_SHOWS_ACTOR)))
       {
         searchtv: try
         {
@@ -438,6 +452,7 @@ public class XBMCJsonRPC
               rYear,
               0
             });
+            nb_shows++;
             totCount++;
           }
         } catch (Exception e)
