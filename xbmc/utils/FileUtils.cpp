@@ -262,12 +262,24 @@ bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
 
     // if this is a real path and accesses into user home, allow.
     std::string userHome = CSpecialProtocol::TranslatePath("special://home");
+    // need both test and home paths from realpath or they might not match
+    char *userhome = realpath(userHome.c_str(), nullptr);
+    if (!userhome)
+      return false;
+    userHome = userhome;
+    free(userhome);
     if (testpath.find(userHome) != std::string::npos)
       return true;
 
     // if this is a real path and accesses outside app, deny.
     std::string appRoot;
     CUtil::GetHomePath(appRoot);
+    // need both test and app paths from realpath or the might not match
+    char *approot = realpath(appRoot.c_str(), nullptr);
+    if (!approot)
+      return false;
+    appRoot = approot;
+    free(approot);
     if (testpath.find(appRoot) == std::string::npos)
     {
       CLog::Log(LOGDEBUG,"http access denied");
