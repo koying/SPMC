@@ -88,7 +88,7 @@ static const ActionMapping actions[] =
     { "nextsubtitle"             , ACTION_NEXT_SUBTITLE },
     { "cyclesubtitle"            , ACTION_CYCLE_SUBTITLE },
     { "playerdebug"              , ACTION_PLAYER_DEBUG },
-    { "codecinfo"                , ACTION_PLAYER_PROCESS_INFO },
+    { "codecinfo"                , ACTION_PLAYER_DEBUG },
     { "playerprocessinfo"        , ACTION_PLAYER_PROCESS_INFO },
     { "nextpicture"              , ACTION_NEXT_PICTURE },
     { "previouspicture"          , ACTION_PREV_PICTURE },
