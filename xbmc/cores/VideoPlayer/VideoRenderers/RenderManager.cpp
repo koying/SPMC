@@ -421,7 +421,7 @@ void CRenderManager::FrameMove()
 
       m_playerPort->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
     }
-    
+
     m_bRenderGUI = true;
   }
 
@@ -684,7 +684,7 @@ bool CRenderManager::RenderCaptureGetPixels(unsigned int captureId, unsigned int
   {
     if (!millis)
       millis = 1000;
-    
+
     CSingleExit exitlock(m_captCritSect);
     if (!it->second->GetEvent().WaitMSec(millis))
     {
@@ -928,9 +928,9 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
 
     if (m_renderDebug)
     {
-      std::string audio, video, player, vsync;
+      std::string acodec, audio, vcodec, video, player, vsync;
 
-      m_playerPort->GetDebugInfo(audio, video, player);
+      m_playerPort->GetDebugInfo(acodec, audio, vcodec, video, player);
 
       double refreshrate, clockspeed;
       int missedvblanks;
@@ -943,7 +943,7 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
                                      clockspeed * 100);
       }
 
-      m_debugRenderer.SetInfo(audio, video, player, vsync);
+      m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
       m_debugRenderer.Render(src, dst, view);
 
       m_debugTimer.Set(1000);
@@ -1334,7 +1334,7 @@ void CRenderManager::PrepareNextRender()
       m_lateframes += lateframes;
     else
       m_lateframes = 0;
-    
+
     m_presentstep = PRESENT_FLIP;
     m_discard.push_back(m_presentsource);
     m_presentsource = idx;

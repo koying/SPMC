@@ -87,6 +87,7 @@ public:
   double GetCurrentPts();
   double GetOutputDelay(); /* returns the expected delay, from that a packet is put in queue */
   int GetDecoderFreeSpace() { return 0; }
+  std::string GetCodecInfo();
   std::string GetPlayerInfo();
   int GetVideoBitrate();
   std::string GetStereoMode();

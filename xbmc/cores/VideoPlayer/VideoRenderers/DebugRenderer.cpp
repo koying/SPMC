@@ -28,7 +28,7 @@ using namespace OVERLAY;
 
 CDebugRenderer::CDebugRenderer()
 {
-  for (int i=0; i<4; i++)
+  for (int i=0; i<OVERLAY_LINES; i++)
   {
     m_overlay[i] = nullptr;
     m_strDebug[i] = " ";
@@ -37,14 +37,14 @@ CDebugRenderer::CDebugRenderer()
 
 CDebugRenderer::~CDebugRenderer()
 {
-  for (int i=0; i<4; i++)
+  for (int i=0; i<OVERLAY_LINES; i++)
   {
     if (m_overlay[i])
       m_overlay[i]->Release();
   }
 }
 
-void CDebugRenderer::SetInfo(std::string &info1, std::string &info2, std::string &info3, std::string &info4)
+void CDebugRenderer::SetInfo(std::string &info1, std::string &info2, std::string &info3, std::string &info4, std::string &info5, std::string &info6)
 {
   m_overlayRenderer.Release(0);
 
@@ -80,11 +80,29 @@ void CDebugRenderer::SetInfo(std::string &info1, std::string &info2, std::string
     m_overlay[3] = new CDVDOverlayText();
     m_overlay[3]->AddElement(new CDVDOverlayText::CElementText(m_strDebug[3]));
   }
+  if (info5 != m_strDebug[4])
+  {
+    m_strDebug[4] = info5;
+    if (m_overlay[4])
+      m_overlay[4]->Release();
+    m_overlay[4] = new CDVDOverlayText();
+    m_overlay[4]->AddElement(new CDVDOverlayText::CElementText(m_strDebug[4]));
+  }
+  if (info6 != m_strDebug[5])
+  {
+    m_strDebug[5] = info6;
+    if (m_overlay[5])
+      m_overlay[5]->Release();
+    m_overlay[5] = new CDVDOverlayText();
+    m_overlay[5]->AddElement(new CDVDOverlayText::CElementText(m_strDebug[5]));
+  }
 
   m_overlayRenderer.AddOverlay(m_overlay[0], 0, 0);
   m_overlayRenderer.AddOverlay(m_overlay[1], 0, 0);
   m_overlayRenderer.AddOverlay(m_overlay[2], 0, 0);
   m_overlayRenderer.AddOverlay(m_overlay[3], 0, 0);
+  m_overlayRenderer.AddOverlay(m_overlay[4], 0, 0);
+  m_overlayRenderer.AddOverlay(m_overlay[5], 0, 0);
 }
 
 void CDebugRenderer::Render(CRect &src, CRect &dst, CRect &view)
