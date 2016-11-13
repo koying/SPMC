@@ -56,6 +56,9 @@ protected:
   
   int AudioTrackWrite(char* audioData, int offsetInBytes, int sizeInBytes);
   int AudioTrackWrite(char* audioData, int sizeInBytes, int64_t timestamp);
+
+  int AEStreamFormatToATFormat(const CAEStreamInfo::DataType& dt);
+
 private:
   jni::CJNIAudioTrack  *m_at_jni;
   int     m_jniAudioFormat;
@@ -76,7 +79,6 @@ private:
   // the newest value gets a weight of 1
   std::deque<double>   m_linearmovingaverage;
 
-  static CAEDeviceInfo m_info;
   static std::set<unsigned int>       m_sink_sampleRates;
 
   AEAudioFormat      m_format;
@@ -87,6 +89,7 @@ private:
   bool               m_passthrough;
   double             m_audiotrackbuffer_sec;
   int                m_encoding;
+  bool               m_wantsIECPassthrough;
 
   std::vector<float> m_floatbuf;
   std::vector<int16_t> m_shortbuf;
