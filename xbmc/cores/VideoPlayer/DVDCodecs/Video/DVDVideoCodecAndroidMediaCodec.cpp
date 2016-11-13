@@ -415,12 +415,17 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   
   switch(m_hints.codec)
   {
+    case AV_CODEC_ID_MPEG1VIDEO:
     case AV_CODEC_ID_MPEG2VIDEO:
+      if (m_hints.width < CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELMPEG2))
+        return false;
       m_mime = "video/mpeg2";
       m_formatname = "amc-mpeg2";
       break;
+    case AV_CODEC_ID_MSMPEG4V2:
+    case AV_CODEC_ID_MSMPEG4V3:
     case AV_CODEC_ID_MPEG4:
-      if (hints.width <= 800)
+      if (m_hints.width < CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELMPEG4))
         return false;
       m_mime = "video/mp4v-es";
       m_formatname = "amc-mpeg4";
@@ -445,6 +450,9 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     case AV_CODEC_ID_AVS:
     case AV_CODEC_ID_CAVS:
     case AV_CODEC_ID_H264:
+      if (m_hints.width < CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELH264))
+        return false;
+
       switch(hints.profile)
       {
         case FF_PROFILE_H264_HIGH_10:
@@ -476,6 +484,9 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       }
       break;
     case AV_CODEC_ID_HEVC:
+      if (m_hints.width < CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOPLAYER_ACCELHEVC))
+        return false;
+
       m_mime = "video/hevc";
       m_formatname = "amc-h265";
       // check for hevc-hvcC and convert to h265-annex-b
