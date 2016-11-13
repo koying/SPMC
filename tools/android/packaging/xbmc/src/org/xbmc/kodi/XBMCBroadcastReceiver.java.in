@@ -18,7 +18,7 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
   {
     if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
     {
-      if (XBMCProperties.getBoolProperty("xbmc.autostart"))
+      if (XBMCProperties.getBoolProperty("@APP_NAME_LC@.autostart"))
       {
         // Run @APP_NAME@
         Intent i = new Intent();
