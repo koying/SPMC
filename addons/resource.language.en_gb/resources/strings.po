@@ -19858,6 +19858,10 @@ msgctxt "#39010"
 msgid "Select sort method"
 msgstr ""
 
+msgctxt "#39011"
+msgid "Accelerate hevc"
+msgstr ""
+
 msgctxt "#39104"
 msgid "Export"
 msgstr ""
@@ -19873,4 +19877,3 @@ msgstr ""
 msgctxt "#39107"
 msgid "Upload the current debug log"
 msgstr ""
-
