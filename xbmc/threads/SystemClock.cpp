@@ -43,7 +43,7 @@ namespace XbmcThreads
     now_time = (uint64_t)timeGetTime();
 #else
     struct timespec ts = {};
-#ifdef CLOCK_MONOTONIC_RAW
+#if defined(CLOCK_MONOTONIC_RAW) && !defined(TARGET_ANDROID)
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
 #else
     clock_gettime(CLOCK_MONOTONIC, &ts);
