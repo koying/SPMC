@@ -1157,9 +1157,6 @@ void CLinuxRendererGLES::ReleaseBuffer(int idx)
   {
     if (buf.mediacodec)
     {
-      // The media buffer has been queued to the SurfaceView but we didn't render it
-      // We have to do to the updateTexImage or it will get stuck
-      buf.mediacodec->UpdateTexImage();
       SAFE_RELEASE(buf.mediacodec);
     }
   }
