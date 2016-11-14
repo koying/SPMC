@@ -229,16 +229,30 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
   // release OutputBuffer and render if indicated
   // then wait for rendered frame to become avaliable.
 
-  if (render)
-    if (m_frameready)
-      m_frameready->Reset();
+  if (m_frameready && render)
+    m_frameready->Reset();
 
-  media_status_t mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, render);
+  media_status_t mstat;
+  if (render)
+    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, (int64_t)1);  // Make sure buffer pts is ignored
+  else
+    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
 
   if (mstat != AMEDIA_OK)
     CLog::Log(LOGERROR, "CDVDMediaCodecInfo::ReleaseOutputBuffer "
       "error %d in render(%d)", mstat, render);
+
+  // this is key, after calling releaseOutputBuffer, we must
+  // wait a little for MediaCodec to render to the surface.
+  // Then we can updateTexImage without delay. If we do not
+  // wait, then video playback gets jerky. To optomize this,
+  // we hook the SurfaceTexture OnFrameAvailable callback
+  // using CJNISurfaceTextureOnFrameAvailableListener and wait
+  // on a CEvent to fire. 50ms seems to be a good max fallback.
+  if (m_frameready && render)
+    if (!m_frameready->WaitMSec(50))
+      CLog::Log(LOGERROR, "CDVDMediaCodecInfo::ReleaseOutputBuffer timeout waiting for frame");
 }
 
 ssize_t CDVDMediaCodecInfo::GetIndex() const
@@ -275,15 +289,6 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   // updateTexImage will check and spew any prior gl errors,
   // clear them before we call updateTexImage.
   glGetError();
-
-  // this is key, after calling releaseOutputBuffer, we must
-  // wait a little for MediaCodec to render to the surface.
-  // Then we can updateTexImage without delay. If we do not
-  // wait, then video playback gets jerky. To optomize this,
-  // we hook the SurfaceTexture OnFrameAvailable callback
-  // using CJNISurfaceTextureOnFrameAvailableListener and wait
-  // on a CEvent to fire. 50ms seems to be a good max fallback.
-  m_frameready->WaitMSec(50);
 
   m_surfacetexture->updateTexImage();
   if (xbmc_jnienv()->ExceptionCheck())
