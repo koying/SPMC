@@ -90,10 +90,7 @@ void CRendererMediaCodec::ReleaseBuffer(int idx)
   YUVBUFFER &buf = m_buffers[idx];
   if (buf.hwDec)
   {
-    // The media buffer has been queued to the SurfaceView but we didn't render it
-    // We have to do to the updateTexImage or it will get stuck
     CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(buf.hwDec);
-    mci->UpdateTexImage();
     SAFE_RELEASE(mci);
     buf.hwDec = NULL;
   }
