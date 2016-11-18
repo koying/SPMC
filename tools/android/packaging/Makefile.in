@@ -121,8 +121,8 @@ res:
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
-	rm -rf xbmc/lib/$(ABI) xbmc/libs/$(ABI) xbmc/obj/local/$(ABI)
-	mkdir -p xbmc/lib/$(ABI) xbmc/assets/python2.6/lib/ xbmc/libs/$(ABI) xbmc/obj/local/$(ABI)
+	rm -rf xbmc/lib/$(ABI) xbmc/obj/local/$(ABI)
+	mkdir -p xbmc/lib/$(ABI) xbmc/assets/python2.6/lib/ xbmc/obj/local/$(ABI)
 	cp -fp $(SRCLIBS) xbmc/obj/local/$(ABI)/
 	cp -fp $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so xbmc/obj/local/$(ABI)/
 	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
@@ -132,18 +132,17 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 	cd xbmc/obj/local/$(ABI)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
 	cp -fp xbmc/obj/local/$(ABI)/*.so xbmc/lib/$(ABI)/
 	$(STRIP) --strip-unneeded xbmc/lib/$(ABI)/*.so
-	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/libs
-	install -p $(GDBPATH) ./xbmc/libs/$(ABI)/gdbserver
-	echo "set solib-search-path ./obj/local/$(ABI)" > ./xbmc/libs/$(ABI)/gdb.setup
+	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/lib
+	install -p $(GDBPATH) ./xbmc/lib/$(ABI)/gdbserver
+	echo "set solib-search-path ./obj/local/$(ABI)" > ./xbmc/lib/$(ABI)/gdb.setup
 	echo "directory $(TOOLCHAIN)/sysroot/usr/include $(NDKROOT)/sources/android/native_app_glue" \
-	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/libs/$(ABI)/gdb.setup
-	cp -fp xbmc/libs/$(ABI)/* xbmc/lib/$(ABI)
+	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/lib/$(ABI)/gdb.setup
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/obj
 	@javac -source 1.7 -target 1.7 -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/@APP_PACKAGE_DIR@/*.java
 	@javac -source 1.7 -target 1.7 -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java
-	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/libs
+	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/lib
 
 package: libs symbols python xbmc/classes.dex
 	@echo "Creating package..."
@@ -167,7 +166,6 @@ apk-clean:
 	rm -rf symbols
 	rm -rf xbmc/gen
 	rm -rf xbmc/lib
-	rm -rf xbmc/libs
 	rm -rf xbmc/assets
 	rm -rf xbmc/obj
 	rm -rf xbmc/res/raw
