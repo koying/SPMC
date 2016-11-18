@@ -139,9 +139,10 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(XBMCROOT)  $(PREFIX)/include jni" >> ./xbmc/lib/$(ABI)/gdb.setup
 
 xbmc/classes.dex: res
-	mkdir -p xbmc/obj
+	mkdir -p xbmc/java/@APP_PACKAGE_DIR@ xbmc/obj
+	@cp xbmc/src/org/xbmc/kodi/*.java xbmc/java/@APP_PACKAGE_DIR@/
 	@javac -source 1.7 -target 1.7 -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/@APP_PACKAGE_DIR@/*.java
-	@javac -source 1.7 -target 1.7 -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/src/org/xbmc/kodi/*.java
+	@javac -source 1.7 -target 1.7 -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/java/@APP_PACKAGE_DIR@/*.java
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/lib
 
 package: libs symbols python xbmc/classes.dex
@@ -164,6 +165,7 @@ $(SRCLIBS):
 apk-clean:
 	rm -rf images
 	rm -rf symbols
+	rm -rf xbmc/java
 	rm -rf xbmc/gen
 	rm -rf xbmc/lib
 	rm -rf xbmc/assets

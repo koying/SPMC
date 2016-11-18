@@ -2445,6 +2445,7 @@ OUTPUT_FILES_DROID=" \
 
 OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/Makefile \
+    tools/android/packaging/xbmc/build.gradle \
     tools/android/packaging/xbmc/AndroidManifest.xml \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java \
