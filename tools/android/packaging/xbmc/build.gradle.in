@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "24.0.1"
+    defaultConfig {
+        applicationId "@APP_PACKAGE@"
+        minSdkVersion 21
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['java']
+            //resources.srcDirs = ['src']
+            //aidl.srcDirs = ['src']
+            //renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['lib']
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-v4:23.4.0'
+}
+
+task copyJava(type: Copy) {
+    description = 'copying back java sources'
+    from 'java'
+    into 'src/org/xbmc/kodi'
+    eachFile { FileCopyDetails fcp ->
+        def segments = fcp.relativePath.segments
+        def pathsegments =segments[3..-1] as String[]
+    	fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), pathsegments)
+    }
+    includeEmptyDirs = false
+}
+
+project.afterEvaluate {
+    preBuild.dependsOn copyJava
+}
+
