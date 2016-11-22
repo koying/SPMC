@@ -19,33 +19,21 @@
  *
  */
 
-#include "IFile.h"
-#include "File.h"
+#include "filesystem/OverrideFile.h"
 #include "video/VideoDatabase.h"
 
 namespace XFILE
 {
-class CVideoDatabaseFile : public IFile
+class CVideoDatabaseFile : public COverrideFile
 {
 public:
   CVideoDatabaseFile(void);
   virtual ~CVideoDatabaseFile(void);
-  virtual bool Open(const CURL& url);
-  virtual bool Exists(const CURL& url);
-  virtual int Stat(const CURL& url, struct __stat64* buffer);
 
-  virtual ssize_t Read(void* lpBuf, size_t uiBufSize);
-  virtual int64_t Seek(int64_t iFilePosition, int iWhence = SEEK_SET);
-  virtual void Close();
-  virtual int64_t GetPosition();
-  virtual int64_t GetLength();
-
-  static std::string TranslateUrl(const CURL& url);
   static CVideoInfoTag GetVideoTag(const CURL& url);
-
-  static VIDEODB_CONTENT_TYPE GetType(const CURL &url);
-
+  
 protected:
-  CFile m_file;
+  virtual std::string TranslatePath(const CURL& url);
+  static VIDEODB_CONTENT_TYPE GetType(const CURL& url);
 };
 }

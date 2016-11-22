@@ -23,17 +23,39 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 
-#include <sys/stat.h>
-
 using namespace XFILE;
 
 CVideoDatabaseFile::CVideoDatabaseFile(void)
-{
-}
+  : COverrideFile(true)
+{ }
 
 CVideoDatabaseFile::~CVideoDatabaseFile(void)
+{ }
+
+CVideoInfoTag CVideoDatabaseFile::GetVideoTag(const CURL& url)
 {
-  Close();
+  CVideoInfoTag tag;
+  
+  std::string strFileName = URIUtils::GetFileName(url.Get());
+  if (strFileName.empty())
+    return tag;
+  
+  URIUtils::RemoveExtension(strFileName);
+  if (!StringUtils::IsNaturalNumber(strFileName))
+    return tag;
+  long idDb = atol(strFileName.c_str());
+  
+  VIDEODB_CONTENT_TYPE type = GetType(url);
+  if (type == VIDEODB_CONTENT_UNKNOWN)
+    return tag;
+  
+  CVideoDatabase videoDatabase;
+  if (!videoDatabase.Open())
+    return tag;
+  
+  tag = videoDatabase.GetDetailsByTypeAndId(type, idDb);
+  
+  return tag;
 }
 
 VIDEODB_CONTENT_TYPE CVideoDatabaseFile::GetType(const CURL& url)
@@ -60,33 +82,8 @@ VIDEODB_CONTENT_TYPE CVideoDatabaseFile::GetType(const CURL& url)
   return type;
 }
 
-CVideoInfoTag CVideoDatabaseFile::GetVideoTag(const CURL& url)
-{
-  CVideoInfoTag tag;
 
-  std::string strFileName = URIUtils::GetFileName(url.Get());
-  if (strFileName.empty())
-    return tag;
-
-  URIUtils::RemoveExtension(strFileName);
-  if (!StringUtils::IsNaturalNumber(strFileName))
-    return tag;
-  long idDb = atol(strFileName.c_str());
-
-  VIDEODB_CONTENT_TYPE type = GetType(url);
-  if (type == VIDEODB_CONTENT_UNKNOWN)
-    return tag;
-
-  CVideoDatabase videoDatabase;
-  if (!videoDatabase.Open())
-    return tag;
-
-  tag = videoDatabase.GetDetailsByTypeAndId(type, idDb);
-
-  return tag;
-}
-
-std::string CVideoDatabaseFile::TranslateUrl(const CURL& url)
+std::string CVideoDatabaseFile::TranslatePath(const CURL& url)
 {
   std::string strFileName = URIUtils::GetFileName(url.Get());
   if (strFileName.empty())
@@ -110,44 +107,3 @@ std::string CVideoDatabaseFile::TranslateUrl(const CURL& url)
 
   return realFilename;
 }
-
-bool CVideoDatabaseFile::Open(const CURL& url)
-{
-  return m_file.Open(TranslateUrl(url));
-}
-
-bool CVideoDatabaseFile::Exists(const CURL& url)
-{
-  return !TranslateUrl(url).empty();
-}
-
-int CVideoDatabaseFile::Stat(const CURL& url, struct __stat64* buffer)
-{
-  return m_file.Stat(TranslateUrl(url), buffer);
-}
-
-ssize_t CVideoDatabaseFile::Read(void* lpBuf, size_t uiBufSize)
-{
-  return m_file.Read(lpBuf, uiBufSize);
-}
-
-int64_t CVideoDatabaseFile::Seek(int64_t iFilePosition, int iWhence /*=SEEK_SET*/)
-{
-  return m_file.Seek(iFilePosition, iWhence);
-}
-
-void CVideoDatabaseFile::Close()
-{
-  m_file.Close();
-}
-
-int64_t CVideoDatabaseFile::GetPosition()
-{
-  return m_file.GetPosition();
-}
-
-int64_t CVideoDatabaseFile::GetLength()
-{
-  return m_file.GetLength();
-}
-
