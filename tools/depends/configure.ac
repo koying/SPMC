@@ -162,7 +162,7 @@ case $host in
     use_sdk="${use_sdk:-android-23}"
     use_ndk="${use_ndk:-android-21}"
     deps_dir="$use_host-$use_ndk"
-    platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC -Wino-switch"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC -Wno-switch"
     platform_ldflags="-L$prefix/$deps_dir/lib/$use_ndk"
     platform_cxxflags="$platform_cflags -frtti -Wno-reorder"
     platform_includes="-I$prefix/$deps_dir/include/$use_ndk"
