@@ -216,6 +216,9 @@ const BUILT_IN commands[] = {
   { "ToggleDebug",                false,  "Enables/disables debug mode" },
   { "StartPVRManager",            false,  "(Re)Starts the PVR manager" },
   { "StopPVRManager",             false,  "Stops the PVR manager" },
+#if defined(TARGET_ANDROID)
+  { "StartAndroidActivity",       true,   "Launch an Android native app with the given package name.  Optional parms (in order): intent, dataType, dataURI." },
+#endif
 };
 
 bool CBuiltins::HasCommand(const CStdString& execString)
@@ -1638,6 +1641,10 @@ int CBuiltins::Execute(const CStdString& execString)
   else if (execute.Equals("stoppvrmanager"))
   {
     g_application.StopPVRManager();
+  }
+  else if (execute.Equals("StartAndroidActivity") && params.size() > 0)
+  {
+    CApplicationMessenger::Get().StartAndroidActivity(params);
   }
   else
     return -1;
