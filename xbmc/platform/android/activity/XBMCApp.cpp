@@ -826,6 +826,11 @@ bool CXBMCApp::GetStorageUsage(const std::string &path, std::string &usage)
   }
 
   CJNIStatFs fileStat(path);
+  if (!fileStat)
+  {
+    CLog::Log(LOGERROR, "CXBMCApp::GetStorageUsage cannot stat %s", path.c_str());
+    return false;
+  }
   int blockSize = fileStat.getBlockSize();
   int blockCount = fileStat.getBlockCount();
   int freeBlocks = fileStat.getFreeBlocks();
