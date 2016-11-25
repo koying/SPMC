@@ -717,9 +717,12 @@ CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
   float scaleY = 1.0;
 
   CJNIRect r = m_xbmcappinstance->getVideoViewSurfaceRect();
-  RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
-  scaleX = (double)r.width() / renderRes.iWidth;
-  scaleY = (double)r.height() / renderRes.iHeight;
+  if (r.width() && r.height())
+  {
+    RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
+    scaleX = (double)r.width() / renderRes.iWidth;
+    scaleY = (double)r.height() / renderRes.iHeight;
+  }
 
   return CRect(srcRect.x1 * scaleX, srcRect.y1 * scaleY, srcRect.x2 * scaleX, srcRect.y2 * scaleY);
 }
@@ -730,9 +733,12 @@ CPoint CXBMCApp::GetDroidToGuiRatio()
   float scaleY = 1.0;
 
   CJNIRect r = m_xbmcappinstance->getVideoViewSurfaceRect();
-  CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
-  scaleX = gui.Width() / (double)r.width();
-  scaleY = gui.Height() / (double)r.height();
+  if (r.width() && r.height())
+  {
+    CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
+    scaleX = gui.Width() / (double)r.width();
+    scaleY = gui.Height() / (double)r.height();
+  }
 
   return CPoint(scaleX, scaleY);
 }

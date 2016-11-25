@@ -180,7 +180,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
   public Surface getVideoViewSurface()
   {
-    return mVideoView.getSurface();
+    try
+    {
+      return mVideoView.getSurface();
+    }
+    catch (Exception e)
+    {
+      return null;
+    }
   }
 
   public Rect getVideoViewSurfaceRect()
@@ -188,8 +195,15 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     Rect ret = new Rect();
     ret.top = 0;
     ret.left = 0;
-    ret.right = mVideoView.mWidth;
-    ret.bottom = mVideoView.mHeight;
+    ret.right = 0;
+    ret.bottom = 0;
+
+    try
+    {
+      ret.right = mVideoView.mWidth;
+      ret.bottom = mVideoView.mHeight;
+    }
+    catch (Exception e) {}
 
     return ret;
   }
@@ -201,10 +215,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       @Override
       public void run()
       {
-        android.widget.RelativeLayout.LayoutParams mp = new android.widget.RelativeLayout.LayoutParams(mVideoView.getLayoutParams());
-        mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
-        mVideoView.setLayoutParams(mp);
-        mVideoView.requestLayout();
+        try
+        {
+          android.widget.RelativeLayout.LayoutParams mp = new android.widget.RelativeLayout.LayoutParams(mVideoView.getLayoutParams());
+          mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
+          mVideoView.setLayoutParams(mp);
+          mVideoView.requestLayout();
+        }
+        catch (Exception e) {}
       }
     });
   }
@@ -216,7 +234,11 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       @Override
       public void run()
       {
-        mVideoView.clearSurface();
+        try
+        {
+          mVideoView.clearSurface();
+        }
+        catch (Exception e) {}
       }
     });
   }
