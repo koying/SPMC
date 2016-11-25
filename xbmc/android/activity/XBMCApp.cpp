@@ -378,7 +378,6 @@ void CXBMCApp::onLostFocus()
 
 bool CXBMCApp::EnableWakeLock(bool on)
 {
-  android_printf("%s: %s", __PRETTY_FUNCTION__, on ? "true" : "false");
   if (!m_wakeLock)
   {
     std::string appName = CCompileInfo::GetAppName();
@@ -396,12 +395,18 @@ bool CXBMCApp::EnableWakeLock(bool on)
   if (on)
   {
     if (!m_wakeLock->isHeld())
+    {
       m_wakeLock->acquire();
+      android_printf("%s: %s", __PRETTY_FUNCTION__, "acquired");
+    }
   }
   else
   {
     if (m_wakeLock->isHeld())
+    {
       m_wakeLock->release();
+      android_printf("%s: %s", __PRETTY_FUNCTION__, "released");
+    }
   }
 
   return true;
