@@ -251,7 +251,13 @@ void CNetworkAndroid::RetrieveInterfaces()
   {
     CJNINetworkInfo ni = connman.getNetworkInfo(n);
     CJNILinkProperties lp = connman.getLinkProperties(n);
-    CJNINetworkInterface intf = CJNINetworkInterface::getByName(lp.getInterfaceName());
-    m_interfaces.push_back(new CNetworkInterfaceAndroid(n, ni, lp, intf));
+    if (lp)
+    {
+      CJNINetworkInterface intf = CJNINetworkInterface::getByName(lp.getInterfaceName());
+      if (intf)
+        m_interfaces.push_back(new CNetworkInterfaceAndroid(n, ni, lp, intf));
+      else
+        CLog::Log(LOGERROR, "CNetworkAndroid::RetrieveInterfaces Cannot get interface by name: %s", lp.getInterfaceName().c_str());
+    }
   }
 }
