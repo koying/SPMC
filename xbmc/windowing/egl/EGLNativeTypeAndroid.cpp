@@ -126,7 +126,7 @@ static void fetchDisplayModes()
       {
         s_hasModeApi = true;
 
-        CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: current mode: %d: %dx%d@%f", m.getModeId(), m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
+        CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: Mode API: current: %d: %dx%d@%f", m.getModeId(), m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
         s_res_cur_displayMode.strId = StringUtils::Format("%d", m.getModeId());
         s_res_cur_displayMode.iWidth = s_res_cur_displayMode.iScreenWidth = m.getPhysicalWidth();
         s_res_cur_displayMode.iHeight = s_res_cur_displayMode.iScreenHeight = m.getPhysicalHeight();
@@ -142,7 +142,7 @@ static void fetchDisplayModes()
         std::vector<CJNIDisplayMode> modes = display.getSupportedModes();
         for (auto m : modes)
         {
-          CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: available mode: %d: %dx%d@%f", m.getModeId(), m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
+          CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: Mode API: available: %d: %dx%d@%f", m.getModeId(), m.getPhysicalWidth(), m.getPhysicalHeight(), m.getRefreshRate());
 
           RESOLUTION_INFO res;
           res.strId = StringUtils::Format("%d", m.getModeId());
@@ -183,9 +183,12 @@ void CEGLNativeTypeAndroid::Initialize()
   std::string displaySize;
   m_width = m_height = 0;
 
+  fetchDisplayModes();
   if (CJNIBuild::DEVICE != "foster")   // Buggy implementation of DisplayMode API on SATV
   {
-    fetchDisplayModes();
+    CLog::Log(LOGWARNING, "Nvidia Shield detected; Mode API ignored");
+    s_hasModeApi = false;
+
     for (auto res : s_res_displayModes)
     {
       if (res.iWidth > m_width || res.iHeight > m_height)
