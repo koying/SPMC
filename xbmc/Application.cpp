@@ -3014,14 +3014,6 @@ void CApplication::Stop(int exitCode)
     g_RarManager.ClearCache(true);
 #endif
 
-#ifdef HAS_FILESYSTEM_SFTP
-    CSFTPSessionManager::DisconnectAllSessions();
-#endif
-
-#if defined(TARGET_POSIX) && defined(HAS_FILESYSTEM_SMB)
-    smb.Deinit();
-#endif
-
     CLog::Log(LOGNOTICE, "unload skin");
     UnloadSkin();
 
@@ -3043,6 +3035,14 @@ void CApplication::Stop(int exitCode)
     // not before some windows still need it when deinitializing during skin
     // unloading
     CScriptInvocationManager::GetInstance().Uninitialize();
+
+#ifdef HAS_FILESYSTEM_SFTP
+    CSFTPSessionManager::DisconnectAllSessions();
+#endif
+
+#if defined(TARGET_POSIX) && defined(HAS_FILESYSTEM_SMB)
+    smb.Deinit();
+#endif
 
     g_Windowing.DestroyRenderSystem();
     g_Windowing.DestroyWindow();
