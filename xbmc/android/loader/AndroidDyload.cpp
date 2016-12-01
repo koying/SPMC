@@ -313,7 +313,7 @@ int CAndroidDyload::Close(void *handle)
         if (DecRef(j->filename) == 0)
         {
           if (dlclose(j->handle))
-            CXBMCApp::android_printf("xb_dlopen: Error from dlopen(%s): %s", j->filename.c_str(), dlerror());
+            CXBMCApp::android_printf("xb_dlclose: Error from dlclose(%s): %s", j->filename.c_str(), dlerror());
 
           CSingleLock lock(m_libLock);
           m_libs.erase(j->filename);
