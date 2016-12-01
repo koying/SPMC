@@ -191,7 +191,7 @@ public class XBMCJsonRPC
     {
       JSONObject req = request_object("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
           + src + "\"}, \"id\": \"1\"}");
-      if (req == null)
+      if (req == null || req.isNull("result"))
         return null;
 
       JSONObject result = req.getJSONObject("result");
@@ -220,7 +220,7 @@ public class XBMCJsonRPC
     {
       JSONObject req = request_object("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
           + src + "\"}, \"id\": \"1\"}");
-      if (req == null)
+      if (req == null || req.isNull("result"))
         return null;
 
       JSONObject result = req.getJSONObject("result");
@@ -255,7 +255,7 @@ public class XBMCJsonRPC
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
 
-        if (req == null)
+        if (req == null || req.isNull("result"))
           return null;
 
         JSONObject results = req.getJSONObject("result");
@@ -279,7 +279,8 @@ public class XBMCJsonRPC
         "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
-        if (req == null)
+
+        if (req == null || req.isNull("result"))
           return null;
 
         JSONObject results = req.getJSONObject("result");
@@ -377,6 +378,8 @@ public class XBMCJsonRPC
       {
         searchmovies: try
         {
+          if (resp.isNull("result"))
+            break searchmovies;
           JSONObject results = resp.getJSONObject("result");
           if (results == null || results.isNull("movies"))
             break searchmovies;
@@ -421,6 +424,8 @@ public class XBMCJsonRPC
       {
         searchtv: try
         {
+          if(resp.isNull("result"))
+            break searchtv;
           JSONObject results = resp.getJSONObject("result");
           if (results == null || results.isNull("tvshows"))
             break searchtv;
@@ -464,6 +469,8 @@ public class XBMCJsonRPC
       {
         searchalbums: try
         {
+          if (resp.isNull("result"))
+            break searchalbums;
           JSONObject results = resp.getJSONObject("result");
           if (results == null || results.isNull("albums"))
             break searchalbums;
@@ -495,6 +502,8 @@ public class XBMCJsonRPC
       {
         searchartists: try
         {
+          if (resp.isNull("result"))
+            break searchartists;
           JSONObject results = resp.getJSONObject("result");
           if (results == null || results.isNull("artists"))
             break searchartists;
@@ -539,7 +548,7 @@ public class XBMCJsonRPC
         .setSmallIcon(R.drawable.notif_icon);
 
     JSONObject rep = request_object(RECOMMENDATION_MOVIES_JSON);
-    if (rep != null)
+    if (rep != null && !rep.isNull("result"))
     {
       try
       {
@@ -580,7 +589,7 @@ public class XBMCJsonRPC
     }
 
     rep = request_object(RECOMMENDATIONS_SHOWS_JSON);
-    if (rep != null)
+    if (rep != null && !rep.isNull("result"))
     {
       try
       {
@@ -622,7 +631,7 @@ public class XBMCJsonRPC
     }
 
     rep = request_object(RECOMMENDATIONS_ALBUMS_JSON);
-    if (rep != null)
+    if (rep != null && !rep.isNull("result"))
     {
       try
       {
