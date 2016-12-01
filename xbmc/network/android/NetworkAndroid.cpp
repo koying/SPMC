@@ -79,20 +79,36 @@ bool CNetworkInterfaceAndroid::IsWireless()
 std::string CNetworkInterfaceAndroid::GetMacAddress()
 {
   auto interfaceMacAddrRaw = m_intf.getHardwareAddress();
-  return (StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
+  if (xbmc_jnienv()->ExceptionCheck())
+  {
+    xbmc_jnienv()->ExceptionClear();
+    CLog::Log(LOGERROR, "CNetworkInterfaceAndroid::GetMacAddress Exception getting HW address");
+    return "";
+  }
+  if (interfaceMacAddrRaw.size() >= 6)
+  {
+    return (StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
                                       (uint8_t)interfaceMacAddrRaw[0],
                                       (uint8_t)interfaceMacAddrRaw[1],
                                       (uint8_t)interfaceMacAddrRaw[2],
                                       (uint8_t)interfaceMacAddrRaw[3],
                                       (uint8_t)interfaceMacAddrRaw[4],
                                       (uint8_t)interfaceMacAddrRaw[5]));
+  }
+  return "";
 }
 
 void CNetworkInterfaceAndroid::GetMacAddressRaw(char rawMac[6])
 {
   auto interfaceMacAddrRaw = m_intf.getHardwareAddress();
-  memcpy(rawMac, interfaceMacAddrRaw.data(), 6);
-
+  if (xbmc_jnienv()->ExceptionCheck())
+  {
+    xbmc_jnienv()->ExceptionClear();
+    CLog::Log(LOGERROR, "CNetworkInterfaceAndroid::GetMacAddress Exception getting HW address");
+    return;
+  }
+  if (interfaceMacAddrRaw.size() >= 6)
+    memcpy(rawMac, interfaceMacAddrRaw.data(), 6);
 }
 
 bool CNetworkInterfaceAndroid::GetHostMacAddress(unsigned long host, std::string& mac)
