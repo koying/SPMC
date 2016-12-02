@@ -48,8 +48,9 @@ DVDVideoPicture* CDVDCodecUtils::AllocatePicture(int iWidth, int iHeight)
     pPicture->iWidth = iWidth;
     pPicture->iHeight = iHeight;
 
-    int w = iWidth / 2;
-    int h = iHeight / 2;
+    // fix buffer overflow if width or height is odd
+    int w = (iWidth + 1) / 2;
+    int h = (iHeight + 1) / 2;
     int size = w * h;
     int totalsize = (iWidth * iHeight) + size * 2;
     uint8_t* data = new uint8_t[totalsize];
