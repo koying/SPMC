@@ -182,7 +182,7 @@ void CAndroidDyload::GetDeps(string filename, strings *results)
   }
 
   if(!data)
-  { 
+  {
     close(fd);
     return;
   }
@@ -306,10 +306,11 @@ int CAndroidDyload::Close(void *handle)
   CSingleLock lock(m_depsLock);
   for (std::list<recursivelib>::iterator i = m_recursivelibs.begin(); i != m_recursivelibs.end(); ++i)
   {
-    if (i->handle == handle) 
+    if (i->handle == handle)
     {
       for (std::list<recursivelibdep>::iterator j = i->deps.begin(); j != i->deps.end(); ++j)
       {
+        CXBMCApp::android_printf("xb_dlclose: unloading: %s", j->filename.c_str());
         if (DecRef(j->filename) == 0)
         {
           if (dlclose(j->handle))
