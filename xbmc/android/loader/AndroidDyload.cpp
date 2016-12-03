@@ -12,7 +12,7 @@
 #include "CompileInfo.h"
 using namespace std;
 
-//#define DEBUG_SPEW
+#define DEBUG_SPEW
 
 #ifdef __LP64__
 #define Elf_Ehdr Elf64_Ehdr
@@ -271,7 +271,7 @@ void* CAndroidDyload::Open_Internal(string filename, bool checkSystem)
     handle = Find(*j);
     if (handle)
     {
-      if (IsSystemLib(*j) && !checkSystem)
+      if (!checkSystem && IsSystemLib(*j))
         continue;
       recursivelibdep dep;
       dep.handle = handle;
@@ -310,7 +310,9 @@ int CAndroidDyload::Close(void *handle)
     {
       for (std::list<recursivelibdep>::iterator j = i->deps.begin(); j != i->deps.end(); ++j)
       {
+#if defined(DEBUG_SPEW)
         CXBMCApp::android_printf("xb_dlclose: unloading: %s", j->filename.c_str());
+#endif
         if (DecRef(j->filename) == 0)
         {
           if (dlclose(j->handle))
