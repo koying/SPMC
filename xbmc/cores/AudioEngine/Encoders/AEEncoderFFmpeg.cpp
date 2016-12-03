@@ -18,9 +18,9 @@
  *
  */
 
-#define AC3_ENCODE_BITRATE 640000
 #define DTS_ENCODE_BITRATE 1411200
 
+#include "cores/AudioEngine/Interfaces/AE.h"
 #include "cores/AudioEngine/Encoders/AEEncoderFFmpeg.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "utils/log.h"
@@ -124,7 +124,10 @@ bool CAEEncoderFFmpeg::Initialize(AEAudioFormat &format, bool allow_planar_input
     m_CodecName = "AC3";
     m_CodecID   = AV_CODEC_ID_AC3;
     m_PackFunc  = &CAEPackIEC61937::PackAC3;
-    m_BitRate   = AC3_ENCODE_BITRATE;
+    if (CSettings::GetInstance().GetInt(CSettings::SETTING_AUDIOOUTPUT_PROCESSQUALITY) > AE_QUALITY_MID)
+      m_BitRate = 640000;
+    else
+      m_BitRate = 384000;
     codec = avcodec_find_encoder(m_CodecID);
   }
 
@@ -244,7 +247,7 @@ bool CAEEncoderFFmpeg::Initialize(AEAudioFormat &format, bool allow_planar_input
       return false;
     }
   }
-  CLog::Log(LOGNOTICE, "CAEEncoderFFmpeg::Initialize - %s encoder ready", m_CodecName.c_str());
+  CLog::Log(LOGNOTICE, "CAEEncoderFFmpeg::Initialize - %s encoder ready. Using %d kb/s bitrate", m_CodecName.c_str(), m_BitRate / 100);
   return true;
 }
 
