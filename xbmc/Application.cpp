@@ -206,6 +206,8 @@
 
 #if defined(TARGET_ANDROID)
 #include <androidjni/Build.h>
+#include <androidjni/ApplicationInfo.h>
+#include <androidjni/System.h>
 #include "platform/android/activity/XBMCApp.h"
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
@@ -560,6 +562,9 @@ bool CApplication::Create()
   std::string extstorage;
   bool extready = CXBMCApp::GetExternalStorage(extstorage);
   CLog::Log(LOGNOTICE, "External storage path = %s; status = %s", extstorage.c_str(), extready ? "ok" : "nok");
+  CLog::Log(LOGNOTICE, "System library paths = %s", CJNISystem::getProperty("java.library.path").c_str());
+  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCApp::getApplicationInfo().nativeLibraryDir.c_str());
+  CLog::Log(LOGNOTICE, "APK = %s", CXBMCApp::getPackageResourcePath().c_str());
   CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
 #endif
 
