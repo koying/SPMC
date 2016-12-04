@@ -271,7 +271,7 @@ void* CAndroidDyload::Open_Internal(string filename, bool checkSystem)
     handle = Find(*j);
     if (handle)
     {
-      if (!checkSystem && IsSystemLib(*j))
+      if (IsSystemLib(*j))
         continue;
       recursivelibdep dep;
       dep.handle = handle;
