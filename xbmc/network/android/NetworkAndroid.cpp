@@ -33,9 +33,8 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
-CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, const CJNINetworkInfo& ni, const CJNILinkProperties& lp, const CJNINetworkInterface& intf)
+CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, CJNILinkProperties lp, CJNINetworkInterface intf)
   : m_network(network)
-  , m_ni(ni)
   , m_lp(lp)
   , m_intf(intf)
 {
@@ -62,17 +61,32 @@ std::string& CNetworkInterfaceAndroid::GetName()
 
 bool CNetworkInterfaceAndroid::IsEnabled()
 {
-  return m_ni.isAvailable();
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return false;
+
+  return ni.isAvailable();
 }
 
 bool CNetworkInterfaceAndroid::IsConnected()
 {
-  return m_ni.isConnected();
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return false;
+
+  return ni.isConnected();
 }
 
 bool CNetworkInterfaceAndroid::IsWireless()
 {
-  int type = m_ni.getType();
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return false;
+
+  int type = ni.getType();
   return !(type == CJNIConnectivityManager::TYPE_ETHERNET || type == CJNIConnectivityManager::TYPE_DUMMY);
 }
 
@@ -180,7 +194,12 @@ std::string CNetworkInterfaceAndroid::GetCurrentWirelessEssId()
 {
   std::string ret;
 
-  if (m_ni.getType() == CJNIConnectivityManager::TYPE_WIFI)
+  CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
+  if (!ni)
+    return "";
+
+  if (ni.getType() == CJNIConnectivityManager::TYPE_WIFI)
   {
     CJNIWifiManager wm = CXBMCApp::getSystemService("wifi");
     if (wm.isWifiEnabled())
@@ -216,6 +235,14 @@ CNetworkAndroid::CNetworkAndroid()
   RetrieveInterfaces();
 }
 
+CNetworkAndroid::~CNetworkAndroid()
+{
+  for (auto intf : m_interfaces)
+    delete intf;
+  for (auto intf : m_oldInterfaces)
+    delete intf;
+}
+
 bool CNetworkAndroid::GetHostName(std::string& hostname)
 {
   hostname = CJNIInetAddress::getLocalHost().getHostName();
@@ -224,11 +251,14 @@ bool CNetworkAndroid::GetHostName(std::string& hostname)
 
 std::vector<CNetworkInterface*>& CNetworkAndroid::GetInterfaceList()
 {
+  CSingleLock lock(m_refreshMutex);
   return m_interfaces;
 }
 
 CNetworkInterface* CNetworkAndroid::GetFirstConnectedInterface()
 {
+  CSingleLock lock(m_refreshMutex);
+
   for(CNetworkInterface* intf : m_interfaces)
   {
     if (intf->IsEnabled() && intf->IsConnected() && !intf->GetCurrentDefaultGateway().empty())
@@ -260,12 +290,19 @@ void CNetworkAndroid::SetNameServers(const std::vector<std::string>& nameServers
 
 void CNetworkAndroid::RetrieveInterfaces()
 {
+  CSingleLock lock(m_refreshMutex);
+
+  // Cannot delete interfaces here, as there still might have references to it
+  for (auto intf : m_oldInterfaces)
+    delete intf;
+  m_oldInterfaces = m_interfaces;
+  m_interfaces.clear();
+
   CJNIConnectivityManager connman(CXBMCApp::getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   std::vector<CJNINetwork> networks = connman.getAllNetworks();
 
   for (auto n : networks)
   {
-    CJNINetworkInfo ni = connman.getNetworkInfo(n);
     CJNILinkProperties lp = connman.getLinkProperties(n);
     if (lp)
     {
@@ -277,9 +314,11 @@ void CNetworkAndroid::RetrieveInterfaces()
         continue;
       }
       if (intf)
-        m_interfaces.push_back(new CNetworkInterfaceAndroid(n, ni, lp, intf));
+        m_interfaces.push_back(new CNetworkInterfaceAndroid(n, lp, intf));
       else
         CLog::Log(LOGERROR, "CNetworkAndroid::RetrieveInterfaces Cannot get interface by name: %s", lp.getInterfaceName().c_str());
     }
+    else
+      CLog::Log(LOGERROR, "CNetworkAndroid::RetrieveInterfaces Cannot get link properties for network: %s", n.toString().c_str());
   }
 }

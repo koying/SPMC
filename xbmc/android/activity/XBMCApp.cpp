@@ -38,6 +38,7 @@
 #include <android/log.h>
 
 #include "Application.h"
+#include "network/android/NetworkAndroid.h"
 #include "settings/AdvancedSettings.h"
 #include "xbmc.h"
 #include "windowing/WinEvents.h"
@@ -235,6 +236,7 @@ void CXBMCApp::onResume()
   intentFilter.addAction("android.intent.action.SCREEN_ON");
   intentFilter.addAction("android.intent.action.SCREEN_OFF");
   intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+  intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
   registerReceiver(*this, intentFilter);
 
   if (!g_application.IsInScreenSaver())
@@ -1033,6 +1035,12 @@ void CXBMCApp::onReceive(CJNIIntent intent)
       CAndroidKey::XBMC_Key(keycode, XBMCK_MEDIA_REWIND, 0, 0, up);
     else if (keycode == CJNIKeyEvent::KEYCODE_MEDIA_STOP)
       CAndroidKey::XBMC_Key(keycode, XBMCK_MEDIA_STOP, 0, 0, up);
+  }
+  else if (action == "android.net.conn.CONNECTIVITY_CHANGE")
+  {
+    CNetwork& net = g_application.getNetwork();
+    CNetworkAndroid* netdroid = static_cast<CNetworkAndroid*>(&net);
+    netdroid->RetrieveInterfaces();
   }
 }
 

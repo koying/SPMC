@@ -20,6 +20,7 @@
  */
 
 #include "network/Network.h"
+#include "threads/CriticalSection.h"
 
 #include "android/jni/Network.h"
 #include "android/jni/NetworkInfo.h"
@@ -32,9 +33,9 @@ class CNetworkAndroid;
 class CNetworkInterfaceAndroid : public CNetworkInterface
 {
 public:
-  CNetworkInterfaceAndroid(CJNINetwork network, const CJNINetworkInfo& ni, const CJNILinkProperties& lp, const CJNINetworkInterface& intf);
+  CNetworkInterfaceAndroid(CJNINetwork network, CJNILinkProperties lp, CJNINetworkInterface intf);
   std::vector<std::string> GetNameServers();
-  
+
   // CNetworkInterface interface
 public:
   virtual std::string& GetName() override;
@@ -51,11 +52,10 @@ public:
   virtual std::vector<NetworkAccessPoint> GetAccessPoints() override;
   virtual void GetSettings(NetworkAssignment& assignment, std::string& ipAddress, std::string& networkMask, std::string& defaultGateway, std::string& essId, std::string& key, EncMode& encryptionMode) override;
   virtual void SetSettings(NetworkAssignment& assignment, std::string& ipAddress, std::string& networkMask, std::string& defaultGateway, std::string& essId, std::string& key, EncMode& encryptionMode) override;
-  
+
 protected:
   std::string m_name;
   CJNINetwork m_network;
-  CJNINetworkInfo m_ni;
   CJNILinkProperties m_lp;
   CJNINetworkInterface m_intf;
 };
@@ -63,9 +63,12 @@ protected:
 
 class CNetworkAndroid : public CNetwork
 {
+  friend class CXBMCApp;
+
 public:
   CNetworkAndroid();
-  
+  ~CNetworkAndroid();
+
   // CNetwork interface
 public:
   virtual bool GetHostName(std::string& hostname) override;
@@ -74,9 +77,11 @@ public:
   virtual bool PingHost(unsigned long host, unsigned int timeout_ms) override;
   virtual std::vector<std::string> GetNameServers() override;
   virtual void SetNameServers(const std::vector<std::string>& nameServers) override;
-  
+
 protected:
   void RetrieveInterfaces();
-  std::vector<CNetworkInterface*> m_interfaces;  
+  std::vector<CNetworkInterface*> m_interfaces;
+  std::vector<CNetworkInterface*> m_oldInterfaces;
+  CCriticalSection m_refreshMutex;
 };
 
