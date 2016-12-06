@@ -153,13 +153,26 @@ bool CWinSystemEGL::InitWindowSystem()
 
 bool CWinSystemEGL::CreateWindow(RESOLUTION_INFO &res)
 {
+  RESOLUTION_INFO current_resolution;
+  current_resolution.iWidth = current_resolution.iHeight = 0;
+  RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
+
   if (!m_egl)
   {
     CLog::Log(LOGERROR, "CWinSystemEGL::CreateWindow no EGL!");
     return false;
   }
 
-  if(m_egl)
+  if (m_egl->GetNativeResolution(&current_resolution) &&
+    current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
+    current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
+    current_resolution.fRefreshRate == res.fRefreshRate &&
+    (current_resolution.dwFlags & D3DPRESENTFLAG_MODEMASK) == (res.dwFlags & D3DPRESENTFLAG_MODEMASK) &&
+    m_stereo_mode == stereo_mode)
+  {
+    CLog::Log(LOGDEBUG, "%s: No need to call SetNativeResolution",__FUNCTION__);
+  }
+  else
     m_egl->SetNativeResolution(res);
 
   int quirks;
