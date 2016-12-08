@@ -68,9 +68,7 @@
 #include "utils/CharsetConverter.h"
 #include "utils/URIUtils.h"
 #endif
-#if defined(TARGET_ANDROID)
-#include "android/loader/AndroidDyload.h"
-#elif !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS)
 #include <dlfcn.h>
 #endif
 #include "utils/Environment.h"
@@ -449,10 +447,7 @@ extern "C"
 
   void *dll_dlopen(const char *filename, int flag)
   {
-#if defined(TARGET_ANDROID)
-    CAndroidDyload temp;
-    return temp.Open(filename);
-#elif !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS)
     return dlopen(filename, flag);
 #else
     return NULL;
