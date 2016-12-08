@@ -2216,7 +2216,6 @@ OUTPUT_FILES="Makefile \
     xbmc/platform/posix/Makefile \
     xbmc/platform/darwin/osx/Makefile \
     xbmc/platform/android/activity/Makefile \
-    xbmc/platform/android/loader/Makefile \
     xbmc/platform/android/jni/Makefile \
     xbmc/utils/Makefile \
     xbmc/platform/Makefile \

@@ -203,7 +203,6 @@ DIRECTORY_ARCHIVES += lib/UnrarXLib/UnrarXLib.a
 endif
 
 ifeq (@USE_ANDROID@,1)
-DIRECTORY_ARCHIVES += xbmc/platform/android/loader/AndroidDyload.a
 DIRECTORY_ARCHIVES += xbmc/windowing/android/windowing_android.a
 DIRECTORY_ARCHIVES += xbmc/platform/android/bionic_supplement/bionic_supplement.a
 DIRECTORY_ARCHIVES += xbmc/platform/android/jni/jni.a
