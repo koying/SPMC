@@ -892,6 +892,7 @@
           <constraints>
             <options>
             <option label="20420">9999</option>   <!-- Never -->
+            <option label="39000">800</option>  <!-- HD -->
             <option label="20422">0</option>  <!-- Always -->
             </options>
           </constraints>
@@ -2421,7 +2422,7 @@
             <dependency type="enable">
                 <condition on="property" operator="!is" name="enablemysqlgui" />
             </dependency>
-          </dependencies>	
+          </dependencies>
           <level>1</level>
           <default>3306</default>
           <constraints>
@@ -2436,25 +2437,25 @@
             <dependency type="enable">
                 <condition on="property" operator="!is" name="enablemysqlgui" />
             </dependency>
-          </dependencies> 	
+          </dependencies>
           <level>1</level>
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
           <control type="edit" format="string" />
-        </setting> 
+        </setting>
         <setting id="mysql.pass" type="string" label="15052" help="12326">
         <dependencies>
             <dependency type="enable">
                 <condition on="property" operator="!is" name="enablemysqlgui" />
             </dependency>
-          </dependencies>	
+          </dependencies>
           <level>1</level>
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
           <control type="edit" format="string" />
-        </setting>                        
+        </setting>
       </group>
       <group id="2">
         <setting id="mysql.video" type="string" label="1265" help="1267">
@@ -2463,15 +2464,15 @@
             <allowempty>true</allowempty>
           </constraints>
           <control type="edit" format="string" />
-        </setting> 
+        </setting>
         <setting id="mysql.music" type="string" label="1266" help="1267">
           <level>1</level>
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
           <control type="edit" format="string" />
-        </setting> 
-      </group>	
+        </setting>
+      </group>
     </category>
   </section>
   <section id="system" label="13000" help="36349">
