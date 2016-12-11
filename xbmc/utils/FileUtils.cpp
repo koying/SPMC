@@ -254,7 +254,11 @@ bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
     }
   }
 
+#if defined(_MSC_VER)
+  char *fullpath = _fullpath(NULL, filePath.c_str(), MAX_PATH);
+#else
   char *fullpath = realpath(filePath.c_str(), nullptr);
+#endif
   if (fullpath)
   {
     const std::string testpath = fullpath;
@@ -263,7 +267,11 @@ bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
     // if this is a real path and accesses into user home, allow.
     std::string userHome = CSpecialProtocol::TranslatePath("special://home");
     // need both test and home paths from realpath or they might not match
+#if defined(_MSC_VER)
+    char *userhome = _fullpath(NULL, userHome.c_str(), MAX_PATH);
+#else
     char *userhome = realpath(userHome.c_str(), nullptr);
+#endif
     if (!userhome)
       return false;
     userHome = userhome;
@@ -275,7 +283,11 @@ bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
     std::string appRoot;
     CUtil::GetHomePath(appRoot);
     // need both test and app paths from realpath or the might not match
+#if defined(_MSC_VER)
+    char *approot = _fullpath(NULL, appRoot.c_str(), MAX_PATH);
+#else
     char *approot = realpath(appRoot.c_str(), nullptr);
+#endif
     if (!approot)
       return false;
     appRoot = approot;
