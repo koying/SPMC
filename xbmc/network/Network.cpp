@@ -23,7 +23,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <sys/wait.h>
 
 #include "Network.h"
 #include "messaging/ApplicationMessenger.h"
@@ -33,6 +32,8 @@
 #include "utils/SystemInfo.h"
 #include "platform/win32/WIN32Util.h"
 #include "utils/CharsetConverter.h"
+#else
+#include <sys/wait.h>
 #endif
 #include "utils/StringUtils.h"
 
@@ -466,7 +467,10 @@ bool CNetwork::PingHost(unsigned long ipaddr, unsigned short port, unsigned int 
 
 bool CNetwork::PingHost(unsigned long remote_ip, unsigned int timeout_ms)
 {
-  char cmd_line [64];
+#ifdef TARGET_WINDOWS
+  return false;
+#else
+  char cmd_line[64];
 
   struct in_addr host_ip;
   host_ip.s_addr = remote_ip;
@@ -492,6 +496,7 @@ bool CNetwork::PingHost(unsigned long remote_ip, unsigned int timeout_ms)
     CLog::Log(LOGERROR, "Ping fail : status = %d, errno = %d : '%s'", status, errno, cmd_line);
 
   return result == 0;
+#endif
 }
 
 //creates, binds and listens a tcp socket on the desired port. Set bindLocal to
