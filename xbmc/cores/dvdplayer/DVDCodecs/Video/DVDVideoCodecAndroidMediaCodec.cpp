@@ -687,7 +687,10 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   m_surface = nullptr;
 
   if (m_render_surface)
+  {
     CXBMCApp::get()->clearVideoView();
+    Sleep(500);
+  }
   CXBMCApp::get()->setVideosurfaceInUse(false);
 
   SAFE_DELETE(m_bitstream);
