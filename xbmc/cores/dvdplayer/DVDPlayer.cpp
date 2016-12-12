@@ -1575,7 +1575,10 @@ void CDVDPlayer::CheckStreamChanges(CCurrentStream& current, CDemuxStream* strea
     /* if they have, reopen stream */
 
     if (current.hint != CDVDStreamInfo(*stream, true))
+    {
+      CloseStream(current, false);
       OpenStream(current, stream->iId, stream->source );
+    }
 
     current.stream = (void*)stream;
     current.changes = stream->changes;
