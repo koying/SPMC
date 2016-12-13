@@ -285,12 +285,14 @@ DemuxPacket* CDVDDemuxPVRClient::Read()
 
   if (pPacket->iStreamId == DMX_SPECIALID_STREAMINFO)
   {
+    CLog::Log(LOGNOTICE, "DMX_SPECIALID_STREAMINFO");
     RequestStreams();
     CDVDDemuxUtils::FreeDemuxPacket(pPacket);
     return CDVDDemuxUtils::AllocateDemuxPacket(0);
   }
   else if (pPacket->iStreamId == DMX_SPECIALID_STREAMCHANGE)
   {
+    CLog::Log(LOGNOTICE, "DMX_SPECIALID_STREAMCHANGE");
     RequestStreams();
   }
   else if (pPacket->iStreamId >= 0
