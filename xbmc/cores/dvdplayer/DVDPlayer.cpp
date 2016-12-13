@@ -890,6 +890,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   // open video stream
   streams = m_SelectionStreams.Get(STREAM_VIDEO, PredicateVideoPriority);
   valid   = false;
+  CloseStream(m_CurrentVideo, false);
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenStream(m_CurrentVideo, it->id, it->source, reset))
@@ -905,6 +906,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
     streams = m_SelectionStreams.Get(STREAM_AUDIO, PredicateAudioPriority);
   valid   = false;
 
+  CloseStream(m_CurrentAudio, false);
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenStream(m_CurrentAudio, it->id, it->source, reset))
@@ -919,6 +921,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   // open teletext stream
   streams = m_SelectionStreams.Get(STREAM_TELETEXT);
   valid   = false;
+  CloseStream(m_CurrentTeletext, false);
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenStream(m_CurrentTeletext, it->id, it->source))
@@ -930,6 +933,7 @@ void CDVDPlayer::OpenDefaultStreams(bool reset)
   // open RDS stream
   streams = m_SelectionStreams.Get(STREAM_RADIO_RDS);
   valid   = false;
+  CloseStream(m_CurrentRadioRDS, false);
   for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
   {
     if(OpenStream(m_CurrentRadioRDS, it->id, it->source))
