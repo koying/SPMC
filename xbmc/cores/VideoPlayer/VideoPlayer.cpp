@@ -919,6 +919,7 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
   // open video stream
   valid   = false;
 
+  CloseStream(m_CurrentVideo, false);
   for (const auto &stream : m_SelectionStreams.Get(STREAM_VIDEO, PredicateVideoPriority))
   {
     if(OpenStream(m_CurrentVideo, stream.demuxerId, stream.id, stream.source, reset))
@@ -935,8 +936,8 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
 
   // open audio stream
   valid   = false;
-  if(!m_PlayerOptions.video_only)
   {
+    CloseStream(m_CurrentAudio, false);
     for (const auto &stream : m_SelectionStreams.Get(STREAM_AUDIO, PredicateAudioPriority))
     {
       if(OpenStream(m_CurrentAudio, stream.demuxerId, stream.id, stream.source, reset))
@@ -981,6 +982,7 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
 
   // open teletext stream
   valid   = false;
+  CloseStream(m_CurrentTeletext, false);
   for (const auto &stream : m_SelectionStreams.Get(STREAM_TELETEXT))
   {
     if(OpenStream(m_CurrentTeletext, stream.demuxerId, stream.id, stream.source))
@@ -994,6 +996,7 @@ void CVideoPlayer::OpenDefaultStreams(bool reset)
 
   // open RDS stream
   valid   = false;
+  CloseStream(m_CurrentRadioRDS, false);
   for (const auto &stream : m_SelectionStreams.Get(STREAM_RADIO_RDS))
   {
     if(OpenStream(m_CurrentRadioRDS, stream.demuxerId, stream.id, stream.source))
