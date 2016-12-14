@@ -36,6 +36,7 @@
 #endif
 
 #include "android/activity/JNIMainActivity.h"
+#include "android/activity/JNIXBMCSurfaceHolderCallback.h"
 
 #if defined(HAVE_BREAKPAD)
 static void *startCrashHandler(void* arg)
@@ -176,6 +177,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   std::string frameListener = pkgRoot + "/XBMCOnFrameAvailableListener";
   std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
   std::string audioFocusChangeListener = pkgRoot + "/XBMCOnAudioFocusChangeListener";
+  std::string surfaceCallback = pkgRoot + "/XBMCSurfaceHolderCallback";
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
@@ -293,6 +295,31 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       (void*)&CJNIMainActivity::_onAudioFocusChange
     };
     env->RegisterNatives(cAudioFocusChangeListener, &mOnAudioFocusChange, 1);
+  }
+
+  jclass cSurfaceCallback = env->FindClass(surfaceCallback.c_str());
+  if(cSurfaceCallback)
+  {
+    JNINativeMethod mOnSurfaceChanged = {
+      "_OnSurfaceChanged",
+      "(Landroid/view/SurfaceHolder;III)V",
+      (void*)&CJNIXBMCSurfaceHolderCallback::_OnSurfaceChanged
+    };
+    env->RegisterNatives(cSurfaceCallback, &mOnSurfaceChanged, 1);
+    
+    JNINativeMethod mOnSurfaceCreated = {
+      "_OnSurfaceCreated",
+      "(Landroid/view/SurfaceHolder;)V",
+      (void*)&CJNIXBMCSurfaceHolderCallback::_OnSurfaceCreated
+    };
+    env->RegisterNatives(cSurfaceCallback, &mOnSurfaceCreated, 1);
+    
+    JNINativeMethod mOnSurfaceDestroyed = {
+      "_OnSurfaceDestroyed",
+      "(Landroid/view/SurfaceHolder;)V",
+      (void*)&CJNIXBMCSurfaceHolderCallback::_OnSurfaceDestroyed
+    };
+    env->RegisterNatives(cSurfaceCallback, &mOnSurfaceDestroyed, 1);
   }
 
   return version;

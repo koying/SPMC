@@ -2458,6 +2458,7 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSurfaceHolderCallback.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProperties.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCCrashHandler.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java \

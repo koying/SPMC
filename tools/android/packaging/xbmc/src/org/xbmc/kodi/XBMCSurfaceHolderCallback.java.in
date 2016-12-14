@@ -1,0 +1,44 @@
+package @APP_PACKAGE@;
+
+import android.view.SurfaceHolder;
+import android.view.SurfaceHolder.Callback;
+
+public class XBMCSurfaceHolderCallback implements SurfaceHolder.Callback
+{
+  native void _OnSurfaceChanged(SurfaceHolder holder, int format, int width, int height);
+  native void _OnSurfaceCreated(SurfaceHolder holder);
+  native void _OnSurfaceDestroyed(SurfaceHolder holder);
+  
+  private synchronized void signalSurfaceChanged(SurfaceHolder holder, int format, int width, int height)
+  {
+    _OnSurfaceChanged(holder, format, width, height);
+  }
+
+  private synchronized void signalSurfaceCreated(SurfaceHolder holder)
+  {
+    _OnSurfaceCreated(holder);
+  }
+
+  private synchronized void signalSurfaceDestroyed(SurfaceHolder holder)
+  {
+    _OnSurfaceDestroyed(holder);
+  }
+
+  @Override
+  public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+  {
+    signalSurfaceChanged(holder, format, width, height);
+  }
+
+  @Override
+  public void surfaceCreated(SurfaceHolder holder)
+  {
+    signalSurfaceCreated(holder);
+  }
+
+  @Override
+  public void surfaceDestroyed(SurfaceHolder holder)
+  {
+    signalSurfaceDestroyed(holder);
+  }
+}
