@@ -36,6 +36,7 @@
 #endif
 
 #include "android/activity/JNIMainActivity.h"
+#include "android/activity/JNIXBMCVideoView.h"
 
 #if defined(HAVE_BREAKPAD)
 static void *startCrashHandler(void* arg)
@@ -176,6 +177,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   std::string frameListener = pkgRoot + "/XBMCOnFrameAvailableListener";
   std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
   std::string audioFocusChangeListener = pkgRoot + "/XBMCOnAudioFocusChangeListener";
+  std::string videoView = pkgRoot + "/XBMCVideoView";
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
@@ -221,20 +223,6 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       (void*)&CJNIMainActivity::_onAudioDeviceRemoved
     };
     env->RegisterNatives(cMain, &mAudioDeviceRemoved, 1);
-
-    JNINativeMethod mVideoViewAcquired = {
-      "_onVideoViewAcquired",
-      "()V",
-      (void*)&CJNIMainActivity::_onVideoViewAcquired
-    };
-    env->RegisterNatives(cMain, &mVideoViewAcquired, 1);
-
-    JNINativeMethod mVideoViewLost = {
-      "_onVideoViewLost",
-      "()V",
-      (void*)&CJNIMainActivity::_onVideoViewLost
-    };
-    env->RegisterNatives(cMain, &mVideoViewLost, 1);
   }
 
   JNINativeMethod mOnCaptureAvailable = {
@@ -293,6 +281,33 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       (void*)&CJNIMainActivity::_onAudioFocusChange
     };
     env->RegisterNatives(cAudioFocusChangeListener, &mOnAudioFocusChange, 1);
+  }
+
+  jclass cVideoView = env->FindClass(videoView.c_str());
+  if(cVideoView)
+  {
+    CJNIXBMCVideoView::m_jclass = (jclass)env->NewGlobalRef(cVideoView);
+
+    JNINativeMethod mOnSurfaceChanged = {
+      "_OnSurfaceChanged",
+      "(Landroid/view/SurfaceHolder;III)V",
+      (void*)&CJNIXBMCVideoView::_OnSurfaceChanged
+    };
+    env->RegisterNatives(cVideoView, &mOnSurfaceChanged, 1);
+
+    JNINativeMethod mOnSurfaceCreated = {
+      "_OnSurfaceCreated",
+      "(Landroid/view/SurfaceHolder;)V",
+      (void*)&CJNIXBMCVideoView::_OnSurfaceCreated
+    };
+    env->RegisterNatives(cVideoView, &mOnSurfaceCreated, 1);
+
+    JNINativeMethod mOnSurfaceDestroyed = {
+      "_OnSurfaceDestroyed",
+      "(Landroid/view/SurfaceHolder;)V",
+      (void*)&CJNIXBMCVideoView::_OnSurfaceDestroyed
+    };
+    env->RegisterNatives(cVideoView, &mOnSurfaceDestroyed, 1);
   }
 
   return version;

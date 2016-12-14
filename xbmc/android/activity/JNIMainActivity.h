@@ -20,12 +20,10 @@
  */
 
 #include "android/jni/Activity.h"
-#include "android/jni/Surface.h"
 #include "android/jni/Intent.h"
 #include "android/jni/AudioDeviceInfo.h"
 #include "android/jni/Image.h"
 #include "android/jni/Rect.h"
-
 
 class CJNIMainActivity : public CJNIActivity
 {
@@ -42,8 +40,6 @@ public:
   static void _doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos);
   static void _onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices);
   static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
-  static void _onVideoViewAcquired(JNIEnv *env, jobject context);
-  static void _onVideoViewLost(JNIEnv *env, jobject context);
   static void _onCaptureAvailable(JNIEnv *env, jobject context, jobject image);
   static void _onScreenshotAvailable(JNIEnv *env, jobject context, jobject image);
 
@@ -55,11 +51,8 @@ public:
   static void startCrashHandler();
   static void uploadLog();
 
-  CJNISurface getVideoViewSurface();
-  void clearVideoView();
-  CJNIRect getVideoViewSurfaceRect();
-  void setVideoViewSurfaceRect(int l, int t, int r, int b);
-
+  CJNIRect getDisplayRect();
+  
   static void takeScreenshot();
   static void startProjection();
   static void startCapture(int width, int height);
@@ -78,6 +71,4 @@ protected:
   virtual void doFrame(int64_t frameTimeNanos)=0;
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
-  virtual void onVideoViewAcquired() = 0;
-  virtual void onVideoViewLost() = 0;
 };
