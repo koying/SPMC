@@ -23,6 +23,10 @@
 #include "filesystem/SpecialProtocol.h"
 #include "utils/log.h"
 
+#include <map>
+
+std::map<void*, std::string> s_libmap;
+
 SoLoader::SoLoader(const std::string &so, bool bGlobal) : LibraryLoader(so)
 {
   m_soHandle = NULL;
@@ -57,6 +61,7 @@ bool SoLoader::Load()
       CLog::Log(LOGERROR, "Unable to load %s, reason: %s", strFileName.c_str(), dlerror());
       return false;
     }
+    s_libmap.insert(std::pair<void*, std::string>(m_soHandle, strFileName));
   }
   m_bLoaded = true;
   return true;
@@ -67,6 +72,9 @@ void SoLoader::Unload()
 
   if (m_soHandle)
   {
+    std::string fn = s_libmap[m_soHandle];
+    CLog::Log(LOGDEBUG, "Unloading: %s\n", fn.c_str());
+    
     if (dlclose(m_soHandle) != 0)
        CLog::Log(LOGERROR, "Unable to unload %s, reason: %s", GetName(), dlerror());
   }
