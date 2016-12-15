@@ -9921,3 +9921,10 @@ xbmc/listproviders/IListProvider.cpp
 xbmc/listproviders/IListProvider.h
 xbmc/listproviders/StaticProvider.cpp
 xbmc/listproviders/StaticProvider.h
+xbmc/android/jni/SurfaceHolder.h
+xbmc/android/jni/SurfaceHolder.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSurfaceHolderCallback.java.in
+xbmc/android/activity/JNIXBMCSurfaceHolderCallback.h
+xbmc/android/activity/JNIXBMCSurfaceHolderCallback.cpp
+xbmc/android/activity/JNIXBMCVideoView.h
+xbmc/android/activity/JNIXBMCVideoView.cpp
