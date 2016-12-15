@@ -40,11 +40,6 @@ CJNIXBMCSurfaceHolderCallback::CJNIXBMCSurfaceHolderCallback(CJNISurfaceHolderCa
   std::replace(dotClassName.begin(), dotClassName.end(), '/', '.');
   m_object = new_object(CJNIContext::getClassLoader().loadClass(dotClassName));
   m_object.setGlobal();
-  
-  std::string pkgRoot = GetClassName();
-  StringUtils::ToLower(pkgRoot);
-  StringUtils::Replace(pkgRoot, '.', '/');
-  std::string slashClassName = pkgRoot + "/XBMCSurfaceHolderCallback";
 }
 
 void CJNIXBMCSurfaceHolderCallback::_OnSurfaceChanged(JNIEnv *env, jobject thiz, jobject holder, jint format, jint width, jint height )

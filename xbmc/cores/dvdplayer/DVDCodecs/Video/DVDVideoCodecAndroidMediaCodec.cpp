@@ -172,6 +172,7 @@ CDVDMediaCodecInfo::CDVDMediaCodecInfo(
   , AMediaCodec* codec
   , std::shared_ptr<CJNISurfaceTexture> &surfacetexture
   , std::shared_ptr<CDVDMediaCodecOnFrameAvailable> &frameready
+  , std::shared_ptr<CJNIXBMCVideoView> &videoview
 )
 : m_refs(1)
 , m_valid(true)
@@ -182,6 +183,7 @@ CDVDMediaCodecInfo::CDVDMediaCodecInfo(
 , m_codec(codec)
 , m_surfacetexture(surfacetexture)
 , m_frameready(frameready)
+, m_videoview(videoview)
 {
   // paranoid checks
   assert(m_index >= 0);
@@ -319,7 +321,7 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
   if (DestRect != cur_rect)
   {
     CRect adjRect = CXBMCApp::MapRenderToDroid(DestRect);
-    CXBMCApp::get()->setVideoViewSurfaceRect(adjRect.x1, adjRect.y1, adjRect.x2, adjRect.y2);
+    m_videoview->setSurfaceRect(adjRect.x1, adjRect.y1, adjRect.x2, adjRect.y2);
     CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height());
     CLog::Log(LOGDEBUG, "RenderUpdate: Adj  - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
     cur_rect = DestRect;
@@ -339,7 +341,9 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_re
 , m_opened(false)
 , m_textureId(0)
 , m_bitstream(nullptr)
+, m_jnivideoview(nullptr)
 , m_surface(nullptr)
+, m_jnisurface(nullptr)
 , m_render_sw(false)
 , m_render_surface(surface_render)
 {
@@ -518,11 +522,11 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
 
   if (m_render_surface)
   {
-    m_jnivideosurface = CXBMCApp::get()->getVideoViewSurface();
+    m_jnivideoview = std::shared_ptr<CJNIXBMCVideoView>(new CJNIXBMCVideoView(this));
+    m_jnivideosurface = m_jnivideoview->getSurface();
     if (!m_jnivideosurface)
       return false;
     m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnivideosurface.get_raw());
-    CXBMCApp::get()->setVideosurfaceInUse(true);
 
     m_formatname += "(S)";
   }
@@ -685,13 +689,6 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   if(m_surface)
     ANativeWindow_release(m_surface);
   m_surface = nullptr;
-
-  if (m_render_surface)
-  {
-    CXBMCApp::get()->clearVideoView();
-    Sleep(500);
-  }
-  CXBMCApp::get()->setVideosurfaceInUse(false);
 
   SAFE_DELETE(m_bitstream);
 }
@@ -1019,7 +1016,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
       }
       if (i == m_inflight.size())
         m_inflight.push_back(
-          new CDVDMediaCodecInfo(index, m_textureId, m_codec, m_surfaceTexture, m_frameAvailable)
+          new CDVDMediaCodecInfo(index, m_textureId, m_codec, m_surfaceTexture, m_frameAvailable, m_jnivideoview)
         );
       m_videobuffer.mediacodec = m_inflight[i]->Retain();
       m_videobuffer.mediacodec->Validate(true);
@@ -1333,4 +1330,17 @@ void CDVDVideoCodecAndroidMediaCodec::ReleaseSurfaceTexture(void)
     CXBMCApp::GetTexturePool().push_back((GLuint)m_textureId);
     m_textureId = 0;
   }
+}
+
+
+void CDVDVideoCodecAndroidMediaCodec::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
+{
+}
+
+void CDVDVideoCodecAndroidMediaCodec::surfaceCreated(CJNISurfaceHolder holder)
+{
+}
+
+void CDVDVideoCodecAndroidMediaCodec::surfaceDestroyed(CJNISurfaceHolder holder)
+{
 }

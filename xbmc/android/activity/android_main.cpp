@@ -223,20 +223,6 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       (void*)&CJNIMainActivity::_onAudioDeviceRemoved
     };
     env->RegisterNatives(cMain, &mAudioDeviceRemoved, 1);
-
-    JNINativeMethod mVideoViewAcquired = {
-      "_onVideoViewAcquired",
-      "()V",
-      (void*)&CJNIMainActivity::_onVideoViewAcquired
-    };
-    env->RegisterNatives(cMain, &mVideoViewAcquired, 1);
-
-    JNINativeMethod mVideoViewLost = {
-      "_onVideoViewLost",
-      "()V",
-      (void*)&CJNIMainActivity::_onVideoViewLost
-    };
-    env->RegisterNatives(cMain, &mVideoViewLost, 1);
   }
 
   JNINativeMethod mOnCaptureAvailable = {
