@@ -35,11 +35,12 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private static final String TAG = "@APP_NAME_UC@";
   private static final int INTENT_RESULT_PROJECT_CODE = 4658;
 
+  public static Main MainActivity = null;
+
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCJsonRPC mJsonRPC = null;
   private XBMCProjection mCaptureProjection = null;
   private XBMCProjection mScreenshotProjection = null;
-  private RelativeLayout mVideoLayout = null;
   private View thisView = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
@@ -172,6 +173,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public Main()
   {
     super();
+    MainActivity = this;
   }
 
   public Rect getDisplayRect()
@@ -190,17 +192,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     catch (Exception e) {}
 
     return ret;
-  }
-
-  public void addVideoView(XBMCVideoView sview)
-  {
-    sview.setActivity(this);
-    mVideoLayout.addView(sview);
-  }
-
-  public void removeVideoView(XBMCVideoView sview)
-  {
-    mVideoLayout.removeView(sview);
   }
 
   public void registerMediaButtonEventReceiver()
@@ -264,8 +255,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     getWindow().setFormat(PixelFormat.TRANSPARENT);
 
     setContentView(R.layout.activity_main);
-    mVideoLayout = (RelativeLayout) findViewById(R.id.VideoLayout);
-
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
     mSettingsContentObserver = new XBMCSettingsContentObserver(this, handler);

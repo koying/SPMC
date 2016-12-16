@@ -32,25 +32,31 @@ class CJNIXBMCVideoView : public CJNIBase
 {
 public:
   CJNIXBMCVideoView(const jni::jhobject &object) : CJNIBase(object) {}
-  CJNIXBMCVideoView(CJNISurfaceHolderCallback* callback);
+  ~CJNIXBMCVideoView();
+  
+  static CJNIXBMCVideoView* createVideoView(CJNISurfaceHolderCallback* callback);
 
   static void _OnSurfaceChanged(JNIEnv* env, jobject thiz, jobject holder, jint format, jint width, jint height);
   static void _OnSurfaceCreated(JNIEnv* env, jobject thiz, jobject holder);
   static void _OnSurfaceDestroyed(JNIEnv* env, jobject thiz, jobject holder);
   
   bool waitForSurface(unsigned int millis);
-  bool isActive() { return m_surfaceCreated.Signaled(); }
+  bool isActive() { return m_surfaceCreated->Signaled(); }
   CJNISurface getSurface();  
   CJNIRect getSurfaceRect();
   void setSurfaceRect(int l, int t, int r, int b);
+  void add();
+  void release();
   void clearSurface();
   
 protected:
   CJNISurfaceHolderCallback* m_callback;
-  CEvent m_surfaceCreated;
+  CEvent* m_surfaceCreated;
   
   void OnSurfaceChanged(CJNISurfaceHolder holder, int format, int width, int height);
   void OnSurfaceCreated(CJNISurfaceHolder holder);
   void OnSurfaceDestroyed(CJNISurfaceHolder holder);
-  
+
+private:
+  CJNIXBMCVideoView();
 };

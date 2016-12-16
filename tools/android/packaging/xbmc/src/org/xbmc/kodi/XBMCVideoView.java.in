@@ -21,41 +21,38 @@ import android.widget.RelativeLayout;
 public class XBMCVideoView extends SurfaceView implements
     SurfaceHolder.Callback
 {
-  native void _OnSurfaceChanged(int format, int width, int height);
-  native void _OnSurfaceCreated();
-  native void _OnSurfaceDestroyed();
+  native void _OnSurfaceChanged(SurfaceHolder holder, int format, int width, int height);
+  native void _OnSurfaceCreated(SurfaceHolder holder);
+  native void _OnSurfaceDestroyed(SurfaceHolder holder);
 
-  private Main mActivity;
   private static final String TAG = "XBMCVideoPlayView";
 
   public boolean mHasHolder = false;
   public int mWidth = -1;
   public int mHeight = -1;
+  private RelativeLayout mVideoLayout = null;
+
+  public static XBMCVideoView createVideoView()
+  {
+    return new XBMCVideoView(Main.MainActivity);
+  }
 
   public XBMCVideoView(Context context)
   {
     super(context);
     getHolder().addCallback(this);
     getHolder().setFormat(PixelFormat.TRANSPARENT);
+    mVideoLayout = (RelativeLayout) findViewById(R.id.VideoLayout);
   }
 
-  public XBMCVideoView(Context context, AttributeSet attrs)
+  public void add()
   {
-    this(context, attrs, 0);
-    getHolder().addCallback(this);
-    getHolder().setFormat(PixelFormat.TRANSPARENT);
+    mVideoLayout.addView(this);
   }
 
-  public XBMCVideoView(Context context, AttributeSet attrs, int defStyle)
+  public void release()
   {
-    super(context, attrs, defStyle);
-    getHolder().addCallback(this);
-    getHolder().setFormat(PixelFormat.TRANSPARENT);
-  }
-
-  public void setActivity(Main act)
-  {
-    mActivity = act;
+    mVideoLayout.removeView(this);
   }
 
   /**
@@ -66,7 +63,7 @@ public class XBMCVideoView extends SurfaceView implements
     if (!mHasHolder)
       return;
 
-    mActivity.runOnUiThread(new Runnable()
+    Main.MainActivity.runOnUiThread(new Runnable()
     {
       @Override
       public void run()
@@ -140,7 +137,7 @@ public class XBMCVideoView extends SurfaceView implements
 
   public void setSurfaceRect(final int left, final int top, final int right, final int bottom)
   {
-    mActivity.runOnUiThread(new Runnable()
+    Main.MainActivity.runOnUiThread(new Runnable()
     {
       @Override
       public void run()
@@ -171,7 +168,7 @@ public class XBMCVideoView extends SurfaceView implements
 
     Log.d(TAG, "Created");
     mHasHolder = true;
-    _OnSurfaceCreated();
+    _OnSurfaceCreated(holder);
   }
 
   @Override
@@ -185,7 +182,7 @@ public class XBMCVideoView extends SurfaceView implements
     mWidth = v.getWidth();
     mHeight = v.getHeight();
     
-    _OnSurfaceChanged(format, mWidth, mHeight);
+    _OnSurfaceChanged(holder, format, mWidth, mHeight);
 
     Log.d(TAG, "Changed, format:" + format + ", width:" + width
         + ", height:" + height);
@@ -199,6 +196,6 @@ public class XBMCVideoView extends SurfaceView implements
 
     Log.d(TAG, "Destroyed");
     mHasHolder = false;
-    _OnSurfaceDestroyed();
+    _OnSurfaceDestroyed(holder);
   }
 }

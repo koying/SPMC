@@ -522,10 +522,12 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
 
   if (m_render_surface)
   {
-    m_jnivideoview = std::shared_ptr<CJNIXBMCVideoView>(new CJNIXBMCVideoView(this));
+    m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(this));
+    if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
+      return false;
+
     m_jnivideosurface = m_jnivideoview->getSurface();
     if (!m_jnivideosurface)
-      return false;
     m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnivideosurface.get_raw());
 
     m_formatname += "(S)";

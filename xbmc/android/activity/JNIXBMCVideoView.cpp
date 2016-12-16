@@ -24,21 +24,50 @@
 #include "android/jni/ClassLoader.h"
 
 #include "utils/StringUtils.h"
+#include "utils/log.h"
 
 #include <algorithm>
 
 using namespace jni;
 
-
-CJNIXBMCVideoView::CJNIXBMCVideoView(CJNISurfaceHolderCallback* callback)
-  : CJNIBase(CJNIContext::getPackageName() + ".XBMCVideoView")
-  , m_callback(callback)
+CJNIXBMCVideoView::CJNIXBMCVideoView()
+  : m_callback(nullptr)
+  , m_surfaceCreated(nullptr)
 {
-  // Convert "the/class/name" to "the.class.name" as loadClass() expects it.
-  std::string dotClassName = GetClassName();
-  std::replace(dotClassName.begin(), dotClassName.end(), '/', '.');
-  m_object = new_object(CJNIContext::getClassLoader().loadClass(dotClassName));
-  m_object.setGlobal();
+}
+
+CJNIXBMCVideoView::~CJNIXBMCVideoView()
+{
+  release();
+  delete m_surfaceCreated;
+}
+
+CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(CJNISurfaceHolderCallback* callback)
+{
+  std::string slashClassName = CJNIContext::getPackageName() + "/XBMCVideoView";
+  std::replace(slashClassName.begin(), slashClassName.end(), '.', '/');
+  std::string signature = "()L" + slashClassName + ";";
+  
+  JNIEnv *jenv = xbmc_jnienv();
+
+  jhclass jcView = find_class(slashClassName.c_str());
+  if (!jcView) 
+  {
+    CLog::Log(LOGERROR, "%s: Error getting class XBMCVideoView", __PRETTY_FUNCTION__);
+    return nullptr;
+  }
+
+  jhobject o = call_static_method<jhobject>(jenv, jcView,
+    "createVideoView", signature.c_str());
+  
+  CJNIXBMCVideoView*pvw = new CJNIXBMCVideoView(o);
+  pvw->m_callback = callback;
+  pvw->m_surfaceCreated = new CEvent;
+  pvw->add();
+  
+  jenv->DeleteLocalRef(jcView);
+
+  return pvw;
 }
 
 void CJNIXBMCVideoView::_OnSurfaceChanged(JNIEnv *env, jobject thiz, jobject holder, jint format, jint width, jint height )
@@ -76,21 +105,33 @@ void CJNIXBMCVideoView::OnSurfaceChanged(CJNISurfaceHolder holder, int format, i
 
 void CJNIXBMCVideoView::OnSurfaceCreated(CJNISurfaceHolder holder)
 {
-  m_surfaceCreated.Set();
+  m_surfaceCreated->Set();
   if (m_callback)
     m_callback->surfaceCreated(holder);
 }
 
 void CJNIXBMCVideoView::OnSurfaceDestroyed(CJNISurfaceHolder holder)
 {
-  m_surfaceCreated.Reset();
+  m_surfaceCreated->Reset();
   if (m_callback)
     m_callback->surfaceDestroyed(holder);
 }
 
 bool CJNIXBMCVideoView::waitForSurface(unsigned int millis)
 {
-  return m_surfaceCreated.WaitMSec(millis);
+  return m_surfaceCreated->WaitMSec(millis);
+}
+
+void CJNIXBMCVideoView::add()
+{
+  call_method<void>(m_object,
+                    "add", "()V");
+}
+
+void CJNIXBMCVideoView::release()
+{
+  call_method<void>(m_object,
+                    "release", "()V");
 }
 
 void CJNIXBMCVideoView::clearSurface()
