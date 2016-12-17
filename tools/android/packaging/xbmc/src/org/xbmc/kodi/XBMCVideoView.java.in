@@ -1,16 +1,8 @@
 package @APP_PACKAGE@;
 
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
-
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.opengl.GLES20;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -33,8 +25,6 @@ public class XBMCVideoView extends SurfaceView implements
 
   public int mID;
   public boolean mIsCreated = false;
-  public int mWidth = -1;
-  public int mHeight = -1;
   private RelativeLayout mVideoLayout = null;
 
   public static XBMCVideoView createVideoView()
@@ -79,7 +69,7 @@ public class XBMCVideoView extends SurfaceView implements
       {
         mVideoLayout.addView(XBMCVideoView.this);
 
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) RelativeLayout.LayoutParams.MATCH_PARENT , (int) RelativeLayout.LayoutParams.MATCH_PARENT);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         setLayoutParams(layoutParams);
         setBackgroundColor(Color.TRANSPARENT);
       }
@@ -98,63 +88,6 @@ public class XBMCVideoView extends SurfaceView implements
     });
   }
 
-  /**
-   * Clears the playback surface to black.
-   */
-  public void clearSurface()
-  {
-    if (!mIsCreated)
-      return;
-
-    Main.MainActivity.runOnUiThread(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        try
-        {
-          // Have to go EGL to allow reuse of surface
-
-          final int EGL_OPENGL_ES2_BIT = 4;
-          final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-
-          EGL10 egl = (EGL10) EGLContext.getEGL();
-          EGLDisplay display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-          egl.eglInitialize(display, null);
-
-          int[] attribList =
-                  { EGL10.EGL_RED_SIZE, 8, EGL10.EGL_GREEN_SIZE, 8, EGL10.EGL_BLUE_SIZE, 8,
-                          EGL10.EGL_ALPHA_SIZE, 8, EGL10.EGL_RENDERABLE_TYPE,
-                          EGL_OPENGL_ES2_BIT, EGL10.EGL_NONE, 0, // placeholder for
-                          // recordable [@-3]
-                          EGL10.EGL_NONE };
-          EGLConfig[] configs = new EGLConfig[1];
-          int[] numConfigs = new int[1];
-          egl.eglChooseConfig(display, attribList, configs, configs.length,
-                  numConfigs);
-          EGLConfig config = configs[0];
-          EGLContext context = egl.eglCreateContext(display, config,
-                  EGL10.EGL_NO_CONTEXT, new int[]
-                          { EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE });
-          EGLSurface eglSurface = egl.eglCreateWindowSurface(display, config,
-                  this, new int[]
-                          { EGL10.EGL_NONE });
-
-          egl.eglMakeCurrent(display, eglSurface, eglSurface, context);
-          GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-          GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-          egl.eglSwapBuffers(display, eglSurface);
-          egl.eglDestroySurface(display, eglSurface);
-          egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE,
-                  EGL10.EGL_NO_CONTEXT);
-          egl.eglDestroyContext(display, context);
-          egl.eglTerminate(display);
-        }
-        catch (Exception e) {}
-      }
-    });
-  }
-
   public Surface getSurface()
   {
     if (!mIsCreated)
@@ -167,17 +100,6 @@ public class XBMCVideoView extends SurfaceView implements
     }
   }
 
-  public Rect getSurfaceRect()
-  {
-    Rect ret = new Rect();
-    ret.top = 0;
-    ret.left = 0;
-    ret.right = mWidth;
-    ret.bottom = mHeight;
-
-    return ret;
-  }
-
   public void setSurfaceRect(final int left, final int top, final int right, final int bottom)
   {
     Main.MainActivity.runOnUiThread(new Runnable()
@@ -188,12 +110,14 @@ public class XBMCVideoView extends SurfaceView implements
         try
         {
           RelativeLayout.LayoutParams mp = new RelativeLayout.LayoutParams(getLayoutParams());
-          final RelativeLayout layout = (RelativeLayout) findViewById(R.id.VideoLayout);
-          mp.setMargins(left, top, layout.getWidth() - right, layout.getHeight() - bottom);
+          mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
           setLayoutParams(mp);
           requestLayout();
         }
-        catch (Exception e) {}
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
       }
     });
   }
@@ -204,10 +128,6 @@ public class XBMCVideoView extends SurfaceView implements
   {
     if (holder != getHolder())
       return;
-
-    View v = getRootView();
-    mWidth = v.getWidth();
-    mHeight = v.getHeight();
 
     Log.d(TAG, "Created");
     mIsCreated = true;
@@ -221,11 +141,7 @@ public class XBMCVideoView extends SurfaceView implements
     if (holder != getHolder())
       return;
 
-    View v = getRootView();
-    mWidth = v.getWidth();
-    mHeight = v.getHeight();
-
-    _OnSurfaceChanged(holder, format, mWidth, mHeight);
+    _OnSurfaceChanged(holder, format, width, height);
 
     Log.d(TAG, "Changed, format:" + format + ", width:" + width
         + ", height:" + height);

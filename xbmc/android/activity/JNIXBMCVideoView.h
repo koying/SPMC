@@ -26,6 +26,8 @@
 #include "android/jni/Surface.h"
 #include "android/jni/Rect.h"
 
+#include "guilib/Geometry.h"
+
 #include "threads/Event.h"
 
 class CJNIXBMCVideoView : public CJNIBase
@@ -43,11 +45,10 @@ public:
   bool waitForSurface(unsigned int millis);
   bool isActive() { return m_surfaceCreated->Signaled(); }
   CJNISurface getSurface();
-  CJNIRect getSurfaceRect();
-  void setSurfaceRect(int l, int t, int r, int b);
+  const CRect& getSurfaceRect();
+  void setSurfaceRect(const CRect& rect);
   void add();
   void release();
-  void clearSurface();
   int ID() const;
   bool isCreated() const;
 
@@ -63,6 +64,8 @@ protected:
   void OnSurfaceChanged(CJNISurfaceHolder holder, int format, int width, int height);
   void OnSurfaceCreated(CJNISurfaceHolder holder);
   void OnSurfaceDestroyed(CJNISurfaceHolder holder);
+
+  CRect m_surfaceRect;
 
 private:
   CJNIXBMCVideoView();

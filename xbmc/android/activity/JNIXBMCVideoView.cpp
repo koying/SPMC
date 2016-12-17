@@ -154,28 +154,22 @@ void CJNIXBMCVideoView::release()
                     "release", "()V");
 }
 
-void CJNIXBMCVideoView::clearSurface()
-{
-  call_method<void>(m_object,
-                    "clearSurface", "()V");
-}
-
 CJNISurface CJNIXBMCVideoView::getSurface()
 {
   return call_method<jhobject>(m_object,
                                "getSurface", "()Landroid/view/Surface;");
 }
 
-CJNIRect CJNIXBMCVideoView::getSurfaceRect()
+const CRect& CJNIXBMCVideoView::getSurfaceRect()
 {
-  return call_method<jhobject>(m_object,
-                               "getSurfaceRect", "()Landroid/graphics/Rect;");
+  return m_surfaceRect;
 }
 
-void CJNIXBMCVideoView::setSurfaceRect(int l, int t, int r, int b)
+void CJNIXBMCVideoView::setSurfaceRect(const CRect& rect)
 {
   call_method<void>(m_object,
-                    "setSurfaceRect", "(IIII)V", l, t, r, b);
+                    "setSurfaceRect", "(IIII)V", int(rect.x1), int(rect.y1), int(rect.x2), int(rect.y2));
+  m_surfaceRect = rect;
 }
 
 int CJNIXBMCVideoView::ID() const

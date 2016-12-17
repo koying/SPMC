@@ -313,18 +313,15 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
 {
   CSingleLock lock(m_section);
 
-  static CRect cur_rect;
-
   if (!m_valid)
     return;
 
-  if (DestRect != cur_rect)
+  if (DestRect != m_videoview->getSurfaceRect())
   {
     CRect adjRect = CXBMCApp::MapRenderToDroid(DestRect);
-    m_videoview->setSurfaceRect(adjRect.x1, adjRect.y1, adjRect.x2, adjRect.y2);
+    m_videoview->setSurfaceRect(adjRect);
     CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height());
     CLog::Log(LOGDEBUG, "RenderUpdate: Adj  - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
-    cur_rect = DestRect;
 
     // setVideoViewSurfaceRect is async, so skip rendering this frame
     ReleaseOutputBuffer(false);
@@ -527,7 +524,10 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     {
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: VideoView creation failed!!");
       if (m_jnivideoview)
+      {
         m_jnivideoview->release();
+        m_jnivideoview.reset();
+      }
       return false;
     }
 
@@ -536,6 +536,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     {
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: VideoView getSurface failed!!");
       m_jnivideoview->release();
+      m_jnivideoview.reset();
       return false;
     }
     m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnivideosurface.get_raw());
@@ -702,6 +703,7 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   {
     ANativeWindow_release(m_surface);
     m_jnivideoview->release();
+    m_jnivideoview.reset();
   }
   m_surface = nullptr;
 
