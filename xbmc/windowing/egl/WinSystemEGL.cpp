@@ -57,6 +57,7 @@ CWinSystemEGL::CWinSystemEGL() : CWinSystemBase()
   m_surface           = EGL_NO_SURFACE;
   m_context           = EGL_NO_CONTEXT;
   m_config            = NULL;
+  m_stereo_mode       = RENDER_STEREO_MODE_OFF;
 
   m_egl               = NULL;
   m_iVSyncMode        = 0;
@@ -151,13 +152,26 @@ bool CWinSystemEGL::InitWindowSystem()
 
 bool CWinSystemEGL::CreateWindow(RESOLUTION_INFO &res)
 {
+  RESOLUTION_INFO current_resolution;
+  current_resolution.iWidth = current_resolution.iHeight = 0;
+  RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
+
   if (!m_egl)
   {
     CLog::Log(LOGERROR, "CWinSystemEGL::CreateWindow no EGL!");
     return false;
   }
 
-  if(m_egl)
+  if (m_egl->GetNativeResolution(&current_resolution) &&
+    current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
+    current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
+    current_resolution.fRefreshRate == res.fRefreshRate &&
+    (current_resolution.dwFlags & D3DPRESENTFLAG_MODEMASK) == (res.dwFlags & D3DPRESENTFLAG_MODEMASK) &&
+    m_stereo_mode == stereo_mode)
+  {
+    CLog::Log(LOGDEBUG, "%s: No need to call SetNativeResolution",__FUNCTION__);
+  }
+  else
     m_egl->SetNativeResolution(res);
 
   int quirks;
@@ -278,6 +292,7 @@ bool CWinSystemEGL::CreateNewWindow(const std::string& name, bool fullScreen, RE
 {
   RESOLUTION_INFO current_resolution;
   current_resolution.iWidth = current_resolution.iHeight = 0;
+  RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
 
   m_nWidth        = res.iWidth;
   m_nHeight       = res.iHeight;
@@ -289,12 +304,14 @@ bool CWinSystemEGL::CreateNewWindow(const std::string& name, bool fullScreen, RE
     current_resolution.iWidth == res.iWidth && current_resolution.iHeight == res.iHeight &&
     current_resolution.iScreenWidth == res.iScreenWidth && current_resolution.iScreenHeight == res.iScreenHeight &&
     m_bFullScreen == fullScreen && current_resolution.fRefreshRate == res.fRefreshRate &&
-    (current_resolution.dwFlags & D3DPRESENTFLAG_MODEMASK) == (res.dwFlags & D3DPRESENTFLAG_MODEMASK))
+    (current_resolution.dwFlags & D3DPRESENTFLAG_MODEMASK) == (res.dwFlags & D3DPRESENTFLAG_MODEMASK) &&
+    m_stereo_mode == stereo_mode)
   {
     CLog::Log(LOGDEBUG, "CWinSystemEGL::CreateNewWindow: No need to create a new window");
-//xxx    return true;
+    return true;
   }
 
+  m_stereo_mode = stereo_mode;
   m_bFullScreen   = fullScreen;
   // Destroy any existing window
   if (m_surface != EGL_NO_SURFACE)

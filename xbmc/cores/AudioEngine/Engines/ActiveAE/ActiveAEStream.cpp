@@ -361,6 +361,7 @@ void CActiveAEStream::Drain(bool wait)
         msgData.stream = this;
         msgData.buffer = *((CSampleBuffer**)msg->data);
         msg->Reply(CActiveAEDataProtocol::STREAMSAMPLE, &msgData, sizeof(MsgStreamSample));
+        msg->Release();
         DecFreeBuffers();
         continue;
       }
