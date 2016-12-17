@@ -391,7 +391,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: Tag %d \n", m_hints.codec_tag);
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: %dx%d \n", m_hints.width,  m_hints.height);
   }
-  
+
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_MPEG2VIDEO:
@@ -524,10 +524,20 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   {
     m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(this));
     if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
+    {
+      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: VideoView creation failed!!");
+      if (m_jnivideoview)
+        m_jnivideoview->release();
       return false;
+    }
 
     m_jnivideosurface = m_jnivideoview->getSurface();
     if (!m_jnivideosurface)
+    {
+      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: VideoView getSurface failed!!");
+      m_jnivideoview->release();
+      return false;
+    }
     m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnivideosurface.get_raw());
 
     m_formatname += "(S)";
@@ -689,7 +699,10 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   ReleaseSurfaceTexture();
 
   if(m_surface)
+  {
     ANativeWindow_release(m_surface);
+    m_jnivideoview->release();
+  }
   m_surface = nullptr;
 
   SAFE_DELETE(m_bitstream);

@@ -286,20 +286,22 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   jclass cVideoView = env->FindClass(videoView.c_str());
   if(cVideoView)
   {
+    CJNIXBMCVideoView::m_jclass = (jclass)env->NewGlobalRef(cVideoView);
+
     JNINativeMethod mOnSurfaceChanged = {
       "_OnSurfaceChanged",
       "(Landroid/view/SurfaceHolder;III)V",
       (void*)&CJNIXBMCVideoView::_OnSurfaceChanged
     };
     env->RegisterNatives(cVideoView, &mOnSurfaceChanged, 1);
-    
+
     JNINativeMethod mOnSurfaceCreated = {
       "_OnSurfaceCreated",
       "(Landroid/view/SurfaceHolder;)V",
       (void*)&CJNIXBMCVideoView::_OnSurfaceCreated
     };
     env->RegisterNatives(cVideoView, &mOnSurfaceCreated, 1);
-    
+
     JNINativeMethod mOnSurfaceDestroyed = {
       "_OnSurfaceDestroyed",
       "(Landroid/view/SurfaceHolder;)V",
