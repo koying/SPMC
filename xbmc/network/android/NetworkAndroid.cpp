@@ -33,6 +33,9 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
+#include <net/if_arp.h>
+#include <netinet/in.h>
+
 CNetworkInterfaceAndroid::CNetworkInterfaceAndroid(CJNINetwork network, CJNILinkProperties lp, CJNINetworkInterface intf)
   : m_network(network)
   , m_lp(lp)
@@ -125,9 +128,47 @@ void CNetworkInterfaceAndroid::GetMacAddressRaw(char rawMac[6])
     memcpy(rawMac, interfaceMacAddrRaw.data(), 6);
 }
 
-bool CNetworkInterfaceAndroid::GetHostMacAddress(unsigned long host, std::string& mac)
+bool CNetworkInterfaceAndroid::GetHostMacAddress(unsigned long host_ip, std::string& mac)
 {
-  // TODO
+  struct arpreq areq;
+  struct sockaddr_in* sin;
+
+  memset(&areq, 0x0, sizeof(areq));
+
+  sin = (struct sockaddr_in *) &areq.arp_pa;
+  sin->sin_family = AF_INET;
+  sin->sin_addr.s_addr = host_ip;
+
+  sin = (struct sockaddr_in *) &areq.arp_ha;
+  sin->sin_family = ARPHRD_ETHER;
+
+  strncpy(areq.arp_dev, m_name.c_str(), sizeof(areq.arp_dev));
+  areq.arp_dev[sizeof(areq.arp_dev)-1] = '\0';
+
+  int sock = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sock != -1)
+  {
+    int result = ioctl (sock, SIOCGARP, (caddr_t) &areq);
+    close(sock);
+
+    if (result != 0)
+    {
+      //  CLog::Log(LOGERROR, "%s - GetHostMacAddress/ioctl failed with errno (%d)", __FUNCTION__, errno);
+      return false;
+    }
+  }
+  else
+    return false;
+
+  struct sockaddr* res = &areq.arp_ha;
+  mac = StringUtils::Format("%02X:%02X:%02X:%02X:%02X:%02X",
+    (uint8_t) res->sa_data[0], (uint8_t) res->sa_data[1], (uint8_t) res->sa_data[2],
+    (uint8_t) res->sa_data[3], (uint8_t) res->sa_data[4], (uint8_t) res->sa_data[5]);
+
+  for (int i=0; i<6; ++i)
+    if (res->sa_data[i])
+      return true;
+
   return false;
 }
 
