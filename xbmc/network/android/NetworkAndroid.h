@@ -44,7 +44,7 @@ public:
   virtual bool IsWireless() override;
   virtual std::string GetMacAddress() override;
   virtual void GetMacAddressRaw(char rawMac[6]) override;
-  virtual bool GetHostMacAddress(unsigned long host, std::string& mac) override;
+  virtual bool GetHostMacAddress(unsigned long host_ip, std::string& mac) override;
   virtual std::string GetCurrentIPAddress() override;
   virtual std::string GetCurrentNetmask() override;
   virtual std::string GetCurrentDefaultGateway() override;
