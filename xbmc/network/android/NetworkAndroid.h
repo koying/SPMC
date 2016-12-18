@@ -74,7 +74,6 @@ public:
   virtual bool GetHostName(std::string& hostname) override;
   virtual std::vector<CNetworkInterface*>& GetInterfaceList() override;
   virtual CNetworkInterface* GetFirstConnectedInterface() override;
-  virtual bool PingHost(unsigned long host, unsigned int timeout_ms) override;
   virtual std::vector<std::string> GetNameServers() override;
   virtual void SetNameServers(const std::vector<std::string>& nameServers) override;
 

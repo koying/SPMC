@@ -72,10 +72,7 @@ public:
 
    // Return the list of interfaces
    virtual std::vector<CNetworkInterface*>& GetInterfaceList(void);
-   virtual CNetworkInterface* GetFirstConnectedInterface(void);        
-    
-   // Ping remote host
-   virtual bool PingHost(unsigned long host, unsigned int timeout_ms = 2000);
+   virtual CNetworkInterface* GetFirstConnectedInterface(void);
 
    // Get/set the nameserver(s)
    virtual std::vector<std::string> GetNameServers(void);
