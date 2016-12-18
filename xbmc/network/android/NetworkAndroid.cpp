@@ -268,12 +268,6 @@ CNetworkInterface* CNetworkAndroid::GetFirstConnectedInterface()
   return nullptr;
 }
 
-bool CNetworkAndroid::PingHost(unsigned long host, unsigned int timeout_ms)
-{
-  // TODO
-  return false;
-}
-
 std::vector<std::string> CNetworkAndroid::GetNameServers()
 {
   CNetworkInterfaceAndroid* intf = static_cast<CNetworkInterfaceAndroid*>(GetFirstConnectedInterface());
