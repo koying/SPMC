@@ -700,12 +700,14 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   ReleaseSurfaceTexture();
 
   if(m_surface)
-  {
     ANativeWindow_release(m_surface);
+  m_surface = nullptr;
+
+  if (m_render_surface)
+  {
     m_jnivideoview->release();
     m_jnivideoview.reset();
   }
-  m_surface = nullptr;
 
   SAFE_DELETE(m_bitstream);
 }

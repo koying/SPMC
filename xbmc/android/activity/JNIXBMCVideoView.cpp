@@ -26,13 +26,28 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
-#include <map>
+#include <list>
 #include <algorithm>
+#include <cassert>
 
 using namespace jni;
 
 jclass CJNIXBMCVideoView::m_jclass;
-std::map<int, CJNIXBMCVideoView*> s_videoview_map;
+
+// Map java object instances to C++ instances
+std::list<std::pair<jhobject, CJNIXBMCVideoView*>> s_videoview_map;
+
+CJNIXBMCVideoView* find_videoview(const jhobject& o)
+{
+  for( auto it = s_videoview_map.begin(); it != s_videoview_map.end(); ++it )
+  {
+    if (it->first == o)
+      return it->second;
+  }
+  // Can never get here!!
+  assert(false);
+  return nullptr;
+}
 
 CJNIXBMCVideoView::CJNIXBMCVideoView()
   : m_callback(nullptr)
@@ -75,7 +90,7 @@ CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(CJNISurfaceHolderCallback*
   }
 
   CJNIXBMCVideoView*pvw = new CJNIXBMCVideoView(o);
-  s_videoview_map.insert(std::pair<int, CJNIXBMCVideoView*>(pvw->ID(), pvw));
+  s_videoview_map.push_back(std::pair<jhobject, CJNIXBMCVideoView*>(pvw->get_raw(), pvw));
   pvw->m_callback = callback;
   pvw->m_surfaceCreated = new CEvent;
   if (pvw->isCreated())
@@ -89,30 +104,24 @@ void CJNIXBMCVideoView::_OnSurfaceChanged(JNIEnv *env, jobject thiz, jobject hol
 {
   (void)env;
 
-  CJNIXBMCVideoView*pvw = new CJNIXBMCVideoView(jhobject(thiz));
-  CJNIXBMCVideoView *inst = s_videoview_map[pvw->ID()];
+  CJNIXBMCVideoView *inst = find_videoview(jhobject(thiz));
   inst->OnSurfaceChanged(CJNISurfaceHolder(jhobject(holder)), format, width, height);
-  delete pvw;
 }
 
 void CJNIXBMCVideoView::_OnSurfaceCreated(JNIEnv* env, jobject thiz, jobject holder)
 {
   (void)env;
 
-  CJNIXBMCVideoView*pvw = new CJNIXBMCVideoView(jhobject(thiz));
-  CJNIXBMCVideoView *inst = s_videoview_map[pvw->ID()];
+  CJNIXBMCVideoView *inst = find_videoview(jhobject(thiz));
   inst->OnSurfaceCreated(CJNISurfaceHolder(jhobject(holder)));
-  delete pvw;
 }
 
 void CJNIXBMCVideoView::_OnSurfaceDestroyed(JNIEnv* env, jobject thiz, jobject holder)
 {
   (void)env;
 
-  CJNIXBMCVideoView*pvw = new CJNIXBMCVideoView(jhobject(thiz));
-  CJNIXBMCVideoView *inst = s_videoview_map[pvw->ID()];
+  CJNIXBMCVideoView *inst = find_videoview(jhobject(thiz));
   inst->OnSurfaceDestroyed(CJNISurfaceHolder(jhobject(holder)));
-  delete pvw;
 }
 
 void CJNIXBMCVideoView::OnSurfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
@@ -170,11 +179,6 @@ void CJNIXBMCVideoView::setSurfaceRect(const CRect& rect)
   call_method<void>(m_object,
                     "setSurfaceRect", "(IIII)V", int(rect.x1), int(rect.y1), int(rect.x2), int(rect.y2));
   m_surfaceRect = rect;
-}
-
-int CJNIXBMCVideoView::ID() const
-{
-  return get_field<jint>(m_object, "mID");
 }
 
 bool CJNIXBMCVideoView::isCreated() const

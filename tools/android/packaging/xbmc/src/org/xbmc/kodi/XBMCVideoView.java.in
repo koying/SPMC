@@ -23,7 +23,6 @@ public class XBMCVideoView extends SurfaceView implements
 
   private static final String TAG = "XBMCVideoPlayView";
 
-  public int mID;
   public boolean mIsCreated = false;
   private RelativeLayout mVideoLayout = null;
 
@@ -41,7 +40,6 @@ public class XBMCVideoView extends SurfaceView implements
     {
       Main.MainActivity.runOnUiThread(futureResult);
       XBMCVideoView vw = futureResult.get();
-      vw.mID = System.identityHashCode(vw);
       return vw;
     }
     catch (Exception e)
