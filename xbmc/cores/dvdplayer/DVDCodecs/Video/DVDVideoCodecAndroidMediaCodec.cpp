@@ -242,17 +242,6 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
   if (mstat != AMEDIA_OK)
     CLog::Log(LOGERROR, "CDVDMediaCodecInfo::ReleaseOutputBuffer "
       "error %d in render(%d)", mstat, render);
-
-  // this is key, after calling releaseOutputBuffer, we must
-  // wait a little for MediaCodec to render to the surface.
-  // Then we can updateTexImage without delay. If we do not
-  // wait, then video playback gets jerky. To optomize this,
-  // we hook the SurfaceTexture OnFrameAvailable callback
-  // using CJNISurfaceTextureOnFrameAvailableListener and wait
-  // on a CEvent to fire. 50ms seems to be a good max fallback.
-  if (m_frameready && render)
-    if (!m_frameready->WaitMSec(50))
-      CLog::Log(LOGERROR, "CDVDMediaCodecInfo::ReleaseOutputBuffer timeout waiting for frame");
 }
 
 ssize_t CDVDMediaCodecInfo::GetIndex() const
@@ -289,6 +278,15 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   // updateTexImage will check and spew any prior gl errors,
   // clear them before we call updateTexImage.
   glGetError();
+
+  // this is key, after calling releaseOutputBuffer, we must
+  // wait a little for MediaCodec to render to the surface.
+  // Then we can updateTexImage without delay. If we do not
+  // wait, then video playback gets jerky. To optomize this,
+  // we hook the SurfaceTexture OnFrameAvailable callback
+  // using CJNISurfaceTextureOnFrameAvailableListener and wait
+  // on a CEvent to fire. 50ms seems to be a good max fallback.
+  m_frameready->WaitMSec(50);
 
   m_surfacetexture->updateTexImage();
   if (xbmc_jnienv()->ExceptionCheck())
@@ -387,7 +385,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: Tag %d \n", m_hints.codec_tag);
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: %dx%d \n", m_hints.width,  m_hints.height);
   }
-  
+
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_MPEG2VIDEO:
