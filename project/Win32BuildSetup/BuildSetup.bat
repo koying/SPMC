@@ -206,6 +206,7 @@ set WORKSPACE=%CD%\..\..
   xcopy ..\..\system BUILD_WIN32\application\system /E /Q /I /Y /EXCLUDE:exclude.txt  > NUL
   copy ..\..\system\libexpat.dll BUILD_WIN32\application > NUL
   xcopy ..\..\media BUILD_WIN32\application\media /E /Q /I /Y /EXCLUDE:exclude.txt  > NUL
+  copy BUILD_WIN32\application\media\Splash_orig.png BUILD_WIN32\application\media\Splash.png > NUL
   
   SET build_path=%CD%
   IF %buildbinaryaddons%==true (
