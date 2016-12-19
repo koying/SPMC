@@ -10,15 +10,21 @@ As far as I'm concerned, Nvidia Shield has basically cornered the market, so is 
 **Note 1:** As of 16.5.0, Android lollipop (API 21) is required  
 **Note 2:** For recommendations and android voice search, SPMC must be already running.  
 
-Latest Jarvis build is: **16.5.2** [link](https://github.com/koying/SPMC/releases/tag/16.5.2-spmc)   
-APK: [link](https://github.com/koying/SPMC/releases/download/16.5.2-spmc/SPMC-16.5.2-spmc-2d86e3f-armeabi-v7a.apk)  
-Launcher APK: [link](https://github.com/koying/SPMC/releases/download/16.5.2-spmc/SPMC-16.5.2-spmc-2d86e3f-armeabi-v7a_launcher.apk)  
-X86 APK: [link](https://github.com/koying/SPMC/releases/download/16.5.2-spmc/SPMC-16.5.2-spmc-2d86e3f-x86.apk)  
+Latest Jarvis build is: **16.5.3** [link](https://github.com/koying/SPMC/releases/tag/16.5.3-spmc)   
+APK: [link](https://github.com/koying/SPMC/releases/download/16.5.3-spmc/SPMC-16.5.3-spmc-be672c0-armeabi-v7a.apk)  
+Launcher APK: [link](https://github.com/koying/SPMC/releases/download/16.5.3-spmc/SPMC-16.5.3-spmc-be672c0-armeabi-v7a_launcher.apk)  
+X86 APK: [link](https://github.com/koying/SPMC/releases/download/16.5.3-spmc/SPMC-16.5.3-spmc-be672c0-x86.apk)  
 Google Play: [link](https://play.google.com/store/apps/details?id=com.semperpax.spmc16)  
 Issues and questions: [github](https://github.com/koying/SPMC/issues)  
 FAQ: [wiki] (https://github.com/koying/SPMC/wiki)
 
 Changelog:
+
+### 16.5.3 (2016/12/19):
+
+- FIX: crash on exit
+- FIX: WOL
+- FIX: Hiccups in plain Mediacodec
 
 ### 16.5.2 (2016/12/11):
 
