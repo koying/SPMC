@@ -196,6 +196,9 @@ void CGUIWindowAddonBrowser::GetContextButtons(int itemNumber, CContextButtons& 
 
 bool CGUIWindowAddonBrowser::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
 {
+  if (itemNumber < 0 || itemNumber >= m_vecItems->Size()) 
+    return true;
+  
   CFileItemPtr pItem = m_vecItems->Get(itemNumber);
 
   std::string addonId = pItem->GetProperty("Addon.ID").asString();
