@@ -1,4 +1,5 @@
 /opt/android-dev/android-toolchain-arm-21-r12b/sysroot/usr/include
+/opt/android-dev/android-toolchain-arm-21-r12b/include/c++/4.9.x
 /home/cloud9/spmc-build/arm-linux-androideabi-21/include
 
 addons/library.xbmc.addon
