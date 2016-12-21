@@ -993,13 +993,6 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
   {
-    m_audiodevices.clear();
-    if (CJNIAudioManager::GetSDKVersion() >= 23)
-    {
-      CJNIAudioManager audioManager(getSystemService("audio"));
-      m_audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
-      LogAudoDevices("Connectivity changed", m_audiodevices);
-    }
     CheckHeadsetPlugged();
   }
   else if (action == "android.intent.action.MEDIA_BUTTON")
