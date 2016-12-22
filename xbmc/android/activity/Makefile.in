@@ -18,6 +18,8 @@ SRCS      += GraphicBuffer.cpp
 SRCS      += EventLoop.cpp
 SRCS      += XBMCApp.cpp
 SRCS      += JNIMainActivity.cpp
+SRCS      += JNIXBMCSurfaceHolderCallback.cpp
+SRCS      += JNIXBMCVideoView.cpp
 
 OBJS      += $(APP_GLUE) $(CPU_OBJ)
 
