@@ -316,7 +316,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
-      audioManager.registerAudioDeviceCallback(new MyAudioDeviceCallback(), null);
+      audioManager.registerAudioDeviceCallback(new MyAudioDeviceCallback(), handler);
     }
     mJsonRPC = new XBMCJsonRPC();
 
