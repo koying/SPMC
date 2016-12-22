@@ -156,6 +156,7 @@ protected:
 private:
   CSysData m_info;
   static WindowsVersion m_WinVer;
+  static int m_hasFTV3D;
   int m_iSystemTimeTotalUp; // Uptime in minutes!
   void Reset();
 };
