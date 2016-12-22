@@ -305,7 +305,7 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   }
 }
 
-void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRect)
+void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect)
 {
   CSingleLock lock(m_section);
 

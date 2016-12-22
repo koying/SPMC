@@ -629,18 +629,20 @@ void CLinuxRendererGLES::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
         g_graphicsContext.SetStereoView(RENDER_STEREO_VIEW_OFF);
 
       CRect dstRect(m_destRect);
-      CRect srcRect(m_sourceRect);
       switch (stereo_mode)
       {
         case RENDER_STEREO_MODE_SPLIT_HORIZONTAL:
           dstRect.y2 *= 2.0;
-          srcRect.y2 *= 2.0;
-        break;
+          break;
 
         case RENDER_STEREO_MODE_SPLIT_VERTICAL:
           dstRect.x2 *= 2.0;
-          srcRect.x2 *= 2.0;
-        break;
+          break;
+
+        case RENDER_STEREO_MODE_MONO:
+          dstRect.y2 = dstRect.y2 * (dstRect.y2 / m_sourceRect.y2);
+          dstRect.x2 = dstRect.x2 * (dstRect.x2 / m_sourceRect.x2);
+          break;
 
         default:
         break;
@@ -661,7 +663,7 @@ void CLinuxRendererGLES::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
           break;
       }
 
-      mci->RenderUpdate(srcRect, dstRect);
+      mci->RenderUpdate(dstRect);
     }
   }
 #endif

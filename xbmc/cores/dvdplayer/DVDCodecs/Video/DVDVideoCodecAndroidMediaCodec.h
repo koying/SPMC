@@ -74,7 +74,7 @@ public:
   int                 GetTextureID() const;
   void                GetTransformMatrix(float *textureMatrix);
   void                UpdateTexImage();
-  void                RenderUpdate(const CRect &SrcRect, const CRect &DestRect);
+  void                RenderUpdate(const CRect &DestRect);
 
 private:
   // private because we are reference counted
