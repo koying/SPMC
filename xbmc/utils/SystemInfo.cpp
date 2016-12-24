@@ -399,6 +399,7 @@ CSysInfo::CSysInfo(void) : CInfoLoader(15 * 1000)
   memset(MD5_Sign, 0, sizeof(MD5_Sign));
   m_iSystemTimeTotalUp = 0;
 
+#if defined(TARGET_ANDROID)
   if (m_hasFTV3D == -1)
   {
     if (SysfsUtils::HasRW("/sys/class/graphics/fb0/format_3d"))  // AFTV
@@ -406,6 +407,7 @@ CSysInfo::CSysInfo(void) : CInfoLoader(15 * 1000)
     else
       m_hasFTV3D = 0;
   }
+#endif
 }
 
 CSysInfo::~CSysInfo()
