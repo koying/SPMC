@@ -173,6 +173,23 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     });
   }
 
+  private Runnable leanbackUpdateRunnable = new Runnable() 
+  {
+    @Override
+    public void run() 
+    {
+      Log.d(TAG, "Updating recommendations");
+      new Thread()
+      {
+        public void run()
+        {
+          mJsonRPC.updateLeanback(Main.this);
+        }
+      }.start();
+      handler.postDelayed(this, 60*60*1000);
+    }
+  };
+  
   public Main()
   {
     super();

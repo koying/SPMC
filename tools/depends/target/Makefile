@@ -6,7 +6,7 @@ endif
 
 DEPENDS = \
 	pcre expat gettext sqlite3 libgpg-error \
-	libgcrypt bzip2 liblzo2 libzip freetype2 fontconfig \
+	libgcrypt bzip2 liblzo2 freetype2 fontconfig \
 	openssl gmp nettle gnutls libssh2 curl \
 	libjpeg-turbo tiff jasper libpng \
 	fribidi libmpeg2 \
@@ -89,7 +89,6 @@ libplist: libxml2 $(ZLIB)
 libbluray: $(ICONV) libxml2
 libssh: openssl $(ZLIB)
 mysql: openssl
-libzip: $(ZLIB)
 libpng: $(ZLIB)
 openssl: $(ZLIB)
 gnutls: nettle $(ZLIB)
