@@ -83,8 +83,7 @@ void CGUIVideoControl::Render()
       g_graphicsContext.SetScissors(old);
       g_graphicsContext.EndPaint();
     }
-    else
-      g_renderManager.Render(false, 0, alpha);
+    g_renderManager.Render(false, 0, alpha);
 #else
     ((CDummyVideoPlayer *)(g_application.m_pPlayer->GetInternal()).get())->Render();
 #endif
