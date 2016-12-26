@@ -68,8 +68,7 @@ void CGUIVideoControl::Render()
 #endif
       g_graphicsContext.SetScissors(old);
     }
-    else
-      g_application.m_pPlayer->Render(false, alpha);
+    g_application.m_pPlayer->Render(false, alpha);
 
     g_graphicsContext.RemoveTransform();
   }
