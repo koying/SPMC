@@ -586,16 +586,6 @@ void CXBMCApp::SetDisplayModeCallback(CVariant* modeVariant)
   }
 }
 
-bool CXBMCApp::getVideosurfaceInUse()
-{
-  return m_videosurfaceInUse;
-}
-
-void CXBMCApp::setVideosurfaceInUse(bool videosurfaceInUse)
-{
-  m_videosurfaceInUse = videosurfaceInUse;
-}
-
 void CXBMCApp::SetRefreshRate(float rate)
 {
   if (rate < 1.0)
@@ -718,7 +708,7 @@ CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
   float scaleX = 1.0;
   float scaleY = 1.0;
 
-  CJNIRect r = m_xbmcappinstance->getVideoViewSurfaceRect();
+  CJNIRect r = m_xbmcappinstance->getDisplayRect();
   if (r.width() && r.height())
   {
     RESOLUTION_INFO renderRes = g_graphicsContext.GetResInfo(g_renderManager.GetResolution());
@@ -734,7 +724,7 @@ CPoint CXBMCApp::GetDroidToGuiRatio()
   float scaleX = 1.0;
   float scaleY = 1.0;
 
-  CJNIRect r = m_xbmcappinstance->getVideoViewSurfaceRect();
+  CJNIRect r = m_xbmcappinstance->getDisplayRect();
   if (r.width() && r.height())
   {
     CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
@@ -1152,20 +1142,6 @@ void CXBMCApp::onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)
   m_audiodevices = devices;
   LogAudoDevices("onAudioDeviceRemoved", m_audiodevices);
   CheckHeadsetPlugged();
-}
-
-void CXBMCApp::onVideoViewAcquired()
-{
-
-}
-
-void CXBMCApp::onVideoViewLost()
-{
-  if (g_application.m_pPlayer->IsPlayingVideo())
-  {
-    if (getVideosurfaceInUse())
-      CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
-  }
 }
 
 int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent &result)

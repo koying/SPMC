@@ -78,22 +78,6 @@ void CJNIMainActivity::_onAudioDeviceRemoved(JNIEnv *env, jobject context, jobje
     m_appInstance->onAudioDeviceRemoved(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
 }
 
-void CJNIMainActivity::_onVideoViewAcquired(JNIEnv *env, jobject context)
-{
-  (void)env;
-  (void)context;
-  if (m_appInstance)
-    m_appInstance->onVideoViewAcquired();
-}
-
-void CJNIMainActivity::_onVideoViewLost(JNIEnv *env, jobject context)
-{
-  (void)env;
-  (void)context;
-  if (m_appInstance)
-    m_appInstance->onVideoViewLost();
-}
-
 void CJNIMainActivity::_onCaptureAvailable(JNIEnv *env, jobject context, jobject image)
 {
   (void)env;
@@ -152,28 +136,10 @@ void CJNIMainActivity::_doFrame(JNIEnv *env, jobject context, jlong frameTimeNan
     m_appInstance->doFrame(frameTimeNanos);
 }
 
-CJNISurface CJNIMainActivity::getVideoViewSurface()
+CJNIRect CJNIMainActivity::getDisplayRect()
 {
   return call_method<jhobject>(m_context,
-                               "getVideoViewSurface", "()Landroid/view/Surface;");
-}
-
-void CJNIMainActivity::clearVideoView()
-{
-  call_method<void>(m_context,
-                    "clearVideoView", "()V");
-}
-
-CJNIRect CJNIMainActivity::getVideoViewSurfaceRect()
-{
-  return call_method<jhobject>(m_context,
-                               "getVideoViewSurfaceRect", "()Landroid/graphics/Rect;");
-}
-
-void CJNIMainActivity::setVideoViewSurfaceRect(int l, int t, int r, int b)
-{
-  call_method<void>(m_context,
-                    "setVideoViewSurfaceRect", "(IIII)V", l, t, r, b);
+                               "getDisplayRect", "()Landroid/graphics/Rect;");
 }
 
 void CJNIMainActivity::registerMediaButtonEventReceiver()

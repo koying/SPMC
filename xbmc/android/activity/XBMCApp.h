@@ -124,8 +124,6 @@ public:
   virtual void doFrame(int64_t frameTimeNanos);
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
-  virtual void onVideoViewAcquired();
-  virtual void onVideoViewLost();
 
   bool isValid() { return m_activity != NULL; }
 
@@ -194,9 +192,6 @@ public:
   static void OnPlayBackResumed();
   static void OnPlayBackStopped();
   static void OnPlayBackEnded();
-
-  bool getVideosurfaceInUse();
-  void setVideosurfaceInUse(bool videosurfaceInUse);
 
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }

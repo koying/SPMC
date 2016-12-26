@@ -2878,3 +2878,4 @@ lib/cximage-6.0
 lib/libmpeg2
 lib/libUPnP
 xbmc/network/android
+xbmc/listproviders
