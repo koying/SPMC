@@ -554,7 +554,7 @@ void CGUIWindowFullScreen::FrameMove()
     SET_CONTROL_HIDDEN(BLUE_BAR);
   }
 
-  g_renderManager.FrameMove();
+  CGUIWindow::FrameMove();
 }
 
 void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &dirtyregion)

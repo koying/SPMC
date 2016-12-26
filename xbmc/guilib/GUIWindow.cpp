@@ -42,6 +42,9 @@
 #ifdef HAS_PERFORMANCE_SAMPLE
 #include "utils/PerformanceSample.h"
 #endif
+#ifdef HAS_VIDEO_PLAYBACK
+#include "cores/VideoRenderers/RenderManager.h"
+#endif
 
 using namespace KODI::MESSAGING;
 
@@ -370,6 +373,12 @@ void CGUIWindow::AfterRender()
   if (m_closing && !CGUIControlGroup::IsAnimating(ANIM_TYPE_WINDOW_CLOSE))
     Close(true);
 
+}
+
+void CGUIWindow::FrameMove()
+{
+  if (g_application.m_pPlayer->IsPlayingVideo() && g_renderManager.IsStarted())
+    g_renderManager.FrameMove();
 }
 
 void CGUIWindow::Close_Internal(bool forceClose /*= false*/, int nextWindowID /*= 0*/, bool enableSound /*= true*/)
