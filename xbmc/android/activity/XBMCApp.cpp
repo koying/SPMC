@@ -245,12 +245,13 @@ void CXBMCApp::onResume()
     g_application.WakeUpScreenSaverAndDPMS();
 
   m_audiodevices.clear();
-  if (CJNIAudioManager::GetSDKVersion() >= 23)
-  {
-    CJNIAudioManager audioManager(getSystemService("audio"));
-    m_audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
-    LogAudoDevices("OnResume", m_audiodevices);
-  }
+// Crashes on SATV as of FW 3.3
+//  if (CJNIAudioManager::GetSDKVersion() >= 23)
+//  {
+//    CJNIAudioManager audioManager(getSystemService("audio"));
+//    m_audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
+//    LogAudoDevices("OnResume", m_audiodevices);
+//  }
   CheckHeadsetPlugged();
 
   unregisterMediaButtonEventReceiver();
