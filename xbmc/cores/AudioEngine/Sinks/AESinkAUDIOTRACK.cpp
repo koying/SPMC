@@ -414,8 +414,6 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   if (m_passthrough && aml_present())
     atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
 #endif
-  if (m_encoding == CJNIAudioFormat::ENCODING_IEC61937)
-    atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
 
   while (!m_at_jni)
   {
@@ -435,10 +433,7 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
       m_format.m_frameSize      = m_format.m_channelLayout.Count() *
                                     (CAEUtil::DataFormatToBits(m_format.m_dataFormat) / 8);
-      if (m_passthrough)
-        m_sink_frameSize          = 4;
-      else
-        m_sink_frameSize          = m_format.m_frameSize;
+      m_sink_frameSize          = m_format.m_frameSize;
       m_format.m_frames       = (int)(m_buffer_size / m_format.m_frameSize) / 2;
     }
 
@@ -592,10 +587,7 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
 #if defined(HAS_LIBAMCODEC)
   if (aml_present() && (m_encoding == CJNIAudioFormat::ENCODING_E_AC3 || m_encoding == CJNIAudioFormat::ENCODING_DTSHD_MA || m_encoding == CJNIAudioFormat::ENCODING_TRUEHD))
     head_pos >>= 2;  // On 2 chans rather than 8
-  else
 #endif
-    if (m_encoding == CJNIAudioFormat::ENCODING_IEC61937 && (m_format.m_dataFormat == AE_FMT_DTSHD || m_format.m_dataFormat == AE_FMT_TRUEHD))
-      head_pos >>= 2;  // On 2 chans rather than 8
 
   double delay = m_duration_written - ((double)head_pos / m_sink_sampleRate);
   if (m_duration_written != m_last_duration_written && head_pos != m_last_head_pos)
