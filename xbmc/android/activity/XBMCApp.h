@@ -43,6 +43,8 @@
 #include "interfaces/IAnnouncer.h"
 #include "guilib/Geometry.h"
 
+#include "android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -103,7 +105,6 @@ class CXBMCApp
     : public IActivityHandler
     , public CJNIMainActivity
     , public CJNIBroadcastReceiver
-    , public CJNIAudioManagerAudioFocusChangeListener
     , public ANNOUNCEMENT::IAnnouncer
 {
 public:
@@ -201,11 +202,12 @@ protected:
   friend class CAESinkAUDIOTRACK;
 
   static int GetMaxSystemVolume(JNIEnv *env);
-  static bool AcquireAudioFocus();
-  static bool ReleaseAudioFocus();
+  bool AcquireAudioFocus();
+  bool ReleaseAudioFocus();
 
 private:
   static CXBMCApp* m_xbmcappinstance;
+  CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
   static bool HasLaunchIntent(const std::string &package);
   std::string GetFilenameFromIntent(const CJNIIntent &intent);
   void run();

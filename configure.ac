@@ -2449,9 +2449,7 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnFrameAvailableListener.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaContentProvider.java \
@@ -2464,6 +2462,8 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/activity_main.xml \
     tools/android/packaging/xbmc/searchable.xml \
     tools/android/packaging/xbmc/strings.xml \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java \
     "
 
 if test "$target_platform" = "target_android" ; then

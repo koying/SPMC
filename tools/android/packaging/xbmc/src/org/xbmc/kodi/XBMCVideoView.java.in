@@ -17,9 +17,9 @@ import java.util.concurrent.FutureTask;
 public class XBMCVideoView extends SurfaceView implements
     SurfaceHolder.Callback
 {
-  native void _OnSurfaceChanged(SurfaceHolder holder, int format, int width, int height);
-  native void _OnSurfaceCreated(SurfaceHolder holder);
-  native void _OnSurfaceDestroyed(SurfaceHolder holder);
+  native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
+  native void _surfaceCreated(SurfaceHolder holder);
+  native void _surfaceDestroyed(SurfaceHolder holder);
 
   private static final String TAG = "XBMCVideoPlayView";
 
@@ -129,7 +129,7 @@ public class XBMCVideoView extends SurfaceView implements
 
     Log.d(TAG, "Created");
     mIsCreated = true;
-    _OnSurfaceCreated(holder);
+    _surfaceCreated(holder);
   }
 
   @Override
@@ -139,7 +139,7 @@ public class XBMCVideoView extends SurfaceView implements
     if (holder != getHolder())
       return;
 
-    _OnSurfaceChanged(holder, format, width, height);
+    _surfaceChanged(holder, format, width, height);
 
     Log.d(TAG, "Changed, format:" + format + ", width:" + width
         + ", height:" + height);
@@ -153,6 +153,6 @@ public class XBMCVideoView extends SurfaceView implements
 
     Log.d(TAG, "Destroyed");
     mIsCreated = false;
-    _OnSurfaceDestroyed(holder);
+    _surfaceDestroyed(holder);
   }
 }

@@ -36,7 +36,6 @@ public:
   static void _onNewIntent(JNIEnv *env, jobject context, jobject intent);
   static void _onActivityResult(JNIEnv *env, jobject context, jint requestCode, jint resultCode, jobject resultData);
   static void _onVolumeChanged(JNIEnv *env, jobject context, jint volume);
-  static void _onAudioFocusChange(JNIEnv *env, jobject context, jint focusChange);
   static void _doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos);
   static void _onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices);
   static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
@@ -67,7 +66,6 @@ protected:
   virtual void onCaptureAvailable(jni::CJNIImage image)=0;
   virtual void onScreenshotAvailable(jni::CJNIImage image)=0;
   virtual void onVolumeChanged(int volume)=0;
-  virtual void onAudioFocusChange(int focusChange)=0;
   virtual void doFrame(int64_t frameTimeNanos)=0;
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
