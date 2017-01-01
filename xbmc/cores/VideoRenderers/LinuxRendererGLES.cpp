@@ -654,8 +654,49 @@ void CLinuxRendererGLES::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
         case 90:
         case 270:
         {
-          int diff = (int) ((dstRect.Height() - dstRect.Width()) / 2);
-          dstRect = CRect(dstRect.x1 - diff, dstRect.y1, dstRect.x2 + diff, dstRect.y2);
+          int diffX = 0;
+          int diffY = 0;
+          int centerX = 0;
+          int centerY = 0;
+
+          int newWidth = dstRect.Height(); // new width is old height
+          int newHeight = dstRect.Width(); // new height is old width
+          int diffWidth = newWidth - dstRect.Width(); // difference between old and new width
+          int diffHeight = newHeight - dstRect.Height(); // difference between old and new height
+
+          // if the new width is bigger then the old or
+          // the new height is bigger then the old - we need to scale down
+          if (diffWidth > 0 || diffHeight > 0 )
+          {
+            float aspectRatio = GetAspectRatio();
+            // scale to fit screen width because
+            // the difference in width is bigger then the
+            // difference in height
+            if (diffWidth > diffHeight)
+            {
+              newWidth = dstRect.Width(); // clamp to the width of the old dest rect
+              newHeight *= aspectRatio;
+            }
+            else // scale to fit screen height
+            {
+              newHeight = dstRect.Height(); // clamp to the height of the old dest rect
+              newWidth /= aspectRatio;
+            }
+          }
+
+          // calculate the center point of the view
+          centerX = m_viewRect.x1 + m_viewRect.Width() / 2;
+          centerY = m_viewRect.y1 + m_viewRect.Height() / 2;
+
+          // calculate the number of pixels we need to go in each
+          // x direction from the center point
+          diffX = newWidth / 2;
+          // calculate the number of pixels we need to go in each
+          // y direction from the center point
+          diffY = newHeight / 2;
+
+          dstRect = CRect(centerX - diffX, centerY - diffY, centerX + diffX, centerY + diffY);
+
           break;
         }
 
