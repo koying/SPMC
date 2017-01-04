@@ -539,6 +539,17 @@ std::string& StringUtils::RemoveDuplicatedSpacesAndTabs(std::string& str)
   return str;
 }
 
+int StringUtils::ReturnDigits(const std::string& str)
+{
+  std::stringstream ss;
+  for (const auto& character : str)
+  {
+    if (isdigit(character))
+      ss << character;
+  }
+  return atoi(ss.str().c_str());
+}
+
 int StringUtils::Replace(std::string &str, char oldChar, char newChar)
 {
   int replacedChars = 0;

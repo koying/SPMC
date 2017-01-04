@@ -84,7 +84,7 @@ namespace XBMCAddon
 
     String InfoTagVideo::getVotes()
     {
-      return infoTag->m_strVotes;
+      return StringUtils::Format("%d", infoTag->GetRating().votes);
     }
 
     String InfoTagVideo::getCast()
@@ -104,17 +104,17 @@ namespace XBMCAddon
 
     String InfoTagVideo::getIMDBNumber()
     {
-      return infoTag->m_strIMDBNumber;
+      return infoTag->GetUniqueID();
     }
 
     int InfoTagVideo::getYear()
     {
-      return infoTag->m_iYear;
+      return infoTag->GetYear();
     }
 
     double InfoTagVideo::getRating()
     {
-      return infoTag->m_fRating;
+      return infoTag->GetRating().rating;
     }
 
     int InfoTagVideo::getPlayCount()

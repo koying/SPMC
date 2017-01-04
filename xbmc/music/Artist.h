@@ -27,6 +27,7 @@
 
 #include "utils/Fanart.h"
 #include "utils/ScraperUrl.h"
+#include "utils/StringUtils.h"
 #include "XBDateTime.h"
 
 class TiXmlNode;
@@ -148,3 +149,36 @@ private:
 typedef std::vector<CArtist> VECARTISTS;
 typedef std::vector<CArtistCredit> VECARTISTCREDITS;
 
+const std::string BLANKARTIST_FAKEMUSICBRAINZID = "Artist Tag Missing";
+const std::string BLANKARTIST_NAME = "[Missing Tag]";
+const long BLANKARTIST_ID = 1;
+
+#define ROLE_ARTIST 1  //Default role
+
+class CMusicRole
+{
+public:
+  CMusicRole() { }
+  CMusicRole(std::string strRole, std::string strArtist) : idRole(-1), m_strRole(strRole), m_strArtist(strArtist), idArtist(-1) { }
+  CMusicRole(int role, std::string strRole, std::string strArtist, long ArtistId) : idRole(role), m_strRole(strRole), m_strArtist(strArtist), idArtist(ArtistId) { }
+  std::string GetArtist() const { return m_strArtist; }
+  std::string GetRoleDesc() const { return m_strRole; }
+  int GetRoleId() const { return idRole; }
+  long GetArtistId() const { return idArtist; }
+  void SetArtistId(long iArtistId) { idArtist = iArtistId;  }
+  
+  bool operator==(const CMusicRole& a) const
+  {
+    if (StringUtils::EqualsNoCase(m_strRole, a.m_strRole))
+      return StringUtils::EqualsNoCase(m_strArtist, a.m_strArtist);
+    else
+      return false;
+  }
+private:
+  int idRole;
+  std::string m_strRole;
+  std::string m_strArtist;
+  long idArtist;
+};
+
+typedef std::vector<CMusicRole> VECMUSICROLES;

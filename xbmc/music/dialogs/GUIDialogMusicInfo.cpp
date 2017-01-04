@@ -152,7 +152,8 @@ void CGUIDialogMusicInfo::SetAlbum(const CAlbum& album, const std::string &path)
   m_albumItem->GetMusicInfoTag()->SetArtist(m_album.GetAlbumArtist());
   m_albumItem->GetMusicInfoTag()->SetYear(m_album.iYear);
   m_albumItem->GetMusicInfoTag()->SetLoaded(true);
-  m_albumItem->GetMusicInfoTag()->SetUserrating('0' + m_album.iRating);
+  m_albumItem->GetMusicInfoTag()->SetRating(m_album.fRating);
+  m_albumItem->GetMusicInfoTag()->SetUserrating(m_album.iUserrating);
   m_albumItem->GetMusicInfoTag()->SetGenre(m_album.genre);
   m_albumItem->GetMusicInfoTag()->SetDatabaseId(m_album.idAlbum, MediaTypeAlbum);
   CMusicDatabase::SetPropertiesFromAlbum(*m_albumItem,m_album);
@@ -218,7 +219,7 @@ void CGUIDialogMusicInfo::SetDiscography()
   database.Open();
 
   std::vector<int> albumsByArtist;
-  database.GetAlbumsByArtist(m_artist.idArtist, true, albumsByArtist);
+  database.GetAlbumsByArtist(m_artist.idArtist,albumsByArtist);
 
   for (unsigned int i=0;i<m_artist.discography.size();++i)
   {

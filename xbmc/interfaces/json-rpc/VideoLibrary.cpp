@@ -1130,7 +1130,7 @@ void CVideoLibrary::UpdateVideoTag(const CVariant &parameterObject, CVideoInfoTa
   details.SetStudio(studio);
 
   if (ParameterNotNull(parameterObject, "year"))
-    details.m_iYear = (int)parameterObject["year"].asInteger();
+    details.SetYear((int)parameterObject["year"].asInteger());
   if (ParameterNotNull(parameterObject, "plot"))
     details.SetPlot(parameterObject["plot"].asString());
   if (ParameterNotNull(parameterObject, "album"))
@@ -1147,17 +1147,17 @@ void CVideoLibrary::UpdateVideoTag(const CVariant &parameterObject, CVideoInfoTa
   if (ParameterNotNull(parameterObject, "track"))
     details.m_iTrack = (int)parameterObject["track"].asInteger();
   if (ParameterNotNull(parameterObject, "rating"))
-    details.m_fRating = parameterObject["rating"].asFloat();
+    details.SetRating(parameterObject["rating"].asFloat());
   if (ParameterNotNull(parameterObject, "userrating"))
     details.m_iUserRating = parameterObject["userrating"].asInteger();
   if (ParameterNotNull(parameterObject, "mpaa"))
     details.SetMPAARating(parameterObject["mpaa"].asString());
   if (ParameterNotNull(parameterObject, "imdbnumber"))
-    details.SetIMDBNumber(parameterObject["imdbnumber"].asString());
+    details.SetUniqueID(parameterObject["imdbnumber"].asString());
   if (ParameterNotNull(parameterObject, "premiered"))
     SetFromDBDate(parameterObject["premiered"], details.m_premiered);
   if (ParameterNotNull(parameterObject, "votes"))
-    details.SetVotes(parameterObject["votes"].asString());
+    details.SetVotes(atoi(parameterObject["votes"].asString().c_str()));
   if (ParameterNotNull(parameterObject, "lastplayed"))
     SetFromDBDateTime(parameterObject["lastplayed"], details.m_lastPlayed);
   if (ParameterNotNull(parameterObject, "firstaired"))

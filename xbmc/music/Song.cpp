@@ -188,6 +188,11 @@ const std::string CSong::GetArtistString() const
   return artistString;
 }
 
+void CSong::AppendArtistRole(const CMusicRole& musicRole)
+{
+	  m_musicRoles.push_back(musicRole);
+}
+
 const std::vector<int> CSong::GetArtistIDArray() const
 {
   // Get song artist IDs for json rpc

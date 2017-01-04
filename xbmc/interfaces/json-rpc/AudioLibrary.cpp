@@ -498,7 +498,7 @@ JSONRPC_STATUS CAudioLibrary::SetAlbumDetails(const std::string &method, ITransp
   if (ParameterNotNull(parameterObject, "albumlabel"))
     album.strLabel = parameterObject["albumlabel"].asString();
   if (ParameterNotNull(parameterObject, "rating"))
-    album.iRating = (int)parameterObject["rating"].asInteger();
+    album.fRating = (float)parameterObject["rating"].asInteger();
   if (ParameterNotNull(parameterObject, "year"))
     album.iYear = (int)parameterObject["year"].asInteger();
 

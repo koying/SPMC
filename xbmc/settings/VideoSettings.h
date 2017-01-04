@@ -150,6 +150,7 @@ public:
   int m_ResumeTime;
   int m_StereoMode;
   bool m_StereoInvert;
+  int m_VideoStream;
 
 private:
 };

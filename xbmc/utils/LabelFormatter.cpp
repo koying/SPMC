@@ -209,8 +209,8 @@ std::string CLabelFormatter::GetMaskContent(const CMaskString &mask, const CFile
         value = movie->m_firstAired.GetAsLocalizedDate();
       else if (movie->m_premiered.IsValid())
         value = movie->m_premiered.GetAsLocalizedDate();
-      else if (movie->m_iYear > 0)
-        value = StringUtils::Format("%i", movie->m_iYear);
+      else if (movie->GetYear() > 0)
+        value = StringUtils::Format("%i", movie->GetYear());
     }
     break;
   case 'F': // filename
@@ -252,8 +252,8 @@ std::string CLabelFormatter::GetMaskContent(const CMaskString &mask, const CFile
   case 'R': // rating
     if (music && music->GetUserrating() != '0')
       value.assign(1, music->GetUserrating());
-    else if (movie && movie->m_fRating != 0.f)
-      value = StringUtils::Format("%.1f", movie->m_fRating);
+    else if (movie && movie->GetRating().rating != 0.f)
+      value = StringUtils::Format("%.1f", movie->GetRating().rating);
     break;
   case 'C': // programs count
     value = StringUtils::Format("%i", item->m_iprogramCount);

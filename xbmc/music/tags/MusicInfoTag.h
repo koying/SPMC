@@ -80,7 +80,7 @@ public:
   const CDateTime& GetLastPlayed() const;
   const CDateTime& GetDateAdded() const;
   bool  GetCompilation() const;
-  char  GetUserrating() const;
+  int  GetUserrating() const;
   int  GetListeners() const;
   int  GetPlayCount() const;
   const EmbeddedArtInfo &GetCoverArtInfo() const;
@@ -121,7 +121,9 @@ public:
   void SetMood(const std::string& mood);
   void SetLyrics(const std::string& lyrics);
   void SetCueSheet(const std::string& cueSheet);
-  void SetUserrating(char rating);
+  void SetRating(float rating);
+  void SetUserrating(int rating);
+  void SetVotes(int votes);
   void SetListeners(int listeners);
   void SetPlayCount(int playcount);
   void SetLastPlayed(const std::string& strLastPlayed);
@@ -150,6 +152,8 @@ public:
    \param genre genre to add.
    */
   void AppendGenre(const std::string &genre);
+  
+  void AppendArtistRole(const CMusicRole& ArtistRole);
 
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& ar) const;
@@ -157,6 +161,8 @@ public:
 
   void Clear();
 
+  void SetContributors(const VECMUSICROLES& contributors);
+  
   /*! \brief Trim whitespace off the given string
    \param value string to trim
    \return trimmed value, with spaces removed from left and right, as well as carriage returns from the right.
@@ -178,6 +184,7 @@ public:
   std::vector<std::string> m_musicBrainzAlbumArtistID;
   std::vector<std::string> m_musicBrainzAlbumArtistHints;
   std::string m_strMusicBrainzTRMID;
+  VECMUSICROLES m_musicRoles; //Artists contributing to the recording and role (from tags other than ARTIST or ALBUMARTIST)
   std::string m_strComment;
   std::string m_strMood;
   std::string m_strLyrics;
@@ -188,9 +195,11 @@ public:
   int m_iDuration;
   int m_iTrack;     // consists of the disk number in the high 16 bits, the track number in the low 16bits
   int m_iDbId;
-  MediaType m_type; ///< item type "song", "album", "artist"
+  MediaType m_type; ///< item type "music", "song", "album", "artist"
   bool m_bLoaded;
-  char m_rating;
+  float m_Rating;
+  int m_Userrating;
+  int m_Votes;
   int m_listeners;
   int m_iTimesPlayed;
   int m_iAlbumId;

@@ -282,12 +282,12 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
               object.m_People.artists.Add(itArtist->c_str());
           object.m_Affiliation.album = tag.m_strAlbum.c_str();
           object.m_Title = tag.m_strTitle.c_str();
-          object.m_Date = CDateTime(tag.m_iYear, 1, 1, 0, 0, 0).GetAsW3CDate().c_str();
+          object.m_Date = CDateTime(tag.GetYear(), 1, 1, 0, 0, 0).GetAsW3CDate().c_str();
           object.m_ReferenceID = NPT_String::Format("videodb://musicvideos/titles/%i", tag.m_iDbId);
         } else if (tag.m_type == MediaTypeMovie) {
           object.m_ObjectClass.type = "object.item.videoItem.movie";
           object.m_Title = tag.m_strTitle.c_str();
-          object.m_Date = CDateTime(tag.m_iYear, 1, 1, 0, 0, 0).GetAsW3CDate().c_str();
+          object.m_Date = CDateTime(tag.GetYear(), 1, 1, 0, 0, 0).GetAsW3CDate().c_str();
           object.m_ReferenceID = NPT_String::Format("videodb://movies/titles/%i", tag.m_iDbId);
         } else {
           object.m_ObjectClass.type = "object.item.videoItem.videoBroadcast";
@@ -314,9 +314,9 @@ PopulateObjectFromTag(CVideoInfoTag&         tag,
         object.m_People.publisher.Add(tag.m_studio[index].c_str());
 
     object.m_XbmcInfo.date_added = tag.m_dateAdded.GetAsW3CDate().c_str();
-    object.m_XbmcInfo.rating = tag.m_fRating;
-    object.m_XbmcInfo.votes = tag.m_strVotes.c_str();
-    object.m_XbmcInfo.unique_identifier = tag.m_strIMDBNumber.c_str();
+    object.m_XbmcInfo.rating = tag.GetRating().rating;
+    object.m_XbmcInfo.votes = tag.GetRating().votes;
+    object.m_XbmcInfo.unique_identifier = tag.GetUniqueID().c_str();
     for (const auto& country : tag.m_country)
       object.m_XbmcInfo.countries.Add(country.c_str());
     object.m_XbmcInfo.user_rating = tag.m_iUserRating;
@@ -530,8 +530,8 @@ BuildObject(CFileItem&                    item,
                   container->m_Recorded.episode_number = tag.m_iEpisode;
                   container->m_MiscInfo.play_count = tag.m_playCount;
                   container->m_Title = tag.m_strTitle.c_str();
-                  if (!tag.m_premiered.IsValid() && tag.m_iYear)
-                    container->m_Date = CDateTime(tag.m_iYear, 1, 1, 0, 0, 0).GetAsW3CDateTime().c_str();
+                  if (!tag.m_premiered.IsValid() && tag.GetYear())
+                    container->m_Date = CDateTime(tag.GetYear(), 1, 1, 0, 0, 0).GetAsW3CDateTime().c_str();
                   else
                     container->m_Date = tag.m_premiered.GetAsW3CDate().c_str();
 
@@ -820,15 +820,14 @@ PopulateTagFromObject(CVideoInfoTag&         tag,
     }
 
     if (date.IsValid())
-      tag.m_iYear = date.GetYear();
+      tag.SetYear(date.GetYear());
 
     for (unsigned int index = 0; index < object.m_People.publisher.GetItemCount(); index++)
         tag.m_studio.push_back(object.m_People.publisher.GetItem(index)->GetChars());
 
     tag.m_dateAdded.SetFromW3CDate((const char*)object.m_XbmcInfo.date_added);
-    tag.m_fRating = object.m_XbmcInfo.rating;
-    tag.m_strVotes = object.m_XbmcInfo.votes;
-    tag.m_strIMDBNumber = object.m_XbmcInfo.unique_identifier;
+    tag.SetRating((float)object.m_XbmcInfo.rating, object.m_XbmcInfo.votes);
+    tag.SetUniqueID(object.m_XbmcInfo.unique_identifier.GetChars());
     for (unsigned int index = 0; index < object.m_XbmcInfo.countries.GetItemCount(); index++)
       tag.m_country.push_back(object.m_XbmcInfo.countries.GetItem(index)->GetChars());
     tag.m_iUserRating = object.m_XbmcInfo.user_rating;

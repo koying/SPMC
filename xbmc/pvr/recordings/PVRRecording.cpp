@@ -91,7 +91,8 @@ CPVRRecording::CPVRRecording(const PVR_RECORDING &recording, unsigned int iClien
   m_strShowTitle                   = recording.strEpisodeName;
   m_iSeason                        = recording.iSeriesNumber;
   m_iEpisode                       = recording.iEpisodeNumber;
-  m_iYear                          = recording.iYear;
+  if (recording.iYear > 0)
+    SetYear(recording.iYear);
   m_iClientId                      = iClientId;
   m_recordingTime                  = recording.recordingTime + g_advancedSettings.m_iPVRTimeCorrection;
   m_duration                       = CDateTimeSpan(0, 0, recording.iDuration / 60, recording.iDuration % 60);
@@ -133,7 +134,7 @@ bool CPVRRecording::operator ==(const CPVRRecording& right) const
        m_strShowTitle       == right.m_strShowTitle &&
        m_iSeason            == right.m_iSeason &&
        m_iEpisode           == right.m_iEpisode &&
-       m_iYear              == right.m_iYear &&
+       GetPremiered()       == right.GetPremiered() &&
        m_strIconPath        == right.m_strIconPath &&
        m_strThumbnailPath   == right.m_strThumbnailPath &&
        m_strFanartPath      == right.m_strFanartPath &&
@@ -345,7 +346,7 @@ void CPVRRecording::Update(const CPVRRecording &tag)
   m_strShowTitle      = tag.m_strShowTitle;
   m_iSeason           = tag.m_iSeason;
   m_iEpisode          = tag.m_iEpisode;
-  m_iYear             = tag.m_iYear;
+  SetPremiered(tag.GetPremiered());
   m_recordingTime     = tag.m_recordingTime;
   m_duration          = tag.m_duration;
   m_iPriority         = tag.m_iPriority;
@@ -409,7 +410,7 @@ void CPVRRecording::UpdatePath(void)
     std::string strSeasonEpisode;
     if ((m_iSeason > -1 && m_iEpisode > -1 && (m_iSeason > 0 || m_iEpisode > 0)))
       strSeasonEpisode = StringUtils::Format("s%02de%02d", m_iSeason, m_iEpisode);
-    std::string strYear(m_iYear > 0 ? StringUtils::Format(" (%i)", m_iYear) : "");
+    std::string strYear(GetYear() > 0 ? StringUtils::Format(" (%i)", GetYear()) : "");
     std::string strChannel;
     StringUtils::Replace(strTitle, '/', ' ');
 
