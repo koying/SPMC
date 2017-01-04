@@ -47,6 +47,17 @@ struct SActorInfo
   int        order;
 };
 
+class CRating
+{
+public:
+  CRating(): rating(0.0f), votes(0) {}
+  CRating(float r): rating(r), votes(0) {}
+  CRating(float r, int v): rating(r), votes(v) {}
+  float rating;
+  int votes;
+};
+typedef std::map<std::string, CRating> RatingMap;
+
 class CVideoInfoTag : public IArchivable, public ISerializable, public ISortable
 {
 public:
@@ -54,17 +65,17 @@ public:
   void Reset();
   /* \brief Load information to a videoinfotag from an XML element
    There are three types of tags supported:
-    1. Single-value tags, such as <title>.  These are set if available, else are left untouched.
-    2. Additive tags, such as <set> or <genre>.  These are appended to or replaced (if available) based on the value
-       of the prioritise parameter.  In addition, a clear attribute is available in the XML to clear the current value prior
-       to appending.
-    3. Image tags such as <thumb> and <fanart>.  If the prioritise value is specified, any additional values are prepended
-       to the existing values.
-
+   1. Single-value tags, such as <title>.  These are set if available, else are left untouched.
+   2. Additive tags, such as <set> or <genre>.  These are appended to or replaced (if available) based on the value
+   of the prioritise parameter.  In addition, a clear attribute is available in the XML to clear the current value prior
+   to appending.
+   3. Image tags such as <thumb> and <fanart>.  If the prioritise value is specified, any additional values are prepended
+   to the existing values.
+   
    \param element    the root XML element to parse.
    \param append     whether information should be added to the existing tag, or whether it should be reset first.
    \param prioritise if appending, whether additive tags should be prioritised (i.e. replace or prepend) over existing values. Defaults to false.
-
+   
    \sa ParseNative
    */
   bool Load(const TiXmlElement *element, bool append = false, bool prioritise = false);
@@ -72,28 +83,38 @@ public:
   virtual void Archive(CArchive& ar);
   virtual void Serialize(CVariant& value) const;
   virtual void ToSortable(SortItem& sortable, Field field) const;
+  const CRating GetRating(std::string type = "") const;
+  const std::string& GetDefaultRating() const;
+  const std::string GetUniqueID(std::string type = "") const;
+  const std::map<std::string, std::string>& GetUniqueIDs() const;
+  const std::string& GetDefaultUniqueID() const;
+  const bool HasUniqueID() const;
+  const bool HasYear() const;
+  const int GetYear() const;
+  const bool HasPremiered() const;
+  const CDateTime& GetPremiered() const;
   const std::string GetCast(bool bIncludeRole = false) const;
   bool HasStreamDetails() const;
   bool IsEmpty() const;
-
+  
   const std::string& GetPath() const
   {
     if (m_strFileNameAndPath.empty())
       return m_strPath;
     return m_strFileNameAndPath;
   };
-
+  
   /*! \brief retrieve the duration in seconds.
    Prefers the duration from stream details if available.
    */
   unsigned int GetDuration() const;
-
+  
   /*! \brief get the duration in seconds from a minute string
    \param runtime the runtime string from a scraper or similar
    \return the time in seconds, if decipherable.
    */
   static unsigned int GetDurationFromMinuteString(const std::string &runtime);
-
+  
   void SetBasePath(std::string basePath);
   void SetDirector(std::vector<std::string> director);
   void SetWritingCredits(std::vector<std::string> writingCredits);
@@ -106,14 +127,22 @@ public:
   void SetTitle(std::string title);
   void SetSortTitle(std::string sortTitle);
   void SetPictureURL(CScraperUrl &pictureURL);
-  void SetVotes(std::string votes);
+  void SetRating(float rating, int votes, const std::string& type = "", bool def = false);
+  void SetRating(CRating rating, const std::string& type = "", bool def = false);
+  void SetRating(float rating, const std::string& type = "", bool def = false);
+  void RemoveRating(const std::string& type);
+  void SetRatings(RatingMap ratings);
+  void SetVotes(int votes, const std::string& type = "");
+  void SetUniqueIDs(std::map<std::string, std::string> uniqueIDs);
+  void SetPremiered(CDateTime premiered);
+  void SetPremieredFromDBDate(std::string premieredString);
+  void SetYear(int year);
   void SetArtist(std::vector<std::string> artist);
   void SetSet(std::string set);
   void SetSetOverview(std::string setOverview);
   void SetTags(std::vector<std::string> tags);
   void SetFile(std::string file);
   void SetPath(std::string path);
-  void SetIMDBNumber(std::string imdbNumber);
   void SetMPAARating(std::string mpaaRating);
   void SetFileNameAndPath(std::string fileNameAndPath);
   void SetOriginalTitle(std::string originalTitle);
@@ -124,10 +153,11 @@ public:
   void SetStudio(std::vector<std::string> studio);
   void SetAlbum(std::string album);
   void SetShowLink(std::vector<std::string> showLink);
-  void SetUniqueId(std::string uniqueId);
+  void SetUniqueID(const std::string& uniqueid, const std::string& type = "", bool def = false);
+  void RemoveUniqueID(const std::string& type);
   void SetNamedSeasons(std::map<int, std::string> namedSeasons);
   void SetUserrating(int userrating);
-
+  
   std::string m_basePath; // the base path of the video, for folder-based lookups
   int m_parentPathID;      // the parent path id where the base path of the video lies
   std::vector<std::string> m_director;
@@ -141,7 +171,6 @@ public:
   CScraperUrl m_strPictureURL;
   std::string m_strTitle;
   std::string m_strSortTitle;
-  std::string m_strVotes;
   std::vector<std::string> m_artist;
   std::vector< SActorInfo > m_cast;
   typedef std::vector< SActorInfo >::const_iterator iCast;
@@ -151,12 +180,14 @@ public:
   std::vector<std::string> m_tags;
   std::string m_strFile;
   std::string m_strPath;
-  std::string m_strIMDBNumber;
   std::string m_strMPAARating;
   std::string m_strFileNameAndPath;
   std::string m_strOriginalTitle;
   std::string m_strEpisodeGuide;
+  std::string m_strServiceFile;
+  std::string m_strServiceId;
   CDateTime m_premiered;
+  bool m_bHasPremiered;
   std::string m_strStatus;
   std::string m_strProductionCode;
   CDateTime m_firstAired;
@@ -168,18 +199,18 @@ public:
   std::map<int, std::string> m_namedSeasons;
   int m_playCount;
   int m_iTop250;
-  int m_iYear;
   int m_iSeason;
   int m_iEpisode;
-  std::string m_strUniqueId;
+  int m_iIdUniqueID;
   int m_iDbId;
   int m_iFileId;
   int m_iSpecialSortSeason;
   int m_iSpecialSortEpisode;
   int m_iTrack;
-  float m_fRating;
+  RatingMap m_ratings;
+  int m_iIdRating;
   int m_iUserRating;
-  float m_fEpBookmark;
+  CBookmark m_EpBookmark;
   int m_iBookmarkId;
   int m_iIdShow;
   int m_iIdSeason;
@@ -189,17 +220,22 @@ public:
   CDateTime m_dateAdded;
   MediaType m_type;
   int m_duration; ///< duration in seconds
-
+  int m_relevance; // Used for actors' number of appearances
+  int m_parsedDetails;
+  
 private:
   /* \brief Parse our native XML format for video info.
    See Load for a description of the available tag types.
-
+   
    \param element    the root XML element to parse.
    \param prioritise whether additive tags should be replaced (or prepended) by the content of the tags, or appended to.
    \sa Load
    */
   void ParseNative(const TiXmlElement* element, bool prioritise);
-
+  
+  std::string m_strDefaultRating;
+  std::string m_strDefaultUniqueID;
+  std::map<std::string, std::string> m_uniqueIDs;
   std::string Trim(std::string &&value);
   std::vector<std::string> Trim(std::vector<std::string> &&items);
 };

@@ -267,6 +267,15 @@ CStreamDetail *CStreamDetails::NewStream(CStreamDetail::StreamType type)
   return retVal;
 }
 
+std::string CStreamDetails::GetVideoLanguage(int idx) const
+{
+  CStreamDetailVideo *item = (CStreamDetailVideo*)GetNthStream(CStreamDetail::VIDEO, idx);
+  if (item)
+    return item->m_strLanguage;
+  else
+    return "";
+}
+
 int CStreamDetails::GetStreamCount(CStreamDetail::StreamType type) const
 {
   int retVal = 0;

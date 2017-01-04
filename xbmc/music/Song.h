@@ -100,6 +100,13 @@ public:
   */
   const std::vector<std::string> GetAlbumArtist() const { return m_albumArtist; }
 
+  /*! \brief Get the full list of artist names and the role each played for those
+   that contributed to the recording. Given in music file tags other than ARTIST
+   or ALBUMARTIST, e.g. COMPOSER or CONDUCTOR etc.
+   \return a vector of all contributing artist names and their roles
+   */
+  const VECMUSICROLES& GetContributors() const { return m_musicRoles; };
+  
   /*! \brief Set album artist vector. 
    Album artist is held local to song until album created for inital processing only.
    Normalised album artist data belongs to album and is stored in album artist credits
@@ -122,6 +129,8 @@ public:
    Tests both the strThumb and embeddedArt members.
    */
   bool ArtMatches(const CSong &right) const;
+  
+  void AppendArtistRole(const CMusicRole& musicRole);
 
   long idSong;
   int idAlbum;
@@ -137,7 +146,9 @@ public:
   std::string strComment;
   std::string strMood;
   std::string strCueSheet;
-  char rating;
+  float rating;
+  int userrating;
+  int votes;
   int iTrack;
   int iDuration;
   int iYear;
@@ -147,11 +158,12 @@ public:
   int iStartOffset;
   int iEndOffset;
   bool bCompilation;
-
+  
   ReplayGain replayGain;
 
 private:
   std::vector<std::string> m_albumArtist; // Album artist from tag for album processing, no desc or MBID
+  VECMUSICROLES m_musicRoles;
 };
 
 /*!

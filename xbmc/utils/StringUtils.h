@@ -76,6 +76,7 @@ public:
   static std::string& TrimRight(std::string &str);
   static std::string& TrimRight(std::string &str, const char* const chars);
   static std::string& RemoveDuplicatedSpacesAndTabs(std::string& str);
+  static int ReturnDigits(const std::string& str);
   static int Replace(std::string &str, char oldChar, char newChar);
   static int Replace(std::string &str, const std::string &oldStr, const std::string &newStr);
   static int Replace(std::wstring &str, const std::wstring &oldStr, const std::wstring &newStr);

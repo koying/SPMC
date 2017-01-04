@@ -62,6 +62,7 @@ public:
   int m_iDuration;
   std::string m_strCodec;
   std::string m_strStereoMode;
+  std::string m_strLanguage;
 };
 
 class CStreamDetailAudio : public CStreamDetail
@@ -107,6 +108,7 @@ public:
   int GetVideoStreamCount(void) const;
   int GetAudioStreamCount(void) const;
   int GetSubtitleStreamCount(void) const;
+  std::string GetVideoLanguage(int idx) const;
   const CStreamDetail* GetNthStream(CStreamDetail::StreamType type, int idx) const;
 
   std::string GetVideoCodec(int idx = 0) const;

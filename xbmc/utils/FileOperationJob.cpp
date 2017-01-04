@@ -192,7 +192,7 @@ bool CFileOperationJob::DoProcess(FileAction action, CFileItemList & items, cons
           CVideoInfoTag* tag = pItem->GetVideoInfoTag();
           if (tag->m_type == "movie")
           {
-            strFileName = StringUtils::Format("%s (%d)", tag->m_strTitle.c_str(), tag->m_iYear);
+            strFileName = StringUtils::Format("%s (%d)", tag->m_strTitle.c_str(), tag->GetYear());
           }
           else if (tag->m_type == "episode")
           {
