@@ -44,6 +44,9 @@ set(package_files strings.xml
                   src/org/xbmc/kodi/XBMCVideoView.java
                   src/org/xbmc/kodi/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
                   src/org/xbmc/kodi/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java
+                  src/org/xbmc/kodi/interfaces/XBMCNsdManagerDiscoveryListener.java
+                  src/org/xbmc/kodi/interfaces/XBMCNsdManagerRegistrationListener.java
+                  src/org/xbmc/kodi/interfaces/XBMCNsdManagerResolveListener.java
                   )
 foreach(file IN LISTS package_files)
   configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/xbmc/${file}.in
