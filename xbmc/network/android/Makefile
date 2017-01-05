@@ -1,4 +1,6 @@
-SRCS=NetworkAndroid.cpp 
+SRCS  = NetworkAndroid.cpp 
+SRCS += ZeroconfAndroid.cpp 
+SRCS += ZeroconfBrowserAndroid.cpp 
 
 LIB=network_android.a
 
