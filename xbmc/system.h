@@ -210,6 +210,7 @@
 #if defined(TARGET_ANDROID)
 #undef HAS_LINUX_EVENTS
 #undef HAS_LIRC
+#define HAS_ZEROCONF
 #endif
 
 #ifdef HAVE_LIBEGL
