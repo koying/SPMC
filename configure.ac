@@ -2464,6 +2464,9 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/strings.xml \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerDiscoveryListener.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerRegistrationListener.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerResolveListener.java \
     "
 
 if test "$target_platform" = "target_android" ; then

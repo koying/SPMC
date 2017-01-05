@@ -39,6 +39,9 @@
 #include "android/activity/JNIXBMCVideoView.h"
 #include "android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
 #include "android/activity/JNIXBMCSurfaceTextureOnFrameAvailableListener.h"
+#include "android/activity/JNIXBMCNsdManagerDiscoveryListener.h"
+#include "android/activity/JNIXBMCNsdManagerRegistrationListener.h"
+#include "android/activity/JNIXBMCNsdManagerResolveListener.h"
 
 #if defined(HAVE_BREAKPAD)
 static void *startCrashHandler(void* arg)
@@ -178,6 +181,9 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   CJNIXBMCAudioManagerOnAudioFocusChangeListener::RegisterNatives(env);
   CJNIXBMCSurfaceTextureOnFrameAvailableListener::RegisterNatives(env);
   CJNIXBMCVideoView::RegisterNatives(env);
+  jni::CJNIXBMCNsdManagerDiscoveryListener::RegisterNatives(env);
+  jni::CJNIXBMCNsdManagerRegistrationListener::RegisterNatives(env);
+  jni::CJNIXBMCNsdManagerResolveListener::RegisterNatives(env);
   
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
