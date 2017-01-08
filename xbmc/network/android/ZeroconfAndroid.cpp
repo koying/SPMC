@@ -77,6 +77,8 @@ bool CZeroconfAndroid::doForceReAnnounceService(const std::string& fcr_identifie
       it->second.serviceInfo.setAttribute("xbmcdummy", "odddummy");
     it->second.updateNumber++;
 
+    m_manager.unregisterService(it->second.registrationListener);
+    it->second.registrationListener = jni::CJNIXBMCNsdManagerRegistrationListener();
     m_manager.registerService(it->second.serviceInfo, 1 /* PROTOCOL_DNS_SD */, it->second.registrationListener);
   }
   return ret;
