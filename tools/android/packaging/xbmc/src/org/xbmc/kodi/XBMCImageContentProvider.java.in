@@ -54,7 +54,7 @@ public class XBMCImageContentProvider extends ContentProvider
     .fragment(surl);
     
     Uri out = builder.build();
-    Log.d(TAG, "GetImageUri: in:" + surl + " out:" + out.toString());
+    // Log.d(TAG, "GetImageUri: in:" + surl + " out:" + out.toString());
     return out;    
   }
   
@@ -62,14 +62,18 @@ public class XBMCImageContentProvider extends ContentProvider
   public ParcelFileDescriptor openFile(Uri uri, String mode)
       throws FileNotFoundException
   {
-    Log.d(TAG, "openFile: " + uri.toString());
+    // Log.d(TAG, "openFile: " + uri.toString());
     
     ParcelFileDescriptor[] pipe = null;
 
     try
     {
       String decodedUrl = uri.getFragment();
-      Log.d(TAG, "  decodedUrl: " + decodedUrl);
+      // Log.d(TAG, "  decodedUrl: " + decodedUrl);
+      if (decodedUrl == null)
+      {
+        throw new FileNotFoundException("Uri is null");
+      }
       pipe = ParcelFileDescriptor.createPipe();
 
       URL url = new URL(decodedUrl);

@@ -1,10 +1,10 @@
 package @APP_PACKAGE@;
 
-import android.util.Base64;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -96,8 +96,8 @@ public class XBMCJsonRPC
   {
     try
     {
-      Log.d(TAG, "JSON in: " + jsonRequest);
-      Log.d(TAG, "JSON url: " + m_jsonURL);
+      //Log.d(TAG, "JSON in: " + jsonRequest);
+      //Log.d(TAG, "JSON url: " + m_jsonURL);
 
       String returnStr = null;
       StringBuilder strbuilder = new StringBuilder();
@@ -131,10 +131,11 @@ public class XBMCJsonRPC
           reader.close();
           connection.disconnect();
 
-          Log.d(TAG, "JSON out: " + strbuilder.toString());
+          // Log.d(TAG, "JSON out: " + strbuilder.toString());
           returnStr = strbuilder.toString();
 
-        } else
+        }
+        else
         {
           Log.e(TAG, "Failed to read JSON");
         }
@@ -146,10 +147,15 @@ public class XBMCJsonRPC
       finally
       {
         connection.disconnect();
-        return returnStr;
       }
-
-    } catch (Exception e)
+      return returnStr;
+    }
+    catch (ConnectException ce)
+    {
+      // Connection not available or died
+      return null;
+    }
+    catch (Exception e)
     {
       Log.e(TAG, "Failed to read JSON");
       e.printStackTrace();
@@ -161,9 +167,13 @@ public class XBMCJsonRPC
   {
     try
     {
-      JSONObject resp = new JSONObject(request_string(jsonRequest));
+      String stringResp = request_string(jsonRequest);
+      if (stringResp == null)
+        return null;
+      JSONObject resp = new JSONObject(stringResp);
       return resp;
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       Log.e(TAG, "Failed to parse JSON");
       e.printStackTrace();
@@ -175,9 +185,13 @@ public class XBMCJsonRPC
   {
     try
     {
-      JSONArray resp = new JSONArray(request_string(jsonRequest));
+      String stringResp = request_string(jsonRequest);
+      if (stringResp == null)
+        return null;
+      JSONArray resp = new JSONArray(stringResp);
       return resp;
-    } catch (Exception e)
+    }
+    catch (Exception e)
     {
       Log.e(TAG, "Failed to parse JSON");
       e.printStackTrace();
@@ -302,7 +316,7 @@ public class XBMCJsonRPC
 
   public Cursor getSuggestions(String query, int limit)
   {
-    Log.d(TAG, "query: " + query);
+    //Log.d(TAG, "query: " + query);
 
     int totCount = 0;
     String[] menuCols = new String[]
@@ -723,5 +737,4 @@ public class XBMCJsonRPC
       return null;
     }
   }
-
 }
