@@ -215,22 +215,6 @@ void CXBMCApp::onStart()
   }
 #endif
 
-  if (!m_firstrun)
-  {
-    android_printf("%s: Already running, ignoring request to start", __PRETTY_FUNCTION__);
-    return;
-  }
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  pthread_create(&m_thread, &attr, thread_run<CXBMCApp, &CXBMCApp::run>, this);
-  pthread_attr_destroy(&attr);
-}
-
-void CXBMCApp::onResume()
-{
-  android_printf("%s: ", __PRETTY_FUNCTION__);
-
   // Some intent filters MUST be registered in code rather than through the manifest
   CJNIIntentFilter intentFilter;
   intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
@@ -239,6 +223,20 @@ void CXBMCApp::onResume()
   intentFilter.addAction("android.intent.action.HEADSET_PLUG");
   intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
   registerReceiver(*this, intentFilter);
+
+  if (m_firstrun)
+  {
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    pthread_create(&m_thread, &attr, thread_run<CXBMCApp, &CXBMCApp::run>, this);
+    pthread_attr_destroy(&attr);
+  }
+}
+
+void CXBMCApp::onResume()
+{
+  android_printf("%s: ", __PRETTY_FUNCTION__);
 
   if (!g_application.IsInScreenSaver())
     EnableWakeLock(true);
@@ -297,6 +295,8 @@ void CXBMCApp::onPause()
 void CXBMCApp::onStop()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
+
+  unregisterReceiver(*this);
 }
 
 void CXBMCApp::onDestroy()
