@@ -1,5 +1,6 @@
 /opt/android-dev/android-toolchain-arm-21-r12b/sysroot/usr/include
 /opt/android-dev/android-toolchain-arm-21-r12b/include/c++/4.9.x
+/opt/android-dev/android-ndk-r12b/sources/android/native_app_glue
 /home/cloud9/spmc-build/arm-linux-androideabi-21/include
 /home/cbro/spmc-build/arm-linux-androideabi-21/include
 

@@ -41,6 +41,7 @@ public:
   static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
   static void _onCaptureAvailable(JNIEnv *env, jobject context, jobject image);
   static void _onScreenshotAvailable(JNIEnv *env, jobject context, jobject image);
+  static void _onVisibleBehindCanceled(JNIEnv *env, jobject context);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -69,4 +70,5 @@ protected:
   virtual void doFrame(int64_t frameTimeNanos)=0;
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
+  virtual void onVisibleBehindCanceled() = 0;
 };
