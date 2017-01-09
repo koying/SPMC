@@ -55,7 +55,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
   native void _onCaptureAvailable(Image img);
   native void _onScreenshotAvailable(Image img);
-
+  native void _onVisibleBehindCanceled();
+  
   private class MyAudioDeviceCallback extends AudioDeviceCallback
   {
     public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices)
@@ -417,6 +418,13 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     super.onDestroy();
   }
 
+  @Override
+  public void onVisibleBehindCanceled()
+  {
+    _onVisibleBehindCanceled();
+    super.onVisibleBehindCanceled();
+  }
+  
   @Override
   public void doFrame(long frameTimeNanos)
   {

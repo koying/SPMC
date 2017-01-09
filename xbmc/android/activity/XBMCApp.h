@@ -125,6 +125,7 @@ public:
   virtual void doFrame(int64_t frameTimeNanos);
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
+  virtual void onVisibleBehindCanceled();
 
   bool isValid() { return m_activity != NULL; }
 
@@ -204,6 +205,7 @@ protected:
   static int GetMaxSystemVolume(JNIEnv *env);
   bool AcquireAudioFocus();
   bool ReleaseAudioFocus();
+  static void RequestVisibleBehind(bool requested);
 
 private:
   static CXBMCApp* m_xbmcappinstance;
@@ -222,6 +224,7 @@ private:
   static bool m_isResumed;
   static bool m_hasAudioFocus;
   static bool m_headsetPlugged;
+  static bool m_hasReqVisible;
   bool m_videosurfaceInUse;
   bool m_firstrun;
   bool m_exiting;

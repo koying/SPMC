@@ -116,6 +116,7 @@ bool CXBMCApp::m_hasFocus = false;
 bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
+bool CXBMCApp::m_hasReqVisible = false;
 CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
@@ -261,6 +262,10 @@ void CXBMCApp::onResume()
     m_applications.clear();
   }
 
+  // Re-request Visible Behind
+  if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
+    RequestVisibleBehind(true);
+  
   m_isResumed = true;
 }
 
@@ -270,9 +275,9 @@ void CXBMCApp::onPause()
 
   if (g_application.m_pPlayer->IsPlaying())
   {
-    if (g_application.m_pPlayer->IsPlayingVideo())
+    if (g_application.m_pPlayer->HasVideo())
     {
-      if (!g_application.m_pPlayer->IsPaused())
+      if (!g_application.m_pPlayer->IsPaused() && !m_hasReqVisible)
         CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
     }
     else
@@ -471,6 +476,15 @@ bool CXBMCApp::ReleaseAudioFocus()
   }
   m_hasAudioFocus = false;
   return true;
+}
+
+void CXBMCApp::RequestVisibleBehind(bool requested)
+{
+  if (requested == m_hasReqVisible)
+    return;
+
+  m_hasReqVisible = requestVisibleBehind(requested);
+  CLog::Log(LOGDEBUG, "Visible Behind request: %s", m_hasReqVisible ? "true" : "false");
 }
 
 void CXBMCApp::CheckHeadsetPlugged()
@@ -745,6 +759,7 @@ CPoint CXBMCApp::GetDroidToGuiRatio()
 
 void CXBMCApp::OnPlayBackStarted()
 {
+  RequestVisibleBehind(true);
   m_xbmcappinstance->AcquireAudioFocus();
   registerMediaButtonEventReceiver();
   CAndroidKey::SetHandleMediaKeys(true);
@@ -752,16 +767,19 @@ void CXBMCApp::OnPlayBackStarted()
 
 void CXBMCApp::OnPlayBackPaused()
 {
+  RequestVisibleBehind(false);
   m_xbmcappinstance->ReleaseAudioFocus();
 }
 
 void CXBMCApp::OnPlayBackResumed()
 {
+  RequestVisibleBehind(true);
   m_xbmcappinstance->AcquireAudioFocus();
 }
 
 void CXBMCApp::OnPlayBackStopped()
 {
+  RequestVisibleBehind(false);
   CAndroidKey::SetHandleMediaKeys(false);
   unregisterMediaButtonEventReceiver();
   m_xbmcappinstance->ReleaseAudioFocus();
@@ -769,6 +787,7 @@ void CXBMCApp::OnPlayBackStopped()
 
 void CXBMCApp::OnPlayBackEnded()
 {
+  RequestVisibleBehind(false);
   CAndroidKey::SetHandleMediaKeys(false);
   unregisterMediaButtonEventReceiver();
   m_xbmcappinstance->ReleaseAudioFocus();
@@ -1150,6 +1169,16 @@ void CXBMCApp::onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)
   m_audiodevices = devices;
   LogAudoDevices("onAudioDeviceRemoved", m_audiodevices);
   CheckHeadsetPlugged();
+}
+
+void CXBMCApp::onVisibleBehindCanceled()
+{
+  CLog::Log(LOGDEBUG, "Visible Behind Cancelled");
+  m_hasReqVisible = false;
+
+  // Pressing the pause button calls OnStop() (cf. https://code.google.com/p/android/issues/detail?id=186469)
+  if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
+    CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
 }
 
 int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent &result)
