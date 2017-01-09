@@ -78,6 +78,14 @@ void CJNIMainActivity::_onScreenshotAvailable(JNIEnv* env, jobject context, jobj
     m_appInstance->onScreenshotAvailable(CJNIImage(jhobject(image)));
 }
 
+void CJNIMainActivity::_onVisibleBehindCanceled(JNIEnv* env, jobject context)
+{
+  (void)env;
+  (void)context;
+  if (m_appInstance)
+    m_appInstance->onVisibleBehindCanceled();
+}
+
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
 {
   call_method<void>(m_context,
