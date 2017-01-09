@@ -123,7 +123,7 @@ public:
   virtual void onVolumeChanged(int volume);
   virtual void onAudioFocusChange(int focusChange);
   virtual void doFrame(int64_t frameTimeNanos);
-  virtual void onVisibleBehindCanceled() {}
+  virtual void onVisibleBehindCanceled();
   
   // implementation of CJNIInputManagerInputDeviceListener
   void onInputDeviceAdded(int deviceId) override;
@@ -223,6 +223,7 @@ protected:
   static int GetMaxSystemVolume(JNIEnv *env);
   bool AcquireAudioFocus();
   bool ReleaseAudioFocus();
+  static void RequestVisibleBehind(bool requested);
 
 private:
   static CXBMCApp* m_xbmcappinstance;
@@ -243,6 +244,7 @@ private:
   static bool m_headsetPlugged;
   static IInputDeviceCallbacks* m_inputDeviceCallbacks;
   static IInputDeviceEventHandler* m_inputDeviceEventHandler;
+  static bool m_hasReqVisible;
   bool m_videosurfaceInUse;
   bool m_firstrun;
   bool m_exiting;

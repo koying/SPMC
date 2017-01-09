@@ -198,6 +198,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       {"_callNative", "(JJ)V", (void*)&CJNIMainActivity::_callNative},
       {"_onCaptureAvailable", "(Landroid/media/Image;)V", (void*)&CJNIMainActivity::_onCaptureAvailable},
       {"_onScreenshotAvailable", "(Landroid/media/Image;)V", (void*)&CJNIMainActivity::_onScreenshotAvailable},
+      {"_onVisibleBehindCanceled", "()V", (void*)&CJNIMainActivity::_onVisibleBehindCanceled},
     };
     env->RegisterNatives(cMain, methods, sizeof(methods)/sizeof(methods[0]));
   }
