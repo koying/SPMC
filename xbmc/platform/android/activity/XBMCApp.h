@@ -210,6 +210,9 @@ public:
   static void UnregisterInputDeviceEventHandler();
   static bool onInputDeviceEvent(const AInputEvent* event);
 
+  // Application slow ping
+  void ProcessSlow();
+
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }
 
