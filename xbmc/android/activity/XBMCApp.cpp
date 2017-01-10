@@ -794,6 +794,11 @@ void CXBMCApp::OnPlayBackEnded()
   m_xbmcappinstance->ReleaseAudioFocus();
 }
 
+void CXBMCApp::ProcessSlow()
+{
+
+}
+
 std::vector<androidPackage> CXBMCApp::GetApplications()
 {
   CSingleLock lock(m_applicationsMutex);
