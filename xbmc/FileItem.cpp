@@ -2051,10 +2051,16 @@ void CFileItemList::Randomize()
 
 void CFileItemList::Archive(CArchive& ar)
 {
+#define CUR_AR_VERSION 2
+
   CSingleLock lock(m_lock);
   if (ar.IsStoring())
   {
     CFileItem::Archive(ar);
+
+    ar << '@';                                // Magic
+    ar << CUR_AR_VERSION;                     // Version
+    ar << XbmcThreads::SystemClockMillis();   // Timestamp
 
     int i = 0;
     if (m_items.size() > 0 && m_items[0]->IsParentFolder())
@@ -2107,6 +2113,21 @@ void CFileItemList::Archive(CArchive& ar)
 
 
     CFileItem::Archive(ar);
+
+    char cMagic= ' ';
+    ar >> cMagic;
+    if (cMagic != '@')
+      throw;
+
+    int iVersion = 0;
+    ar >> iVersion;
+    if (iVersion != CUR_AR_VERSION)
+      throw;
+
+    unsigned int iCacheTime = 0;
+    ar >> iCacheTime;
+    if ((XbmcThreads::SystemClockMillis() - iCacheTime) > 3600000)  // Max 1h validity
+      throw;
 
     int iSize = 0;
     ar >> iSize;
@@ -2632,7 +2653,17 @@ bool CFileItemList::Load(int windowID)
   if (file.Open(GetDiscFileCache(windowID)))
   {
     CArchive ar(&file, CArchive::load);
-    ar >> *this;
+    try
+    {
+      ar >> *this;
+    }
+    catch (...)
+    {
+      CLog::Log(LOGERROR, "Error loadind File Items");
+      ar.Close();
+      file.Close();
+      return false;
+    }
     CLog::Log(LOGDEBUG,"Loading items: %i, directory: %s sort method: %i, ascending: %s", Size(), CURL::GetRedacted(GetPath()).c_str(), m_sortDescription.sortBy,
       m_sortDescription.sortOrder == SortOrderAscending ? "true" : "false");
     ar.Close();
