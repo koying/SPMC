@@ -17,7 +17,7 @@ More downloads at: [link](https://github.com/koying/SPMC/releases/tag/16.5.5-spm
 
 Google Play: [link](https://play.google.com/store/apps/details?id=com.semperpax.spmc16)  
 Issues and questions: [github](https://github.com/koying/SPMC/issues)  
-FAQ: [wiki] (https://github.com/koying/SPMC/wiki)
+FAQ: [wiki](https://github.com/koying/SPMC/wiki)
 
 Changelog:
 
