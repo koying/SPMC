@@ -9976,3 +9976,12 @@ xbmc/android/jni/BitmapFactory.h
 xbmc/android/jni/BitmapFactory.cpp
 xbmc/android/activity/android_native_app_glue.c
 xbmc/android/activity/android_native_app_glue.h
+xbmc/android/activity/JNIXBMCMediaSession.h
+xbmc/android/activity/JNIXBMCMediaSession.cpp
+xbmc/android/jni/MediaMetadata.h
+xbmc/android/jni/MediaMetadata.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaSession.java.in
+xbmc/android/jni/PlaybackState.h
+xbmc/android/jni/PlaybackState.cpp
+xbmc/android/jni/BitmapFactory.h
+xbmc/android/jni/BitmapFactory.cpp
