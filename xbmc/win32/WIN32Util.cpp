@@ -414,7 +414,7 @@ std::string CWIN32Util::GetProfilePath()
   CUtil::GetHomePath(strHomePath);
 
   if(g_application.PlatformDirectoriesEnabled())
-    strProfilePath = URIUtils::AddFileToFolder(GetSpecialFolder(CSIDL_APPDATA|CSIDL_FLAG_CREATE), "Kodi");
+    strProfilePath = URIUtils::AddFileToFolder(GetSpecialFolder(CSIDL_APPDATA|CSIDL_FLAG_CREATE), "SPMC");
   else
     strProfilePath = URIUtils::AddFileToFolder(strHomePath , "portable_data");
 
