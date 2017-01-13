@@ -44,6 +44,7 @@
 #include "guilib/Geometry.h"
 
 #include "android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
+#include "android/activity/JNIXBMCMediaSession.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -211,6 +212,7 @@ protected:
 private:
   static CXBMCApp* m_xbmcappinstance;
   CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
+  std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
   static bool HasLaunchIntent(const std::string &package);
   std::string GetFilenameFromIntent(const CJNIIntent &intent);
   void run();

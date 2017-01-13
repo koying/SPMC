@@ -42,6 +42,7 @@
 #include "android/activity/JNIXBMCNsdManagerDiscoveryListener.h"
 #include "android/activity/JNIXBMCNsdManagerRegistrationListener.h"
 #include "android/activity/JNIXBMCNsdManagerResolveListener.h"
+#include "android/activity/JNIXBMCMediaSession.h"
 
 #if defined(HAVE_BREAKPAD)
 static void *startCrashHandler(void* arg)
@@ -184,6 +185,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   jni::CJNIXBMCNsdManagerDiscoveryListener::RegisterNatives(env);
   jni::CJNIXBMCNsdManagerRegistrationListener::RegisterNatives(env);
   jni::CJNIXBMCNsdManagerResolveListener::RegisterNatives(env);
+  jni::CJNIXBMCMediaSession::RegisterNatives(env);
   
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
