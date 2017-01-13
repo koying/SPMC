@@ -36,6 +36,7 @@ set(package_files strings.xml
                   src/org/xbmc/kodi/XBMCInputDeviceListener.java
                   src/org/xbmc/kodi/XBMCJsonRPC.java
                   src/org/xbmc/kodi/XBMCMediaContentProvider.java
+                  src/org/xbmc/kodi/XBMCMediaSession.java
                   src/org/xbmc/kodi/XBMCProjection.java
                   src/org/xbmc/kodi/XBMCRecommendationBuilder.java
                   src/org/xbmc/kodi/XBMCSearchableActivity.java
