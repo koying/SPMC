@@ -61,12 +61,6 @@ using namespace jni;
 
 static const AEChannel KnownChannels[] = { AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_LFE, AE_CH_SL, AE_CH_SR, AE_CH_BL, AE_CH_BR, AE_CH_BC, AE_CH_BLOC, AE_CH_BROC, AE_CH_NULL };
 
-static bool Has71Support()
-{
-  /* Android 5.0 introduced side channels */
-  return CJNIAudioManager::GetSDKVersion() >= 21;
-}
-
 static AEChannel AUDIOTRACKChannelToAEChannel(int atChannel)
 {
   AEChannel aeChannel;
@@ -128,7 +122,7 @@ static CAEChannelInfo AUDIOTRACKChannelMaskToAEChannelMap(int atMask)
 static int AEChannelMapToAUDIOTRACKChannelMask(CAEChannelInfo info)
 {
 #ifdef LIMIT_TO_STEREO_AND_5POINT1_AND_7POINT1
-  if (info.Count() > 6 && Has71Support())
+  if (info.Count() > 6)
     return CJNIAudioFormat::CHANNEL_OUT_5POINT1
          | CJNIAudioFormat::CHANNEL_OUT_SIDE_LEFT
          | CJNIAudioFormat::CHANNEL_OUT_SIDE_RIGHT;
@@ -789,10 +783,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
 
   pcminfo.m_deviceType = AE_DEVTYPE_PCM;
 #ifdef LIMIT_TO_STEREO_AND_5POINT1_AND_7POINT1
-  if (Has71Support())
-    pcminfo.m_channels = AE_CH_LAYOUT_7_1;
-  else
-    pcminfo.m_channels = AE_CH_LAYOUT_5_1;
+  pcminfo.m_channels = AE_CH_LAYOUT_7_1;
 #else
   m_info.m_channels = KnownChannels;
 #endif
