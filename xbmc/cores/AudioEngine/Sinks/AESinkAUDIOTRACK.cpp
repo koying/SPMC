@@ -672,13 +672,18 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     double duration = (double)(written / m_format.m_frameSize) / m_format.m_sampleRate;
     m_duration_written += duration;
 
-    if (!m_lastAddTimeMs)
+    int32_t diff = 0;
+    int32_t sleep_ms = 0;
+    if (m_passthrough && !WantsIEC61937())
+    {
+      if (!m_lastAddTimeMs)
+        m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
+      diff = XbmcThreads::SystemClockMillis() - m_lastAddTimeMs;
+      sleep_ms = (duration * 1000.0) - diff;
       m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
-    int32_t diff = XbmcThreads::SystemClockMillis() - m_lastAddTimeMs;
-    int32_t sleep_ms = (duration * 1000.0) - diff;
-    m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
-    if (sleep_ms > 0)
-      usleep(sleep_ms * 1000.0);
+      if (sleep_ms > 0)
+        usleep(sleep_ms * 1000.0);
+    }
 
     if (g_advancedSettings.CanLogComponent(LOGAUDIO))
       CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d(%d;%d)", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs, diff, sleep_ms);
