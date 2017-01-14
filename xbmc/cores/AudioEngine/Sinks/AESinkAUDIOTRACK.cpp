@@ -411,9 +411,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 
   while (!m_at_jni)
   {
-    m_buffer_size       = CJNIAudioTrack::getMinBufferSize( m_sink_sampleRate,
-                                                                  atChannelMask,
-                                                                  m_encoding);
+    m_buffer_size = CJNIAudioTrack::getMinBufferSize( m_sink_sampleRate,
+                                                      atChannelMask,
+                                                      m_encoding);
+    m_buffer_size *= 2;
     if (m_passthrough && !WantsIEC61937())
     {
       m_format.m_frameSize      = 1;
