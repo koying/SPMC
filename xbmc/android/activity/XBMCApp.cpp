@@ -843,7 +843,7 @@ void CXBMCApp::OnPlayBackStopped()
 
 void CXBMCApp::ProcessSlow()
 {
-  if (m_mediaSession)
+  if (m_mediaSession && m_mediaSession->isActive())
   {
     CJNIPlaybackStateBuilder builder;
     int state = CJNIPlaybackState::STATE_NONE;
