@@ -1454,6 +1454,7 @@ void CAdvancedSettings::SettingOptionsLoggingComponentsFiller(const CSetting *se
 #ifdef HAVE_LIBCEC
   list.push_back(std::make_pair(g_localizeStrings.Get(679), LOGCEC));
 #endif
+  list.push_back(std::make_pair(g_localizeStrings.Get(681), LOGDATABASE));
 }
 
 void CAdvancedSettings::setExtraLogLevel(const std::vector<CVariant> &components)

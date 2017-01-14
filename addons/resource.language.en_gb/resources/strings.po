@@ -2989,7 +2989,12 @@ msgctxt "#680"
 msgid "Verbose logging for the [B]Video[/B] component"
 msgstr ""
 
-#empty strings from id 681 to 699
+#: xbmc/settings/AdvancedSettings.cpp
+msgctxt "#681"
+msgid "Verbose logging for the [B]Database[/B] component"
+msgstr ""
+
+#empty strings from id 682 to 699
 
 msgctxt "#700"
 msgid "Cleaning up library"
