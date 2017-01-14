@@ -33,6 +33,7 @@ static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCM
 
 CJNIXBMCMediaSession::CJNIXBMCMediaSession()
   : CJNIBase(s_className)
+  , m_isActive(false)
 {
   m_object = new_object(CJNIContext::getClassLoader().loadClass(GetDotClassName(s_className)));
   m_object.setGlobal();
@@ -74,9 +75,13 @@ void CJNIXBMCMediaSession::RegisterNatives(JNIEnv* env)
 
 void CJNIXBMCMediaSession::activate(bool state)
 {
+  if (state == m_isActive)
+    return;
+
   call_method<void>(m_object,
                     "activate", "(Z)V",
                     (jboolean)state);
+  m_isActive = state;
 }
 
 void CJNIXBMCMediaSession::updatePlaybackState(const CJNIPlaybackState& state)
@@ -152,6 +157,11 @@ void CJNIXBMCMediaSession::OnSeekRequested(int64_t pos)
   g_application.SeekTime(pos / 1000.0);
 }
 
+bool CJNIXBMCMediaSession::isActive() const
+{
+  return m_isActive;
+}
+
 /**********************/
 
 void CJNIXBMCMediaSession::_onPlayRequested(JNIEnv* env, jobject thiz)
@@ -225,4 +235,3 @@ void CJNIXBMCMediaSession::_onSeekRequested(JNIEnv* env, jobject thiz, jlong pos
   if (inst)
     inst->OnSeekRequested(pos);
 }
-

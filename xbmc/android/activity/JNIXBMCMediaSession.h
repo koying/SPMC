@@ -50,6 +50,8 @@ public:
   void OnStopRequested();
   void OnSeekRequested(int64_t pos);
 
+  bool isActive() const;
+
 protected:
   static void _onPlayRequested(JNIEnv* env, jobject thiz);
   static void _onPauseRequested(JNIEnv* env, jobject thiz);
@@ -59,6 +61,8 @@ protected:
   static void _onRewindRequested(JNIEnv* env, jobject thiz);
   static void _onStopRequested(JNIEnv* env, jobject thiz);
   static void _onSeekRequested(JNIEnv* env, jobject thiz, jlong pos);
+
+  bool m_isActive;
 };
 
 }
