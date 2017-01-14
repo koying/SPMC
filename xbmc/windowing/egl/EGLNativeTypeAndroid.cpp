@@ -184,7 +184,7 @@ void CEGLNativeTypeAndroid::Initialize()
   m_width = m_height = 0;
 
   fetchDisplayModes();
-  if (CJNIBuild::DEVICE == "foster")   // Buggy implementation of DisplayMode API on SATV
+  if (CJNIBuild::DEVICE == "foster" && CJNIBuild::SDK_INT < 24)   // Buggy implementation of DisplayMode API on SATV
   {
     CLog::Log(LOGWARNING, "Nvidia Shield detected; Mode API ignored");
     s_hasModeApi = false;
