@@ -314,6 +314,7 @@ void CXBMCApp::onPause()
 
   EnableWakeLock(false);
   m_isResumed = false;
+  m_hasReqVisible = false;
 }
 
 void CXBMCApp::onStop()
