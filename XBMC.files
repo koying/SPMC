@@ -6173,6 +6173,8 @@ xbmc/android/activity/XBMCApp.h
 xbmc/android/bionic_supplement/bionic_supplement.h
 xbmc/android/bionic_supplement/getdelim.c
 xbmc/android/bionic_supplement/rand_r.c
+xbmc/android/jni/PendingIntent.cpp
+xbmc/android/jni/PendingIntent.h
 xbmc/android/jni/jutils/jutils-details.hpp
 xbmc/android/jni/jutils/jutils.hpp
 xbmc/android/jni/ApplicationInfo.cpp
