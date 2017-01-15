@@ -23,6 +23,7 @@
 
 #include "android/jni/MediaMetadata.h"
 #include "android/jni/PlaybackState.h"
+#include "android/jni/Intent.h"
 
 namespace jni
 {
@@ -40,6 +41,7 @@ public:
   void activate(bool state);
   void updatePlaybackState(const CJNIPlaybackState& state);
   void updateMetadata(const CJNIMediaMetadata& myData);
+  void updateIntent(const CJNIIntent& intent);
 
   void OnPlayRequested();
   void OnPauseRequested();
