@@ -100,6 +100,8 @@
 #define GIGABYTES       1073741824
 #define CAPTURE_QUEUE_MAXDEPTH 3
 
+#define ACTION_XBMC_RESUME "android.intent.XBMC_RESUME"
+
 using namespace std;
 using namespace jni;
 using namespace KODI::MESSAGING;
@@ -823,6 +825,9 @@ void CXBMCApp::OnPlayBackStarted()
   }
   m_mediaSession->updateMetadata(builder.build());
 
+  CJNIIntent intent(ACTION_XBMC_RESUME, CJNIURI::EMPTY, *this, get_class(CJNIContext::get_raw()));
+  m_mediaSession->updateIntent(intent);
+
   m_xbmcappinstance->AcquireAudioFocus();
   CAndroidKey::SetHandleMediaKeys(true);
 }
@@ -1164,6 +1169,16 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
       params.push_back(targeturl.Get());
       params.push_back("return");
       CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_MUSIC_NAV, 0, nullptr, "", params);
+    }
+  }
+  else if (action == ACTION_XBMC_RESUME)
+  {
+    if (g_application.m_pPlayer->IsPlaying())
+    {
+      if (g_application.m_pPlayer->HasVideo())
+        RequestVisibleBehind(true);
+      if (g_application.m_pPlayer->IsPaused())
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
     }
   }
 }

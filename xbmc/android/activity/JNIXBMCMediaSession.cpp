@@ -98,12 +98,19 @@ void CJNIXBMCMediaSession::updateMetadata(const CJNIMediaMetadata& myData)
                     myData.get_raw());
 }
 
+void CJNIXBMCMediaSession::updateIntent(const CJNIIntent& intent)
+{
+  call_method<void>(m_object,
+                    "updateIntent", "(Landroid/content/Intent;)V",
+                    intent.get_raw());
+}
+
 void CJNIXBMCMediaSession::OnPlayRequested()
 {
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (g_application.m_pPlayer->IsPaused())
-      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
   }
 }
 
