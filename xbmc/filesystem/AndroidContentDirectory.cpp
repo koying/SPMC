@@ -59,7 +59,7 @@ bool CAndroidContentDirectory::GetDirectory(const CURL& url, CFileItemList &item
   {
     CJNIIntent intent = CJNIIntent(CJNIIntent::ACTION_OPEN_DOCUMENT_TREE);
     CJNIIntent result;
-    if (CXBMCApp::WaitForActivityResult(intent, ACTION_OPEN_DOCUMENT_TREE_REQID, result))
+    if (CXBMCApp::get()->WaitForActivityResult(intent, ACTION_OPEN_DOCUMENT_TREE_REQID, result))
     {
       CJNIURI rooturi = result.getData();
       childrenUri = CJNIDocumentsContract::buildChildDocumentsUriUsingTree(rooturi, CJNIDocumentsContract::getTreeDocumentId(rooturi));
