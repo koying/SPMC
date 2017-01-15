@@ -352,7 +352,23 @@ void CXBMCApp::onSaveState(void **data, size_t *size)
 void CXBMCApp::onConfigurationChanged()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
-  // ignore any configuration changes like screen rotation etc
+
+  if (m_window)
+  {
+    // Check for resize
+    ANativeWindow_acquire(m_window);
+    int cur_width = ANativeWindow_getWidth(m_window);
+    int cur_height = ANativeWindow_getHeight(m_window);
+    ANativeWindow_release(m_window);
+
+    if (cur_width != m_window_width_sav || cur_height != m_window_height_sav)
+    {
+      m_window_width_sav = cur_width;
+      m_window_height_sav = cur_height;
+      onResizeWindow();
+    }
+  }
+
 }
 
 void CXBMCApp::onLowMemory()
@@ -371,6 +387,12 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
   }
   m_window = window;
   m_windowCreated.Set();
+
+  ANativeWindow_acquire(m_window);
+  m_window_width_sav = ANativeWindow_getWidth(m_window);
+  m_window_height_sav = ANativeWindow_getHeight(m_window);
+  ANativeWindow_release(m_window);
+
   if(!m_firstrun)
   {
     XBMC_SetupDisplay();
@@ -380,9 +402,12 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
 void CXBMCApp::onResizeWindow()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
-  m_window = NULL;
-  m_windowCreated.Reset();
-  // no need to do anything because we are fixed in fullscreen landscape mode
+
+  XBMC_Event newEvent;
+  newEvent.type = XBMC_VIDEORESIZE;
+  newEvent.resize.w = m_window_width_sav;
+  newEvent.resize.h = m_window_height_sav;
+  g_application.OnEvent(newEvent);
 }
 
 void CXBMCApp::onDestroyWindow()
