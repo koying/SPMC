@@ -6,7 +6,7 @@
     android:versionCode="@APP_VERSION_CODE@00"
     android:versionName="@APP_VERSION@" >
 
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="24" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -79,7 +79,10 @@
             android:label="@string/app_name"
             android:launchMode="singleInstance"
             android:screenOrientation="sensorLandscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            >
 
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data

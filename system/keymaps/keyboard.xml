@@ -300,7 +300,7 @@
       <period>StepForward</period>
       <comma>StepBack</comma>
       <backspace>Stop</backspace>
-      <backspace mod="longpress">Fullscreen</backspace>
+      <backspace mod="longpress">DroidPIP</backspace>
       <browser_back>Stop</browser_back>
       <browser_back mod="longpress">Fullscreen</browser_back>
       <quote>Seek(-7)</quote> <!-- Replaces smallstepback -->

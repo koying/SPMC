@@ -56,7 +56,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onCaptureAvailable(Image img);
   native void _onScreenshotAvailable(Image img);
   native void _onVisibleBehindCanceled();
-  
+  native void _onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
+
   private class MyAudioDeviceCallback extends AudioDeviceCallback
   {
     public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices)
@@ -425,6 +426,16 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     super.onVisibleBehindCanceled();
   }
   
+  @Override
+  public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode)
+  {
+    if (android.os.Build.VERSION.SDK_INT >= 24)
+    {
+      _onPictureInPictureModeChanged(isInPictureInPictureMode);
+      super.onPictureInPictureModeChanged(isInPictureInPictureMode);
+    }
+  }
+
   @Override
   public void doFrame(long frameTimeNanos)
   {

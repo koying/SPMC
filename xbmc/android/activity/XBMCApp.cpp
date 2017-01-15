@@ -1272,6 +1272,11 @@ void CXBMCApp::onVisibleBehindCanceled()
     CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
 }
 
+void CXBMCApp::onPictureInPictureModeChanged(bool isInPictureInPictureMode)
+{
+
+}
+
 int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent &result)
 {
   int ret = 0;
