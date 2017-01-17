@@ -9974,3 +9974,5 @@ xbmc/android/jni/PlaybackState.h
 xbmc/android/jni/PlaybackState.cpp
 xbmc/android/jni/BitmapFactory.h
 xbmc/android/jni/BitmapFactory.cpp
+xbmc/android/activity/android_native_app_glue.c
+xbmc/android/activity/android_native_app_glue.h

@@ -21,7 +21,7 @@
 
 #include "system.h"
 
-#include <android_native_app_glue.h>
+#include "android_native_app_glue.h"
 
 #include "IActivityHandler.h"
 #include "IInputHandler.h"
