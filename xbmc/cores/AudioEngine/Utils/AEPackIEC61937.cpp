@@ -58,6 +58,22 @@ int CAEPackIEC61937::PackAC3(uint8_t *data, unsigned int size, uint8_t *dest)
   return OUT_FRAMESTOBYTES(AC3_FRAME_SIZE);
 }
 
+int CAEPackIEC61937::PackAC3RAW(uint8_t *data, unsigned int size, uint8_t *dest)
+{
+  assert(size <= OUT_FRAMESTOBYTES(AC3_FRAME_SIZE));
+  int* packet = (int*)dest;
+
+  *packet = size;
+  
+  if (data == NULL)
+    data = (uint8_t*)(packet + sizeof(int));
+  else
+    memcpy(packet + sizeof(int), data, size);
+
+  memset(packet + sizeof(int) + size, 0, OUT_FRAMESTOBYTES(AC3_FRAME_SIZE) - sizeof(int) - size);
+  return OUT_FRAMESTOBYTES(AC3_FRAME_SIZE);
+}
+
 int CAEPackIEC61937::PackEAC3(uint8_t *data, unsigned int size, uint8_t *dest)
 {
   assert(size <= OUT_FRAMESTOBYTES(EAC3_FRAME_SIZE));

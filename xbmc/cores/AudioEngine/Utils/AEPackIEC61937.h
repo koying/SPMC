@@ -42,6 +42,7 @@ public:
   typedef int (*PackFunc)(uint8_t *data, unsigned int size, uint8_t *dest);
 
   static int PackAC3     (uint8_t *data, unsigned int size, uint8_t *dest);
+  static int PackAC3RAW  (uint8_t *data, unsigned int size, uint8_t *dest);
   static int PackEAC3    (uint8_t *data, unsigned int size, uint8_t *dest);
   static int PackDTS_512 (uint8_t *data, unsigned int size, uint8_t *dest, bool littleEndian);
   static int PackDTS_1024(uint8_t *data, unsigned int size, uint8_t *dest, bool littleEndian);

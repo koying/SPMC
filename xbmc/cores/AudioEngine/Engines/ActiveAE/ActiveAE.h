@@ -27,6 +27,7 @@
 #include "cores/AudioEngine/Interfaces/AESound.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Engines/ActiveAE/ActiveAEBuffer.h"
+#include "cores/AudioEngine/Utils/AEPackIEC61937.h"
 
 #include "guilib/DispResource.h"
 #include <queue>
@@ -345,6 +346,8 @@ protected:
   AudioSettings m_settings;
   CEngineStats m_stats;
   IAEEncoder *m_encoder;
+  CAEPackIEC61937::PackFunc m_encoderPackFunc;
+  int m_encoderReserved;
   std::string m_currDevice;
 
   // buffers
