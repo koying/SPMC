@@ -136,7 +136,11 @@ void android_app_pre_exec_cmd(struct android_app* android_app, int8_t cmd) {
             print_cur_config(android_app);
             break;
 
-        case APP_CMD_DESTROY:
+        case APP_CMD_WINDOW_RESIZED:
+            LOGV("APP_CMD_WINDOW_RESIZED\n");
+            break;
+
+      case APP_CMD_DESTROY:
             LOGV("APP_CMD_DESTROY\n");
             android_app->destroyRequested = 1;
             break;
