@@ -243,8 +243,6 @@ private:
   static std::queue<jni::CJNIImage> m_captureQueue;
 
   static ANativeWindow* m_window;
-  int m_window_width_sav;
-  int m_window_height_sav;
   static CEvent m_windowCreated;
   static std::vector<GLuint> m_texturePool;
 

@@ -390,11 +390,6 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
   m_window = window;
   m_windowCreated.Set();
 
-  ANativeWindow_acquire(m_window);
-  m_window_width_sav = ANativeWindow_getWidth(m_window);
-  m_window_height_sav = ANativeWindow_getHeight(m_window);
-  ANativeWindow_release(m_window);
-
   if(!m_firstrun)
   {
     XBMC_SetupDisplay();
@@ -403,12 +398,17 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
 
 void CXBMCApp::onResizeWindow()
 {
-  android_printf("%s: %d x %d", __PRETTY_FUNCTION__, m_window_width_sav, m_window_height_sav);
+  ANativeWindow_acquire(m_window);
+  int cur_width = ANativeWindow_getWidth(m_window);
+  int cur_height = ANativeWindow_getHeight(m_window);
+  ANativeWindow_release(m_window);
+
+  android_printf("%s: %d x %d", __PRETTY_FUNCTION__, cur_width, cur_height);
 
   XBMC_Event newEvent;
   newEvent.type = XBMC_VIDEORESIZE;
-  newEvent.resize.w = m_window_width_sav;
-  newEvent.resize.h = m_window_height_sav;
+  newEvent.resize.w = cur_width;
+  newEvent.resize.h = cur_height;
   g_application.OnEvent(newEvent);
 }
 
@@ -1302,7 +1302,7 @@ void CXBMCApp::onVisibleBehindCanceled()
 void CXBMCApp::onMultiWindowModeChanged(bool isInMultiWindowMode)
 {
   android_printf("%s: %s", __PRETTY_FUNCTION__, isInMultiWindowMode ? "true" : "false");
-  g_graphicsContext.ToggleFullScreenRoot();
+  g_graphicsContext.SetFullScreenRoot(!isInMultiWindowMode);
 }
 
 void CXBMCApp::onPictureInPictureModeChanged(bool isInPictureInPictureMode)
