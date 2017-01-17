@@ -1,12 +1,11 @@
 include @abs_top_srcdir@/tools/depends/Makefile.include
 
-GLUEPATH   = $(NDKROOT)/sources/android/native_app_glue
 APP_GLUE   = android_native_app_glue.o
 
 CPUPATH    = $(NDKROOT)/sources/android/cpufeatures
 CPU_OBJ    = cpu-features.o
 
-INCLUDES += -I$(GLUEPATH) -I$(CPUPATH)
+INCLUDES += -I$(CPUPATH)
 
 SRCS       = android_main.cpp
 SRCS      += AndroidFeatures.cpp
@@ -32,7 +31,7 @@ LIB        = activity.a
 $(LIB): $(OBJS)
 
 $(APP_GLUE):
-	$(CC) -c -DHAVE_INTTYPES_H -I$(GLUEPATH) -o $@ $(GLUEPATH)/$(APP_GLUE:.o=.c)
+	$(CC) -c -DHAVE_INTTYPES_H -o $@ $(APP_GLUE:.o=.c)
 
 $(CPU_OBJ):
 	$(CC) -c -I$(CPUPATH) -o $@ $(CPUPATH)/$(CPU_OBJ:.o=.c)

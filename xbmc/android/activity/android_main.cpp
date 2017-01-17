@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <android_native_app_glue.h>
+#include "android/activity/android_native_app_glue.h"
 #include "EventLoop.h"
 #include "XBMCApp.h"
 #include "android/jni/SurfaceTexture.h"

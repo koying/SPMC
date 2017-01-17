@@ -9963,3 +9963,5 @@ xbmc/android/jni/Set.h
 xbmc/android/jni/Set.cpp
 xbmc/android/jni/Iterator.h
 xbmc/android/jni/Iterator.cpp
+xbmc/android/activity/android_native_app_glue.c
+xbmc/android/activity/android_native_app_glue.h
