@@ -416,7 +416,7 @@ static void onNativeWindowDestroyed(ANativeActivity* activity, ANativeWindow* wi
 
 static void onNativeWindowResized(ANativeActivity* activity, ANativeWindow* window) {
     LOGV("onNativeWindowResized: %p -- %p\n", activity, window);
-    android_app_write_cmd(android_app, APP_CMD_WINDOW_RESIZED);
+    android_app_write_cmd((struct android_app*)activity->instance, APP_CMD_WINDOW_RESIZED);
 }
 
 static void onInputQueueCreated(ANativeActivity* activity, AInputQueue* queue) {
