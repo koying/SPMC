@@ -1109,7 +1109,18 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
       {
         AEAudioFormat format;
         format.m_channelLayout = AE_CH_LAYOUT_2_0;
-        format.m_dataFormat = AE_FMT_S16NE;
+        if (SupportsRaw(AE_FMT_AC3_RAW, 48000))
+        {
+          format.m_dataFormat = AE_FMT_AC3_RAW;
+          m_encoderPackFunc  = &CAEPackIEC61937::PackAC3RAW;
+          m_encoderReserved = sizeof(int);
+        }
+        else
+      	{
+          format.m_dataFormat = AE_FMT_AC3;
+          m_encoderPackFunc  = &CAEPackIEC61937::PackAC3;
+          m_encoderReserved = IEC61937_DATA_OFFSET;
+        }
         format.m_frameSize = 2* (CAEUtil::DataFormatToBits(format.m_dataFormat) >> 3);
         format.m_frames = AC3_FRAME_SIZE;
         format.m_sampleRate = 48000;
@@ -1505,7 +1516,10 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat &format, AudioSettings &sett
            !m_streams.empty() &&
            (format.m_channelLayout.Count() > 2 || settings.stereoupmix))
   {
-    format.m_dataFormat = AE_FMT_AC3;
+    if (SupportsRaw(AE_FMT_AC3_RAW, 48000))
+      format.m_dataFormat = AE_FMT_AC3_RAW;
+    else
+      format.m_dataFormat = AE_FMT_AC3;
     format.m_sampleRate = 48000;
     format.m_encodedRate = 48000;
     format.m_channelLayout = AE_CH_LAYOUT_2_0;
@@ -2071,8 +2085,11 @@ bool CActiveAE::RunStages()
         {
           CSampleBuffer *buf = m_encoderBuffers->GetFreeBuffer();
           m_encoder->Encode(out->pkt->data[0], out->pkt->planes*out->pkt->linesize,
-                            buf->pkt->data[0], buf->pkt->planes*buf->pkt->linesize);
+                            buf->pkt->data[0] + m_encoderReserved, buf->pkt->planes*buf->pkt->linesize - m_encoderReserved);
           buf->pkt->nb_samples = buf->pkt->max_nb_samples;
+
+          /* pack it into an IEC958 frame */
+          m_encoderPackFunc(NULL, buf->pkt->planes*buf->pkt->linesize - m_encoderReserved, buf->pkt->data[0]);
 
           // set pts of last sample
           buf->pkt_start_offset = buf->pkt->nb_samples;
