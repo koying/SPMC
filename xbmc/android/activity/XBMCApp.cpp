@@ -550,6 +550,7 @@ void CXBMCApp::run()
   XBMC::Context context;
 
   m_firstrun=false;
+  g_advancedSettings.m_startFullScreen = true;
   android_printf(" => running XBMC_Run...");
   try
   {
