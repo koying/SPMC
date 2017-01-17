@@ -97,6 +97,8 @@
 #include "video/videosync/VideoSyncAndroid.h"
 #include "interfaces/AnnouncementManager.h"
 
+#include "windowing/WindowingFactory.h"
+
 #define GIGABYTES       1073741824
 #define CAPTURE_QUEUE_MAXDEPTH 3
 
@@ -353,21 +355,21 @@ void CXBMCApp::onConfigurationChanged()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
 
-  if (m_window)
-  {
-    // Check for resize
-    ANativeWindow_acquire(m_window);
-    int cur_width = ANativeWindow_getWidth(m_window);
-    int cur_height = ANativeWindow_getHeight(m_window);
-    ANativeWindow_release(m_window);
+//  if (m_window)
+//  {
+//    // Check for resize
+//    ANativeWindow_acquire(m_window);
+//    int cur_width = ANativeWindow_getWidth(m_window);
+//    int cur_height = ANativeWindow_getHeight(m_window);
+//    ANativeWindow_release(m_window);
 
-    if (cur_width != m_window_width_sav || cur_height != m_window_height_sav)
-    {
-      m_window_width_sav = cur_width;
-      m_window_height_sav = cur_height;
-      onResizeWindow();
-    }
-  }
+//    if (cur_width != m_window_width_sav || cur_height != m_window_height_sav)
+//    {
+//      m_window_width_sav = cur_width;
+//      m_window_height_sav = cur_height;
+//      onResizeWindow();
+//    }
+//  }
 
 }
 
@@ -401,7 +403,7 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
 
 void CXBMCApp::onResizeWindow()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
+  android_printf("%s: %d x %d", __PRETTY_FUNCTION__, m_window_width_sav, m_window_height_sav);
 
   XBMC_Event newEvent;
   newEvent.type = XBMC_VIDEORESIZE;
@@ -1295,6 +1297,12 @@ void CXBMCApp::onVisibleBehindCanceled()
   // Pressing the pause button calls OnStop() (cf. https://code.google.com/p/android/issues/detail?id=186469)
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
     CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
+}
+
+void CXBMCApp::onMultiWindowModeChanged(bool isInMultiWindowMode)
+{
+  android_printf("%s: %s", __PRETTY_FUNCTION__, isInMultiWindowMode ? "true" : "false");
+  g_graphicsContext.ToggleFullScreenRoot();
 }
 
 void CXBMCApp::onPictureInPictureModeChanged(bool isInPictureInPictureMode)

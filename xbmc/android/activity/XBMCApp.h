@@ -127,6 +127,7 @@ public:
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
   virtual void onVisibleBehindCanceled();
+  virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
   virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
 
   bool isValid() { return m_activity != NULL; }
