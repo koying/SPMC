@@ -1006,6 +1006,15 @@ bool CGraphicContext::IsFullScreenRoot () const
 
 bool CGraphicContext::ToggleFullScreenRoot ()
 {
+  SetFullScreenRoot(!m_bFullScreenRoot);
+  return m_bFullScreenRoot;
+}
+
+void CGraphicContext::SetFullScreenRoot(bool bOnOff)
+{
+  if (bOnOff == m_bFullScreenRoot)
+    return;
+
   RESOLUTION uiRes;  ///< resolution to save - not necessarily the same as the one we switch to (e.g. during video playback)
   RESOLUTION videoRes;
   bool setVideoRes = false;
@@ -1046,8 +1055,6 @@ bool CGraphicContext::ToggleFullScreenRoot ()
   {
     SetVideoResolution(videoRes);
   }
-
-  return m_bFullScreenRoot;
 }
 
 void CGraphicContext::SetMediaDir(const std::string &strMediaDir)
