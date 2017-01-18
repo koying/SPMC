@@ -1481,7 +1481,7 @@ void CGUIMediaWindow::OnInitWindow()
 
   // the start directory may change during Refresh
   bool updateStartDirectory = URIUtils::PathEquals(m_vecItems->GetPath(), m_startDirectory, true);
-  Refresh();
+  Refresh(true);
   if (updateStartDirectory)
   {
     // reset the start directory to the path of the items
