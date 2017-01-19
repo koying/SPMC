@@ -144,7 +144,10 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, CProces
 #if defined(HAS_IMXVPU)
     pCodec = OpenCodec(new CDVDVideoCodecIMX(processInfo), hint, options);
 #elif defined(TARGET_ANDROID)
-    pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(processInfo), hint, options);
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
+      pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(processInfo, true), hint, options);
+    if (!pCodec && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODEC))
+      pCodec = OpenCodec(new CDVDVideoCodecAndroidMediaCodec(processInfo, false), hint, options);
 #elif defined(HAVE_LIBOPENMAX)
     pCodec = OpenCodec(new CDVDVideoCodecOpenMax(processInfo), hint, options);
 #elif defined(HAS_MMAL)
