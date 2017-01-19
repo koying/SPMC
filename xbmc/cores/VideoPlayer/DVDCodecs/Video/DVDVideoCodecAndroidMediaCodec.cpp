@@ -393,7 +393,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
            !CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE))
     return false;
 
-  m_render_surface = CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEMEDIACODECSURFACE);
   m_drop = false;
   m_state = MEDIACODEC_STATE_UNINITIALIZED;
   m_noPictureLoop = 0;
