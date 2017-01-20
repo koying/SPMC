@@ -6173,6 +6173,8 @@ xbmc/android/activity/XBMCApp.h
 xbmc/android/bionic_supplement/bionic_supplement.h
 xbmc/android/bionic_supplement/getdelim.c
 xbmc/android/bionic_supplement/rand_r.c
+xbmc/android/jni/PendingIntent.cpp
+xbmc/android/jni/PendingIntent.h
 xbmc/android/jni/jutils/jutils-details.hpp
 xbmc/android/jni/jutils/jutils.hpp
 xbmc/android/jni/ApplicationInfo.cpp
@@ -9963,3 +9965,12 @@ xbmc/android/jni/Set.h
 xbmc/android/jni/Set.cpp
 xbmc/android/jni/Iterator.h
 xbmc/android/jni/Iterator.cpp
+xbmc/android/activity/JNIXBMCMediaSession.h
+xbmc/android/activity/JNIXBMCMediaSession.cpp
+xbmc/android/jni/MediaMetadata.h
+xbmc/android/jni/MediaMetadata.cpp
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaSession.java.in
+xbmc/android/jni/PlaybackState.h
+xbmc/android/jni/PlaybackState.cpp
+xbmc/android/jni/BitmapFactory.h
+xbmc/android/jni/BitmapFactory.cpp

@@ -44,6 +44,7 @@
 #include "guilib/Geometry.h"
 
 #include "android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
+#include "android/activity/JNIXBMCMediaSession.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -189,11 +190,12 @@ public:
   static void StopCapture();
 
   // Playback callbacks
-  static void OnPlayBackStarted();
-  static void OnPlayBackPaused();
-  static void OnPlayBackResumed();
-  static void OnPlayBackStopped();
-  static void OnPlayBackEnded();
+  void OnPlayBackStarted();
+  void OnPlayBackPaused();
+  void OnPlayBackStopped();
+
+  // Application slow ping
+  void ProcessSlow();
 
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }
@@ -210,6 +212,7 @@ protected:
 private:
   static CXBMCApp* m_xbmcappinstance;
   CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
+  std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
   static bool HasLaunchIntent(const std::string &package);
   std::string GetFilenameFromIntent(const CJNIIntent &intent);
   void run();
