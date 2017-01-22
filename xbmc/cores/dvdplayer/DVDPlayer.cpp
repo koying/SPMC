@@ -3586,7 +3586,7 @@ bool CDVDPlayer::AdaptForcedSubtitles()
 {
   bool valid = false;
   SelectionStream ss = m_SelectionStreams.Get(STREAM_SUBTITLE, GetSubtitle());
-  if (ss.flags & CDemuxStream::FLAG_FORCED || !GetSubtitleVisible())
+  if (ss.flags & CDemuxStream::FLAG_FORCED)
   {
     SelectionStream as = m_SelectionStreams.Get(STREAM_AUDIO, GetAudioStream());
     SelectionStreams streams = m_SelectionStreams.Get(STREAM_SUBTITLE);
