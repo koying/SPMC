@@ -41,7 +41,7 @@ ARCHIVE_TOOL_FLAGS=--strip-components=1 -xf
 CONFIG_SUB=@prefix@/@tool_dir@/share/automake-1.11/config.sub
 CONFIG_GUESS=@prefix@/@tool_dir@/share/automake-1.11/config.guess
 
-RPL=@prefix@/@tool_dir@/bin/python @prefix@/@tool_dir@/bin/rpl
+RPL=python @prefix@/@tool_dir@/bin/rpl
 
 LD=@LD@
 CC=@CC@
@@ -82,16 +82,16 @@ NATIVE_CPPFLAGS=-I@prefix@/@tool_dir@/include
 NATIVE_CXXFLAGS=-I@prefix@/@tool_dir@/include
 
 
-export AUTOM4TE=@prefix@/@tool_dir@/bin/autom4te
-export AUTOMAKE=@prefix@/@tool_dir@/bin/automake
-export AUTOCONF=@prefix@/@tool_dir@/bin/autoconf
-export ACLOCAL=@prefix@/@tool_dir@/bin/aclocal
+export AUTOM4TE=autom4te
+export AUTOMAKE=automake
+export AUTOCONF=autoconf
+export ACLOCAL=aclocal
 export ACLOCAL_PATH=@prefix@/@deps_dir@/share/aclocal:@prefix@/@tool_dir@/share/aclocal
-export AUTOPOINT=@prefix@/@tool_dir@/bin/autopoint
-export AUTOHEADER=@prefix@/@tool_dir@/bin/autoheader
-export LIBTOOL=@prefix@/@tool_dir@/bin/libtool
-export LIBTOOLIZE=@prefix@/@tool_dir@/bin/libtoolize
+export AUTOPOINT=autopoint
+export AUTOHEADER=autoheader
+export LIBTOOL=libtool
+export LIBTOOLIZE=libtoolize
 
-export AUTORECONF=@prefix@/@tool_dir@/bin/autoreconf
+export AUTORECONF=autoreconf
 export JSON_BUILDER=$(NATIVEPREFIX)/bin/JsonSchemaBuilder
 

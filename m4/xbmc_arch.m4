@@ -26,6 +26,9 @@ case $build in
   arm*-*-linux-gnu*|arm*-*-linux-uclibc*)
      AC_SUBST(NATIVE_ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX")
      ;;
+  *cygwin*)
+     AC_SUBST(NATIVE_ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX")
+     ;;
   *)
      AC_MSG_ERROR(unsupported native build platform: $build)
 esac

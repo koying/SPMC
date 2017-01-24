@@ -112,6 +112,9 @@ case $build in
   x86_64*-linux-gnu*|x86_64-*-linux-uclibc*)
     build_os="linux"
   ;;
+  *cygwin*)
+    build_os="cygwin"
+  ;;
   *darwin*)
     build_os="osx"
   ;;
@@ -442,7 +445,7 @@ if test "$platform_os" == "android"; then
     AC_MSG_ERROR("SDK path is required for android")
   fi
 
-  if [ ! test -f $use_sdk_path/tools/android ]; then
+  if [ ! test -f $use_sdk_path/tools/android* ]; then
     AC_MSG_ERROR(verify sdk path)
   fi
 
@@ -460,7 +463,14 @@ if test "$platform_os" == "android"; then
     AC_MSG_ERROR("Missing program: aapt")
   fi
 
-  AC_PATH_PROG(DX,dx,"no",$build_tools_path)
+  case "$build_os" in
+    *cygwin*)
+      AC_PATH_PROG(DX,dx.bat,"no",$build_tools_path)
+    ;;
+    *)
+      AC_PATH_PROG(DX,dx,"no",$build_tools_path)
+    ;;
+  esac
   if test "x$DX" = "xno" ; then
     AC_MSG_ERROR("Missing program: dx")
   fi

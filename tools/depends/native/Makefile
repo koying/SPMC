@@ -4,12 +4,11 @@ ifneq ($(shell test -f $(NATIVEPREFIX)/share/config.site && echo 1),1)
   $(error Error: $(NATIVEPREFIX)/share/config.site  is missing. Please reconfigure depends to generate it)
 endif
 
-NATIVE= m4-native gettext-native autoconf-native automake-native \
-        libtool-native pkg-config-native yasm-native cmake-native \
-        gas-preprocessor-native python26-native zlib-native \
+NATIVE=  \
+        yasm-native \
+        gas-preprocessor-native \
         pcre-native swig-native rpl-native libsquish-native \
-        tiff-native libpng-native libjpeg-turbo-native liblzo2-native giflib-native \
-        distribute-native distutilscross-native JsonSchemaBuilder TexturePacker \
+        JsonSchemaBuilder TexturePacker \
         google-breakpad-native
 
 
