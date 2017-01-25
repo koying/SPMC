@@ -25,7 +25,8 @@
 #include <inttypes.h>
 #define platform_stricmp _stricmp
 #else
-#define platform_stricmp stricmp
+#include <strings.h>
+#define platform_stricmp strcasecmp
 #endif
 #include <cerrno>
 #include <dirent.h>
@@ -101,7 +102,7 @@ void CreateSkeletonHeaderImpl(CXBTFWriter& xbtfWriter, std::string fullPath, std
       std::string fileN = fullPath + "/" + dp->d_name;
       if (stat(fileN.c_str(), &stat_p) == 0)
       {
-        if (dp->d_type == DT_DIR || stat_p.st_mode & S_IFDIR)
+        if (stat_p.st_mode & S_IFDIR)
         {
           std::string tmpPath = relativePath;
           if (tmpPath.size() > 0)

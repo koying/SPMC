@@ -28,7 +28,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)
-	cd $(PLATFORM); $(MAKE) Parser/pgen
+	cd $(PLATFORM); $(MAKE)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 	cd $(PLATFORM); cp -f Parser/pgen $(PREFIX)/bin
