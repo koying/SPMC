@@ -20,6 +20,7 @@ ffmpg_config += --enable-encoder=ac3 --enable-encoder=aac
 ffmpg_config += --enable-encoder=wmav2 --enable-protocol=http
 ffmpg_config += --enable-gnutls
 ffmpg_config += --enable-libdcadec
+ffmpg_config += --pkg-config-flags="--static"
 
 ifeq ($(CROSS_COMPILING), yes)
   ffmpg_config += --arch=$(CPU) --enable-cross-compile
@@ -69,7 +70,7 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
-	cd $(PLATFORM); sed -i".bak" -e "s%pkg_config_default=pkg-config%export PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \&\& pkg_config_default=$(NATIVEPREFIX)/bin/pkg-config%" configure
+	cd $(PLATFORM); sed -i".bak" -e "s%pkg_config_default=pkg-config%export PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \&\& pkg_config_default=pkg-config%" configure
 	cd $(PLATFORM);\
 	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 	./configure $(ffmpg_config)

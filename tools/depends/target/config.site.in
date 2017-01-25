@@ -25,10 +25,10 @@ LDFLAGS="-L@prefix@/@deps_dir@/lib -L@prefix@/@deps_dir@/lib64 @platform_ldflags
 CXXFLAGS="@platform_cxxflags@ @platform_includes@ -isystem @prefix@/@deps_dir@/include $CXXFLAGS"
 CPPFLAGS="@platform_cflags@ @platform_includes@ -isystem @prefix@/@deps_dir@/include $CPPFLAGS"
 
-export PKG_CONFIG=@prefix@/@tool_dir@/bin/pkg-config
+export PKG_CONFI=pkg-config
 export PKG_CONFIG_LIBDIR=@prefix@/@deps_dir@/lib/pkgconfig
-export YASM=@prefix@/@tool_dir@/bin/yasm
-export NASM=@prefix@/@tool_dir@/bin/yasm
+export YASM=yasm
+export NASM=yasm
 export MYSQL_CONFIG=@prefix@/@deps_dir@/bin/mysql_config
 LIBGCRYPT_CONFIG=@prefix@/@deps_dir@/bin/libgcrypt-config
 

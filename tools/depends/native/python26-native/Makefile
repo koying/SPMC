@@ -28,10 +28,10 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)
-	cd $(PLATFORM); $(MAKE)
+	cd $(PLATFORM); $(MAKE) Parser/pgen
 
 .installed-$(PLATFORM): $(LIBDYLIB)
-	cd $(PLATFORM); make install -j1
+	cd $(PLATFORM); cp -f Parser/pgen $(PREFIX)/bin
 	touch $@
 
 clean:

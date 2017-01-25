@@ -12,7 +12,7 @@ SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
 
 ifeq ($(OS),android)
-CROSSFLAGS=PYTHONXCPREFIX="$(PREFIX)" LDSHARED="$(CC) -shared" LDFLAGS="$(LDFLAGS) -L$(PREFIX)/lib/dummy-lib$(APP_NAME)/ -l$(APP_NAME) -lm"
+CROSSFLAGS=CC="$(CC) -I$(PREFIX)/include/python2.6" PYTHONXCPREFIX="$(PREFIX)" LDSHARED="$(CC) -shared" LDFLAGS="$(LDFLAGS) -L$(PREFIX)/lib/dummy-lib$(APP_NAME)/ -l$(APP_NAME) -lm"
 else
 CROSSFLAGS=PYTHONXCPREFIX="$(PREFIX)" LDFLAGS="$(LDFLAGS)"
 endif
@@ -37,12 +37,12 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 
 $(LIBDYLIB): $(PLATFORM)
 	mkdir -p $(PLATFORM)/output
-	cd $(PLATFORM); $(CROSSFLAGS) $(NATIVEPREFIX)/bin/python setup.py build -x bdist_egg --plat-name $(OS)-$(CPU)
+	cd $(PLATFORM); $(CROSSFLAGS) python setup.py build -x bdist_egg --plat-name $(OS)-$(CPU)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 ifeq ($(OS),android)
 	mkdir -p $(PREFIX)/share/$(APP_NAME)/addons/script.module.pil/lib/PIL/
-	unzip -oq $(LIBDYLIB) -d $(PREFIX)/share/$(APP_NAME)/addons/script.module.pil/lib/PIL/
+	unzip -oq $(PLATFORM)/dist/PIL-$(VERSION)-*-$(OS)-$(CPU).egg -d $(PREFIX)/share/$(APP_NAME)/addons/script.module.pil/lib/PIL/
 else
 	mkdir -p $(PREFIX)/lib/python2.6/site-packages/PIL
 	unzip -oq $(LIBDYLIB) -d $(PREFIX)/lib/python2.6/site-packages/PIL/
