@@ -4,7 +4,8 @@ ifneq ($(shell test -f $(NATIVEPREFIX)/share/config.site && echo 1),1)
   $(error Error: $(NATIVEPREFIX)/share/config.site  is missing. Please reconfigure depends to generate it)
 endif
 
-NATIVE = rpl-native python26-native
+NATIVE = rpl-native libsquish-native JsonSchemaBuilder TexturePacker google-breakpad-native \
+         swig-native python26-native
 # NATIVE= m4-native gettext-native autoconf-native automake-native \
         libtool-native pkg-config-native yasm-native cmake-native \
         gas-preprocessor-native python26-native zlib-native \
@@ -27,21 +28,7 @@ all: native
 	@echo "Dependencies built successfully."
 
 # Dependency layout for parallel builds
-autoconf-native: m4-native
-automake-native: autoconf-native
-libtool-native: automake-native
-libpng-native: zlib-native
-tiff-native: libjpeg-turbo-native
-swig-native: pcre-native
-distribute-native: python26-native
-distutilscross-native: python26-native distribute-native
-tar-native: xz-native
-python26-native: zlib-native
-
-#liblzo2 has stale packaged automake files that cause borked host/build detection
-liblzo2-native: automake-native
-JsonSchemaBuilder: automake-native
-TexturePacker: automake-native pkg-config-native libsquish-native libpng-native liblzo2-native giflib-native libpng-native
+TexturePacker: libsquish-native
 
 native: $(NATIVE)
 $(NATIVE):

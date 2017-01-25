@@ -16,10 +16,7 @@ CXXFLAGS="-I@prefix@/@tool_dir@/include $CXXFLAGS"
 
 export PKG_CONFIG_PATH=@prefix@/@tool_dir@/lib/pkgconfig
 
-PATH=@prefix@/@tool_dir@/bin:$PATH
 if test -n "@use_build_toolchain@"; then
   PATH=@use_build_toolchain@/usr/bin:@use_build_toolchain@/bin:$PATH
 fi
 
-LD_LIBRARY_PATH=@prefix@/@tool_dir@/lib:$LD_LIBRARY_PATH
-NASM=@prefix@/@tool_dir@/bin/yasm
