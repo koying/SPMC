@@ -115,6 +115,7 @@ public:
   virtual double  GetTimeSize(void);
   virtual const char* GetName(void) { return m_formatname.c_str(); }
   virtual unsigned GetAllowedReferences();
+  virtual bool GetCodecStats(double &pts, int &droppedPics);
 
 protected:
   void            FlushInternal(void);
@@ -134,6 +135,7 @@ protected:
   bool            m_opened;
   bool            m_drop;
   int             m_state;
+  double          m_lastDecodedPts;
 
   std::shared_ptr<CJNIXBMCVideoView> m_jnivideoview;
   CJNISurface*    m_jnisurface;
