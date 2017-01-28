@@ -831,11 +831,11 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
         presentationTimeUs = pts;
       else if (dts != DVD_NOPTS_VALUE)
         presentationTimeUs = dts;
-/*
-      CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec:: "
-        "pts(%f), ipts(%lld), iSize(%d), GetDataSize(%d), loop_cnt(%d)",
-        presentationTimeUs, pts_dtoi(presentationTimeUs), iSize, GetDataSize(), loop_cnt);
-*/
+
+      if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+        CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec:: "
+                            "pts(%lld), iSize(%d)", presentationTimeUs, iSize);
+
       int flags = 0;
       int offset = 0;
       media_status_t mstat = AMediaCodec_queueInputBuffer(m_codec, index, offset, iSize, presentationTimeUs, flags);
@@ -929,6 +929,9 @@ bool CDVDVideoCodecAndroidMediaCodec::ClearPicture(DVDVideoPicture* pDvdVideoPic
 
 void CDVDVideoCodecAndroidMediaCodec::SetDropState(bool bDrop)
 {
+  if (bDrop != m_drop && g_advancedSettings.CanLogComponent(LOGVIDEO))
+    CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::SetDropState: %s", bDrop ? "true" : "false");
+
   m_drop = bDrop;
   if (m_drop)
     m_videobuffer.iFlags |=  DVP_FLAG_DROPPED;
@@ -1074,6 +1077,9 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
     if (m_drop)
     {
       AMediaCodec_releaseOutputBuffer(m_codec, index, false);
+      if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+        CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture "
+                            "dropped, pts(%f)", m_videobuffer.pts);
       return 1;
     }
 
@@ -1127,10 +1133,9 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture error: releaseOutputBuffer(%d)", mstat);
     }
 
-/*
-    CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture "
-      "index(%d), pts(%f)", index, m_videobuffer.pts);
-*/
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture "
+                          "index(%d), pts(%f)", index, m_videobuffer.pts);
 
     rtn = 1;
   }
@@ -1149,7 +1154,9 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
   }
   else if (index == AMEDIACODEC_INFO_TRY_AGAIN_LATER)
   {
-    // normal dequeueOutputBuffer timeout, ignore it.
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+      CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture "
+                          "TRY_AGAIN_LATER");
     rtn = 0;
   }
   else
