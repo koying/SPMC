@@ -399,6 +399,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   m_codecControlFlags = 0;
   m_hints = hints;
   m_dec_retcode = VC_BUFFER;
+  m_savIndex = -99;
 
   if (g_advancedSettings.CanLogComponent(LOGVIDEO))
   {
@@ -888,6 +889,9 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
       media_status_t mstat = AMediaCodec_queueInputBuffer(m_codec, index, offset, iSize, presentationTimeUs, flags);
       if (mstat != AMEDIA_OK)
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode error(%d)", mstat);
+      else
+        if (pts != DVD_NOPTS_VALUE || dts != DVD_NOPTS_VALUE)
+          m_ptsList.insert(presentationTimeUs);
 
       // Free saved buffer it there was one
       if (m_demux_pkt.pData)
@@ -952,6 +956,8 @@ bool CDVDVideoCodecAndroidMediaCodec::GetPicture(DVDVideoPicture* pDvdVideoPictu
     return false;
 
   *pDvdVideoPicture = m_videobuffer;
+  if (m_drop)
+    pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
 
   // Invalidate our local DVDVideoPicture bits
   m_videobuffer.pts = DVD_NOPTS_VALUE;
@@ -979,10 +985,6 @@ void CDVDVideoCodecAndroidMediaCodec::SetDropState(bool bDrop)
     CLog::Log(LOGDEBUG, "%s::%s %s->%s", "CDVDVideoCodecAndroidMediaCodec", __func__, m_drop ? "true" : "false", bDrop ? "true" : "false");
 
   m_drop = bDrop;
-  if (m_drop)
-    m_videobuffer.iFlags |=  DVP_FLAG_DROPPED;
-  else
-    m_videobuffer.iFlags &= ~DVP_FLAG_DROPPED;
 }
 
 void CDVDVideoCodecAndroidMediaCodec::SetCodecControl(int flags)
@@ -1122,10 +1124,39 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
 
   int64_t timeout_us = 10000;
   AMediaCodecBufferInfo bufferInfo;
-  ssize_t index = AMediaCodec_dequeueOutputBuffer(m_codec, &bufferInfo, timeout_us);
+  ssize_t index;
+  if (m_savIndex != -99)
+  {
+    // Saved Buffer
+    index = m_savIndex;
+    bufferInfo = m_savBufferInfo;
+    m_savIndex = -99;
+  }
+  else
+    index = AMediaCodec_dequeueOutputBuffer(m_codec, &bufferInfo, timeout_us);
   if (index >= 0)
   {
     int64_t pts = bufferInfo.presentationTimeUs;
+    if (!m_ptsList.empty())
+    {
+      auto it = m_ptsList.begin();
+      int64_t inPts = *it;
+      m_ptsList.erase(it);
+
+      if (pts > inPts)
+      {
+        CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec pts dropped by decoder(%lld)", inPts);
+
+        m_savIndex = index;
+        m_savBufferInfo = bufferInfo;
+        // Decoder dropped a frame
+        m_videobuffer.pts = inPts;
+        m_videobuffer.iFlags |= DVP_FLAG_DROPPED;
+        return 1;
+      }
+    }
+    m_savIndex = -99;
+    m_videobuffer.iFlags &= ~DVP_FLAG_DROPPED;
     m_videobuffer.dts = DVD_NOPTS_VALUE;
     m_videobuffer.pts = DVD_NOPTS_VALUE;
     if (pts != AV_NOPTS_VALUE)
