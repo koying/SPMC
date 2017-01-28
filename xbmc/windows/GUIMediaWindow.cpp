@@ -505,7 +505,10 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
           resetHistory = true;
         }
         if (resetHistory)
+        {
+          m_vecItems->RemoveDiscCache(GetID());
           SetHistoryForPath(m_vecItems->GetPath());
+        }
       }
       if (message.GetParam1() != WINDOW_INVALID)
       { // first time to this window - make sure we set the root path
@@ -1481,7 +1484,7 @@ void CGUIMediaWindow::OnInitWindow()
 
   // the start directory may change during Refresh
   bool updateStartDirectory = URIUtils::PathEquals(m_vecItems->GetPath(), m_startDirectory, true);
-  Refresh(true);
+  Refresh();
   if (updateStartDirectory)
   {
     // reset the start directory to the path of the items
