@@ -956,6 +956,13 @@ unsigned CDVDVideoCodecAndroidMediaCodec::GetAllowedReferences()
   return 3;
 }
 
+bool CDVDVideoCodecAndroidMediaCodec::GetCodecStats(double& pts, int& droppedPics)
+{
+  pts = m_lastDecodedPts;
+  droppedPics = -1;
+  return true;
+}
+
 void CDVDVideoCodecAndroidMediaCodec::FlushInternal()
 {
   // invalidate any existing inflight buffers and create
@@ -1065,7 +1072,10 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
     m_videobuffer.dts = DVD_NOPTS_VALUE;
     m_videobuffer.pts = DVD_NOPTS_VALUE;
     if (pts != AV_NOPTS_VALUE)
+    {
       m_videobuffer.pts = pts;
+      m_lastDecodedPts = pts;
+    }
 
     int flags = bufferInfo.flags;
     if (flags & AMEDIACODEC_BUFFER_FLAG_END_OF_STREAM)
