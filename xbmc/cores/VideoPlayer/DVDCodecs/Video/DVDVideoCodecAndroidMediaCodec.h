@@ -25,6 +25,7 @@
 #include <queue>
 #include <vector>
 #include <memory>
+#include <set>
 
 #include <androidjni/Surface.h>
 
@@ -156,6 +157,9 @@ protected:
 
   amc_demux m_demux_pkt;
   std::vector<CDVDMediaCodecInfo*> m_inflight;
+  std::set<int64_t> m_ptsList;
+  ssize_t m_savIndex;
+  AMediaCodecBufferInfo m_savBufferInfo;
 
   CBitstreamConverter *m_bitstream;
   DVDVideoPicture m_videobuffer;
