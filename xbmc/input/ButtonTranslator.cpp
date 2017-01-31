@@ -84,6 +84,7 @@ static const ActionMapping actions[] =
     { "skipnext"                 , ACTION_NEXT_ITEM },
     { "skipprevious"             , ACTION_PREV_ITEM },
     { "fullscreen"               , ACTION_SHOW_GUI },
+    { "droidpip"                 , ACTION_DROID_PIP },
     { "aspectratio"              , ACTION_ASPECT_RATIO },
     { "stepforward"              , ACTION_STEP_FORWARD },
     { "stepback"                 , ACTION_STEP_BACK },

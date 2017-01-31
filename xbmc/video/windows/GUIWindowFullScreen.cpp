@@ -52,6 +52,8 @@
 #include <algorithm>
 #if defined(TARGET_DARWIN)
 #include "linux/LinuxResourceCounter.h"
+#elif defined(TARGET_ANDROID)
+#include "android/activity/XBMCApp.h"
 #endif
 
 using namespace KODI::MESSAGING;
@@ -142,6 +144,16 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
   case ACTION_TRIGGER_OSD:
     TriggerOSD();
     return true;
+
+  case ACTION_DROID_PIP:
+#if defined TARGET_ANDROID
+    if (CJNIBase::GetSDKVersion() >= 24)
+    {
+      CXBMCApp::get()->enterPictureInPictureMode();
+      break;
+    }
+#endif
+    // Fallthrough
 
   case ACTION_SHOW_GUI:
     {

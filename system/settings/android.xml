@@ -43,9 +43,9 @@
   <section id="system">
     <category id="videoscreen">
       <group id="1">
-        <setting id="videoscreen.screen">
+<!--        <setting id="videoscreen.screen">
           <visible>false</visible>
-        </setting>
+        </setting>-->
         <setting id="videoscreen.fakefullscreen">
           <visible>false</visible>
         </setting>

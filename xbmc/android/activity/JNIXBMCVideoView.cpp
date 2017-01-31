@@ -123,7 +123,7 @@ void CJNIXBMCVideoView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hol
 void CJNIXBMCVideoView::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {
   // Reset Surface Rect
-  m_surfaceRect = CRect();
+//  m_surfaceRect = CRect();
 
   if (m_callback)
     m_callback->surfaceChanged(holder, format, width, height);
