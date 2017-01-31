@@ -56,6 +56,25 @@ public class XBMCVideoView extends SurfaceView implements
     getHolder().setFormat(PixelFormat.TRANSPARENT);
     setZOrderMediaOverlay(true);
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
+
+    addOnLayoutChangeListener(new OnLayoutChangeListener() {
+
+      @Override
+      public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight,
+                                 int oldBottom)
+      {
+        // its possible that the layout is not complete in which case
+        // we will get all zero values for the positions, so ignore the event
+        if (left == 0 && top == 0 && right == 0 && bottom == 0) {
+          return;
+        }
+
+        Log.d(TAG, "Layout changed " + (right - left) + " x " + (bottom - top));
+        Log.d(TAG, "Layout changed Decor " + Main.MainActivity.getWindow().getDecorView().getWidth() + " x " + Main.MainActivity.getWindow().getDecorView().getHeight());
+        Log.d(TAG, "Layout changed Root " + getRootView().getWidth() + " x " + getRootView().getHeight());
+        //_surfaceChanged(null, -1, right - left, bottom - top);
+      }
+    });
   }
 
   public void add()

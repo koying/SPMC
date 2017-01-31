@@ -646,6 +646,7 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
 
   // write as many frames of audio as we can fit into our internal buffer.
   int written = 0;
+  double duration = (double)frames / m_format.m_sampleRate;
   if (frames)
   {
     // android will auto pause the playstate when it senses idle,
@@ -666,27 +667,33 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
       }
       written += len;
       toWrite -= len;
+      if (toWrite)
+      {
+        double toSleep = duration / 2;
+//        CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets leftovers(%d), sleeping(%f)", toWrite, toSleep);
+        usleep(toSleep * 1000000);
+      }
     }
     written = frames * m_format.m_frameSize;     // Be sure to report to AE everything has been written
 
-    double duration = (double)(written / m_format.m_frameSize) / m_format.m_sampleRate;
     m_duration_written += duration;
 
     int32_t diff = 0;
     int32_t sleep_ms = 0;
-    if (m_passthrough && !WantsIEC61937())
-    {
-      if (!m_lastAddTimeMs)
-        m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
-      diff = XbmcThreads::SystemClockMillis() - m_lastAddTimeMs;
-      sleep_ms = (duration * 1000.0) - diff;
-      m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
-      if (sleep_ms > 0)
-        usleep(sleep_ms * 1000.0);
-    }
+//    if (m_passthrough && !WantsIEC61937())
+//    {
+//      if (!m_lastAddTimeMs)
+//        m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
+//      diff = XbmcThreads::SystemClockMillis() - m_lastAddTimeMs;
+//      sleep_ms = (duration * 1000.0) - diff;
+//      if (sleep_ms > 0)
+//        usleep(sleep_ms * 1000.0);
+//    }
 
     if (g_advancedSettings.CanLogComponent(LOGAUDIO))
       CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::AddPackets written %d(%d), tm:%d(%d;%d)", written, size, XbmcThreads::SystemClockMillis() - m_lastAddTimeMs, diff, sleep_ms);
+
+    m_lastAddTimeMs = XbmcThreads::SystemClockMillis();
   }
   return (unsigned int)(written/m_format.m_frameSize);
 }

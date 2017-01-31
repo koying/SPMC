@@ -45,7 +45,7 @@ public:
   virtual bool  SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays);
   virtual void  UpdateResolutions();
   virtual bool  IsExtSupported(const char* extension);
-  virtual bool  CanDoWindowed() { return false; }
+  virtual bool  CanDoWindowed();
 
   virtual void  ShowOSMouse(bool show);
   virtual bool  HasCursor();

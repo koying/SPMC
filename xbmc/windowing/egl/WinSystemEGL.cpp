@@ -453,6 +453,14 @@ bool CWinSystemEGL::IsExtSupported(const char* extension)
   return (m_extensions.find(name) != std::string::npos || CRenderSystemGLES::IsExtSupported(extension));
 }
 
+bool CWinSystemEGL::CanDoWindowed()
+{
+#if defined(TARGET_ANDROID)
+  return (CXBMCApp::GetSDKVersion() >= 24);
+#endif
+  return false;
+}
+
 bool CWinSystemEGL::PresentRenderImpl(const CDirtyRegionList &dirty)
 {
   m_egl->SwapBuffers(m_display, m_surface);
@@ -492,7 +500,7 @@ void CWinSystemEGL::NotifyAppActiveChange(bool bActivated)
 bool CWinSystemEGL::Minimize()
 {
 #ifdef TARGET_ANDROID
-  CXBMCApp::moveTaskToBack(true);
+  CXBMCApp::get()->moveTaskToBack(true);
 #else
   Hide();
 #endif

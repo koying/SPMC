@@ -32,6 +32,7 @@
 #include "input/InputManager.h"
 #include "GUIWindowManager.h"
 #include "video/VideoReferenceClock.h"
+#include "utils/log.h"
 
 using namespace KODI::MESSAGING;
 
@@ -393,6 +394,8 @@ void CGraphicContext::SetVideoResolutionInternal(RESOLUTION res, bool forceUpdat
   {
     res = RES_DESKTOP;
   }
+
+  CLog::Log(LOGDEBUG, "SetVideoResolutionInternal res(%d) lasres(%d) forced(%s)", res, lastRes, forceUpdate ? "true" : "false" );
 
   // If we are switching to the same resolution and same window/full-screen, no need to do anything
   if (!forceUpdate && res == lastRes && m_bFullScreenRoot == g_advancedSettings.m_fullScreen)
@@ -1006,6 +1009,15 @@ bool CGraphicContext::IsFullScreenRoot () const
 
 bool CGraphicContext::ToggleFullScreenRoot ()
 {
+  SetFullScreenRoot(!m_bFullScreenRoot);
+  return m_bFullScreenRoot;
+}
+
+void CGraphicContext::SetFullScreenRoot(bool bOnOff)
+{
+  if (bOnOff == m_bFullScreenRoot)
+    return;
+
   RESOLUTION uiRes;  ///< resolution to save - not necessarily the same as the one we switch to (e.g. during video playback)
   RESOLUTION videoRes;
   bool setVideoRes = false;
@@ -1046,8 +1058,6 @@ bool CGraphicContext::ToggleFullScreenRoot ()
   {
     SetVideoResolution(videoRes);
   }
-
-  return m_bFullScreenRoot;
 }
 
 void CGraphicContext::SetMediaDir(const std::string &strMediaDir)

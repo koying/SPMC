@@ -97,6 +97,8 @@
 #include "video/videosync/VideoSyncAndroid.h"
 #include "interfaces/AnnouncementManager.h"
 
+#include "windowing/WindowingFactory.h"
+
 #define GIGABYTES       1073741824
 #define CAPTURE_QUEUE_MAXDEPTH 3
 
@@ -352,7 +354,32 @@ void CXBMCApp::onSaveState(void **data, size_t *size)
 void CXBMCApp::onConfigurationChanged()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
-  // ignore any configuration changes like screen rotation etc
+
+//  if (m_window)
+//  {
+//    // Check for resize
+//    ANativeWindow_acquire(m_window);
+//    int cur_width = ANativeWindow_getWidth(m_window);
+//    int cur_height = ANativeWindow_getHeight(m_window);
+//    ANativeWindow_release(m_window);
+
+//    if (cur_width != m_window_width_sav || cur_height != m_window_height_sav)
+//    {
+//      m_window_width_sav = cur_width;
+//      m_window_height_sav = cur_height;
+//      onResizeWindow();
+//    }
+//  }
+
+  AConfiguration* cfg = AConfiguration_new();
+  AConfiguration_fromAssetManager(cfg, m_activity->assetManager);
+
+  int density = AConfiguration_getDensity(cfg);
+  int w = AConfiguration_getScreenWidthDp(cfg);
+  int h = AConfiguration_getScreenHeightDp(cfg);
+  CLog::Log(LOGDEBUG, "Configuration w*h@d: %d x %d @ %d", w, h, density);
+
+  AConfiguration_delete(cfg);
 }
 
 void CXBMCApp::onLowMemory()
@@ -371,6 +398,7 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
   }
   m_window = window;
   m_windowCreated.Set();
+
   if(!m_firstrun)
   {
     XBMC_SetupDisplay();
@@ -383,6 +411,19 @@ void CXBMCApp::onResizeWindow()
   m_window = NULL;
   m_windowCreated.Reset();
   // no need to do anything because we are fixed in fullscreen landscape mode
+
+//  ANativeWindow_acquire(m_window);
+//  int cur_width = ANativeWindow_getWidth(m_window);
+//  int cur_height = ANativeWindow_getHeight(m_window);
+//  ANativeWindow_release(m_window);
+
+//  android_printf("%s: %d x %d", __PRETTY_FUNCTION__, cur_width, cur_height);
+
+//  XBMC_Event newEvent;
+//  newEvent.type = XBMC_VIDEORESIZE;
+//  newEvent.resize.w = cur_width;
+//  newEvent.resize.h = cur_height;
+//  g_application.OnEvent(newEvent);
 }
 
 void CXBMCApp::onDestroyWindow()
@@ -550,6 +591,7 @@ void CXBMCApp::run()
   XBMC::Context context;
 
   m_firstrun=false;
+  g_advancedSettings.m_startFullScreen = true;
   android_printf(" => running XBMC_Run...");
   try
   {
@@ -1269,6 +1311,17 @@ void CXBMCApp::onVisibleBehindCanceled()
   // Pressing the pause button calls OnStop() (cf. https://code.google.com/p/android/issues/detail?id=186469)
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
     CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
+}
+
+void CXBMCApp::onMultiWindowModeChanged(bool isInMultiWindowMode)
+{
+  android_printf("%s: %s", __PRETTY_FUNCTION__, isInMultiWindowMode ? "true" : "false");
+//  g_graphicsContext.SetFullScreenRoot(!isInMultiWindowMode);
+}
+
+void CXBMCApp::onPictureInPictureModeChanged(bool isInPictureInPictureMode)
+{
+
 }
 
 int CXBMCApp::WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent &result)

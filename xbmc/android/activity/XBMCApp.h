@@ -127,6 +127,8 @@ public:
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
   virtual void onVisibleBehindCanceled();
+  virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
+  virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
 
   bool isValid() { return m_activity != NULL; }
 
@@ -183,7 +185,7 @@ public:
   static CRect MapRenderToDroid(const CRect& srcRect);
   static CPoint GetDroidToGuiRatio();
 
-  static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
+  int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
   static bool WaitForCapture(jni::CJNIImage& image);
   static bool GetCapture(jni::CJNIImage& img);
   static void TakeScreenshot();
@@ -207,7 +209,7 @@ protected:
   static int GetMaxSystemVolume(JNIEnv *env);
   bool AcquireAudioFocus();
   bool ReleaseAudioFocus();
-  static void RequestVisibleBehind(bool requested);
+  void RequestVisibleBehind(bool requested);
 
 private:
   static CXBMCApp* m_xbmcappinstance;

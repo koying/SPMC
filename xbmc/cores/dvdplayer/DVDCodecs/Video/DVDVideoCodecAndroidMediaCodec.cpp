@@ -1455,6 +1455,7 @@ void CDVDVideoCodecAndroidMediaCodec::ReleaseSurfaceTexture(void)
 
 void CDVDVideoCodecAndroidMediaCodec::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::surfaceChanged: %d x %d", width, height);
 }
 
 void CDVDVideoCodecAndroidMediaCodec::surfaceCreated(CJNISurfaceHolder holder)
