@@ -312,7 +312,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
           });
 
     View videoLayout = findViewById(R.id.VideoLayout);
-    ViewGroup parent = videoLayout.getParent();
+    ViewGroup parent = (ViewGroup)videoLayout.getParent();
     if (parent != null)
       parent.removeView(videoLayout);
     getWindow().addContentView(videoLayout, new ViewGroup.LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT ));

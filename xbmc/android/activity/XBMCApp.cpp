@@ -407,17 +407,17 @@ void CXBMCApp::onCreateWindow(ANativeWindow* window)
 
 void CXBMCApp::onResizeWindow()
 {
-  android_printf("%s: ", __PRETTY_FUNCTION__);
-  m_window = NULL;
-  m_windowCreated.Reset();
+//  android_printf("%s: ", __PRETTY_FUNCTION__);
+//  m_window = NULL;
+//  m_windowCreated.Reset();
   // no need to do anything because we are fixed in fullscreen landscape mode
 
-//  ANativeWindow_acquire(m_window);
-//  int cur_width = ANativeWindow_getWidth(m_window);
-//  int cur_height = ANativeWindow_getHeight(m_window);
-//  ANativeWindow_release(m_window);
+  ANativeWindow_acquire(m_window);
+  int cur_width = ANativeWindow_getWidth(m_window);
+  int cur_height = ANativeWindow_getHeight(m_window);
+  ANativeWindow_release(m_window);
 
-//  android_printf("%s: %d x %d", __PRETTY_FUNCTION__, cur_width, cur_height);
+  android_printf("%s: %d x %d", __PRETTY_FUNCTION__, cur_width, cur_height);
 
 //  XBMC_Event newEvent;
 //  newEvent.type = XBMC_VIDEORESIZE;
