@@ -311,7 +311,11 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
             }
           });
 
-    getWindow().addContentView(findViewById(R.id.VideoLayout), new ViewGroup.LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT ));
+    View videoLayout = findViewById(R.id.VideoLayout);
+    ViewGroup parent = videoLayout.getParent();
+    if (parent != null)
+      parent.removeView(videoLayout);
+    getWindow().addContentView(videoLayout, new ViewGroup.LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT ));
   }
 
   @Override
