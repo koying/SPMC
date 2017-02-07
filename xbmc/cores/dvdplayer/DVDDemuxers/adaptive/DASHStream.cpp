@@ -26,7 +26,7 @@
 using namespace dash;
 using namespace XFILE;
 
-DASHStream::DASHStream(DASHTree &tree, DASHTree::StreamType type)
+DASHStream::DASHStream(adaptive::AdaptiveTree &tree, adaptive::AdaptiveTree::StreamType type)
   :tree_(tree)
   , type_(type)
   , observer_(0)
@@ -48,17 +48,17 @@ bool DASHStream::download_segment()
   std::string strURL;
   char rangebuf[128], *rangeHeader(0);
 
-  if ((current_rep_->flags_ & DASHTree::Representation::SEGMENTBASE))
+  if ((current_rep_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTBASE))
   {
     strURL = current_rep_->url_;
     sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
     rangeHeader = rangebuf;
   }
-  else  if ((current_rep_->flags_ & DASHTree::Representation::SEGMENTMEDIA))
+  else  if ((current_rep_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTMEDIA))
   {
     strURL = current_rep_->url_ + current_seg_->media_;
   }
-  else  if ((current_rep_->flags_ & DASHTree::Representation::TEMPLATE))
+  else  if ((current_rep_->flags_ & adaptive::AdaptiveTree::Representation::TEMPLATE))
   {
     if (~current_seg_->range_end_) //templated segment
     {
@@ -103,12 +103,12 @@ bool DASHStream::write_data(const void *buffer, size_t buffer_size)
   return true;
 }
 
-bool DASHStream::prepare_stream(const DASHTree::AdaptationSet *adp,
+bool DASHStream::prepare_stream(const adaptive::AdaptiveTree::AdaptationSet *adp,
   const uint32_t width, const uint32_t height,
   uint32_t min_bandwidth, uint32_t max_bandwidth, unsigned int repId)
 {
-  width_ = type_ == DASHTree::VIDEO ? width : 0;
-  height_ = type_ == DASHTree::VIDEO ? height : 0;
+  width_ = type_ == adaptive::AdaptiveTree::VIDEO ? width : 0;
+  height_ = type_ == adaptive::AdaptiveTree::VIDEO ? height : 0;
 
   uint32_t avg_bandwidth = tree_.bandwidth_;
 
@@ -120,7 +120,7 @@ bool DASHStream::prepare_stream(const DASHTree::AdaptationSet *adp,
 
   stopped_ = false;
 
-  bandwidth_ = static_cast<uint32_t>(bandwidth_ *(type_ == DASHTree::VIDEO ? 0.9 : 0.1));
+  bandwidth_ = static_cast<uint32_t>(bandwidth_ *(type_ == adaptive::AdaptiveTree::VIDEO ? 0.9 : 0.1));
 
   current_adp_ = adp;
 
@@ -129,7 +129,7 @@ bool DASHStream::prepare_stream(const DASHTree::AdaptationSet *adp,
 
 bool DASHStream::start_stream(const uint32_t seg_offset, uint16_t width, uint16_t height)
 {
-  if (!~seg_offset && tree_.live_start_ && current_rep_->segments_.data.size()>1)
+  if (!~seg_offset && tree_.available_time_ && current_rep_->segments_.data.size()>1)
   {
     //go at least 12 secs back
     std::int32_t pos(static_cast<int32_t>(current_rep_->segments_.data.size() - 1));
@@ -147,8 +147,8 @@ bool DASHStream::start_stream(const uint32_t seg_offset, uint16_t width, uint16_
   }
   else
   {
-    width_ = type_ == DASHTree::VIDEO ? width : 0;
-    height_ = type_ == DASHTree::VIDEO ? height : 0;
+    width_ = type_ == adaptive::AdaptiveTree::VIDEO ? width : 0;
+    height_ = type_ == adaptive::AdaptiveTree::VIDEO ? height : 0;
 
     absolute_position_ = current_rep_->get_next_segment(current_seg_)->range_begin_;
     stopped_ = false;
@@ -219,7 +219,7 @@ bool DASHStream::seek_time(double seek_seconds, double current_seconds, bool &ne
   if (choosen_seg && current_rep_->get_segment(choosen_seg)->startPTS_ > sec_in_ts)
     --choosen_seg;
 
-  const DASHTree::Segment* old_seg(current_seg_);
+  const adaptive::AdaptiveTree::Segment* old_seg(current_seg_);
   if ((current_seg_ = current_rep_->get_segment(choosen_seg)))
   {
     needReset = true;
@@ -318,13 +318,13 @@ bool DASHStream::parseIndexRange()
   byteStream->Release();
   AP4_SidxAtom *sidx(AP4_DYNAMIC_CAST(AP4_SidxAtom, atom));
 
-  dash::DASHTree::AdaptationSet *adp(const_cast<dash::DASHTree::AdaptationSet*>(getAdaptationSet()));
-  dash::DASHTree::Representation *rep(const_cast<dash::DASHTree::Representation*>(getRepresentation()));
+  adaptive::AdaptiveTree::AdaptationSet *adp(const_cast<adaptive::AdaptiveTree::AdaptationSet*>(getAdaptationSet()));
+  adaptive::AdaptiveTree::Representation *rep(const_cast<adaptive::AdaptiveTree::Representation*>(getRepresentation()));
 
   rep->timescale_ = sidx->GetTimeScale();
 
   const AP4_Array<AP4_SidxAtom::Reference> &reps(sidx->GetReferences());
-  dash::DASHTree::Segment seg;
+  adaptive::AdaptiveTree::Segment seg;
   seg.range_end_ = rep->indexRangeMax_;
   seg.startPTS_ = 0;
 
@@ -342,7 +342,7 @@ bool DASHStream::parseIndexRange()
 
 bool DASHStream::select_stream(bool force, bool justInit, unsigned int repId)
 {
-  const DASHTree::Representation *new_rep(0), *min_rep(0);
+  const adaptive::AdaptiveTree::Representation *new_rep(0), *min_rep(0);
 
   if (force && absolute_position_ == 0) //already selected
     return true;
@@ -351,7 +351,7 @@ bool DASHStream::select_stream(bool force, bool justInit, unsigned int repId)
   {
     unsigned int bestScore(~0);
 
-    for (std::vector<DASHTree::Representation*>::const_iterator br(current_adp_->repesentations_.begin()), er(current_adp_->repesentations_.end()); br != er; ++br)
+    for (std::vector<adaptive::AdaptiveTree::Representation*>::const_iterator br(current_adp_->repesentations_.begin()), er(current_adp_->repesentations_.end()); br != er; ++br)
     {
       unsigned int score;
       if ((*br)->bandwidth_ <= bandwidth_
@@ -390,7 +390,7 @@ bool DASHStream::select_stream(bool force, bool justInit, unsigned int repId)
   /* If we have indexRangeExact SegmentBase, update SegmentList from SIDX */
   if (current_rep_->indexRangeMax_)
   {
-    DASHTree::Representation *rep(const_cast<DASHTree::Representation *>(current_rep_));
+    adaptive::AdaptiveTree::Representation *rep(const_cast<adaptive::AdaptiveTree::Representation *>(current_rep_));
     if (!parseIndexRange())
       return false;
     rep->indexRangeMin_ = rep->indexRangeMax_ = 0;

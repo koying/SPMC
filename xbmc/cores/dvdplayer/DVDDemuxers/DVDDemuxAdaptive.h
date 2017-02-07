@@ -25,13 +25,13 @@
 
 #include <memory>
 
-#include "dash/DASHSession.h"
+#include "adaptive/DASHSession.h"
 
-class CDVDDemuxMPD : public CDVDDemux
+class CDVDDemuxAdaptive : public CDVDDemux
 {
 public:
-  CDVDDemuxMPD();
-  virtual ~CDVDDemuxMPD();
+  CDVDDemuxAdaptive();
+  virtual ~CDVDDemuxAdaptive();
 
   bool Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t maxHeight);
   void Dispose();

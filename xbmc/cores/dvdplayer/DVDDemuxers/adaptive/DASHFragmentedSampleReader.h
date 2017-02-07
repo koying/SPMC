@@ -57,7 +57,8 @@ public:
   void SetObserver(IDASHFragmentObserver *observer) { m_Observer = observer; }
   void SetPTSOffset(uint64_t offset) { FindTracker(m_Track->GetId())->m_NextDts = offset; }
   uint64_t GetFragmentDuration() { return dynamic_cast<AP4_FragmentSampleTable*>(FindTracker(m_Track->GetId())->m_SampleTable)->GetDuration(); }
-
+  uint32_t GetTimeScale() { return m_Track->GetMediaTimeScale(); }
+                            
 protected:
   virtual AP4_Result ProcessMoof(AP4_ContainerAtom* moof,
     AP4_Position       moof_offset,

@@ -19,13 +19,13 @@
  *
  */
 
-#include "DVDDemuxMPD.h"
+#include "DVDDemuxAdaptive.h"
 
 #include "DVDDemuxPacket.h"
 #include "DVDDemuxUtils.h"
 #include "DVDInputStreams/DVDInputStream.h"
 
-#include "dash/DASHByteStream.h"
+#include "adaptive/DASHByteStream.h"
 
 #ifdef TARGET_ANDROID
 #include "android/jni/SystemProperties.h"
@@ -38,21 +38,32 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
-CDVDDemuxMPD::CDVDDemuxMPD()
+CDVDDemuxAdaptive::CDVDDemuxAdaptive()
   : CDVDDemux()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
+  CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::%s", __FUNCTION__);
 }
 
-CDVDDemuxMPD::~CDVDDemuxMPD()
+CDVDDemuxAdaptive::~CDVDDemuxAdaptive()
 {
-  CLog::Log(LOGDEBUG, "CDVDDemuxMPD::%s", __FUNCTION__);
+  CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::%s", __FUNCTION__);
 }
 
-bool CDVDDemuxMPD::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t maxHeight)
+bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t maxHeight)
 {
-  CLog::Log(LOGINFO, "CDVDInputStreamMPD - matching against %d x %d", maxWidth, maxHeight);
-  m_MPDsession.reset(new CDASHSession(pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
+  CLog::Log(LOGINFO, "CDVDDemuxAdaptive - matching against %d x %d", maxWidth, maxHeight);
+  
+  CDASHSession::MANIFEST_TYPE type = CDASHSession::MANIFEST_TYPE_UNKNOWN;
+  
+  if (pInput->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInput->GetFileItem().IsType(".mpd"))  //MPD
+    type = CDASHSession::MANIFEST_TYPE_MPD;
+  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInput->GetFileItem().IsType(".ismc"))  //ISM
+    type = CDASHSession::MANIFEST_TYPE_ISM;
+  
+  if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
+    return false;
+  
+  m_MPDsession.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
 
   if (!m_MPDsession->initialize())
   {
@@ -62,23 +73,23 @@ bool CDVDDemuxMPD::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t max
   return true;
 }
 
-void CDVDDemuxMPD::Dispose()
+void CDVDDemuxAdaptive::Dispose()
 {
 }
 
-void CDVDDemuxMPD::Reset()
+void CDVDDemuxAdaptive::Reset()
 {
 }
 
-void CDVDDemuxMPD::Abort()
+void CDVDDemuxAdaptive::Abort()
 {
 }
 
-void CDVDDemuxMPD::Flush()
+void CDVDDemuxAdaptive::Flush()
 {
 }
 
-DemuxPacket*CDVDDemuxMPD::Read()
+DemuxPacket*CDVDDemuxAdaptive::Read()
 {
   if (!m_MPDsession)
     return NULL;
@@ -112,7 +123,7 @@ DemuxPacket*CDVDDemuxMPD::Read()
   return NULL;
 }
 
-bool CDVDDemuxMPD::SeekTime(int time, bool backwards, double* startpts)
+bool CDVDDemuxAdaptive::SeekTime(int time, bool backwards, double* startpts)
 {
   if (!m_MPDsession)
     return false;
@@ -120,11 +131,11 @@ bool CDVDDemuxMPD::SeekTime(int time, bool backwards, double* startpts)
   return m_MPDsession->SeekTime(static_cast<double>(time)*0.001f, 0, !backwards);
 }
 
-void CDVDDemuxMPD::SetSpeed(int speed)
+void CDVDDemuxAdaptive::SetSpeed(int speed)
 {
 }
 
-int CDVDDemuxMPD::GetNrOfStreams()
+int CDVDDemuxAdaptive::GetNrOfStreams()
 {
   int n = 0;
   if (m_MPDsession)
@@ -133,19 +144,19 @@ int CDVDDemuxMPD::GetNrOfStreams()
   return n;
 }
 
-CDemuxStream* CDVDDemuxMPD::GetStream(int streamid)
+CDemuxStream* CDVDDemuxAdaptive::GetStream(int streamid)
 {
   CDASHSession::STREAM *stream(m_MPDsession->GetStream(streamid));
   if (!stream)
   {
-    CLog::Log(LOGERROR, "CDVDDemuxMPD::GetStream(%d): error getting stream", streamid);
+    CLog::Log(LOGERROR, "CDVDDemuxAdaptive::GetStream(%d): error getting stream", streamid);
     return nullptr;
   }
 
   return stream->dmuxstrm;
 }
 
-void CDVDDemuxMPD::EnableStream(int streamid, bool enable)
+void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
 {
   CLog::Log(LOGDEBUG, "EnableStream(%d: %s)", streamid, enable?"true":"false");
 
@@ -164,7 +175,7 @@ void CDVDDemuxMPD::EnableStream(int streamid, bool enable)
     stream->enabled = true;
 
     stream->stream_.start_stream(~0, m_MPDsession->GetWidth(), m_MPDsession->GetHeight());
-    const dash::DASHTree::Representation *rep(stream->stream_.getRepresentation());
+    const adaptive::AdaptiveTree::Representation *rep(stream->stream_.getRepresentation());
     CLog::Log(LOGDEBUG, "Selecting stream with conditions: w: %u, h: %u, bw: %u",
       stream->stream_.getWidth(), stream->stream_.getHeight(), stream->stream_.getBandwidth());
 
@@ -189,7 +200,7 @@ void CDVDDemuxMPD::EnableStream(int streamid, bool enable)
       return stream->disable();
     }
 
-    static const AP4_Track::Type TIDC[dash::DASHTree::STREAM_TYPE_COUNT] =
+    static const AP4_Track::Type TIDC[adaptive::AdaptiveTree::STREAM_TYPE_COUNT] =
     { AP4_Track::TYPE_UNKNOWN, AP4_Track::TYPE_VIDEO, AP4_Track::TYPE_AUDIO, AP4_Track::TYPE_TEXT };
 
     AP4_Track *track = movie->GetTrack(TIDC[stream->stream_.get_type()]);
@@ -221,7 +232,7 @@ void CDVDDemuxMPD::EnableStream(int streamid, bool enable)
   return stream->disable();
 }
 
-int CDVDDemuxMPD::GetStreamLength()
+int CDVDDemuxAdaptive::GetStreamLength()
 {
   if (!m_MPDsession)
     return 0;
@@ -229,7 +240,7 @@ int CDVDDemuxMPD::GetStreamLength()
   return static_cast<int>(m_MPDsession->GetTotalTime()*1000);
 }
 
-std::string CDVDDemuxMPD::GetFileName()
+std::string CDVDDemuxAdaptive::GetFileName()
 {
   if (!m_MPDsession)
     return "";
@@ -237,7 +248,7 @@ std::string CDVDDemuxMPD::GetFileName()
   return m_MPDsession->GetMpdUrl();
 }
 
-void CDVDDemuxMPD::GetStreamCodecName(int iStreamId, std::string& strName)
+void CDVDDemuxAdaptive::GetStreamCodecName(int iStreamId, std::string& strName)
 {
   strName = "";
 
