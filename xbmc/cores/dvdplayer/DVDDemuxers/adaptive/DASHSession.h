@@ -79,7 +79,7 @@ public:
   bool CheckChange(bool bSet = false);
   void SetVideoResolution(unsigned int w, unsigned int h);
   bool SeekTime(double seekTime, unsigned int streamId = 0, bool preceeding=true);
-  bool IsLive() const { return adaptiveTree_->available_time_ != 0; }
+  bool IsLive() const { return adaptiveTree_->has_timeshift_buffer_; }
 
   //Observer Section
   void BeginFragment(AP4_UI32 streamId) override;

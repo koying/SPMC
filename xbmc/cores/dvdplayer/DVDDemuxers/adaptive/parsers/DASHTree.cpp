@@ -684,7 +684,10 @@ start(void *data, const char *el, const char **attr)
       if (strcmp((const char*)*attr, "mediaPresentationDuration") == 0)
         mpt = (const char*)*(attr + 1);
       else if (strcmp((const char*)*attr, "timeShiftBufferDepth") == 0)
+      {
         tsbd = (const char*)*(attr + 1);
+        dash->has_timeshift_buffer_ = true;
+      }
       else if (strcmp((const char*)*attr, "availabilityStartTime") == 0)
       {
         dash->available_time_ = getTime((const char*)*(attr + 1));

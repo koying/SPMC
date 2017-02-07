@@ -57,7 +57,7 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
   
   if (pInput->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInput->GetFileItem().IsType(".mpd"))  //MPD
     type = CDASHSession::MANIFEST_TYPE_MPD;
-  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInput->GetFileItem().IsType(".ismc"))  //ISM
+  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInput->GetFileItem().IsType(".ismc") || pInput->GetFileItem().IsType(".ism"))  //ISM
     type = CDASHSession::MANIFEST_TYPE_ISM;
   
   if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
