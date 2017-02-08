@@ -241,8 +241,7 @@ bool CDASHSession::initialize()
     SAFE_DELETE(*b);
   streams_.clear();
 
-  unsigned int i = 0;
-  while (adp = adaptiveTree_->GetAdaptationSet(i++))
+  for (unsigned int i=0; (adp = adaptiveTree_->GetAdaptationSet(i)); ++i)
   {
     size_t repId = manual_streams_ ? adp->repesentations_.size() : 0;
 
