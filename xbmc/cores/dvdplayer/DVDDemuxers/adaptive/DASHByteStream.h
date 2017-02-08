@@ -29,7 +29,7 @@ class CDASHByteStream : public AP4_ByteStream
 {
 public:
   // Constructor
-  CDASHByteStream(dash::DASHStream *dashStream) :dash_stream_(dashStream) {}
+  CDASHByteStream(dash::DASHStream *dashStream = nullptr) :dash_stream_(dashStream) {}
 
   // AP4_ByteStream methods
   AP4_Result ReadPartial(void* buffer, AP4_Size  bytesToRead, AP4_Size& bytesRead) override;

@@ -63,11 +63,11 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
   if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
     return false;
   
-  m_MPDsession.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
+  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
 
-  if (!m_MPDsession->initialize())
+  if (!m_session->initialize())
   {
-    m_MPDsession = nullptr;
+    m_session = nullptr;
     return false;
   }
   return true;
@@ -91,12 +91,12 @@ void CDVDDemuxAdaptive::Flush()
 
 DemuxPacket*CDVDDemuxAdaptive::Read()
 {
-  if (!m_MPDsession)
+  if (!m_session)
     return NULL;
 
-  CDASHFragmentedSampleReader *sr(m_MPDsession->GetNextSample());
+  CDASHFragmentedSampleReader *sr(m_session->GetNextSample());
 
-  if (m_MPDsession->CheckChange())
+  if (m_session->CheckChange())
   {
     DemuxPacket *p = CDVDDemuxUtils::AllocateDemuxPacket(0);
     p->iStreamId = DMX_SPECIALID_STREAMCHANGE;
@@ -125,10 +125,10 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
 
 bool CDVDDemuxAdaptive::SeekTime(int time, bool backwards, double* startpts)
 {
-  if (!m_MPDsession)
+  if (!m_session)
     return false;
 
-  return m_MPDsession->SeekTime(static_cast<double>(time)*0.001f, 0, !backwards);
+  return m_session->SeekTime(static_cast<double>(time)*0.001f, 0, !backwards);
 }
 
 void CDVDDemuxAdaptive::SetSpeed(int speed)
@@ -138,15 +138,15 @@ void CDVDDemuxAdaptive::SetSpeed(int speed)
 int CDVDDemuxAdaptive::GetNrOfStreams()
 {
   int n = 0;
-  if (m_MPDsession)
-    n = m_MPDsession->GetStreamCount();
+  if (m_session)
+    n = m_session->GetStreamCount();
 
   return n;
 }
 
 CDemuxStream* CDVDDemuxAdaptive::GetStream(int streamid)
 {
-  CDASHSession::STREAM *stream(m_MPDsession->GetStream(streamid));
+  CDASHSession::STREAM *stream(m_session->GetStream(streamid));
   if (!stream)
   {
     CLog::Log(LOGERROR, "CDVDDemuxAdaptive::GetStream(%d): error getting stream", streamid);
@@ -160,10 +160,10 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
 {
   CLog::Log(LOGDEBUG, "EnableStream(%d: %s)", streamid, enable?"true":"false");
 
-  if (!m_MPDsession)
+  if (!m_session)
     return;
 
-  CDASHSession::STREAM *stream(m_MPDsession->GetStream(streamid));
+  CDASHSession::STREAM *stream(m_session->GetStream(streamid));
   if (!stream)
     return;
 
@@ -174,7 +174,7 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
 
     stream->enabled = true;
 
-    stream->stream_.start_stream(~0, m_MPDsession->GetWidth(), m_MPDsession->GetHeight());
+    stream->stream_.start_stream(~0, m_session->GetWidth(), m_session->GetHeight());
     const adaptive::AdaptiveTree::Representation *rep(stream->stream_.getRepresentation());
     CLog::Log(LOGDEBUG, "Selecting stream with conditions: w: %u, h: %u, bw: %u",
       stream->stream_.getWidth(), stream->stream_.getHeight(), stream->stream_.getBandwidth());
@@ -187,21 +187,60 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
 
     if(rep != stream->stream_.getRepresentation())
     {
-      m_MPDsession->UpdateStream(*stream);
-      m_MPDsession->CheckChange(true);
+      m_session->UpdateStream(*stream);
+      m_session->CheckChange(true);
     }
 
     stream->input_ = new CDASHByteStream(&stream->stream_);
-    stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
-    AP4_Movie* movie = stream->input_file_->GetMovie();
-    if (movie == NULL)
-    {
-      CLog::Log(LOGERROR, "No MOOV in stream!");
-      return stream->disable();
-    }
+    AP4_Movie* movie = nullptr;
+    static const AP4_Track::Type TIDC[adaptive::AdaptiveTree::STREAM_TYPE_COUNT] = { 
+      AP4_Track::TYPE_UNKNOWN,
+      AP4_Track::TYPE_VIDEO,
+      AP4_Track::TYPE_AUDIO,
+      AP4_Track::TYPE_TEXT };
 
-    static const AP4_Track::Type TIDC[adaptive::AdaptiveTree::STREAM_TYPE_COUNT] =
-    { AP4_Track::TYPE_UNKNOWN, AP4_Track::TYPE_VIDEO, AP4_Track::TYPE_AUDIO, AP4_Track::TYPE_TEXT };
+    if (m_session->GetManifestType() == CDASHSession::MANIFEST_TYPE_ISM && stream->stream_.getRepresentation()->get_initialization() == nullptr)
+    {
+      //We'll create a Movie out of the things we got from manifest file
+      //note: movie will be deleted in destructor of stream->input_file_
+ 
+      //Create a dumy MOOV Atom to tell Bento4 its a fragmented stream
+      AP4_MoovAtom *moov = new AP4_MoovAtom();
+      moov->AddChild(new AP4_ContainerAtom(AP4_ATOM_TYPE_MVEX));
+
+      AP4_MvhdAtom* MvhdAtom = new AP4_MvhdAtom(0, 0, 
+                                    0, 
+                                    0,
+                                    0x00010000,
+                                    0x0100);
+      moov->AddChild(MvhdAtom);
+      
+      CDASHByteStream dummy_stream;
+      movie = new AP4_Movie(moov, dummy_stream, true);
+
+      AP4_SyntheticSampleTable* sample_table = new AP4_SyntheticSampleTable();
+      AP4_SampleDescription *sample_descryption = new AP4_SampleDescription(AP4_SampleDescription::TYPE_UNKNOWN, 0, 0);
+      if (stream->stream_.getAdaptationSet()->encrypted)
+      {
+        AP4_ContainerAtom schi(AP4_ATOM_TYPE_SCHI);
+        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, m_session->GetDefaultKeyId()));
+        sample_descryption = new AP4_ProtectedSampleDescription(0, sample_descryption, 0, AP4_PROTECTION_SCHEME_TYPE_PIFF, 0, "", &schi);
+      }
+      sample_table->AddSampleDescription(sample_descryption);
+
+      movie->AddTrack(new AP4_Track(TIDC[stream->stream_.get_type()], sample_table, ~0, stream->stream_.getRepresentation()->timescale_, 0, stream->stream_.getRepresentation()->timescale_, 0, "", 0, 0));      
+      stream->input_file_ = new AP4_File(movie);
+    }
+    else
+    {
+      stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
+      movie = stream->input_file_->GetMovie();
+      if (movie == NULL)
+      {
+        CLog::Log(LOGERROR, "No MOOV in stream!");
+        return stream->disable();
+      }
+    }
 
     AP4_Track *track = movie->GetTrack(TIDC[stream->stream_.get_type()]);
     if (!track)
@@ -210,8 +249,8 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
       return stream->disable();
     }
 
-    stream->reader_ = new CDASHFragmentedSampleReader(stream->input_, movie, track, streamid, m_MPDsession->GetSingleSampleDecryptor(), m_MPDsession->GetPresentationTimeOffset());
-    stream->reader_->SetObserver(dynamic_cast<IDASHFragmentObserver*>(m_MPDsession.get()));
+    stream->reader_ = new CDASHFragmentedSampleReader(stream->input_, movie, track, streamid, m_session->GetSingleSampleDecryptor(), m_session->GetPresentationTimeOffset());
+    stream->reader_->SetObserver(dynamic_cast<IDASHFragmentObserver*>(m_session.get()));
 
     if (!stream->dmuxstrm->ExtraSize)
     {
@@ -223,7 +262,7 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
       {
         stream->dmuxstrm->ExtraData = (uint8_t*)malloc(stream->dmuxstrm->ExtraSize);
         memcpy((void*)stream->dmuxstrm->ExtraData, stream->reader_->GetExtraData(), stream->dmuxstrm->ExtraSize);
-        m_MPDsession->CheckChange(true);
+        m_session->CheckChange(true);
       }
     }
     return;
@@ -234,25 +273,25 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
 
 int CDVDDemuxAdaptive::GetStreamLength()
 {
-  if (!m_MPDsession)
+  if (!m_session)
     return 0;
 
-  return static_cast<int>(m_MPDsession->GetTotalTime()*1000);
+  return static_cast<int>(m_session->GetTotalTime()*1000);
 }
 
 std::string CDVDDemuxAdaptive::GetFileName()
 {
-  if (!m_MPDsession)
+  if (!m_session)
     return "";
 
-  return m_MPDsession->GetMpdUrl();
+  return m_session->GetMpdUrl();
 }
 
 void CDVDDemuxAdaptive::GetStreamCodecName(int iStreamId, std::string& strName)
 {
   strName = "";
 
-  CDASHSession::STREAM *stream(m_MPDsession->GetStream(iStreamId));
+  CDASHSession::STREAM *stream(m_session->GetStream(iStreamId));
   if (stream)
     strName = stream->codecName;
 }

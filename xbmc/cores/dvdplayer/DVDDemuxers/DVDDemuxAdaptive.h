@@ -50,5 +50,5 @@ public:
   virtual void GetStreamCodecName(int iStreamId, std::string &strName);
 
 protected:
-  std::shared_ptr<CDASHSession> m_MPDsession;
+  std::shared_ptr<CDASHSession> m_session;
 };

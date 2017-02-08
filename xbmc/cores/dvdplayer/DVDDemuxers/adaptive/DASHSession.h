@@ -80,6 +80,8 @@ public:
   void SetVideoResolution(unsigned int w, unsigned int h);
   bool SeekTime(double seekTime, unsigned int streamId = 0, bool preceeding=true);
   bool IsLive() const { return adaptiveTree_->has_timeshift_buffer_; }
+  MANIFEST_TYPE GetManifestType() const { return manifest_type_; }
+  const AP4_UI08 *GetDefaultKeyId() const;
 
   //Observer Section
   void BeginFragment(AP4_UI32 streamId) override;
@@ -90,6 +92,7 @@ protected:
   //  AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
 
 private:
+  MANIFEST_TYPE manifest_type_;
   std::string mpdFileURL_;
   std::string license_key_, license_type_;
   std::string profile_path_;

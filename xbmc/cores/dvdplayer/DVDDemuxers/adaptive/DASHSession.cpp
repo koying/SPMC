@@ -34,6 +34,7 @@
 
 CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
   :single_sample_decryptor_(0)
+  , manifest_type_(manifest_type)
   , mpdFileURL_(strURL)
   , license_type_(strLicType)
   , license_key_(strLicKey)
@@ -207,17 +208,17 @@ bool CDASHSession::initialize()
   const char* delim(strrchr(mpdFileURL_.c_str(), '/'));
   if (!delim)
   {
-    CLog::Log(LOGERROR, "Invalid mpdURL: / expected (%s)", mpdFileURL_.c_str());
+    CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", mpdFileURL_.c_str());
     return false;
   }
   adaptiveTree_->base_url_ = std::string(mpdFileURL_.c_str(), (delim - mpdFileURL_.c_str()) + 1);
 
   if (!adaptiveTree_->open(mpdFileURL_.c_str()) || adaptiveTree_->empty())
   {
-    CLog::Log(LOGERROR, "Could not open / parse mpdURL (%s)", mpdFileURL_.c_str());
+    CLog::Log(LOGERROR, "Could not open / parse adaptive URL (%s)", mpdFileURL_.c_str());
     return false;
   }
-  CLog::Log(LOGINFO, "Successfully parsed .mpd file. #Streams: %d Download speed: %0.4f Bytes/s", adaptiveTree_->periods_[0]->adaptationSets_.size(), adaptiveTree_->download_speed_);
+  CLog::Log(LOGINFO, "Successfully parsed adaptive manifest. #Streams: %d Download speed: %0.4f Bytes/s", adaptiveTree_->periods_[0]->adaptationSets_.size(), adaptiveTree_->download_speed_);
 
   if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
   {
@@ -349,11 +350,11 @@ void CDASHSession::UpdateStream(STREAM &stream)
 
   stream.codecInternalName = rep->codecs_.substr(0, pos);
 
-  if (rep->codecs_.find("mp4a") == 0)
+  if (rep->codecs_.find("mp4a") == 0 || rep->codecs_.find("aacl") == 0)
     stream.codecName = "aac";
   else if (rep->codecs_.find("ec-3") == 0 || rep->codecs_.find("ac-3") == 0)
     stream.codecName = "eac3";
-  else if (rep->codecs_.find("avc") == 0)
+  else if (rep->codecs_.find("avc") == 0 || rep->codecs_.find("h264") == 0)
     stream.codecName = "h264";
   else if (rep->codecs_.find("hevc") == 0)
     stream.codecName = "hevc";
@@ -363,6 +364,10 @@ void CDASHSession::UpdateStream(STREAM &stream)
     stream.codecName = "opus";
   else if (rep->codecs_.find("vorbis") == 0)
     stream.codecName = "vorbis";
+  else if (rep->codecs_.find("wvc1") == 0)
+    stream.codecName = "vc1";
+  else if (rep->codecs_.find("wmap") == 0)
+    stream.codecName = "wmapro";
 
   AVCodec *codec = avcodec_find_decoder_by_name(stream.codecName.c_str());
   if (codec)
@@ -461,6 +466,14 @@ bool CDASHSession::SeekTime(double seekTime, unsigned int streamId, bool preceed
         (*b)->reader_->Reset(true);
     }
   return ret;
+}
+
+const AP4_UI08*CDASHSession::GetDefaultKeyId() const
+{
+  static const AP4_UI08 default_key[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+  if (adaptiveTree_->defaultKID_.size() == 16)
+    return reinterpret_cast<const AP4_UI08 *>(adaptiveTree_->defaultKID_.data());
+  return default_key;
 }
 
 void CDASHSession::BeginFragment(AP4_UI32 streamId)

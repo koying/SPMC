@@ -48,19 +48,26 @@ bool DASHStream::download_segment()
   std::string strURL;
   char rangebuf[128], *rangeHeader(0);
 
-  if ((current_rep_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTBASE))
+  if (current_rep_->flags_ & adaptive::AdaptiveTree::Representation::STARTTIMETPL)
   {
     strURL = current_rep_->url_;
-    sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
-    rangeHeader = rangebuf;
+    sprintf(rangebuf, "%" PRIu64, tree_.base_time_ + current_seg_->range_end_);
+    strURL.replace(strURL.find("{start time}"), 12, rangebuf);
   }
   else  if ((current_rep_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTMEDIA))
   {
     strURL = current_rep_->url_ + current_seg_->media_;
   }
-  else  if ((current_rep_->flags_ & adaptive::AdaptiveTree::Representation::TEMPLATE))
+  else if (!(current_rep_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTBASE))
   {
-    if (~current_seg_->range_end_) //templated segment
+    if (!(current_rep_->flags_ & adaptive::AdaptiveTree::Representation::TEMPLATE))
+    {
+      strURL = current_rep_->url_;
+      sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
+      rangeHeader = rangebuf;
+      absolute_position_ = current_seg_->range_begin_;
+    }
+    else if (~current_seg_->range_end_) //templated segment
     {
       std::string media = current_rep_->segtpl_.media;
       std::string::size_type lenReplace(7);
@@ -89,11 +96,11 @@ bool DASHStream::download_segment()
   }
   else
   {
-    sprintf(rangebuf, "/range/%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
-    strURL = current_rep_->url_ + rangebuf;
-    absolute_position_ = current_seg_->range_begin_;
-  }
-
+    strURL = current_rep_->url_;
+    sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
+    rangeHeader = rangebuf;
+  }  
+  
   return download(strURL.c_str(), rangeHeader);
 }
 
