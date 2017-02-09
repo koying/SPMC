@@ -205,13 +205,16 @@ bool CDASHSession::initialize()
 //  }
 
   // Open mpd file
-  const char* delim(strrchr(mpdFileURL_.c_str(), '/'));
-  if (!delim)
+  size_t paramPos = mpdFileURL_.find('?');
+  adaptiveTree_->base_url_ = (paramPos == std::string::npos) ? mpdFileURL_ : mpdFileURL_.substr(0, paramPos);
+  
+  paramPos = adaptiveTree_->base_url_.find_last_of('/', adaptiveTree_->base_url_.length());
+  if (paramPos == std::string::npos)
   {
     CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", mpdFileURL_.c_str());
     return false;
   }
-  adaptiveTree_->base_url_ = std::string(mpdFileURL_.c_str(), (delim - mpdFileURL_.c_str()) + 1);
+  adaptiveTree_->base_url_.resize(paramPos + 1);
 
   if (!adaptiveTree_->open(mpdFileURL_.c_str()) || adaptiveTree_->empty())
   {
@@ -329,10 +332,17 @@ bool CDASHSession::initialize()
 //    }
 //    else
 //    {
-//      init_data.SetBufferSize(1024);
-//      unsigned int init_data_size(1024);
-//      b64_decode(dashtree_->pssh_.second.data(), dashtree_->pssh_.second.size(), init_data.UseData(), init_data_size);
-//      init_data.SetDataSize(init_data_size);
+//      if (manifest_type_ == MANIFEST_TYPE_ISM)
+//      {
+//        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
+//      }
+//      else
+//      {
+//        init_data.SetBufferSize(1024);
+//        unsigned int init_data_size(1024);
+//        b64_decode(dashtree_->pssh_.second.data(), dashtree_->pssh_.second.size(), init_data.UseData(), init_data_size);
+//        init_data.SetDataSize(init_data_size);
+//      }
 //    }
 //    return (single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data))!=0;
 //  }

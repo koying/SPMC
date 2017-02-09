@@ -315,35 +315,78 @@ bool DASHStream::parseIndexRange()
   }
   byteStream->Seek(0);
 
-  AP4_Atom *atom(NULL);
-  if(AP4_FAILED(AP4_DefaultAtomFactory::Instance_.CreateAtomFromStream(*byteStream, atom)) || AP4_DYNAMIC_CAST(AP4_SidxAtom, atom)==0)
-  {
-    CLog::Log(LOGERROR, "Unable to create SIDX from IndexRange bytes");
-    byteStream->Release();
-    return false;
-  }
-  byteStream->Release();
-  AP4_SidxAtom *sidx(AP4_DYNAMIC_CAST(AP4_SidxAtom, atom));
-
   adaptive::AdaptiveTree::AdaptationSet *adp(const_cast<adaptive::AdaptiveTree::AdaptationSet*>(getAdaptationSet()));
   adaptive::AdaptiveTree::Representation *rep(const_cast<adaptive::AdaptiveTree::Representation*>(getRepresentation()));
 
-  rep->timescale_ = sidx->GetTimeScale();
-
-  const AP4_Array<AP4_SidxAtom::Reference> &reps(sidx->GetReferences());
-  adaptive::AdaptiveTree::Segment seg;
-  seg.range_end_ = rep->indexRangeMax_;
-  seg.startPTS_ = 0;
-
-  for (unsigned int i(0); i < reps.ItemCount(); ++i)
+  if (!getRepresentation()->indexRangeMin_)
   {
-    seg.range_begin_ = seg.range_end_ + 1;
-    seg.range_end_ = seg.range_begin_ + reps[i].m_ReferencedSize - 1;
-    rep->segments_.data.push_back(seg);
-    if (adp->segment_durations_.data.size() < rep->segments_.data.size() - 1)
-      adp->segment_durations_.data.push_back(reps[i].m_SubsegmentDuration);
-    seg.startPTS_ += reps[i].m_SubsegmentDuration;
+    AP4_File f(*byteStream, AP4_DefaultAtomFactory::Instance_, true);
+    AP4_Movie* movie = f.GetMovie();
+    if (movie == NULL)
+    {
+      CLog::Log(LOGERROR, "No MOOV in stream!");
+      byteStream->Release();
+      return false;
+    }
+    rep->flags_ |= adaptive::AdaptiveTree::Representation::INITIALIZATION;
+    rep->initialization_.range_begin_ = 0;
+    AP4_Position pos;
+    byteStream->Tell(pos);
+    rep->initialization_.range_end_ = pos - 1;
   }
+
+  adaptive::AdaptiveTree::Segment seg;
+  seg.startPTS_ = 0;
+  unsigned int numSIDX(1);
+
+  do
+  {
+    AP4_Atom *atom(NULL);
+    if (AP4_FAILED(AP4_DefaultAtomFactory::Instance_.CreateAtomFromStream(*byteStream, atom)))
+    {
+      CLog::Log(LOGERROR, "Unable to create SIDX from IndexRange bytes");
+      byteStream->Release();
+      return false;
+    }
+
+    if (atom->GetType() == AP4_ATOM_TYPE_MOOF)
+    {
+      delete atom;
+      break;
+    }
+    else if (atom->GetType() != AP4_ATOM_TYPE_SIDX)
+    {
+      delete atom;
+      continue;
+    }
+
+    AP4_SidxAtom *sidx(AP4_DYNAMIC_CAST(AP4_SidxAtom, atom));
+    const AP4_Array<AP4_SidxAtom::Reference> &refs(sidx->GetReferences());
+    if (refs[0].m_ReferenceType == 1)
+    {
+      numSIDX = refs.ItemCount();
+      delete atom;
+      continue;
+    }
+    AP4_Position pos;
+    byteStream->Tell(pos);
+    seg.range_end_ = pos + getRepresentation()->indexRangeMin_ + sidx->GetFirstOffset() - 1;
+    rep->timescale_ = sidx->GetTimeScale();
+
+    for (unsigned int i(0); i < refs.ItemCount(); ++i)
+    {
+      seg.range_begin_ = seg.range_end_ + 1;
+      seg.range_end_ = seg.range_begin_ + refs[i].m_ReferencedSize - 1;
+      rep->segments_.data.push_back(seg);
+      if (adp->segment_durations_.data.size() < rep->segments_.data.size() - 1)
+        adp->segment_durations_.data.push_back(refs[i].m_SubsegmentDuration);
+      seg.startPTS_ += refs[i].m_SubsegmentDuration;
+    }
+    delete atom;
+    --numSIDX;
+  } while (numSIDX);
+  
+  byteStream->Release();
   return true;
 }
 

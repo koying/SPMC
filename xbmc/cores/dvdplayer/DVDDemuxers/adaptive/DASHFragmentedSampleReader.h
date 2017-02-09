@@ -56,20 +56,24 @@ public:
   bool GetAudioInformation(int &channelCount) { return  m_codecHandler->GetAudioInformation(channelCount); }
   void SetObserver(IDASHFragmentObserver *observer) { m_Observer = observer; }
   void SetPTSOffset(uint64_t offset) { FindTracker(m_Track->GetId())->m_NextDts = offset; }
-  uint64_t GetFragmentDuration() { return dynamic_cast<AP4_FragmentSampleTable*>(FindTracker(m_Track->GetId())->m_SampleTable)->GetDuration(); }
+  uint64_t GetFragmentDuration();
   uint32_t GetTimeScale() { return m_Track->GetMediaTimeScale(); }
                             
 protected:
   virtual AP4_Result ProcessMoof(AP4_ContainerAtom* moof,
     AP4_Position       moof_offset,
     AP4_Position       mdat_payload_offset);
+  virtual void UpdateSampleDescription();
 
 private:
   AP4_Track *m_Track;
   AP4_UI32 m_StreamId;
+  AP4_UI32 m_SampleDescIndex;
+  
   bool m_eos, m_started;
   double m_dts, m_pts;
   double m_presentationTimeOffset;
+  bool m_bSampleDescChanged;
 
   AP4_Sample     m_sample_;
   AP4_DataBuffer m_encrypted, m_sample_data_;

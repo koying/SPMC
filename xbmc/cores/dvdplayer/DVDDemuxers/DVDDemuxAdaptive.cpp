@@ -192,54 +192,43 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
     }
 
     stream->input_ = new CDASHByteStream(&stream->stream_);
-    AP4_Movie* movie = nullptr;
     static const AP4_Track::Type TIDC[adaptive::AdaptiveTree::STREAM_TYPE_COUNT] = { 
       AP4_Track::TYPE_UNKNOWN,
       AP4_Track::TYPE_VIDEO,
       AP4_Track::TYPE_AUDIO,
       AP4_Track::TYPE_TEXT };
 
+    AP4_Movie* movie = nullptr;
     if (m_session->GetManifestType() == CDASHSession::MANIFEST_TYPE_ISM && stream->stream_.getRepresentation()->get_initialization() == nullptr)
     {
       //We'll create a Movie out of the things we got from manifest file
       //note: movie will be deleted in destructor of stream->input_file_
- 
-      //Create a dumy MOOV Atom to tell Bento4 its a fragmented stream
-      AP4_MoovAtom *moov = new AP4_MoovAtom();
-      moov->AddChild(new AP4_ContainerAtom(AP4_ATOM_TYPE_MVEX));
-
-      AP4_MvhdAtom* MvhdAtom = new AP4_MvhdAtom(0, 0, 
-                                    0, 
-                                    0,
-                                    0x00010000,
-                                    0x0100);
-      moov->AddChild(MvhdAtom);
+      movie = new AP4_Movie();
       
-      CDASHByteStream dummy_stream;
-      movie = new AP4_Movie(moov, dummy_stream, true);
-
       AP4_SyntheticSampleTable* sample_table = new AP4_SyntheticSampleTable();
       AP4_SampleDescription *sample_descryption = new AP4_SampleDescription(AP4_SampleDescription::TYPE_UNKNOWN, 0, 0);
       if (stream->stream_.getAdaptationSet()->encrypted)
       {
+        static const AP4_UI08 default_key[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
         AP4_ContainerAtom schi(AP4_ATOM_TYPE_SCHI);
-        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, m_session->GetDefaultKeyId()));
+        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, default_key));
         sample_descryption = new AP4_ProtectedSampleDescription(0, sample_descryption, 0, AP4_PROTECTION_SCHEME_TYPE_PIFF, 0, "", &schi);
       }
       sample_table->AddSampleDescription(sample_descryption);
-
-      movie->AddTrack(new AP4_Track(TIDC[stream->stream_.get_type()], sample_table, ~0, stream->stream_.getRepresentation()->timescale_, 0, stream->stream_.getRepresentation()->timescale_, 0, "", 0, 0));      
-      stream->input_file_ = new AP4_File(movie);
+      
+      movie->AddTrack(new AP4_Track(TIDC[stream->stream_.get_type()], sample_table, ~0, stream->stream_.getRepresentation()->timescale_, 0, stream->stream_.getRepresentation()->timescale_, 0, "", 0, 0));
+      //Create a dumy MOOV Atom to tell Bento4 its a fragmented stream
+      AP4_MoovAtom *moov = new AP4_MoovAtom();
+      moov->AddChild(new AP4_ContainerAtom(AP4_ATOM_TYPE_MVEX));
+      movie->SetMoovAtom(moov);    
     }
-    else
+
+    stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true, movie);
+    movie = stream->input_file_->GetMovie();
+    if (movie == NULL)
     {
-      stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
-      movie = stream->input_file_->GetMovie();
-      if (movie == NULL)
-      {
-        CLog::Log(LOGERROR, "No MOOV in stream!");
-        return stream->disable();
-      }
+      CLog::Log(LOGERROR, "No MOOV in stream!");
+      return stream->disable();
     }
 
     AP4_Track *track = movie->GetTrack(TIDC[stream->stream_.get_type()]);
@@ -252,19 +241,6 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
     stream->reader_ = new CDASHFragmentedSampleReader(stream->input_, movie, track, streamid, m_session->GetSingleSampleDecryptor(), m_session->GetPresentationTimeOffset());
     stream->reader_->SetObserver(dynamic_cast<IDASHFragmentObserver*>(m_session.get()));
 
-    if (!stream->dmuxstrm->ExtraSize)
-    {
-      // ExtraData is now available......
-      stream->dmuxstrm->ExtraSize = stream->reader_->GetExtraDataSize();
-
-      // Set the session Changed to force new GetStreamInfo call from kodi -> addon
-      if (stream->dmuxstrm->ExtraSize)
-      {
-        stream->dmuxstrm->ExtraData = (uint8_t*)malloc(stream->dmuxstrm->ExtraSize);
-        memcpy((void*)stream->dmuxstrm->ExtraData, stream->reader_->GetExtraData(), stream->dmuxstrm->ExtraSize);
-        m_session->CheckChange(true);
-      }
-    }
     return;
   }
   CLog::Log(LOGDEBUG, ">>>> ERROR");

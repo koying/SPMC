@@ -28,6 +28,8 @@
 
 using namespace adaptive;
 
+uint32_t gTimeScale = 10000000;
+
 SmoothTree::SmoothTree()
 {
   current_period_ = new AdaptiveTree::Period;
@@ -145,7 +147,8 @@ start(void *data, const char *el, const char **attr)
       dash->current_adaptationset_ = new SmoothTree::AdaptationSet();
       dash->current_period_->adaptationSets_.push_back(dash->current_adaptationset_);
       dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_SUPPORTED;
-
+      dash->current_adaptationset_->timescale_ = gTimeScale;
+          
       for (; *attr;)
       {
         if (strcmp((const char*)*attr, "Type") == 0)
@@ -174,12 +177,12 @@ start(void *data, const char *el, const char **attr)
   }
   else if (strcmp(el, "SmoothStreamingMedia") == 0)
   {
-    uint64_t timeScale = 0, duration = 0;
+    uint64_t duration = 0;
     dash->overallSeconds_ = 0;
     for (; *attr;)
     {
       if (strcmp((const char*)*attr, "TimeScale") == 0)
-        timeScale = atoll((const char*)*(attr + 1));
+        gTimeScale = atoll((const char*)*(attr + 1));
       else if (strcmp((const char*)*attr, "Duration") == 0)
         duration = atoll((const char*)*(attr + 1));
       else if (strcmp((const char*)*attr, "IsLive") == 0)
@@ -193,8 +196,7 @@ start(void *data, const char *el, const char **attr)
       }
       attr += 2;
     }
-    if (timeScale)
-      dash->overallSeconds_ = (double)duration / timeScale;
+    dash->overallSeconds_ = (double)duration / gTimeScale;
     dash->currentNode_ |= SmoothTree::SSMNODE_SSM;
     dash->minPresentationOffset = DBL_MAX;
     dash->base_time_ = ~0ULL;
