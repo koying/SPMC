@@ -30,7 +30,7 @@ CDASHFragmentedSampleReader::CDASHFragmentedSampleReader(AP4_ByteStream* input, 
   , m_eos(false)
   , m_started(false)
   , m_StreamId(streamId)
-  , m_SampleDescIndex(0)
+  , m_SampleDescIndex(1)
   , m_SingleSampleDecryptor(ssd)
   , m_Decrypter(0)
   , m_Protected_desc(0)
@@ -48,6 +48,7 @@ CDASHFragmentedSampleReader::CDASHFragmentedSampleReader(AP4_ByteStream* input, 
     m_Protected_desc = static_cast<AP4_ProtectedSampleDescription*>(desc);
     desc = m_Protected_desc->GetOriginalSampleDescription();
   }
+  UpdateSampleDescription();
 }
 
 CDASHFragmentedSampleReader::~CDASHFragmentedSampleReader()
@@ -242,9 +243,14 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
     //Check if the sample table description has changed
     AP4_ContainerAtom *traf = AP4_DYNAMIC_CAST(AP4_ContainerAtom, moof->GetChild(AP4_ATOM_TYPE_TRAF, 0));
     AP4_TfhdAtom *tfhd = AP4_DYNAMIC_CAST(AP4_TfhdAtom, traf->GetChild(AP4_ATOM_TYPE_TFHD, 0));
-    if ((tfhd && tfhd->GetSampleDescriptionIndex() != m_SampleDescIndex) || (!tfhd && (m_SampleDescIndex = 1)))
+    if (tfhd && tfhd->GetSampleDescriptionIndex() != m_SampleDescIndex)
     {
       m_SampleDescIndex = tfhd->GetSampleDescriptionIndex();
+      UpdateSampleDescription();
+    }
+    else if (m_SampleDescIndex != 1)
+    {
+      m_SampleDescIndex = 1;
       UpdateSampleDescription();
     }
 
@@ -293,6 +299,9 @@ void CDASHFragmentedSampleReader::UpdateSampleDescription()
   m_bSampleDescChanged = true;
 
   AP4_SampleDescription *desc(m_Track->GetSampleDescription(m_SampleDescIndex - 1));
+  if (!desc)
+    return;
+  
   if (desc->GetType() == AP4_SampleDescription::TYPE_PROTECTED)
   {
     m_Protected_desc = static_cast<AP4_ProtectedSampleDescription*>(desc);
