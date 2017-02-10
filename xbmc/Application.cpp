@@ -3037,13 +3037,7 @@ void CApplication::Stop(int exitCode)
     // unloading
     CScriptInvocationManager::GetInstance().Uninitialize();
 
-#ifdef HAS_FILESYSTEM_SFTP
-    CSFTPSessionManager::DisconnectAllSessions();
-#endif
-
-#if defined(TARGET_POSIX) && defined(HAS_FILESYSTEM_SMB)
-    smb.Deinit();
-#endif
+    CloseNetworkShares();
 
     g_Windowing.DestroyRenderSystem();
     g_Windowing.DestroyWindow();
