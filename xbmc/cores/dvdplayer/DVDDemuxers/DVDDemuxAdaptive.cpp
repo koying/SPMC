@@ -115,7 +115,7 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
     p->iSize = sr->GetSampleDataSize();
     memcpy(p->pData, sr->GetSampleData(), p->iSize);
 
-    //CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
+    CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
 
     sr->ReadSample();
     return p;
@@ -241,6 +241,15 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
     stream->reader_ = new CDASHFragmentedSampleReader(stream->input_, movie, track, streamid, m_session->GetSingleSampleDecryptor(), m_session->GetPresentationTimeOffset());
     stream->reader_->SetObserver(dynamic_cast<IDASHFragmentObserver*>(m_session.get()));
 
+    if (!stream->dmuxstrm->ExtraSize && stream->reader_->GetExtraDataSize())
+    {
+      // ExtraData is now available......
+      stream->dmuxstrm->ExtraSize = stream->reader_->GetExtraDataSize();      
+      stream->dmuxstrm->ExtraData = (uint8_t*)malloc(stream->dmuxstrm->ExtraSize);
+      memcpy((void*)stream->dmuxstrm->ExtraData, stream->reader_->GetExtraData(), stream->dmuxstrm->ExtraSize);
+      // Set the session Changed to force new GetStreamInfo call from kodi -> addon
+      m_session->CheckChange(true);
+    }
     return;
   }
   CLog::Log(LOGDEBUG, ">>>> ERROR");

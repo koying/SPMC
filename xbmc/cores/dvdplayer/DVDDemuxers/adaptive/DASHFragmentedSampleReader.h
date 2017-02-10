@@ -51,7 +51,7 @@ public:
   const AP4_Byte *GetSampleData() const { return m_sample_data_.GetData(); }
   double GetDuration() const { return (double)m_sample_.GetDuration() / (double)m_Track->GetMediaTimeScale(); }
   const AP4_UI08 *GetExtraData() { return m_codecHandler->extra_data; }
-  AP4_Size GetExtraDataSize() { return m_codecHandler->extra_data_size; }
+  AP4_Size GetExtraDataSize() { return m_codecHandler ? m_codecHandler->extra_data_size : 0; }
   bool GetVideoInformation(int &width, int &height) { return  m_codecHandler->GetVideoInformation(width, height); }
   bool GetAudioInformation(int &channelCount) { return  m_codecHandler->GetAudioInformation(channelCount); }
   void SetObserver(IDASHFragmentObserver *observer) { m_Observer = observer; }
