@@ -15,18 +15,14 @@
 #include <float.h>
 
 #include "DASHTree.h"
-#include "oscompat.h"
-#include "helpers.h"
+#include "../oscompat.h"
+#include "../helpers.h"
 
-#include "URL.h"
-#include "filesystem/File.h"
 #include "utils/log.h"
-#include "utils/URIUtils.h"
 
 //#define DEBUG_VERBOSE 1
 
-using namespace dash;
-using namespace XFILE;
+using namespace adaptive;
 
 const char* TRANSLANG[370] = {
   "aa", "aar",
@@ -230,15 +226,6 @@ static const char* ltranslate(const char * in)
 }
 
 DASHTree::DASHTree()
-  :download_speed_(0.0)
-  , average_download_speed_(0.0f)
-  , parser_(0)
-  , encryptionState_(ENCRYTIONSTATE_UNENCRYPTED)
-  , current_period_(0)
-  , live_start_(0)
-  , stream_start_(0)
-  , base_time_(0)
-  , publish_time_(0)
 {
 }
 
@@ -357,7 +344,7 @@ start(void *data, const char *el, const char **attr)
                 else if (strcmp((const char*)*attr, "media") == 0)
                 {
                   seg.media_ = (const char*)*(attr + 1);
-                  dash->current_representation_->flags_ |= DASHTree::Representation::SEGMENTMEDIA;
+                  dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::SEGMENTMEDIA;
                 }
                 attr += 2;
               }
@@ -372,11 +359,11 @@ start(void *data, const char *el, const char **attr)
                 else if (strcmp((const char*)*attr, "sourceURL") == 0)
                 {
                   seg.media_ = (const char*)*(attr + 1);
-                  dash->current_representation_->flags_ |= DASHTree::Representation::SEGMENTMEDIA;
+                  dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::SEGMENTMEDIA;
                 }
                 attr += 2;
               }
-              dash->current_representation_->flags_ |= DASHTree::Representation::INITIALIZATION;
+              dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::INITIALIZATION;
               dash->current_representation_->initialization_ = seg;
             }
             else
@@ -402,13 +389,13 @@ start(void *data, const char *el, const char **attr)
               }
               if (d && r)
               {
-                DASHTree::Segment s;
+                adaptive::AdaptiveTree::Segment s;
                 if (dash->current_representation_->segments_.data.empty())
                 {
                   if (dash->current_representation_->segtpl_.duration && dash->current_representation_->segtpl_.timescale)
                     dash->current_representation_->segments_.data.reserve((unsigned int)(dash->overallSeconds_ / (((double)dash->current_representation_->segtpl_.duration) / dash->current_representation_->segtpl_.timescale)) + 1);
 
-                  if (dash->current_representation_->flags_ & DASHTree::Representation::INITIALIZATION)
+                  if (dash->current_representation_->flags_ & adaptive::AdaptiveTree::Representation::INITIALIZATION)
                   {
                     s.range_begin_ = s.range_end_ = ~0;
                     dash->current_representation_->initialization_ = s;
@@ -436,7 +423,7 @@ start(void *data, const char *el, const char **attr)
             }
             else if (strcmp(el, "SegmentTimeline") == 0)
             {
-              dash->current_representation_->flags_ |= DASHTree::Representation::TIMELINE;
+              dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::TIMELINE;
               dash->currentNode_ |= DASHTree::MPDNODE_SEGMENTTIMELINE;
             }
           }
@@ -475,11 +462,11 @@ start(void *data, const char *el, const char **attr)
               if (strcmp((const char*)*attr, "indexRange") == 0)
                 sscanf((const char*)*(attr + 1), "%u-%u" , &dash->current_representation_->indexRangeMin_, &dash->current_representation_->indexRangeMax_);
               else if (strcmp((const char*)*attr, "indexRangeExact") == 0 && strcmp((const char*)*(attr + 1), "true") == 0)
-                dash->current_representation_->flags_ |= DASHTree::Representation::INDEXRANGEEXACT;
-              dash->current_representation_->flags_ |= DASHTree::Representation::SEGMENTBASE;
+                dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::INDEXRANGEEXACT;
+              dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::SEGMENTBASE;
               attr += 2;
             }
-            if((dash->current_representation_->flags_ & DASHTree::Representation::INDEXRANGEEXACT) && dash->current_representation_->indexRangeMax_)
+            if((dash->current_representation_->flags_ & adaptive::AdaptiveTree::Representation::INDEXRANGEEXACT) && dash->current_representation_->indexRangeMax_)
               dash->currentNode_ |= DASHTree::MPDNODE_SEGMENTLIST;
           }
           else if (strcmp(el, "SegmentTemplate") == 0)
@@ -487,10 +474,10 @@ start(void *data, const char *el, const char **attr)
             dash->current_representation_->segtpl_ = dash->current_adaptationset_->segtpl_;
 
             ParseSegmentTemplate(attr, dash->current_representation_->url_, dash->current_representation_->segtpl_, false);
-            dash->current_representation_->flags_ |= DASHTree::Representation::TEMPLATE;
+            dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::TEMPLATE;
             if (!dash->current_representation_->segtpl_.initialization.empty())
             {
-              dash->current_representation_->flags_ |= DASHTree::Representation::INITIALIZATION;
+              dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::INITIALIZATION;
               dash->current_representation_->url_ += dash->current_representation_->segtpl_.initialization;
               dash->current_representation_->timescale_ = dash->current_representation_->segtpl_.timescale;
             }
@@ -544,9 +531,9 @@ start(void *data, const char *el, const char **attr)
             if (strcmp((const char*)*attr, "contentType") == 0)
             {
               dash->current_adaptationset_->type_ =
-                stricmp((const char*)*(attr + 1), "video") == 0 ? DASHTree::VIDEO
-                : stricmp((const char*)*(attr + 1), "audio") == 0 ? DASHTree::AUDIO
-                : DASHTree::NOTYPE;
+                stricmp((const char*)*(attr + 1), "video") == 0 ? adaptive::AdaptiveTree::VIDEO
+                : stricmp((const char*)*(attr + 1), "audio") == 0 ? adaptive::AdaptiveTree::AUDIO
+                : adaptive::AdaptiveTree::NOTYPE;
               break;
             }
             attr += 2;
@@ -563,7 +550,7 @@ start(void *data, const char *el, const char **attr)
         }
         else if (strcmp(el, "Representation") == 0)
         {
-          dash->current_representation_ = new DASHTree::Representation();
+          dash->current_representation_ = new adaptive::AdaptiveTree::Representation();
           dash->current_representation_->channelCount_ = dash->adpChannelCount_;
           dash->current_representation_->codecs_ = dash->current_adaptationset_->codecs_;
           dash->current_representation_->url_ = dash->current_adaptationset_->base_url_;
@@ -617,7 +604,7 @@ start(void *data, const char *el, const char **attr)
         else if (strcmp(el, "ContentProtection") == 0)
         {
           dash->strXMLText_.clear();
-          dash->encryptionState_ |= DASHTree::ENCRYTIONSTATE_ENCRYPTED;
+          dash->encryptionState_ |= adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED;
           bool urnFound(false);
           for (; *attr;)
           {
@@ -631,7 +618,7 @@ start(void *data, const char *el, const char **attr)
           if (urnFound)
           {
             dash->currentNode_ |= DASHTree::MPDNODE_CONTENTPROTECTION;
-            dash->encryptionState_ |= DASHTree::ENCRYTIONSTATE_SUPPORTED;
+            dash->encryptionState_ |= adaptive::AdaptiveTree::ENCRYTIONSTATE_SUPPORTED;
           }
         }
         else if (strcmp(el, "AudioChannelConfiguration") == 0)
@@ -647,7 +634,7 @@ start(void *data, const char *el, const char **attr)
       else if (strcmp(el, "AdaptationSet") == 0)
       {
         //<AdaptationSet contentType="video" group="2" lang="en" mimeType="video/mp4" par="16:9" segmentAlignment="true" startWithSAP="1" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
-        dash->current_adaptationset_ = new DASHTree::AdaptationSet();
+        dash->current_adaptationset_ = new adaptive::AdaptiveTree::AdaptationSet();
         dash->current_period_->adaptationSets_.push_back(dash->current_adaptationset_);
         dash->current_adaptationset_->base_url_ = dash->current_period_->base_url_;
         dash->adp_pssh_.second.clear();
@@ -657,9 +644,9 @@ start(void *data, const char *el, const char **attr)
         {
           if (strcmp((const char*)*attr, "contentType") == 0)
             dash->current_adaptationset_->type_ =
-            stricmp((const char*)*(attr + 1), "video") == 0 ? DASHTree::VIDEO
-            : stricmp((const char*)*(attr + 1), "audio") == 0 ? DASHTree::AUDIO
-            : DASHTree::NOTYPE;
+            stricmp((const char*)*(attr + 1), "video") == 0 ? adaptive::AdaptiveTree::VIDEO
+            : stricmp((const char*)*(attr + 1), "audio") == 0 ? adaptive::AdaptiveTree::AUDIO
+            : adaptive::AdaptiveTree::NOTYPE;
           else if (strcmp((const char*)*attr, "lang") == 0)
             dash->current_adaptationset_->language_ = ltranslate((const char*)*(attr + 1));
           else if (strcmp((const char*)*attr, "mimeType") == 0)
@@ -681,7 +668,7 @@ start(void *data, const char *el, const char **attr)
     }
     else if (strcmp(el, "Period") == 0)
     {
-      dash->current_period_ = new DASHTree::Period();
+      dash->current_period_ = new adaptive::AdaptiveTree::Period();
       dash->current_period_->base_url_ = dash->base_url_;
       dash->periods_.push_back(dash->current_period_);
       dash->currentNode_ |= DASHTree::MPDNODE_PERIOD;
@@ -697,9 +684,16 @@ start(void *data, const char *el, const char **attr)
       if (strcmp((const char*)*attr, "mediaPresentationDuration") == 0)
         mpt = (const char*)*(attr + 1);
       else if (strcmp((const char*)*attr, "timeShiftBufferDepth") == 0)
+      {
         tsbd = (const char*)*(attr + 1);
+        dash->has_timeshift_buffer_ = true;
+      }
       else if (strcmp((const char*)*attr, "availabilityStartTime") == 0)
-        dash->live_start_ = getTime((const char*)*(attr + 1));
+      {
+        dash->available_time_ = getTime((const char*)*(attr + 1));
+        if (!dash->available_time_)
+          dash->available_time_ = ~0ULL;
+      }
       else if (strcmp((const char*)*attr, "publishTime") == 0)
         dash->publish_time_ = getTime((const char*)*(attr + 1));
       attr += 2;
@@ -724,8 +718,8 @@ start(void *data, const char *el, const char **attr)
       if (next)
         dash->overallSeconds_ += atof(mpt);
     }
-    if (dash->publish_time_ && dash->live_start_ && dash->publish_time_ - dash->live_start_ > dash->overallSeconds_)
-      dash->base_time_ = dash->publish_time_ - dash->live_start_ - dash->overallSeconds_;
+    if (dash->publish_time_ && dash->available_time_ && dash->publish_time_ - dash->available_time_ > dash->overallSeconds_)
+      dash->base_time_ = dash->publish_time_ - dash->available_time_ - dash->overallSeconds_;
     dash->minPresentationOffset = DBL_MAX;
 
     dash->currentNode_ |= DASHTree::MPDNODE_MPD;
@@ -824,7 +818,7 @@ end(void *data, const char *el)
             if (dash->current_representation_->segments_.data.empty())
             {
               bool isSegmentTpl(!dash->current_representation_->segtpl_.media.empty());
-              DASHTree::SegmentTemplate &tpl(isSegmentTpl ? dash->current_representation_->segtpl_ : dash->current_adaptationset_->segtpl_);
+              adaptive::AdaptiveTree::SegmentTemplate &tpl(isSegmentTpl ? dash->current_representation_->segtpl_ : dash->current_adaptationset_->segtpl_);
 
               if (!tpl.media.empty() && dash->overallSeconds_ > 0
                 && tpl.timescale > 0 && (tpl.duration > 0 || dash->current_adaptationset_->segment_durations_.data.size()))
@@ -834,10 +828,10 @@ end(void *data, const char *el)
 
                 if (countSegs < 65536)
                 {
-                  DASHTree::Segment seg;
+                  adaptive::AdaptiveTree::Segment seg;
                   seg.range_begin_ = ~0;
 
-                  dash->current_representation_->flags_ |= DASHTree::Representation::TEMPLATE;
+                  dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::TEMPLATE;
 
                   dash->current_representation_->segments_.data.reserve(countSegs);
                   if (!tpl.initialization.empty())
@@ -852,20 +846,20 @@ end(void *data, const char *el)
                     }
 
                     dash->current_representation_->initialization_ = seg;
-                    dash->current_representation_->flags_ |= DASHTree::Representation::INITIALIZATION;
+                    dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::INITIALIZATION;
                   }
 
                   std::vector<uint32_t>::const_iterator sdb(dash->current_adaptationset_->segment_durations_.data.begin()),
                     sde(dash->current_adaptationset_->segment_durations_.data.end());
                   bool timeBased = sdb!=sde && tpl.media.find("$Time") != std::string::npos;
                   if(timeBased)
-                    dash->current_representation_->flags_ |= DASHTree::Representation::TIMETEMPLATE;
+                    dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::TIMETEMPLATE;
 
                   seg.range_end_ = timeBased ? dash->current_adaptationset_->startPTS_ : tpl.startNumber;
                   seg.startPTS_ = dash->current_adaptationset_->startPTS_;
 
-                  if (!timeBased && dash->live_start_ /*&& !dash->publish_time_*/ && dash->stream_start_ - dash->live_start_ > dash->overallSeconds_) //we need to adjust the start-segment
-                    seg.range_end_ += ((dash->stream_start_ - dash->live_start_ - dash->overallSeconds_)*tpl.timescale) / tpl.duration;
+                  if (!timeBased && dash->available_time_ /*&& !dash->publish_time_*/ && dash->stream_start_ - dash->available_time_ > dash->overallSeconds_) //we need to adjust the start-segment
+                    seg.range_end_ += ((dash->stream_start_ - dash->available_time_ - dash->overallSeconds_)*tpl.timescale) / tpl.duration;
 
                   for (;countSegs;--countSegs)
                   {
@@ -876,7 +870,7 @@ end(void *data, const char *el)
                   return;
                 }
               }
-              else if (dash->current_representation_->flags_ & DASHTree::Representation::SEGMENTMEDIA)
+              else if (dash->current_representation_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTMEDIA)
               {
                 if (dash->current_representation_->segments_.data.size() != dash->current_adaptationset_->segment_durations_.data.size())
                 {
@@ -890,7 +884,7 @@ end(void *data, const char *el)
                   t += dash->current_adaptationset_->segment_durations_.data[i];
                 }
               }
-              else if (dash->current_representation_->flags_ & DASHTree::Representation::SEGMENTBASE)
+              else if (dash->current_representation_->flags_ & adaptive::AdaptiveTree::Representation::SEGMENTBASE)
               {}
               else
               {
@@ -947,8 +941,8 @@ end(void *data, const char *el)
         else if (strcmp(el, "AdaptationSet") == 0)
         {
           dash->currentNode_ &= ~DASHTree::MPDNODE_ADAPTIONSET;
-          if (dash->current_adaptationset_->type_ == DASHTree::NOTYPE
-          || ((dash->encryptionState_ & DASHTree::ENCRYTIONSTATE_ENCRYPTED) && dash->adp_pssh_.second.empty())
+          if (dash->current_adaptationset_->type_ == adaptive::AdaptiveTree::NOTYPE
+          || ((dash->encryptionState_ & adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED) && dash->adp_pssh_.second.empty())
           || dash->current_adaptationset_->repesentations_.empty())
           {
             delete dash->current_adaptationset_;
@@ -961,7 +955,7 @@ end(void *data, const char *el)
             if (dash->current_adaptationset_->segment_durations_.data.empty()
               && !dash->current_adaptationset_->segtpl_.media.empty())
             {
-              for (std::vector<DASHTree::Representation*>::iterator
+              for (std::vector<adaptive::AdaptiveTree::Representation*>::iterator
                 b(dash->current_adaptationset_->repesentations_.begin()),
                 e(dash->current_adaptationset_->repesentations_.end()); b != e; ++b)
               {
@@ -975,16 +969,16 @@ end(void *data, const char *el)
             else if (!dash->current_adaptationset_->segment_durations_.data.empty())
             //If representation are not timelined, we have to adjust startPTS_ in rep::segments
             {
-              for (std::vector<DASHTree::Representation*>::iterator
+              for (std::vector<adaptive::AdaptiveTree::Representation*>::iterator
                 b(dash->current_adaptationset_->repesentations_.begin()),
                 e(dash->current_adaptationset_->repesentations_.end()); b != e; ++b)
               {
-                if ((*b)->flags_ & DASHTree::Representation::TIMELINE)
+                if ((*b)->flags_ & adaptive::AdaptiveTree::Representation::TIMELINE)
                   continue;
                 std::vector<uint32_t>::const_iterator sdb(dash->current_adaptationset_->segment_durations_.data.begin()),
                   sde(dash->current_adaptationset_->segment_durations_.data.end());
                 uint64_t spts(0);
-                for (std::vector<DASHTree::Segment>::iterator sb((*b)->segments_.data.begin()), se((*b)->segments_.data.end()); sb != se && sdb != sde; ++sb, ++sdb)
+                for (std::vector<adaptive::AdaptiveTree::Segment>::iterator sb((*b)->segments_.data.begin()), se((*b)->segments_.data.end()); sb != se && sdb != sde; ++sb, ++sdb)
                 {
                   sb->startPTS_ = spts;
                   spts += *sdb;
@@ -1009,18 +1003,6 @@ end(void *data, const char *el)
 /*----------------------------------------------------------------------
 |   DASHTree
 +---------------------------------------------------------------------*/
-
-void DASHTree::Segment::SetRange(const char *range)
-{
-  const char *delim(strchr(range, '-'));
-  if (delim)
-  {
-    range_begin_ = strtoull(range, 0, 10);
-    range_end_ = strtoull(delim + 1, 0, 10);
-  }
-  else
-    range_begin_ = range_end_ = 0;
-}
 
 bool DASHTree::open(const char *url)
 {
@@ -1053,93 +1035,4 @@ bool DASHTree::write_data(void *buffer, size_t buffer_size)
     return false;
   }
   return true;
-}
-
-bool DASHTree::has_type(StreamType t)
-{
-  if (periods_.empty())
-    return false;
-
-  for (std::vector<AdaptationSet*>::const_iterator b(periods_[0]->adaptationSets_.begin()), e(periods_[0]->adaptationSets_.end()); b != e; ++b)
-    if ((*b)->type_ == t)
-      return true;
-  return false;
-}
-
-uint32_t DASHTree::estimate_segcount(uint32_t duration, uint32_t timescale)
-{
-  duration /= timescale;
-  return static_cast<uint32_t>((overallSeconds_ / duration)*1.01);
-}
-
-void DASHTree::set_download_speed(double speed)
-{
-  download_speed_ = speed;
-  if (!average_download_speed_)
-    average_download_speed_ = download_speed_;
-  else
-    average_download_speed_ = average_download_speed_*0.9 + download_speed_*0.1;
-};
-
-void DASHTree::SetFragmentDuration(const AdaptationSet* adp, const Representation* rep, size_t pos, uint32_t fragmentDuration)
-{
-  if (!live_start_ /*|| !(rep->flags_ & DASHTree::Representation::TIMELINE)*/)
-    return;
-
-  //Get a modifiable adaptationset
-  AdaptationSet *adpm(static_cast<AdaptationSet *>((void*)adp));
-
-  // Check if its the last frame we watch
-  if (adp->segment_durations_.data.size())
-  {
-    if (pos == adp->segment_durations_.data.size() - 1)
-    {
-      adpm->segment_durations_.insert(fragmentDuration);
-    }
-    else
-      return;
-  }
-  else if (pos != rep->segments_.data.size() - 1)
-    return;
-
-  Segment seg(*(rep->segments_[pos]));
-  seg.range_begin_ += fragmentDuration;
-  seg.range_end_ += (rep->flags_ & DASHTree::Representation::TIMETEMPLATE)?fragmentDuration:1;
-  seg.startPTS_ += fragmentDuration;
-
-  for (std::vector<Representation*>::iterator b(adpm->repesentations_.begin()), e(adpm->repesentations_.end()); b != e; ++b)
-    (*b)->segments_.insert(seg);
-}
-
-bool DASHTree::empty()
-{
-  return (!current_period_ || current_period_->adaptationSets_.empty());
-}
-
-bool DASHTree::download(const char* url)
-{
-  // open the file
-  CURL uUrl(url);
-  if (URIUtils::IsInternetStream(uUrl))
-  {
-    uUrl.SetProtocolOption("seekable", "0");
-    uUrl.SetProtocolOption("acceptencoding", "gzip");
-  }
-
-  CFile* file = new CFile();
-  if (!file->Open(uUrl, READ_CHUNKED | READ_NO_CACHE))
-    return false;
-
-  // read the file
-  static const unsigned int CHUNKSIZE = 16384;
-  char buf[CHUNKSIZE];
-  size_t nbRead;
-  while ((nbRead = file->Read(buf, CHUNKSIZE)) > 0 && ~nbRead && write_data(buf, nbRead));
-
-  //download_speed_ = xbmc->GetFileDownloadSpeed(file);
-
-  file->Close();
-  delete file;
-
-  return nbRead == 0;
 }

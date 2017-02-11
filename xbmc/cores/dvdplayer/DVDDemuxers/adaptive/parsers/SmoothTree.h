@@ -18,18 +18,30 @@
 
 #pragma once
 
-#include <string>
-#include <stdint.h>
-#include <vector>
+#include "../common/AdaptiveTree.h"
 
-bool b64_decode(const char *in, unsigned int in_len, uint8_t *out, unsigned int &out_len);
+namespace adaptive
+{
 
-std::string b64_encode(unsigned char const* in, unsigned int in_len, bool urlEncode);
+  class SmoothTree : public AdaptiveTree
+  {
+  public:
+    SmoothTree();
+    virtual bool open(const char *url) override;
+    virtual bool write_data(void *buffer, size_t buffer_size) override;
 
-std::vector<std::string> split(const std::string& s, char seperator);
+    void parse_protection();
 
-std::string &trim(std::string &src);
+    enum
+    {
+      SSMNODE_SSM = 1 << 0,
+      SSMNODE_PROTECTION = 1 << 1,
+      SSMNODE_STREAMINDEX = 1 << 2,
+      SSMNODE_PROTECTIONHEADER = 1 << 3,
+      SSMNODE_PROTECTIONTEXT = 1 << 4
+    };
 
-std::string url_decode(std::string text);
+    uint64_t pts_helper_;
+  };
 
-std::string annexb_to_avc(const char *b16_data);
+}

@@ -34,6 +34,8 @@ public:
     , pictureId(0)
     , pictureIdPrev(0)
   {}
+  virtual ~CDASHCodecHandler() {}
+  
   virtual void UpdatePPSId(AP4_DataBuffer const&) {}
   virtual bool GetVideoInformation(int &width, int &height) { return false; }
   virtual bool GetAudioInformation(int &channels) { return false; }
