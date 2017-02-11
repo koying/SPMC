@@ -2866,7 +2866,6 @@ xbmc/video/jobs
 xbmc/video/videosync
 tools/android/packaging/xbmc/src/org/xbmc/kodi
 system/shaders
-xbmc/cores/dvdplayer/DVDInputStreams/dash
 tools/android/packaging/xbmc/res/layout
 tools/android/packaging/xbmc/res/values
 .
@@ -2882,3 +2881,6 @@ lib/libUPnP
 xbmc/network/android
 xbmc/listproviders
 tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/common
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/parsers
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive

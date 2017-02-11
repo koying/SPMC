@@ -11,17 +11,19 @@ SRCS += DVDDemuxVobsub.cpp
 SRCS += DVDDemuxCC.cpp
 SRCS += DVDFactoryDemuxer.cpp
 
-# MPD
+# Adaptive
 SRCS += \
-        DVDDemuxMPD.cpp \
-        dash/DASHStream.cpp \
-        dash/DASHTree.cpp \
-        dash/DASHCodecHandler.cpp \
-        dash/DASHByteStream.cpp \
-        dash/DASHFragmentedSampleReader.cpp \
-        dash/DASHSession.cpp \
-        dash/helpers.cpp \
-        dash/oscompat.cpp
+        DVDDemuxAdaptive.cpp \
+        adaptive/DASHStream.cpp \
+        adaptive/DASHCodecHandler.cpp \
+        adaptive/DASHByteStream.cpp \
+        adaptive/DASHFragmentedSampleReader.cpp \
+        adaptive/DASHSession.cpp \
+        adaptive/helpers.cpp \
+        adaptive/oscompat.cpp \
+        adaptive/common/AdaptiveTree.cpp \
+        adaptive/parsers/DASHTree.cpp \
+        adaptive/parsers/SmoothTree.cpp
 
 LIB = DVDDemuxers.a
 

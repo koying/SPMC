@@ -20,6 +20,7 @@
 #include <cstring>
 #include "oscompat.h"
 #include <stdlib.h>
+#include "ap4/Ap4DataBuffer.h"
 
 #ifndef BYTE
 typedef unsigned char BYTE;
@@ -252,4 +253,70 @@ std::string annexb_to_avc(const char *b16_data)
   result.replace(pos, sz, (const char*)pps, sz); pos += sz;
 
   return result;
+}
+
+void prkid2wvkid(const char *input, char *output)
+{
+  static const uint8_t remap[16] = { 3,2,1,0,5,4,7,6,8,9,10,11,12,13,14,15 };
+  for (unsigned int i(0); i < 16; ++i)
+    output[i] = input[remap[i]];
+}
+
+bool create_ism_license(std::string key, std::string license_data, AP4_DataBuffer &init_data)
+{
+  if (key.size() != 16 || license_data.empty())
+  {
+    init_data.SetDataSize(0);
+    return false;
+  }
+
+  uint8_t ld[1024];
+  unsigned int ld_size(1024);
+  b64_decode(license_data.c_str(), license_data.size(), ld, ld_size);
+
+  const uint8_t *uuid((uint8_t*)strstr((const char*)ld, "{UUID}"));
+  unsigned int license_size = uuid ? ld_size + 36 - 6 : ld_size;
+
+  //Build up proto header
+  init_data.Reserve(512);
+  uint8_t *protoptr(init_data.UseData());
+  *protoptr++ = 18; //id=16>>3=2, type=2(flexlen)
+  *protoptr++ = 16; //length of key
+  memcpy(protoptr, key.data(), 16);
+  protoptr += 16;
+  //-----------
+  *protoptr++ = 34;//id=32>>3=4, type=2(flexlen)
+  do {
+    *protoptr++ = static_cast<uint8_t>(license_size & 127);
+    license_size >>= 7;
+    if (license_size)
+      *(protoptr - 1) |= 128;
+    else
+      break;
+  } while (1);
+  if (uuid)
+  {
+    static const uint8_t hexmap[16] = { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
+    memcpy(protoptr, ld, uuid - ld);
+    protoptr += uuid - ld;
+
+    for (unsigned int i(0); i < 16; ++i)
+    {
+      if(i == 4 || i == 6 || i == 8 || i == 10)
+        *protoptr++ = '-';
+      *protoptr++ = hexmap[(uint8_t)(key.data()[i]) >> 4];
+      *protoptr++ = hexmap[(uint8_t)(key.data()[i]) & 15];
+    }
+    unsigned int sizeleft = ld_size - ((uuid - ld) + 6);
+    memcpy(protoptr, uuid + 6, sizeleft);
+    protoptr += sizeleft;
+  }
+  else
+  {
+    memcpy(protoptr, ld, ld_size);
+    protoptr += ld_size;
+  }
+  init_data.SetDataSize(protoptr - init_data.UseData());
+
+  return true;
 }

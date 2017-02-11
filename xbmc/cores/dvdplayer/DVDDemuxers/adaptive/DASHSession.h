@@ -27,22 +27,17 @@
 #include "DASHFragmentObserver.h"
 #include "DASHFragmentedSampleReader.h"
 #include "DASHStream.h"
-#include "DASHTree.h"
+#include "common/AdaptiveTree.h"
 
 #include "DVDDemuxers/DVDDemux.h"
 
 class CDASHSession: public IDASHFragmentObserver
 {
 public:
-  CDASHSession(const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path);
-  virtual ~CDASHSession();
-  bool initialize();
-  CDASHFragmentedSampleReader *GetNextSample();
-
   class STREAM
   {
   public:
-    STREAM(dash::DASHTree &t, dash::DASHTree::StreamType s);
+    STREAM(adaptive::AdaptiveTree &t, adaptive::AdaptiveTree::StreamType s);
     ~STREAM();
     void disable();
 
@@ -58,21 +53,35 @@ public:
     CDASHFragmentedSampleReader *reader_;
   };
 
+  enum MANIFEST_TYPE
+  {
+    MANIFEST_TYPE_UNKNOWN,
+    MANIFEST_TYPE_MPD,
+    MANIFEST_TYPE_ISM
+  };
+  
+  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path);
+  virtual ~CDASHSession();
+  bool initialize();
+  CDASHFragmentedSampleReader *GetNextSample();
+
   void UpdateStream(STREAM &stream);
 
-  std::string GetMpdUrl() { return mpdFileURL_; }
+  std::string GetUrl() { return fileURL_; }
   STREAM *GetStream(unsigned int sid) const { return (sid < streams_.size() ? streams_[sid] : 0); }
   unsigned int GetStreamCount() const { return streams_.size(); }
   std::uint16_t GetWidth() const { return width_; }
   std::uint16_t GetHeight() const { return height_; }
   AP4_CencSingleSampleDecrypter * GetSingleSampleDecryptor() const { return single_sample_decryptor_; }
-  double GetPresentationTimeOffset() { return dashtree_.minPresentationOffset < DBL_MAX? dashtree_.minPresentationOffset:0; }
-  double GetTotalTime() const { return dashtree_.overallSeconds_; }
+  double GetPresentationTimeOffset() { return adaptiveTree_->minPresentationOffset < DBL_MAX? adaptiveTree_->minPresentationOffset:0; }
+  double GetTotalTime() const { return adaptiveTree_->overallSeconds_; }
   double GetPTS() const { return last_pts_; }
   bool CheckChange(bool bSet = false);
   void SetVideoResolution(unsigned int w, unsigned int h);
   bool SeekTime(double seekTime, unsigned int streamId = 0, bool preceeding=true);
-  bool IsLive() const { return dashtree_.live_start_ != 0; }
+  bool IsLive() const { return adaptiveTree_->has_timeshift_buffer_; }
+  MANIFEST_TYPE GetManifestType() const { return manifest_type_; }
+  const AP4_UI08 *GetDefaultKeyId() const;
 
   //Observer Section
   void BeginFragment(AP4_UI32 streamId) override;
@@ -83,12 +92,13 @@ protected:
   //  AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
 
 private:
-  std::string mpdFileURL_;
+  MANIFEST_TYPE manifest_type_;
+  std::string fileURL_;
   std::string license_key_, license_type_;
   std::string profile_path_;
   void * decrypterModule_;
 
-  dash::DASHTree dashtree_;
+  adaptive::AdaptiveTree* adaptiveTree_;
 
   std::vector<STREAM*> streams_;
 
