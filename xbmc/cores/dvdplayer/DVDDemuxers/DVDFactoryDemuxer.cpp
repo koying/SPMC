@@ -30,7 +30,7 @@
 #include "DVDDemuxBXA.h"
 #include "DVDDemuxCDDA.h"
 #include "DVDDemuxPVRClient.h"
-#include "DVDDemuxMPD.h"
+#include "DVDDemuxAdaptive.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 
@@ -47,10 +47,12 @@ CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool
   if (!pInputStream)
     return NULL;
 
-  // Try to open the MPD demuxer
-  if (pInputStream->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInputStream->GetFileItem().IsType(".mpd"))
+  // Try to open the Adaptive demuxer
+  if (pInputStream->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInputStream->GetFileItem().IsType(".mpd")  //MPD
+      || pInputStream->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInputStream->GetFileItem().IsType(".ismc")
+      )
   {
-    std::unique_ptr<CDVDDemuxMPD> demuxer(new CDVDDemuxMPD());
+    std::unique_ptr<CDVDDemuxAdaptive> demuxer(new CDVDDemuxAdaptive());
 #ifdef TARGET_ANDROID
     CPointInt maxres = CXBMCApp::GetMaxDisplayResolution();
 #else

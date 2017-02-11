@@ -1,13 +1,20 @@
 /*
-* DASHTree.h
-*****************************************************************************
-* Copyright (C) 2015, liberty_developer
+*      Copyright (C) 2016-2016 peak3d
+*      http://www.peak3d.de
 *
-* Email: liberty.developer@xmail.net
+*  This Program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2, or (at your option)
+*  any later version.
 *
-* This source code and its use and distribution, is subject to the terms
-* and conditions of the applicable license agreement.
-*****************************************************************************/
+*  This Program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+*  GNU General Public License for more details.
+*
+*  <http://www.gnu.org/licenses/>.
+*
+*/
 
 #pragma once
 
@@ -17,7 +24,7 @@
 #include <inttypes.h>
 #include "expat.h"
 
-namespace dash
+namespace adaptive
 {
   template <typename T>
   struct SPINCACHE
@@ -61,7 +68,7 @@ namespace dash
     std::vector<T> data;
   };
 
-  class DASHTree
+  class AdaptiveTree
   {
   public:
     enum StreamType
@@ -95,8 +102,8 @@ namespace dash
 
     struct Representation
     {
-      Representation() :timescale_(0), duration_(0), bandwidth_(0), samplingRate_(0), width_(0), height_(0),
-        aspect_(1.0f), fpsRate_(0), fpsScale_(1), channelCount_(0), flags_(0), indexRangeMin_(0), indexRangeMax_(0){};
+      Representation() :bandwidth_(0), samplingRate_(0),  width_(0), height_(0), fpsRate_(0), fpsScale_(1), aspect_(1.0f), 
+         flags_(0), indexRangeMin_(0), indexRangeMax_(0), channelCount_(0), duration_(0), timescale_(0){};
       std::string url_;
       std::string id;
       std::string codecs_;
@@ -114,11 +121,13 @@ namespace dash
       static const unsigned int INITIALIZATION = 8;
       static const unsigned int TIMETEMPLATE = 16;
       static const unsigned int SEGMENTBASE = 32;
-      static const unsigned int SEGMENTMEDIA = 64;
+      static const unsigned int SEGMENTMEDIA = 64;      
+      static const unsigned int STARTTIMETPL = 128;
+
       uint32_t flags_;
 
       uint32_t indexRangeMin_, indexRangeMax_;
-      uint8_t channelCount_;
+      uint8_t channelCount_, nalLengthSize_;
       SegmentTemplate segtpl_;
       //SegmentList
       uint32_t duration_, timescale_;
@@ -146,7 +155,7 @@ namespace dash
 
     struct AdaptationSet
     {
-      AdaptationSet() :type_(NOTYPE), timescale_(0), startPTS_(0){ language_ = "unk"; };
+      AdaptationSet() :type_(NOTYPE), timescale_(0),  startPTS_(0), encrypted(false){ language_ = "unk"; };
       ~AdaptationSet(){ for (std::vector<Representation* >::const_iterator b(repesentations_.begin()), e(repesentations_.end()); b != e; ++b) delete *b; };
       StreamType type_;
       uint32_t timescale_;
@@ -162,6 +171,7 @@ namespace dash
         return *segment_durations_[pos];
       };
       SegmentTemplate segtpl_;
+      bool encrypted;
     }*current_adaptationset_;
 
     struct Period
@@ -180,14 +190,16 @@ namespace dash
     uint32_t currentNode_;
     uint32_t segcount_;
     double overallSeconds_;
-    uint64_t stream_start_, live_start_, publish_time_, base_time_;
+    uint64_t stream_start_, available_time_, publish_time_, base_time_;
     double minPresentationOffset;
+    bool has_timeshift_buffer_;
 
     uint32_t bandwidth_;
 
     double download_speed_, average_download_speed_;
-
+    
     std::pair<std::string, std::string> pssh_, adp_pssh_;
+    std::string defaultKID_;
 
     enum
     {
@@ -197,41 +209,26 @@ namespace dash
     };
     unsigned int  encryptionState_;
     uint8_t adpChannelCount_;
+    uint16_t adpwidth_, adpheight_;
+    uint32_t adpfpsRate_;
 
-    enum
-    {
-      MPDNODE_MPD = 1 << 0,
-      MPDNODE_PERIOD = 1 << 1,
-      MPDNODE_ADAPTIONSET = 1 << 2,
-      MPDNODE_CONTENTPROTECTION = 1 << 3,
-      MPDNODE_REPRESENTATION = 1 << 4,
-      MPDNODE_BASEURL = 1 << 5,
-      MPDNODE_SEGMENTLIST = 1 << 6,
-      MPDNODE_INITIALIZATION = 1 << 7,
-      MPDNODE_SEGMENTURL = 1 << 8,
-      MPDNODE_SEGMENTDURATIONS = 1 << 9,
-      MPDNODE_S = 1 << 11,
-      MPDNODE_PSSH = 1 << 12,
-      MPDNODE_SEGMENTTEMPLATE = 1 << 13,
-      MPDNODE_SEGMENTTIMELINE = 1 << 14
-    };
     std::string strXMLText_;
 
-    DASHTree();
-    ~DASHTree();
-    bool open(const char *url);
+    AdaptiveTree();
     bool has_type(StreamType t);
     uint32_t estimate_segcount(uint32_t duration, uint32_t timescale);
     double get_download_speed() const { return download_speed_; };
     double get_average_download_speed() const { return average_download_speed_; };
     void set_download_speed(double speed);
-    void SetFragmentDuration(const AdaptationSet* adp, const Representation* rep, size_t pos, uint32_t fragmentDuration);
+    void SetFragmentDuration(const AdaptationSet* adp, const Representation* rep, size_t pos, uint32_t fragmentDuration, uint32_t movie_timescale);
 
-    bool empty();
+    bool empty(){ return !current_period_ || current_period_->adaptationSets_.empty(); };
     const AdaptationSet *GetAdaptationSet(unsigned int pos) const { return current_period_ && pos < current_period_->adaptationSets_.size() ? current_period_->adaptationSets_[pos] : 0; };
-protected:
-  virtual bool download(const char* url);
-  bool write_data(void *buffer, size_t buffer_size);
+
+    virtual bool open(const char *url) = 0;
+  protected:
+    virtual bool download(const char* url);
+    virtual bool write_data(void *buffer, size_t buffer_size) = 0;
 };
 
 }
