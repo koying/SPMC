@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "DASHTree.h"
+#include "common/AdaptiveTree.h"
 #include <string>
 
 namespace dash
@@ -27,10 +27,10 @@ namespace dash
   class DASHStream
   {
   public:
-    DASHStream(DASHTree &tree, DASHTree::StreamType type);
+    DASHStream(adaptive::AdaptiveTree &tree, adaptive::AdaptiveTree::StreamType type);
     ~DASHStream();
     void set_observer(DASHStreamObserver *observer){ observer_ = observer; };
-    bool prepare_stream(const DASHTree::AdaptationSet *adp,
+    bool prepare_stream(const adaptive::AdaptiveTree::AdaptationSet *adp,
                         const uint32_t width, const uint32_t height,
                         uint32_t min_bandwidth, uint32_t max_bandwidth, unsigned int repId);
     bool start_stream(const uint32_t seg_offset, uint16_t width, uint16_t height);
@@ -49,8 +49,8 @@ namespace dash
     uint64_t tell(){ read(0, 0);  return absolute_position_; };
     bool seek(uint64_t const pos);
     bool seek_time(double seek_seconds, double current_seconds, bool &needReset);
-    DASHTree::AdaptationSet const *getAdaptationSet() { return current_adp_; };
-    DASHTree::Representation const *getRepresentation(){ return current_rep_; };
+    adaptive::AdaptiveTree::AdaptationSet const *getAdaptationSet() { return current_adp_; };
+    adaptive::AdaptiveTree::Representation const *getRepresentation(){ return current_rep_; };
     double get_download_speed() const { return tree_.get_download_speed(); };
     void set_download_speed(double speed) { tree_.set_download_speed(speed); };
     size_t getSegmentPos() { return current_rep_->segments_.pos(current_seg_); };
@@ -62,14 +62,14 @@ namespace dash
   private:
     bool download_segment();
 
-    DASHTree &tree_;
-    DASHTree::StreamType type_;
+    adaptive::AdaptiveTree &tree_;
+    adaptive::AdaptiveTree::StreamType type_;
     DASHStreamObserver *observer_;
     // Active configuration
-    const DASHTree::Period *current_period_;
-    const DASHTree::AdaptationSet *current_adp_;
-    const DASHTree::Representation *current_rep_;
-    const DASHTree::Segment *current_seg_;
+    const adaptive::AdaptiveTree::Period *current_period_;
+    const adaptive::AdaptiveTree::AdaptationSet *current_adp_;
+    const adaptive::AdaptiveTree::Representation *current_rep_;
+    const adaptive::AdaptiveTree::Segment *current_seg_;
     //We assume that a single segment can build complete frames
     std::string segment_buffer_;
     std::size_t segment_read_pos_;

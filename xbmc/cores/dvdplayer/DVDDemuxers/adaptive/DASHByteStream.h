@@ -21,34 +21,29 @@
  *
  */
 
-#include "DVDDemux.h"
+#include "ap4/Ap4.h"
 
-#include <memory>
+#include "DASHStream.h"
 
-#include "dash/DASHSession.h"
-
-class CDVDDemuxMPD : public CDVDDemux
+class CDASHByteStream : public AP4_ByteStream
 {
 public:
-  CDVDDemuxMPD();
-  virtual ~CDVDDemuxMPD();
+  // Constructor
+  CDASHByteStream(dash::DASHStream *dashStream = nullptr) :dash_stream_(dashStream) {}
 
-  bool Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_t maxHeight);
-  void Dispose();
-  void Reset();
-  void Abort();
-  void Flush();
-  DemuxPacket* Read();
-  bool SeekTime(int time, bool backwords = false, double* startpts = NULL);
-  void SetSpeed(int iSpeed);
-  virtual void EnableStream(int id, bool enable) override;
+  // AP4_ByteStream methods
+  AP4_Result ReadPartial(void* buffer, AP4_Size  bytesToRead, AP4_Size& bytesRead) override;
+  AP4_Result Seek(AP4_Position position) override;
+  AP4_Result Tell(AP4_Position& position) override;
 
-  int GetStreamLength();
-  CDemuxStream* GetStream(int iStreamId);
-  int GetNrOfStreams();
-  std::string GetFileName();
-  virtual void GetStreamCodecName(int iStreamId, std::string &strName);
+  AP4_Result WritePartial(const void* buffer, AP4_Size bytesToWrite, AP4_Size& bytesWritten) override { return AP4_ERROR_NOT_SUPPORTED; }
+  AP4_Result GetSize(AP4_LargeSize& size) override { return AP4_ERROR_NOT_SUPPORTED; }
+
+  // AP4_Referenceable methods
+  void AddReference() override {}
+  void Release() override {}
 
 protected:
-  std::shared_ptr<CDASHSession> m_MPDsession;
+  // members
+  dash::DASHStream *dash_stream_;
 };
