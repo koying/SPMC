@@ -39,6 +39,7 @@
 #include "android/activity/XBMCApp.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderFlags.h"
+#include "cores/dvdplayer/DVDDemuxers/DemuxCrypto.h"
 
 #include "android/jni/ByteBuffer.h"
 #include "android/jni/MediaCodecList.h"
@@ -64,6 +65,9 @@
 #define XMEDIAFORMAT_KEY_CROP_RIGHT "crop-right"
 #define XMEDIAFORMAT_KEY_CROP_TOP "crop-top"
 #define XMEDIAFORMAT_KEY_CROP_BOTTOM "crop-bottom"
+
+AMediaUUID WIDEVINE_UUID = { 0xED, 0xEF, 0x8B, 0xA9, 0x79, 0xD6, 0x4A, 0xCE, 0xA3, 0xC8, 0x27, 0xDC, 0xD5, 0x1D, 0x21, 0xED };
+AMediaUUID PLAYREADY_UUID = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
 
 using namespace KODI::MESSAGING;
 
@@ -346,6 +350,7 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_re
 , m_bitstream(nullptr)
 , m_jnivideoview(nullptr)
 , m_surface(nullptr)
+, m_crypto(nullptr)
 , m_jnisurface(nullptr)
 , m_render_sw(false)
 , m_render_surface(surface_render)
@@ -358,6 +363,9 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_re
 CDVDVideoCodecAndroidMediaCodec::~CDVDVideoCodecAndroidMediaCodec()
 {
   Dispose();
+
+  if (m_crypto)
+    AMediaCrypto_delete(m_crypto);
 }
 
 bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
@@ -542,11 +550,39 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   }
 #endif
 
+  if (m_crypto)
+    AMediaCrypto_delete( m_crypto);
+
+  if (m_hints.cryptoSession)
+  {
+    CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open Initializing MediaCrypto");
+
+    if (m_hints.cryptoSession->keySystem == CRYPTO_SESSION_SYSTEM_WIDEVINE)
+      m_crypto = AMediaCrypto_new(WIDEVINE_UUID, m_hints.cryptoSession->sessionId, m_hints.cryptoSession->sessionIdSize);
+    else if (m_hints.cryptoSession->keySystem == CRYPTO_SESSION_SYSTEM_PLAYREADY)
+      m_crypto = AMediaCrypto_new(PLAYREADY_UUID, m_hints.cryptoSession->sessionId, m_hints.cryptoSession->sessionIdSize);
+    else
+    {
+      CLog::Log(LOGERROR, "CDVDAudioCodecAndroidMediaCodec::Open Unsupported crypto-keysystem:%u", m_hints.cryptoSession->keySystem);
+      return false;
+    }
+
+    if (!m_crypto)
+    {
+      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: Cannot initilize crypto");
+      return false;
+    }
+  }
+  else
+    m_crypto = nullptr;
+
   // CJNIMediaCodec::createDecoderByXXX doesn't handle errors nicely,
   // it crashes if the codec isn't found. This is fixed in latest AOSP,
   // but not in current 4.1 devices. So 1st search for a matching codec, then create it.
   m_codec = nullptr;
   m_colorFormat = -1;
+  bool needSecureDecoder = AMediaCrypto_requiresSecureDecoderComponent(m_mime.c_str());
+
   int num_codecs = CJNIMediaCodecList::getCodecCount();
   for (int i = 0; i < num_codecs; i++)
   {
@@ -556,6 +592,9 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     m_codecname = codec_info.getName();
     if (IsBlacklisted(m_codecname))
       continue;
+
+    if (needSecureDecoder)
+      m_codecname += ".secure";
 
     CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
     if (xbmc_jnienv()->ExceptionCheck())
@@ -658,6 +697,9 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
 
   CLog::Log(LOGINFO, "CDVDVideoCodecAndroidMediaCodec:: "
     "Open Android MediaCodec %s", m_codecname.c_str());
+
+  if (m_hints.cryptoSession)
+    SAFE_DELETE(m_bitstream);
 
   m_opened = true;
   memset(&m_demux_pkt, 0, sizeof(m_demux_pkt));
@@ -794,6 +836,19 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode, iSize(%d) > size(%d)", iSize, out_size);
         iSize = out_size;
       }
+
+      AMediaCodecCryptoInfo* cryptoInfo = nullptr;
+//      if (m_crypto && packet.cryptoInfo)
+//      {
+//        cryptoInfo = AMediaCodecCryptoInfo_new(
+//              packet.cryptoInfo->numSubSamples,
+//              packet.cryptoInfo->kid,
+//              packet.cryptoInfo->iv,
+//              AMEDIACODECRYPTOINFO_MODE_AES_CTR,
+//              packet.cryptoInfo->clearBytes,
+//              packet.cryptoInfo->cipherBytes);
+//      }
+
       if (dst_ptr)
       {
         // Codec specifics
@@ -839,7 +894,15 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dt
 
       int flags = 0;
       int offset = 0;
-      media_status_t mstat = AMediaCodec_queueInputBuffer(m_codec, index, offset, iSize, presentationTimeUs, flags);
+      media_status_t mstat = AMEDIA_ERROR_UNKNOWN;
+      if (cryptoInfo)
+      {
+        mstat = AMediaCodec_queueSecureInputBuffer(m_codec, index, offset, cryptoInfo, presentationTimeUs, flags);
+        AMediaCodecCryptoInfo_delete(cryptoInfo);
+      }
+      else
+        mstat = AMediaCodec_queueInputBuffer(m_codec, index, offset, iSize, presentationTimeUs, flags);
+
       if (mstat != AMEDIA_OK)
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode error(%d)", mstat);
       else
@@ -1037,7 +1100,7 @@ bool CDVDVideoCodecAndroidMediaCodec::ConfigureMediaCodec(void)
   if (m_render_sw)
     mstat = AMediaCodec_configure(m_codec, mediaformat, nullptr, nullptr, flags);
   else
-    mstat = AMediaCodec_configure(m_codec, mediaformat, m_surface, nullptr, flags);
+    mstat = AMediaCodec_configure(m_codec, mediaformat, m_surface, m_crypto, flags);
 
   if (mstat != AMEDIA_OK)
   {

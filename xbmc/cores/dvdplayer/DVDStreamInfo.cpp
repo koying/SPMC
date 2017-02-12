@@ -21,6 +21,7 @@
 #include "DVDStreamInfo.h"
 
 #include "DVDDemuxers/DVDDemux.h"
+#include "DVDDemuxers/DemuxCrypto.h"
 
 CDVDStreamInfo::CDVDStreamInfo()                                                     { extradata = NULL; Clear(); }
 CDVDStreamInfo::CDVDStreamInfo(const CDVDStreamInfo &right, bool withextradata )     { extradata = NULL; Clear(); Assign(right, withextradata); }
@@ -48,6 +49,8 @@ void CDVDStreamInfo::Clear()
 
   extradata = NULL;
   extrasize = 0;
+
+  cryptoSession = nullptr;
 
   fpsscale = 0;
   fpsrate  = 0;
@@ -183,6 +186,9 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
   bitspersample = right.bitspersample;
 
   // SUBTITLE
+
+  // CRYPTO
+  cryptoSession = right.cryptoSession;
 }
 
 void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
@@ -235,4 +241,7 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
   else if(  right.type == STREAM_SUBTITLE )
   {
   }
+
+  // CRYPTO
+  cryptoSession = right.cryptoSession;
 }

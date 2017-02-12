@@ -6542,6 +6542,11 @@ xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxVobsub.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxVobsub.h
 xbmc/cores/dvdplayer/DVDDemuxers/DVDFactoryDemuxer.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/DVDFactoryDemuxer.h
+xbmc/cores/dvdplayer/DVDDemuxers/DemuxCrypto.h
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/SSD_dll.h
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/wvdecrypter/jsmn.c
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/wvdecrypter/jsmn.h
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/wvdecrypter/wvdecrypter_android.cpp
 xbmc/cores/dvdplayer/DVDInputStreams/dvdnav/config.h
 xbmc/cores/dvdplayer/DVDInputStreams/dvdnav/decoder.h
 xbmc/cores/dvdplayer/DVDInputStreams/dvdnav/dvd_reader.h

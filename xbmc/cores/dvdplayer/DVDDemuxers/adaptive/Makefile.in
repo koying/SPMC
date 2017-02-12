@@ -1,0 +1,22 @@
+INCLUDES+=-I@abs_top_srcdir@/xbmc/cores/dvdplayer
+
+SRCS += \
+        DASHStream.cpp \
+        DASHCodecHandler.cpp \
+        DASHByteStream.cpp \
+        DASHFragmentedSampleReader.cpp \
+        DASHSession.cpp \
+        helpers.cpp \
+        oscompat.cpp \
+        common/AdaptiveTree.cpp \
+        parsers/DASHTree.cpp \
+        parsers/SmoothTree.cpp \
+        wvdecrypter/jsmn.c \
+        wvdecrypter/wvdecrypter_android.cpp \
+ 
+
+LIB = DVDDemuxAdaptive.a
+
+include @abs_top_srcdir@/Makefile.include
+-include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))
+

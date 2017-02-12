@@ -2884,3 +2884,4 @@ tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces
 xbmc/cores/dvdplayer/DVDDemuxers/adaptive/common
 xbmc/cores/dvdplayer/DVDDemuxers/adaptive/parsers
 xbmc/cores/dvdplayer/DVDDemuxers/adaptive
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/wvdecrypter
