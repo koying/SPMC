@@ -12,8 +12,11 @@ SRCS += \
         parsers/DASHTree.cpp \
         parsers/SmoothTree.cpp \
         wvdecrypter/jsmn.c \
-        wvdecrypter/wvdecrypter_android.cpp \
  
+# Crypto
+ifeq (@USE_ANDROID@,1)
+SRCS += wvdecrypter/wvdecrypter_android.cpp
+endif
 
 LIB = DVDDemuxAdaptive.a
 

@@ -386,7 +386,7 @@ int DVDPlayerCodec::ReadPCM(BYTE *pBuffer, int size, int *actualsize)
       m_audioPos = 0;
     }
 
-    decodeLen = m_pAudioCodec->Decode(m_pPacket->pData + m_audioPos, m_pPacket->iSize - m_audioPos);
+    decodeLen = m_pAudioCodec->Decode(DemuxPacket(m_pPacket->pData + m_audioPos, m_pPacket->iSize - m_audioPos, m_pPacket->pts, m_pPacket->dts));
 
     if (decodeLen < 0)
       m_audioPos = m_pPacket->iSize; // skip packet

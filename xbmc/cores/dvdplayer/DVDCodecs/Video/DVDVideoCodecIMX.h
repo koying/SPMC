@@ -298,7 +298,7 @@ public:
   // Methods from CDVDVideoCodec which require overrides
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
   virtual void Dispose();
-  virtual int  Decode(BYTE *pData, int iSize, double dts, double pts);
+  virtual int  Decode(const DemuxPacket &packet);
   virtual void Reset();
   virtual bool ClearPicture(DVDVideoPicture *pDvdVideoPicture);
   virtual bool GetPicture(DVDVideoPicture *pDvdVideoPicture);

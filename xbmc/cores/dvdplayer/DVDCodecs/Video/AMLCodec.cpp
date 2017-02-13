@@ -1726,7 +1726,7 @@ void CAMLCodec::Reset()
   SetSpeed(m_speed);
 }
 
-int CAMLCodec::Decode(uint8_t *pData, size_t iSize, double dts, double pts)
+int CAMLCodec::Decode(const DemuxPacket &packet)
 {
   if (!m_opened)
     return VC_BUFFER;

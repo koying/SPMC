@@ -206,7 +206,7 @@ void CDVDAudioCodecAndroidMediaCodec::Dispose()
   }
 }
 
-int CDVDAudioCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize)
+int CDVDAudioCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
 {
   int rtn = 0;
 

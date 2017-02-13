@@ -130,15 +130,17 @@ void CDVDAudioCodecFFmpeg::Dispose()
   }
 }
 
-int CDVDAudioCodecFFmpeg::Decode(uint8_t* pData, int iSize)
+int CDVDAudioCodecFFmpeg::Decode(const DemuxPacket &packet)
 {
   int iBytesUsed;
   if (!m_pCodecContext) return -1;
 
   AVPacket avpkt;
   av_init_packet(&avpkt);
-  avpkt.data = pData;
-  avpkt.size = iSize;
+  avpkt.data = packet.pData;
+  avpkt.size = packet.iSize;
+  avpkt.dts = (packet.dts == DVD_NOPTS_VALUE) ? AV_NOPTS_VALUE : packet.dts / DVD_TIME_BASE * AV_TIME_BASE;
+  avpkt.pts = (packet.pts == DVD_NOPTS_VALUE) ? AV_NOPTS_VALUE : packet.pts / DVD_TIME_BASE * AV_TIME_BASE;
   iBytesUsed = avcodec_decode_audio4( m_pCodecContext
                                                  , m_pFrame1
                                                  , &m_gotFrame
@@ -149,10 +151,10 @@ int CDVDAudioCodecFFmpeg::Decode(uint8_t* pData, int iSize)
   }
 
   /* some codecs will attempt to consume more data than what we gave */
-  if (iBytesUsed > iSize)
+  if (iBytesUsed > packet.iSize)
   {
     CLog::Log(LOGWARNING, "CDVDAudioCodecFFmpeg::Decode - decoder attempted to consume more data than given");
-    iBytesUsed = iSize;
+    iBytesUsed = packet.iSize;
   }
 
   if (m_pFrame1->nb_side_data)

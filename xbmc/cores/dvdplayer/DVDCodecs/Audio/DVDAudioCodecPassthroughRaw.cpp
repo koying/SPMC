@@ -205,7 +205,7 @@ void CDVDAudioCodecPassthroughRaw::Dispose()
   Cleanup();
 }
 
-int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
+int CDVDAudioCodecPassthroughRaw::Decode(const DemuxPacket &packet)
 {
   if (iSize <= 0) return 0;
 
@@ -213,7 +213,7 @@ int CDVDAudioCodecPassthroughRaw::Decode(uint8_t* pData, int iSize)
   unsigned int used = 0;
 
   unsigned int size = m_infobufferSize;
-  used = m_info.AddData(pData, iSize, &m_infobuffer, &size);
+  used = m_info.AddData(packet.pData, packet.iSize, &m_infobuffer, &size);
   if (g_advancedSettings.CanLogComponent(LOGAUDIO))
     CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode iSize(%d), size(%d), used(%d)", iSize, size, used);
   m_infobufferSize = std::max(m_infobufferSize, size);

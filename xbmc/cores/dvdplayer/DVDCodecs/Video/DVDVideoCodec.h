@@ -26,7 +26,7 @@
 #include <string>
 #include <map>
 #include "cores/VideoRenderers/RenderFormats.h"
-
+#include "cores/dvdplayer/DVDDemuxers/DVDDemuxPacket.h"
 
 
 extern "C" {
@@ -190,7 +190,7 @@ public:
    * returns one or a combination of VC_ messages
    * pData and iSize can be NULL, this means we should flush the rest of the data.
    */
-  virtual int Decode(uint8_t* pData, int iSize, double dts, double pts) = 0;
+  virtual int Decode(const DemuxPacket &packet) = 0;
 
  /*
    * Reset the decoder.

@@ -174,7 +174,7 @@ void CDVDVideoCodecStageFright::SetDropState(bool bDrop)
   m_stf_dll->stf_SetDropState(m_stf_handle, bDrop);
 }
 
-int CDVDVideoCodecStageFright::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecStageFright::Decode(const DemuxPacket &packet)
 {
 #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();

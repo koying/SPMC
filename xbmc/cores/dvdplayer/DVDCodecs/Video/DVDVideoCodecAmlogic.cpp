@@ -222,7 +222,7 @@ void CDVDVideoCodecAmlogic::Dispose(void)
     FrameQueuePop();
 }
 
-int CDVDVideoCodecAmlogic::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecAmlogic::Decode(const DemuxPacket &packet)
 {
   // Handle Input, add demuxer packet to input queue, we must accept it or
   // it will be discarded as DVDPlayerVideo has no concept of "try again".

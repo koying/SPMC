@@ -590,7 +590,7 @@ bool CStageFrightVideo::Open(CDVDStreamInfo &hints)
 }
 
 /*** Decode ***/
-int  CStageFrightVideo::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int  CStageFrightVideo::Decode(const DemuxPacket &packet)
 {
 #if defined(DEBUG_VERBOSE)
   unsigned int time = XbmcThreads::SystemClockMillis();
