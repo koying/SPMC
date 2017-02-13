@@ -18,7 +18,6 @@
 
 #include "wvdecrypter_android.h"
 
-#include "media/NdkMediaDrm.h"
 #include "../helpers.h"
 #include "jsmn.h"
 #include <stdarg.h>
@@ -26,6 +25,9 @@
 #include <chrono>
 #include <thread>
 
+#include "filesystem/File.h"
+#include "URL.h"
+#include "filesystem/CurlFile.h"
 #include "utils/log.h"
 
 using namespace SSD;
@@ -65,11 +67,11 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   }
 
 #ifdef _DEBUG
-  std::string strDbg = host->GetProfilePath();
-  strDbg += "EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.init";
-  FILE*f = fopen(strDbg.c_str(), "wb");
-  fwrite(pssh_.c_str(), 1, pssh_.size(), f);
-  fclose(f);
+  std::string strDbg = "special://home/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.init";
+  XFILE::CFile f;
+  f.OpenForWrite(strDbg, true);
+  f.Write(pssh_.c_str(), pssh_.size());
+  f.Close();
 #endif
 
   if (strcmp(&pssh_[4], "pssh") != 0)
@@ -82,12 +84,6 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
     pssh_[3] = static_cast<uint8_t>(pssh_.size());
     pssh_[sizeof(atom) - 1] = static_cast<uint8_t>(pssh_.size()) - sizeof(atom);
   }
-
-  std::string strBasePath = host->GetProfilePath();
-  char cSep = strBasePath.back();
-  strBasePath += "widevine";
-  strBasePath += cSep;
-  host->CreateDirectory(strBasePath.c_str());
 
   //Build up a CDM path to store decrypter specific stuff. Each domain gets it own path
   const char* bspos(strchr(license_url_.c_str(), ':'));
@@ -104,10 +100,6 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   char buffer[1024];
   buffer[(bspos - license_url_.c_str()) * 2] = 0;
   AP4_FormatHex(reinterpret_cast<const uint8_t*>(license_url_.c_str()), bspos - license_url_.c_str(), buffer);
-
-  strBasePath += buffer;
-  strBasePath += cSep;
-  host->CreateDirectory(strBasePath.c_str());
 
   uint8_t keysystem[16] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
   media_drm_ = AMediaDrm_createByUUID(keysystem);
@@ -190,23 +182,27 @@ bool WV_CencSingleSampleDecrypter_android::ProvisionRequest()
 
   std::string encoded = b64_encode(reinterpret_cast<const unsigned char*>(tmp_str.data()), tmp_str.size(), false);
 
-  void* file = host->CURLCreate(url);
-  host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, "Content-Type", "application/json");
-  host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, "seekable", "0");
-  host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, "postdata", encoded.c_str());
+  CURL uUrl(url);
+  uUrl.SetProtocolOption("Content-Type", "application/json");
+  uUrl.SetProtocolOption("seekable", "0");
+  uUrl.SetProtocolOption("postdata", encoded.c_str());
 
-  if (!host->CURLOpen(file))
+  XFILE::CFile* file = new XFILE::CFile();
+  if (!file->Open(uUrl, READ_NO_CACHE))
   {
     CLog::Log(LOGERROR, "Provisioning server returned failure");
     return false;
   }
+
   tmp_str.clear();
   char buf[8192];
   size_t nbRead;
 
   // read the file
-  while ((nbRead = host->ReadFile(file, buf, 8192)) > 0)
+  while ((nbRead = file->Read(buf, 8192)) > 0)
     tmp_str += std::string((const char*)buf, nbRead);
+  file->Close();
+  delete file;
 
   status = AMediaDrm_provideProvisionResponse(media_drm_, reinterpret_cast<const uint8_t *>(tmp_str.c_str()), tmp_str.size());
 
@@ -248,11 +244,11 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   }
 
 #ifdef _DEBUG
-  std::string strDbg = host->GetProfilePath();
-  strDbg += "EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.challenge";
-  FILE*f = fopen(strDbg.c_str(), "wb");
-  fwrite(key_request_, 1, key_request_size_, f);
-  fclose(f);
+  std::string strDbg = "special://home/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.challenge";
+  XFILE::CFile f;
+  f.OpenForWrite(strDbg, true);
+  f.Write(key_request_, key_request_size_);
+  f.Close();
 #endif
 
   //Process placeholder in GET String
@@ -271,24 +267,24 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
     }
   }
 
-  void* file = host->CURLCreate(blocks[0].c_str());
+  CURL uUrl(blocks[0].c_str());
+  uUrl.SetProtocolOption("acceptencoding", "gzip, deflate");
+  uUrl.SetProtocolOption("seekable", "0");
+  uUrl.SetProtocolOption("Expect", "");
 
+  XFILE::CFile* file = nullptr;
   size_t nbRead;
   std::string response;
   char buf[2048];
   AMediaDrmKeySetId dummy_ksid; //STREAMING returns 0
   media_status_t status;
-  //Set our std headers
-  host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, "acceptencoding", "gzip, deflate");
-  host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, "seekable", "0");
-  host->CURLAddOption(file, SSD_HOST::OPTION_HEADER, "Expect", "");
 
   //Process headers
   headers = split(blocks[1], '&');
   for (std::vector<std::string>::iterator b(headers.begin()), e(headers.end()); b != e; ++b)
   {
     header = split(*b, '=');
-    host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, trim(header[0]).c_str(), header.size() > 1 ? url_decode(trim(header[1])).c_str() : "");
+    uUrl.SetProtocolOption(trim(header[0]).c_str(), header.size() > 1 ? url_decode(trim(header[1])).c_str() : "");
   }
 
   //Process body
@@ -335,21 +331,21 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
       }
     }
     std::string decoded = b64_encode(reinterpret_cast<const unsigned char*>(blocks[2].data()), blocks[2].size(), false);
-    host->CURLAddOption(file, SSD_HOST::OPTION_PROTOCOL, "postdata", decoded.c_str());
+    uUrl.SetProtocolOption("postdata", decoded.c_str());
   }
 
-  if (!host->CURLOpen(file))
+  file = new XFILE::CFile();
+  if (!file->Open(uUrl, READ_NO_CACHE))
   {
     CLog::Log(LOGERROR, "License server returned failure");
     goto SSMFAIL;
   }
 
   // read the file
-  while ((nbRead = host->ReadFile(file, buf, 1024)) > 0)
+  while ((nbRead = file->Read(buf, 1024)) > 0)
     response += std::string((const char*)buf, nbRead);
-
-  host->CloseFile(file);
-  file = 0;
+  file->Close();
+  delete file;
 
   if (nbRead != 0)
   {
@@ -358,11 +354,10 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   }
 
 #ifdef _DEBUG
-  strDbg = host->GetProfilePath();
-  strDbg += "EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.response";
-  f = fopen(strDbg.c_str(), "wb");
-  fwrite(response.c_str(), 1, response.size(), f);
-  fclose(f);
+  strDbg = "special://home/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.response";
+  f.OpenForWrite(strDbg, true);
+  f.Write(response.c_str(), response.size());
+  f.Close();
 #endif
 
   if (!blocks[3].empty())
@@ -411,7 +406,7 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   return status == AMEDIA_OK;
 SSMFAIL:
   if (file)
-    host->CloseFile(file);
+    file->Close();
   return false;
 }
 
@@ -542,7 +537,6 @@ extern "C" {
   {
     if (host_version != SSD_HOST::version)
       return 0;
-    host = h;
     return new WVDecrypter;
   };
 

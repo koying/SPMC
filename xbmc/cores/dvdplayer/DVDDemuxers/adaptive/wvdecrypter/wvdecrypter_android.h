@@ -20,6 +20,9 @@
 
 #include "ap4/Ap4.h"
 #include "../SSD_dll.h"
+#include "media/NdkMediaDrm.h"
+
+#include <string>
 
 /*----------------------------------------------------------------------
 |   WV_CencSingleSampleDecrypter
@@ -66,7 +69,7 @@ private:
   AP4_UI08 nal_length_size_;
 };
 
-class WVDecrypter : public SSD_DECRYPTER
+class WVDecrypter : public SSD::SSD_DECRYPTER
 {
 public:
   // Return supported URN if type matches to capabikitues, otherwise null
@@ -89,14 +92,14 @@ public:
     return res;
   }
   
-  virtual bool OpenVideoDecoder(const SSD_VIDEOINITDATA *initData)
+  virtual bool OpenVideoDecoder(const SSD::SSD_VIDEOINITDATA *initData)
   {
     return false;
   }
 
-  virtual SSD_DECODE_RETVAL DecodeVideo(SSD_SAMPLE *sample, SSD_PICTURE *picture)
+  virtual SSD::SSD_DECODE_RETVAL DecodeVideo(SSD::SSD_SAMPLE *sample, SSD::SSD_PICTURE *picture)
   {
-    return VC_ERROR;
+    return SSD::VC_ERROR;
   }
 private:
   std::string licenseKey_;

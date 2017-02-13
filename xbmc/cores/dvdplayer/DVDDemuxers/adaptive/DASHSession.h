@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <float.h>
 
+#include "SSD_dll.h"
 #include "DASHFragmentObserver.h"
 #include "DASHFragmentedSampleReader.h"
 #include "DASHStream.h"
@@ -94,8 +95,10 @@ protected:
 private:
   MANIFEST_TYPE manifest_type_;
   std::string fileURL_;
-  std::string license_key_, license_type_;
+  std::string license_key_, license_type_, license_data_;
+  AP4_DataBuffer server_certificate_;
   std::string profile_path_;
+  SSD::SSD_DECRYPTER *decrypter_;
 
   adaptive::AdaptiveTree* adaptiveTree_;
 

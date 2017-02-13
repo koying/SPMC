@@ -23,7 +23,6 @@
 
 #include "DVDDemuxers/DVDDemux.h"
 
-#include "SSD_dll.h"
 #include "parsers/DASHTree.h"
 #include "parsers/SmoothTree.h"
 #ifdef TARGET_ANDROID
@@ -49,8 +48,7 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
   , width_(width)
   , height_(height)
   , last_pts_(0)
-  , decrypterModule_(0)
-//  , decrypter_(0)
+  , decrypter_(0)
   , changed_(false)
   , manual_streams_(false)
 {
@@ -146,18 +144,16 @@ void CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> 
   
   if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_.c_str())))
   {
-    CLog::Log(LOGDEBUG, "Found decrypter: %s", items[i].path);
-    decrypterModule_ = mod;
+    CLog::Log(LOGDEBUG, "Found decrypter");
     decrypter_ = decrypter;
     urn.first = suppUrn;
-    break;
   }
 }
 
 AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec)
 {
   if (decrypter_)
-    return decrypter_->CreateSingleSampleDecrypter(streamCodec);
+    return decrypter_->CreateSingleSampleDecrypter(streamCodec, server_certificate_);
   return 0;
 }
 
@@ -173,8 +169,8 @@ bool CDASHSession::initialize()
   // Get URN's wich are supported by this addon
   if (!license_type_.empty())
   {
-    GetSupportedDecrypterURN(dashtree_->adp_pssh_);
-    CLog::Log(LOGDEBUG, "Supported URN: %s", dashtree_->adp_pssh_.first.c_str());
+    GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_);
+    CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
   }
 
   // Open mpd file
