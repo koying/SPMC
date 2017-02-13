@@ -36,7 +36,7 @@ public:
 
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
   virtual void Dispose();
-  virtual int  Decode(uint8_t* pData, int iSize);
+  virtual int  Decode(const DemuxPacket &packet);
   virtual void GetData(DVDAudioFrame &frame);
   virtual int  GetData(uint8_t** dst);
   virtual void Reset() {}

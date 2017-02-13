@@ -64,17 +64,14 @@ void CDVDOverlayCodecSSA::Dispose()
     SAFE_RELEASE(m_pOverlay);
 }
 
-int CDVDOverlayCodecSSA::Decode(DemuxPacket *pPacket)
+int CDVDOverlayCodecSSA::Decode(const DemuxPacket &packet)
 {
-  if(!pPacket)
-    return OC_ERROR;
-  
-  double pts = pPacket->dts != DVD_NOPTS_VALUE ? pPacket->dts : pPacket->pts;
+  double pts = packet.dts != DVD_NOPTS_VALUE ? packet.dts : packet.pts;
   if (pts == DVD_NOPTS_VALUE)
     pts = 0;
-  uint8_t *data = pPacket->pData;
-  int size = pPacket->iSize;
-  double duration = pPacket->duration;
+  uint8_t *data = packet.pData;
+  int size = packet.iSize;
+  double duration = packet.duration;
   if(duration == DVD_NOPTS_VALUE)
     duration = 0.0;
 

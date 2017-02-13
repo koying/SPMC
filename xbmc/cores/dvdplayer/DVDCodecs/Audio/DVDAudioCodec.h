@@ -23,6 +23,7 @@
 #include "system.h"
 #include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
+#include "cores/dvdplayer/DVDDemuxers/DVDDemuxPacket.h"
 #include "DVDClock.h"
 
 
@@ -84,7 +85,7 @@ public:
    * returns bytes used or -1 on error
    *
    */
-  virtual int Decode(uint8_t* pData, int iSize) = 0;
+  virtual int Decode(const DemuxPacket &packet) = 0;
 
   /*
    * returns nr of bytes in decode buffer

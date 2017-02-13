@@ -107,7 +107,7 @@ public:
   // required overrides
   virtual bool    Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
   virtual void    Dispose();
-  virtual int     Decode(uint8_t *pData, int iSize, double dts, double pts);
+  virtual int     Decode(const DemuxPacket &packet);
   virtual void    Reset();
   virtual bool    GetPicture(DVDVideoPicture *pDvdVideoPicture);
   virtual bool    ClearPicture(DVDVideoPicture* pDvdVideoPicture);
