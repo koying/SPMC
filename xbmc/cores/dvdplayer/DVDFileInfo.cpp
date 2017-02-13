@@ -248,7 +248,7 @@ bool CDVDFileInfo::ExtractThumb(const std::string &strPath,
             continue;
           }
 
-          iDecoderState = pVideoCodec->Decode(pPacket->pData, pPacket->iSize, pPacket->dts, pPacket->pts);
+          iDecoderState = pVideoCodec->Decode(*pPacket);
           CDVDDemuxUtils::FreeDemuxPacket(pPacket);
 
           if (iDecoderState & VC_ERROR)

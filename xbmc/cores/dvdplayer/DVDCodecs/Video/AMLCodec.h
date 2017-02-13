@@ -40,7 +40,7 @@ public:
   void          CloseDecoder();
   void          Reset();
 
-  int           Decode(uint8_t *pData, size_t size, double dts, double pts);
+  int           Decode(const DemuxPacket &packet);
 
   bool          GetPicture(DVDVideoPicture* pDvdVideoPicture);
   void          SetSpeed(int speed);

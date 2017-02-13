@@ -713,28 +713,33 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   SAFE_DELETE(m_bitstream);
 }
 
-int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
 {
   // Are we stopped? If so, wait and loop
   if (m_state == MEDIACODEC_STATE_STOPPED)
   {
     if (!m_demux_pkt.pData)
     {
-      m_demux_pkt.dts = dts;
-      m_demux_pkt.pts = pts;
-      m_demux_pkt.iSize = iSize;
-      m_demux_pkt.pData = (uint8_t*)malloc(iSize);
-      memcpy(m_demux_pkt.pData, pData, iSize);
+      m_demux_pkt.dts = packet.dts;
+      m_demux_pkt.pts = packet.pts;
+      m_demux_pkt.iSize = packet.iSize;
+      m_demux_pkt.pData = (uint8_t*)malloc(packet.iSize);
+      memcpy(m_demux_pkt.pData, packet.pData, packet.iSize);
     }
 
     Sleep(20);
     return 0;
   }
 
+  unsigned char* pData = packet.pData;
+  int iSize = packet.iSize;
+  double pts = packet.pts;
+  double dts = packet.dts;
+  
   // Handle input, add demuxer packet to input queue, we must accept it or
   // it will be discarded as DVDPlayerVideo has no concept of "try again".
   // we must return VC_BUFFER or VC_PICTURE, default to VC_BUFFER.
-  int rtn = (m_state == MEDIACODEC_STATE_ENDOFSTREAM) ? 0 : VC_BUFFER;;
+  int rtn = (m_state == MEDIACODEC_STATE_ENDOFSTREAM) ? 0 : VC_BUFFER;
 
   if (!m_opened)
     return VC_ERROR;

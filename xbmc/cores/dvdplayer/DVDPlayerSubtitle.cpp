@@ -63,7 +63,7 @@ void CDVDPlayerSubtitle::SendMessage(CDVDMsg* pMsg, int priority)
 
     if (m_pOverlayCodec)
     {
-      int result = m_pOverlayCodec->Decode(pPacket);
+      int result = m_pOverlayCodec->Decode(*pPacket);
 
       if(result == OC_OVERLAY)
       {

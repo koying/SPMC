@@ -89,17 +89,17 @@ void CDVDOverlayCodecTX3G::Dispose()
     SAFE_RELEASE(m_pOverlay);
 }
 
-int CDVDOverlayCodecTX3G::Decode(DemuxPacket *pPacket)
+int CDVDOverlayCodecTX3G::Decode(const DemuxPacket &packet)
 {
   if (m_pOverlay)
     SAFE_RELEASE(m_pOverlay);
 
   m_pOverlay = new CDVDOverlayText();
-  CDVDOverlayCodec::GetAbsoluteTimes(m_pOverlay->iPTSStartTime, m_pOverlay->iPTSStopTime, pPacket, m_pOverlay->replace);
+  CDVDOverlayCodec::GetAbsoluteTimes(m_pOverlay->iPTSStartTime, m_pOverlay->iPTSStopTime, packet, m_pOverlay->replace);
 
   // do not move this. READ_XXXX macros modify pos.
-  uint8_t  *pos = pPacket->pData;
-  uint8_t  *end = pPacket->pData + pPacket->iSize;
+  uint8_t  *pos = packet.pData;
+  uint8_t  *end = packet.pData + packet.iSize;
 
   // Parse the packet as a TX3G TextSample.
   // Look for a single StyleBox ('styl') and 

@@ -222,8 +222,13 @@ void CDVDVideoCodecAmlogic::Dispose(void)
     FrameQueuePop();
 }
 
-int CDVDVideoCodecAmlogic::Decode(uint8_t *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecAmlogic::Decode(const DemuxPacket &packet)
 {
+  unsigned char* pData = packet.pData;
+  int iSize = packet.iSize;
+  double pts = packet.pts;
+  double dts = packet.dts;
+
   // Handle Input, add demuxer packet to input queue, we must accept it or
   // it will be discarded as DVDPlayerVideo has no concept of "try again".
   if (pData)
@@ -253,7 +258,7 @@ int CDVDVideoCodecAmlogic::Decode(uint8_t *pData, int iSize, double dts, double 
   if (m_hints.ptsinvalid)
     pts = DVD_NOPTS_VALUE;
 
-  return m_Codec->Decode(pData, iSize, dts, pts);
+  return m_Codec->Decode(packet);
 }
 
 void CDVDVideoCodecAmlogic::Reset(void)

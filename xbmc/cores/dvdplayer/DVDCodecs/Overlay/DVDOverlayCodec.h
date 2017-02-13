@@ -57,7 +57,7 @@ public:
    * returns one or a combination of VC_ messages
    * pData and iSize can be NULL, this means we should flush the rest of the data.
    */
-  virtual int Decode(DemuxPacket *pPacket) = 0;
+  virtual int Decode(const DemuxPacket &packet) = 0;
 
   /*
    * Reset the decoder.
@@ -89,7 +89,7 @@ protected:
    * replace - will be set to true if the overlay should replace the former overlay
    * offset - optional - offset will be added to start and stoptime
    */
-  static void GetAbsoluteTimes(double &starttime, double &stoptime, DemuxPacket *pkt, bool &replace, double offset = 0.0);
+  static void GetAbsoluteTimes(double &starttime, double &stoptime, const DemuxPacket& pkt, bool &replace, double offset = 0.0);
 
 private:
   std::string m_codecName;

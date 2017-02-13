@@ -406,7 +406,7 @@ void CDVDVideoCodecVDA::SetDropState(bool bDrop)
   m_DropPictures = bDrop;
 }
 
-int CDVDVideoCodecVDA::Decode(uint8_t* pData, int iSize, double dts, double pts)
+int CDVDVideoCodecVDA::Decode(const DemuxPacket &packet)
 {
   CCocoaAutoPool pool;
   //

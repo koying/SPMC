@@ -337,7 +337,7 @@ int COpenMaxVideo::EnqueueDemuxPacket(omx_demux_packet demux_packet)
   return 0;
 }
 
-int COpenMaxVideo::Decode(uint8_t* pData, int iSize, double dts, double pts)
+int COpenMaxVideo::Decode(const DemuxPacket &packet)
 {
   pthread_mutex_lock(&m_omx_queue_mutex);
 

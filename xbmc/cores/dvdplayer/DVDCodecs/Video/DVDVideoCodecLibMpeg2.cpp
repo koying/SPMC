@@ -211,12 +211,12 @@ void CDVDVideoCodecLibMpeg2::SetDropState(bool bDrop)
   m_hurry = bDrop ? 1 : 0;
 }
 
-int CDVDVideoCodecLibMpeg2::Decode(uint8_t* pData, int iSize, double dts, double pts)
+int CDVDVideoCodecLibMpeg2::Decode(const DemuxPacket &packet)
 {
   int iState = 0;
   if (!m_pHandle) return VC_ERROR;
 
-  if (pData && iSize)
+  if (packet.pData && packet.iSize)
   {
     //buffer more data
     iState = m_dll.mpeg2_parse(m_pHandle);
@@ -227,10 +227,10 @@ int CDVDVideoCodecLibMpeg2::Decode(uint8_t* pData, int iSize, double dts, double
     }
 
     // libmpeg2 needs more data. Give it and parse the data again
-    m_dll.mpeg2_buffer(m_pHandle, pData, pData + iSize);
+    m_dll.mpeg2_buffer(m_pHandle, packet.pData, packet.pData + packet.iSize);
     TagUnion u;
-    u.pts = pts;
-    m_dts = dts;
+    u.pts = packet.pts;
+    m_dts = packet.dts;
 
     m_dll.mpeg2_tag_picture(m_pHandle, u.tag.l, u.tag.u);
   }

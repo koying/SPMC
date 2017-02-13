@@ -126,12 +126,12 @@ void CDVDAudioCodecPassthrough::Dispose()
   m_bufferSize = 0;
 }
 
-int CDVDAudioCodecPassthrough::Decode(uint8_t* pData, int iSize)
+int CDVDAudioCodecPassthrough::Decode(const DemuxPacket &packet)
 {
-  if (iSize <= 0) return 0;
+  if (packet.iSize <= 0) return 0;
 
   unsigned int size = m_bufferSize;
-  unsigned int used = m_info.AddData(pData, iSize, &m_buffer, &size);
+  unsigned int used = m_info.AddData(packet.pData, packet.iSize, &m_buffer, &size);
   m_bufferSize = std::max(m_bufferSize, size);
 
   /* if we have a frame */

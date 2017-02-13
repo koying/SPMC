@@ -20,11 +20,8 @@
 #include "DVDOverlayCodec.h"
 #include "cores/dvdplayer/DVDClock.h"
 
-void CDVDOverlayCodec::GetAbsoluteTimes(double &starttime, double &stoptime, DemuxPacket *pkt, bool &replace, double offset/* = 0.0*/)
+void CDVDOverlayCodec::GetAbsoluteTimes(double &starttime, double &stoptime, const DemuxPacket& pkt, bool &replace, double offset/* = 0.0*/)
 {
-  if (!pkt)
-    return;
-  
   double duration = 0.0;
   double pts = starttime;
   
@@ -33,13 +30,13 @@ void CDVDOverlayCodec::GetAbsoluteTimes(double &starttime, double &stoptime, Dem
   // from decoder if available
   if(stoptime > starttime)
     duration = stoptime - starttime;
-  else if(pkt->duration != DVD_NOPTS_VALUE)
-    duration = pkt->duration;
+  else if(pkt.duration != DVD_NOPTS_VALUE)
+    duration = pkt.duration;
   
-  if     (pkt->pts != DVD_NOPTS_VALUE)
-    pts = pkt->pts;
-  else if(pkt->dts != DVD_NOPTS_VALUE)
-    pts = pkt->dts;
+  if     (pkt.pts != DVD_NOPTS_VALUE)
+    pts = pkt.pts;
+  else if(pkt.dts != DVD_NOPTS_VALUE)
+    pts = pkt.dts;
   
   starttime = pts + offset;
   if(duration)

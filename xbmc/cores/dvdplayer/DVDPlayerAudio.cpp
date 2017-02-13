@@ -262,7 +262,7 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe)
       if (dts != DVD_NOPTS_VALUE)
         m_audioClock = dts;
 
-      int len = m_pAudioCodec->Decode(m_decode.data, m_decode.size);
+      int len = m_pAudioCodec->Decode(DemuxPacket(m_decode.data, m_decode.size, dts, dts));
       if (len < 0 || len > m_decode.size)
       {
         /* if error, we skip the packet */
