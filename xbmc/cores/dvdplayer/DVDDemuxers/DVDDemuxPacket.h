@@ -22,9 +22,24 @@
 
 #define DMX_SPECIALID_STREAMINFO    -10
 #define DMX_SPECIALID_STREAMCHANGE  -11
+#define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and int64_t
 
  typedef struct DemuxPacket
 {
+  DemuxPacket() 
+    : pData(nullptr)
+    , iSize(0)
+    , pts(DVD_NOPTS_VALUE)
+    , dts(DVD_NOPTS_VALUE)
+  {}
+  
+  DemuxPacket(unsigned char *pData, int const iSize, double const pts, double const dts)
+    : pData(pData)
+    , iSize(iSize)
+    , pts(pts)
+    , dts(dts)
+  {}
+  
   unsigned char* pData;   // data
   int iSize;     // data size
   int iStreamId; // integer representing the stream index

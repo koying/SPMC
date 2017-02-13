@@ -9807,3 +9807,4 @@ xbmc/cores/dvdplayer/DVDDemuxers/adaptive/oscompat.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/adaptive/oscompat.h
 xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxAdaptive.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxAdaptive.h
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive/Makefile.in

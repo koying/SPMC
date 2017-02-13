@@ -54,19 +54,16 @@ void CDVDOverlayCodecText::Dispose()
     SAFE_RELEASE(m_pOverlay);
 }
 
-int CDVDOverlayCodecText::Decode(DemuxPacket *pPacket)
+int CDVDOverlayCodecText::Decode(const DemuxPacket &packet)
 {
   if(m_pOverlay)
     SAFE_RELEASE(m_pOverlay);
 
-  if(!pPacket)
-    return OC_ERROR;
-  
-  uint8_t *data = pPacket->pData;
-  int      size = pPacket->iSize;
+  uint8_t *data = packet.pData;
+  int      size = packet.iSize;
   
   m_pOverlay = new CDVDOverlayText();
-  CDVDOverlayCodec::GetAbsoluteTimes(m_pOverlay->iPTSStartTime, m_pOverlay->iPTSStopTime, pPacket, m_pOverlay->replace);
+  CDVDOverlayCodec::GetAbsoluteTimes(m_pOverlay->iPTSStartTime, m_pOverlay->iPTSStopTime, packet, m_pOverlay->replace);
 
   char *start, *end, *p;
   start = (char*)data;

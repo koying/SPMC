@@ -675,7 +675,7 @@ void CDVDVideoCodecIMX::Dispose()
   return;
 }
 
-int CDVDVideoCodecIMX::Decode(BYTE *pData, int iSize, double dts, double pts)
+int CDVDVideoCodecIMX::Decode(const DemuxPacket &packet)
 {
   VpuDecFrameLengthInfo frameLengthInfo;
   VpuBufferNode inData;

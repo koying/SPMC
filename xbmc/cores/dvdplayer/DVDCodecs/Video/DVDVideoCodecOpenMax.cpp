@@ -144,7 +144,7 @@ void CDVDVideoCodecOpenMax::SetDropState(bool bDrop)
   m_omx_decoder->SetDropState(bDrop);
 }
 
-int CDVDVideoCodecOpenMax::Decode(uint8_t* pData, int iSize, double dts, double pts)
+int CDVDVideoCodecOpenMax::Decode(const DemuxPacket &packet)
 {
   if (pData)
   {
