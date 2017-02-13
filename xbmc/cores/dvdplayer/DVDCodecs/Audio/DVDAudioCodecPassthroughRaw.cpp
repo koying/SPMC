@@ -207,7 +207,7 @@ void CDVDAudioCodecPassthroughRaw::Dispose()
 
 int CDVDAudioCodecPassthroughRaw::Decode(const DemuxPacket &packet)
 {
-  if (iSize <= 0) return 0;
+  if (packet.iSize <= 0) return 0;
 
   // Do pseudo-encapsulation to make bitrate constant
   unsigned int used = 0;
@@ -215,7 +215,7 @@ int CDVDAudioCodecPassthroughRaw::Decode(const DemuxPacket &packet)
   unsigned int size = m_infobufferSize;
   used = m_info.AddData(packet.pData, packet.iSize, &m_infobuffer, &size);
   if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode iSize(%d), size(%d), used(%d)", iSize, size, used);
+    CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode iSize(%d), size(%d), used(%d)", packet.iSize, size, used);
   m_infobufferSize = std::max(m_infobufferSize, size);
 
   m_bufferUsed = 0;
@@ -235,7 +235,7 @@ int CDVDAudioCodecPassthroughRaw::Decode(const DemuxPacket &packet)
 
     if (m_frameoffset + size > m_constant_size)
     {
-      CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode Error: Frame Buffer too small %d(%d) vs. %d", m_frameoffset + iSize, m_framepos, m_constant_size);
+      CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode Error: Frame Buffer too small %d(%d) vs. %d", m_frameoffset + packet.iSize, m_framepos, m_constant_size);
       return 0;
     }
 

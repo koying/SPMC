@@ -1736,10 +1736,10 @@ int CAMLCodec::Decode(const DemuxPacket &packet)
   // OpenDecoder call. So we need to restore it but it does not seem to stick :)
   g_renderManager.RegisterRenderUpdateCallBack((const void*)this, RenderUpdateCallBack);
 
-  if (pData)
+  if (packet.pData)
   {
-    am_private->am_pkt.data = pData;
-    am_private->am_pkt.data_size = iSize;
+    am_private->am_pkt.data = packet.pData;
+    am_private->am_pkt.data_size = packet.iSize;
 
     am_private->am_pkt.newflag    = 1;
     am_private->am_pkt.isvalid    = 1;
@@ -1747,11 +1747,11 @@ int CAMLCodec::Decode(const DemuxPacket &packet)
 
     // handle pts, including 31bit wrap, aml can only handle 31
     // bit pts as it uses an int in kernel.
-    if (m_hints.ptsinvalid || pts == DVD_NOPTS_VALUE)
+    if (m_hints.ptsinvalid || packet.pts == DVD_NOPTS_VALUE)
       am_private->am_pkt.avpts = AV_NOPTS_VALUE;
     else
     {
-      am_private->am_pkt.avpts = 0.5 + (pts * PTS_FREQ) / DVD_TIME_BASE;\
+      am_private->am_pkt.avpts = 0.5 + (packet.pts * PTS_FREQ) / DVD_TIME_BASE;\
       if (!m_start_pts && am_private->am_pkt.avpts >= 0x7fffffff)
         m_start_pts = am_private->am_pkt.avpts & ~0x0000ffff;
     }
@@ -1761,11 +1761,11 @@ int CAMLCodec::Decode(const DemuxPacket &packet)
 
     // handle dts, including 31bit wrap, aml can only handle 31
     // bit dts as it uses an int in kernel.
-    if (dts == DVD_NOPTS_VALUE)
+    if (packet.dts == DVD_NOPTS_VALUE)
       am_private->am_pkt.avdts = AV_NOPTS_VALUE;
     else
     {
-      am_private->am_pkt.avdts = 0.5 + (dts * PTS_FREQ) / DVD_TIME_BASE;
+      am_private->am_pkt.avdts = 0.5 + (packet.dts * PTS_FREQ) / DVD_TIME_BASE;
       if (!m_start_dts && am_private->am_pkt.avdts >= 0x7fffffff)
         m_start_dts = am_private->am_pkt.avdts & ~0x0000ffff;
     }
@@ -1812,7 +1812,7 @@ int CAMLCodec::Decode(const DemuxPacket &packet)
   // if we have still frames, demux size will be small
   // and we need to pre-buffer more.
   double target_timesize = 1.0;
-  if (iSize < 20)
+  if (packet.iSize < 20)
     target_timesize = 2.0;
 
   // keep hw buffered demux above 1 second
