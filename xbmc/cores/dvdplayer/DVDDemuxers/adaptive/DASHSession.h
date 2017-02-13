@@ -88,15 +88,14 @@ public:
   void EndFragment(AP4_UI32 streamId) override;
 
 protected:
-  //  void GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn);
-  //  AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
+  void GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn);
+  AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
 
 private:
   MANIFEST_TYPE manifest_type_;
   std::string fileURL_;
   std::string license_key_, license_type_;
   std::string profile_path_;
-  void * decrypterModule_;
 
   adaptive::AdaptiveTree* adaptiveTree_;
 

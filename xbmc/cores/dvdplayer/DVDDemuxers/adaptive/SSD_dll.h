@@ -132,4 +132,4 @@ namespace SSD
     virtual bool OpenVideoDecoder(const SSD_VIDEOINITDATA *initData) = 0;
     virtual SSD_DECODE_RETVAL DecodeVideo(SSD_SAMPLE *sample, SSD_PICTURE *picture) = 0;
   };
-}; // namespace
+} // namespace

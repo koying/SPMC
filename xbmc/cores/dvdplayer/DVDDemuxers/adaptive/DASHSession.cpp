@@ -23,14 +23,20 @@
 
 #include "DVDDemuxers/DVDDemux.h"
 
+#include "SSD_dll.h"
 #include "parsers/DASHTree.h"
 #include "parsers/SmoothTree.h"
+#ifdef TARGET_ANDROID
+#include "wvdecrypter/wvdecrypter_android.h"
+#endif
 
 #include "system.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
 #include "filesystem/File.h"
+
+using namespace SSD;
 
 CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
   :single_sample_decryptor_(0)
@@ -133,63 +139,27 @@ void CDASHSession::STREAM::disable()
   }
 }
 
-//void CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn)
-//{
-//  typedef SSD_DECRYPTER *(*CreateDecryptorInstanceFunc)(SSD_HOST *host, uint32_t version);
+void CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn)
+{
+  SSD_DECRYPTER *decrypter = new WVDecrypter();
+  const char *suppUrn(0);
+  
+  if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_.c_str())))
+  {
+    CLog::Log(LOGDEBUG, "Found decrypter: %s", items[i].path);
+    decrypterModule_ = mod;
+    decrypter_ = decrypter;
+    urn.first = suppUrn;
+    break;
+  }
+}
 
-//  char specialpath[1024];
-//  if (!xbmc->GetSetting("DECRYPTERPATH", specialpath))
-//  {
-//    CLog::Log(LOGDEBUG, "DECRYPTERPATH not specified in settings.xml");
-//    return;
-//  }
-//  addonstring path(xbmc->TranslateSpecialProtocol(specialpath));
-
-//  kodihost.SetLibraryPath(path.c_str());
-
-//  VFSDirEntry *items(0);
-//  unsigned int num_items(0);
-
-//  CLog::Log(LOGDEBUG, "Searching for decrypters in: %s", path.c_str());
-
-//  if (!xbmc->GetDirectory(path.c_str(), "", &items, &num_items))
-//    return;
-
-//  for (unsigned int i(0); i < num_items; ++i)
-//  {
-//    if (strncmp(items[i].label, "ssd_", 4) && strncmp(items[i].label, "libssd_", 7))
-//      continue;
-
-//    void * mod(dlopen(items[i].path, RTLD_LAZY));
-//    if (mod)
-//    {
-//      CreateDecryptorInstanceFunc startup;
-//      if ((startup = (CreateDecryptorInstanceFunc)dlsym(mod, "CreateDecryptorInstance")))
-//      {
-//        SSD_DECRYPTER *decrypter = startup(&kodihost, SSD_HOST::version);
-//        const char *suppUrn(0);
-
-//        if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_.c_str())))
-//        {
-//          CLog::Log(LOGDEBUG, "Found decrypter: %s", items[i].path);
-//          decrypterModule_ = mod;
-//          decrypter_ = decrypter;
-//          urn.first = suppUrn;
-//          break;
-//        }
-//      }
-//      dlclose(mod);
-//    }
-//  }
-//  xbmc->FreeDirectory(items, num_items);
-//}
-
-//AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec)
-//{
-//  if (decrypter_)
-//    return decrypter_->CreateSingleSampleDecrypter(streamCodec);
-//  return 0;
-//};
+AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec)
+{
+  if (decrypter_)
+    return decrypter_->CreateSingleSampleDecrypter(streamCodec);
+  return 0;
+}
 
 /*----------------------------------------------------------------------
 |   initialize
@@ -197,12 +167,15 @@ void CDASHSession::STREAM::disable()
 
 bool CDASHSession::initialize()
 {
+  if (!adaptiveTree_)
+    return false;
+
   // Get URN's wich are supported by this addon
-//  if (!license_type_.empty())
-//  {
-//    GetSupportedDecrypterURN(dashtree_->adp_pssh_);
-//    CLog::Log(LOGDEBUG, "Supported URN: %s", dashtree_->adp_pssh_.first.c_str());
-//  }
+  if (!license_type_.empty())
+  {
+    GetSupportedDecrypterURN(dashtree_->adp_pssh_);
+    CLog::Log(LOGDEBUG, "Supported URN: %s", dashtree_->adp_pssh_.first.c_str());
+  }
 
   // Open mpd file
   size_t paramPos = fileURL_.find('?');
