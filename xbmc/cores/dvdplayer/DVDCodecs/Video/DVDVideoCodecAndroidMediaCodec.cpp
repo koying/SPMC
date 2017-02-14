@@ -843,16 +843,16 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
       }
 
       AMediaCodecCryptoInfo* cryptoInfo = nullptr;
-//      if (m_crypto && packet.cryptoInfo)
-//      {
-//        cryptoInfo = AMediaCodecCryptoInfo_new(
-//              packet.cryptoInfo->numSubSamples,
-//              packet.cryptoInfo->kid,
-//              packet.cryptoInfo->iv,
-//              AMEDIACODECRYPTOINFO_MODE_AES_CTR,
-//              packet.cryptoInfo->clearBytes,
-//              packet.cryptoInfo->cipherBytes);
-//      }
+      if (m_crypto && packet.cryptoInfo)
+      {
+        cryptoInfo = AMediaCodecCryptoInfo_new(
+              packet.cryptoInfo->numSubSamples,
+              packet.cryptoInfo->kid,
+              packet.cryptoInfo->iv,
+              AMEDIACODECRYPTOINFO_MODE_AES_CTR,
+              packet.cryptoInfo->clearBytes,
+              packet.cryptoInfo->cipherBytes);
+      }
 
       if (dst_ptr)
       {

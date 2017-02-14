@@ -71,6 +71,7 @@ public:
   std::string GetUrl() { return fileURL_; }
   STREAM *GetStream(unsigned int sid) const { return (sid < streams_.size() ? streams_[sid] : 0); }
   unsigned int GetStreamCount() const { return streams_.size(); }
+  const AP4_DataBuffer &GetCryptoData() { return m_cryptoData; }
   std::uint16_t GetWidth() const { return width_; }
   std::uint16_t GetHeight() const { return height_; }
   AP4_CencSingleSampleDecrypter * GetSingleSampleDecryptor() const { return single_sample_decryptor_; }
@@ -99,7 +100,8 @@ private:
   AP4_DataBuffer server_certificate_;
   std::string profile_path_;
   SSD::SSD_DECRYPTER *decrypter_;
-
+  AP4_DataBuffer m_cryptoData;
+  
   adaptive::AdaptiveTree* adaptiveTree_;
 
   std::vector<STREAM*> streams_;

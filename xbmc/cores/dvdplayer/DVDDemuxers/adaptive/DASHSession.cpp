@@ -23,6 +23,8 @@
 
 #include "DVDDemuxers/DVDDemux.h"
 
+#include "DASHByteStream.h"
+#include "helpers.h"
 #include "parsers/DASHTree.h"
 #include "parsers/SmoothTree.h"
 #ifdef TARGET_ANDROID
@@ -87,12 +89,11 @@ CDASHSession::~CDASHSession()
     SAFE_DELETE(*b);
   streams_.clear();
 
-//  if (decrypterModule_)
-//  {
-//    dlclose(decrypterModule_);
-//    decrypterModule_ = 0;
-//    decrypter_ = 0;
-//  }
+  if (decrypter_)
+  {
+    delete decrypter_;
+    decrypter_ = nullptr;
+  }
 
   XFILE::CFile f;
 
@@ -248,73 +249,113 @@ bool CDASHSession::initialize()
     } while (repId--);
   }
 
-//  // Try to initialize an SingleSampleDecryptor
-//  if (dashtree_->encryptionState_)
-//  {
-//    AP4_DataBuffer init_data;
+  // Try to initialize an SingleSampleDecryptor
+  if (adaptiveTree_->encryptionState_)
+  {
+    AP4_DataBuffer init_data;
 
-//    if (dashtree_->adp_pssh_.second == "FILE")
-//    {
-//      std::string strkey(dashtree_->adp_pssh_.first.substr(9));
-//      size_t pos;
-//      while ((pos = strkey.find('-')) != std::string::npos)
-//        strkey.erase(pos, 1);
-//      if (strkey.size() != 32)
-//      {
-//        CLog::Log(LOGERROR, "Key system mismatch (%s)!", dashtree_->adp_pssh_.first.c_str());
-//        return false;
-//      }
+    if (adaptiveTree_->pssh_.second == "FILE")
+    {
+      if (license_data_.empty())
+      {
+        std::string strkey(adaptiveTree_->adp_pssh_.first.substr(9));
+        size_t pos;
+        while ((pos = strkey.find('-')) != std::string::npos)
+          strkey.erase(pos, 1);
+        if (strkey.size() != 32)
+        {
+          CLog::Log(LOGERROR, "Key system mismatch (%s)!", adaptiveTree_->adp_pssh_.first.c_str());
+          return false;
+        }
 
-//      unsigned char key_system[16];
-//      AP4_ParseHex(strkey.c_str(), key_system, 16);
+        unsigned char key_system[16];
+        AP4_ParseHex(strkey.c_str(), key_system, 16);
 
-//      CDASHSession::STREAM *stream(streams_[0]);
+        CDASHSession::STREAM *stream(streams_[0]);
 
-//      stream->enabled = true;
-//      stream->stream_.start_stream(0, width_, height_);
-//      stream->stream_.select_stream(true,false, stream->info_.m_pID>>16);
+        stream->enabled = true;
+        stream->stream_.start_stream(0, width_, height_);
+        stream->stream_.select_stream(true, false, stream->dmuxstrm->iPhysicalId >> 16);
 
-//      stream->input_ = new AP4_DASHStream(&stream->stream_);
-//      stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
-//      AP4_Movie* movie = stream->input_file_->GetMovie();
-//      if (movie == NULL)
-//      {
-//        CLog::Log(LOGERROR, "No MOOV in stream!");
-//        stream->disable();
-//        return false;
-//      }
-//      AP4_Array<AP4_PsshAtom*>& pssh = movie->GetPsshAtoms();
+        stream->input_ = new CDASHByteStream(&stream->stream_);
+        stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
+        AP4_Movie* movie = stream->input_file_->GetMovie();
+        if (movie == NULL)
+        {
+          CLog::Log(LOGERROR, "No MOOV in stream!");
+          stream->disable();
+          return false;
+        }
+        AP4_Array<AP4_PsshAtom*>& pssh = movie->GetPsshAtoms();
 
-//      for (unsigned int i = 0; !init_data.GetDataSize() && i < pssh.ItemCount(); i++)
-//      {
-//        if (memcmp(pssh[i]->GetSystemId(), key_system, 16) == 0)
-//          init_data.AppendData(pssh[i]->GetData().GetData(), pssh[i]->GetData().GetDataSize());
-//      }
+        for (unsigned int i = 0; !init_data.GetDataSize() && i < pssh.ItemCount(); i++)
+        {
+          if (memcmp(pssh[i]->GetSystemId(), key_system, 16) == 0)
+            init_data.AppendData(pssh[i]->GetData().GetData(), pssh[i]->GetData().GetDataSize());
+        }
 
-//      if (!init_data.GetDataSize())
-//      {
-//        CLog::Log(LOGERROR, "Could not extract license from video stream (PSSH not found)");
-//        stream->disable();
-//        return false;
-//      }
-//      stream->disable();
-//    }
-//    else
-//    {
-//      if (manifest_type_ == MANIFEST_TYPE_ISM)
-//      {
-//        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
-//      }
-//      else
-//      {
-//        init_data.SetBufferSize(1024);
-//        unsigned int init_data_size(1024);
-//        b64_decode(dashtree_->pssh_.second.data(), dashtree_->pssh_.second.size(), init_data.UseData(), init_data_size);
-//        init_data.SetDataSize(init_data_size);
-//      }
-//    }
-//    return (single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data))!=0;
-//  }
+        if (!init_data.GetDataSize())
+        {
+          CLog::Log(LOGERROR, "Could not extract license from video stream (PSSH not found)");
+          stream->disable();
+          return false;
+        }
+        stream->disable();
+      }
+      else if (!adaptiveTree_->defaultKID_.empty())
+      {
+        init_data.SetDataSize(16);
+        AP4_Byte *data(init_data.UseData());
+        const char *src(adaptiveTree_->defaultKID_.c_str());
+        AP4_ParseHex(src, data, 4);
+        AP4_ParseHex(src + 9, data + 4, 2);
+        AP4_ParseHex(src + 14, data + 6, 2);
+        AP4_ParseHex(src + 19, data + 8, 2);
+        AP4_ParseHex(src + 24, data + 10, 6);
+
+        uint8_t ld[1024];
+        unsigned int ld_size(1014);
+        b64_decode(license_data_.c_str(), license_data_.size(), ld, ld_size);
+
+        uint8_t *uuid((uint8_t*)strstr((const char*)ld, "{KID}"));
+        if (uuid)
+        {
+          memmove(uuid + 11, uuid, ld_size - (uuid - ld));
+          memcpy(uuid, init_data.GetData(), init_data.GetDataSize());
+          init_data.SetData(ld, ld_size + 11);
+        }
+        else
+          init_data.SetData(ld, ld_size);
+      }
+      else
+        return false;
+    }
+    else
+    {
+      if (manifest_type_ == MANIFEST_TYPE_ISM)
+      {
+        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
+      }
+      else
+      {
+        init_data.SetBufferSize(1024);
+        unsigned int init_data_size(1024);
+        b64_decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size(), init_data.UseData(), init_data_size);
+        init_data.SetDataSize(init_data_size);
+      }
+    }
+    if ((single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data)) != 0)
+    {
+#ifdef TARGET_ANDROID
+      AP4_DataBuffer in;
+      m_cryptoData.Reserve(1024);
+      single_sample_decryptor_->DecryptSampleData(in, m_cryptoData, 0, 0, 0, 0);
+#endif
+      return true;
+    }
+    return false;
+  }
+
   return true;
 }
 

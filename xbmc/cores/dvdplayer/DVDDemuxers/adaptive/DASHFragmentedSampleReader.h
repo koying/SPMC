@@ -69,6 +69,7 @@ private:
   AP4_Track *m_Track;
   AP4_UI32 m_StreamId;
   AP4_UI32 m_SampleDescIndex;
+  unsigned int m_fail_count_;
   
   bool m_eos, m_started;
   double m_dts, m_pts;

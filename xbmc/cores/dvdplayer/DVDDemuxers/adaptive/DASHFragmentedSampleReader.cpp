@@ -22,11 +22,14 @@
 
 #include "DASHFragmentedSampleReader.h"
 
+#include "utils/log.h"
+
 CDASHFragmentedSampleReader::CDASHFragmentedSampleReader(AP4_ByteStream* input, AP4_Movie* movie, AP4_Track* track, AP4_UI32 streamId, AP4_CencSingleSampleDecrypter* ssd, const double pto)
   : AP4_LinearReader(*movie, input)
   , m_Track(track)
   , m_dts(0.0)
   , m_pts(0.0)
+  , m_fail_count_(0)
   , m_eos(false)
   , m_started(false)
   , m_StreamId(streamId)
@@ -126,20 +129,31 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
     }
   }
 
-//    if (m_Protected_desc)
-//    {
-//      // Make sure that the decrypter is NOT allocating memory!
-//      // If decrypter and addon are compiled with different DEBUG / RELEASE
-//      // options freeing HEAP memory will fail.
-//      m_sample_data_.Reserve(m_encrypted.GetDataSize());
-//      m_SingleSampleDecryptor->SetKeyId(m_DefaultKey?16:0, m_DefaultKey);
-//      if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
-//      {
-//        CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
-//        Reset(true);
-//        return result;
-//      }
-//    }
+  if (m_Protected_desc)
+  {
+    if (!m_Decrypter)
+      return AP4_ERROR_EOS;
+
+    // Make sure that the decrypter is NOT allocating memory!
+    // If decrypter and addon are compiled with different DEBUG / RELEASE
+    // options freeing HEAP memory will fail.
+    m_sample_data_.Reserve(m_encrypted.GetDataSize() + 4096);
+    m_SingleSampleDecryptor->SetFrameInfo(m_DefaultKey?16:0, m_DefaultKey, m_codecHandler->naluLengthSize);
+
+    if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
+    {
+      CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
+      if (++m_fail_count_ > 50)
+      {
+        Reset(true);
+        return result;
+      }
+      else
+        m_sample_data_.SetDataSize(0);
+    }
+    else
+      m_fail_count_ = 0;
+  }
 
   m_dts = (double)m_sample_.GetDts() / (double)m_Track->GetMediaTimeScale() - m_presentationTimeOffset;
   m_pts = (double)m_sample_.GetCts() / (double)m_Track->GetMediaTimeScale() - m_presentationTimeOffset;
