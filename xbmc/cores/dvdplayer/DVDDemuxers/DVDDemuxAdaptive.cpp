@@ -22,6 +22,7 @@
 #include "DVDDemuxAdaptive.h"
 
 #include "DVDDemuxPacket.h"
+#include "DemuxCrypto.h"
 #include "DVDDemuxUtils.h"
 #include "DVDInputStreams/DVDInputStream.h"
 
@@ -106,14 +107,38 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
 
   if (sr)
   {
-    DemuxPacket *p = CDVDDemuxUtils::AllocateDemuxPacket(sr->GetSampleDataSize());
+    AP4_Size iSize = sr->GetSampleDataSize();
+    const AP4_UI08 *pData = sr->GetSampleData();
+    DemuxPacket *p;
+
+#ifdef TARGET_ANDROID
+    if (sr->IsEncrypted())
+    {
+      unsigned int numSubSamples = *((unsigned int*)pData); 
+      pData += sizeof(numSubSamples);
+      p = CDVDDemuxUtils::AllocateEncryptedDemuxPacket(iSize, numSubSamples);
+      memcpy(p->cryptoInfo->clearBytes, pData, numSubSamples * sizeof(uint16_t));
+      pData += (numSubSamples * sizeof(uint32_t));
+      memcpy(p->cryptoInfo->cipherBytes, pData, numSubSamples * sizeof(uint32_t));
+      pData += (numSubSamples * sizeof(uint32_t));
+      memcpy(p->cryptoInfo->iv, pData, 16);
+      pData += 16;
+      memcpy(p->cryptoInfo->kid, pData, 16);
+      pData += 16;
+      iSize -= (pData - sr->GetSampleData());
+      p->cryptoInfo->flags = 0;
+    }
+    else
+#endif
+      p = CDVDDemuxUtils::AllocateDemuxPacket(sr->GetSampleDataSize());
+
     p->dts = sr->DTS() * 1000000;
     p->pts = sr->PTS() * 1000000;
     p->duration = sr->GetDuration() * 1000000;
     p->iStreamId = sr->GetStreamId();
     p->iGroupId = 0;
-    p->iSize = sr->GetSampleDataSize();
-    memcpy(p->pData, sr->GetSampleData(), p->iSize);
+    p->iSize = iSize;
+    memcpy(p->pData, pData, iSize);
 
     CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
 

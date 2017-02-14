@@ -20,11 +20,15 @@
  *
  */
 
+#include <memory>
+
 #define DMX_SPECIALID_STREAMINFO    -10
 #define DMX_SPECIALID_STREAMCHANGE  -11
 #define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and int64_t
 
- typedef struct DemuxPacket
+struct DemuxCryptoInfo;
+
+typedef struct DemuxPacket
 {
   DemuxPacket() 
     : pData(nullptr)
@@ -48,4 +52,7 @@
   double pts; // pts in DVD_TIME_BASE
   double dts; // dts in DVD_TIME_BASE
   double duration; // duration in DVD_TIME_BASE if available
+  
+  std::shared_ptr<DemuxCryptoInfo> cryptoInfo;
+  
 } DemuxPacket;
