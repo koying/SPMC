@@ -78,6 +78,8 @@ public:
     licenseKey_ = licenseKey;
     if (strcmp(licenseType, "com.widevine.alpha") == 0)
       return "urn:uuid:EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED";
+    else if (strcmp(licenseType, "com.microsoft.playready"))
+      return "urn:uuid:9a04f079-9840-4286-ab92e65be0885f95";
     return 0;
   }
 

@@ -236,6 +236,7 @@ end(void *data, const char *el)
       {
         dash->currentNode_ &= ~(SmoothTree::SSMNODE_PROTECTION| SmoothTree::SSMNODE_PROTECTIONTEXT);
         dash->parse_protection();
+        dash->pssh_ = dash->adp_pssh_;
       }
     }
     else if (dash->currentNode_ & SmoothTree::SSMNODE_STREAMINDEX)
@@ -284,19 +285,19 @@ protection_text(void *data, const char *s, int len)
 static void XMLCALL
 protection_end(void *data, const char *el)
 {
-	SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
-    if (strcmp(el, "KID") == 0)
+  SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
+  if (strcmp(el, "KID") == 0)
+  {
+    uint8_t buffer[32];
+    unsigned int buffer_size(32);
+    b64_decode(dash->strXMLText_.data(), dash->strXMLText_.size(), buffer, buffer_size);
+    
+    if (buffer_size == 16)
     {
-      uint8_t buffer[32];
-      unsigned int buffer_size(32);
-      b64_decode(dash->strXMLText_.data(), dash->strXMLText_.size(), buffer, buffer_size);
-
-      if (buffer_size == 16)
-      {
-        dash->defaultKID_.resize(16);
-        prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
-      }
+      dash->defaultKID_.resize(16);
+      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
     }
+  }
 }
 
 /*----------------------------------------------------------------------
@@ -365,6 +366,13 @@ void SmoothTree::parse_protection()
 
   while (strXMLText_.size() & 3)
     strXMLText_ += "=";
+
+  adp_pssh_.first = "com.microsoft.playready";
+  adp_pssh_.second = strXMLText_;
+
+  return;
+
+  //////////
 
   unsigned int xml_size = strXMLText_.size();
   uint8_t *buffer = (uint8_t*)malloc(xml_size), *xml_start(buffer);

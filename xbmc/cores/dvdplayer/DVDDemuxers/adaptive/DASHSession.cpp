@@ -39,7 +39,7 @@
 
 using namespace SSD;
 
-CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
+CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const char* strLicKey, const char* profile_path)
   :single_sample_decryptor_(0)
   , manifest_type_(manifest_type)
   , fileURL_(strURL)
@@ -138,8 +138,9 @@ void CDASHSession::STREAM::disable()
   }
 }
 
-void CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn)
+bool CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn)
 {
+#if defined(TARGET_ANDROID)
   SSD_DECRYPTER *decrypter = new WVDecrypter();
   const char *suppUrn(0);
   
@@ -148,7 +149,10 @@ void CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> 
     CLog::Log(LOGDEBUG, "Found decrypter");
     decrypter_ = decrypter;
     urn.first = suppUrn;
+    return true;
   }
+#endif
+  return false;
 }
 
 AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec)
@@ -166,13 +170,6 @@ bool CDASHSession::initialize()
 {
   if (!adaptiveTree_)
     return false;
-
-  // Get URN's wich are supported by this addon
-  if (!license_type_.empty())
-  {
-    GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_);
-    CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
-  }
 
   // Open mpd file
   size_t paramPos = fileURL_.find('?');
@@ -195,8 +192,17 @@ bool CDASHSession::initialize()
 
   if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
   {
-    CLog::Log(LOGERROR, "Unable to handle decryption. Unsupported!");
-    return false;
+    // Get URN's wich are supported by this addon
+    if (!license_type_.empty())
+    {
+      if (!GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_))
+      {
+        CLog::Log(LOGDEBUG, "Unsupported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+        return false;
+      }
+      else
+        CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+    }
   }
 
   uint32_t min_bandwidth(0), max_bandwidth(0);
@@ -332,11 +338,11 @@ bool CDASHSession::initialize()
     }
     else
     {
-      if (manifest_type_ == MANIFEST_TYPE_ISM)
-      {
-        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
-      }
-      else
+//      if (manifest_type_ == MANIFEST_TYPE_ISM)
+//      {
+//        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
+//      }
+//      else
       {
         init_data.SetBufferSize(1024);
         unsigned int init_data_size(1024);

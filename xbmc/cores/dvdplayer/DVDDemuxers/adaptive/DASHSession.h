@@ -61,7 +61,7 @@ public:
     MANIFEST_TYPE_ISM
   };
   
-  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path);
+  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const char* strLicKey, const char* profile_path);
   virtual ~CDASHSession();
   bool initialize();
   CDASHFragmentedSampleReader *GetNextSample();
@@ -90,7 +90,7 @@ public:
   void EndFragment(AP4_UI32 streamId) override;
 
 protected:
-  void GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn);
+  bool GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn);
   AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
 
 private:

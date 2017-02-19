@@ -56,15 +56,28 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
   
   CDASHSession::MANIFEST_TYPE type = CDASHSession::MANIFEST_TYPE_UNKNOWN;
   
-  if (pInput->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInput->GetFileItem().IsType(".mpd"))  //MPD
-    type = CDASHSession::MANIFEST_TYPE_MPD;
-  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInput->GetFileItem().IsType(".ismc") || pInput->GetFileItem().IsType(".ism"))  //ISM
+  std::string licenseType;
+  if (pInput->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd"
+	  || pInput->GetFileItem().IsType(".mpd")
+	  || pInput->GetFileItem().GetProperty("inputstream.adaptive.manifest_type").asString() == "mpd"
+	  )
+  {
+	type = CDASHSession::MANIFEST_TYPE_MPD;
+	licenseType = "com.widevine.alpha";
+  }
+  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml"
+           || pInput->GetFileItem().IsType(".ismc")
+           || pInput->GetFileItem().IsType(".ism")
+           || pInput->GetFileItem().GetProperty("inputstream.adaptive.manifest_type").asString() == "ism"
+           )
+  {
     type = CDASHSession::MANIFEST_TYPE_ISM;
-  
+    licenseType = "com.microsoft.playready";
+  }
   if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
     return false;
   
-  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
+  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, licenseType, "", "special://profile/"));
 
   if (!m_session->initialize())
   {
