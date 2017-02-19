@@ -192,17 +192,13 @@ bool CDASHSession::initialize()
 
   if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
   {
-    // Get URN's wich are supported by this addon
-    if (!license_type_.empty())
+    if (!GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_))
     {
-      if (!GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_))
-      {
-        CLog::Log(LOGDEBUG, "Unsupported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
-        return false;
-      }
-      else
-        CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+      CLog::Log(LOGDEBUG, "Unsupported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+      return false;
     }
+    else
+      CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
   }
 
   uint32_t min_bandwidth(0), max_bandwidth(0);
@@ -352,6 +348,7 @@ bool CDASHSession::initialize()
     }
     if ((single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data)) != 0)
     {
+      CLog::Log(LOGDEBUG, "Decrypter creation successfull");
 #ifdef TARGET_ANDROID
       AP4_DataBuffer in;
       m_cryptoData.Reserve(1024);
@@ -359,6 +356,7 @@ bool CDASHSession::initialize()
 #endif
       return true;
     }
+    CLog::Log(LOGDEBUG, "Decrypter creation failed !!");
     return false;
   }
 
