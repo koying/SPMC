@@ -50,7 +50,7 @@ void MediaDrmEventListener(AMediaDrm *media_drm, const AMediaDrmSessionId *sessi
 |   WV_CencSingleSampleDecrypter::WV_CencSingleSampleDecrypter
 +---------------------------------------------------------------------*/
 
-WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseURL, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate)
+WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseURL, uint8_t* guid, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate)
   : AP4_CencSingleSampleDecrypter(0)
   , media_drm_(0)
   , license_url_(licenseURL)
@@ -60,14 +60,8 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
 {
 //  SetParentIsOwner(false);
 
-  if (pssh.GetDataSize() > 256)
-  {
-    CLog::Log(LOGERROR, "Init_data with length: %u seems not to be cenc init data!", pssh.GetDataSize());
-    return;
-  }
-
 #ifdef _DEBUG
-  std::string strDbg = "special://home/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.init";
+  std::string strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.init";
   XFILE::CFile f;
   f.OpenForWrite(strDbg, true);
   f.Write(pssh_.c_str(), pssh_.size());
@@ -76,16 +70,22 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
 
   if (strcmp(&pssh_[4], "pssh") != 0)
   {
-    static const uint8_t atom[] = { 0x00, 0x00, 0x00, 0x00, 0x70, 0x73, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00, 0xed, 0xef, 0x8b, 0xa9,
-      0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed, 0x00, 0x00, 0x00, 0x00 };
+    static const uint8_t pssh_header[] = { 0x70, 0x73, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00 };
 
-    pssh_.insert(0, std::string(reinterpret_cast<const char*>(atom), sizeof(atom)));
+    int boxLen = 0;
+    pssh_.insert(0, std::string(reinterpret_cast<const char*>(pssh_header), sizeof(pssh_header)));
+    boxLen += sizeof(pssh_header);
+    pssh_.insert(boxLen, std::string(reinterpret_cast<const char*>(guid), 16));
+    boxLen += 16;
+    pssh_.insert(boxLen, static_cast<uint32_t>(pssh_.size()), sizeof(uint32_t));
+    boxLen += sizeof(uint32_t);
 
-    pssh_[3] = static_cast<uint8_t>(pssh_.size());
-    pssh_[sizeof(atom) - 1] = static_cast<uint8_t>(pssh_.size()) - sizeof(atom);
+    boxLen += pssh_.size();
+    pssh_.insert(0, static_cast<uint32_t>(boxLen), sizeof(uint32_t));
   }
 
   //Build up a CDM path to store decrypter specific stuff. Each domain gets it own path
+  /*
   const char* bspos(strchr(license_url_.c_str(), ':'));
   if (!bspos || bspos[1] != '/' || bspos[2] != '/' || !(bspos = strchr(bspos + 3, '/')))
   {
@@ -100,9 +100,9 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   char buffer[1024];
   buffer[(bspos - license_url_.c_str()) * 2] = 0;
   AP4_FormatHex(reinterpret_cast<const uint8_t*>(license_url_.c_str()), bspos - license_url_.c_str(), buffer);
+  */
 
-  uint8_t keysystem[16] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
-  media_drm_ = AMediaDrm_createByUUID(keysystem);
+  media_drm_ = AMediaDrm_createByUUID(guid);
   if (!media_drm_)
   {
     CLog::Log(LOGERROR, "Unable to initialize media_drm");
@@ -129,8 +129,10 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   }
 
   // For backward compatibility: If no | is found in URL, make the amazon convention out of it
+  /*
   if (license_url_.find('|') == std::string::npos)
     license_url_ += "|Content-Type=application%2Fx-www-form-urlencoded|widevine2Challenge=B{SSM}&includeHdcpTestKeyInLicense=false|JBlicense";
+    */
 
 TRYAGAIN:
   if (!GetLicense())
@@ -244,7 +246,7 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   }
 
 #ifdef _DEBUG
-  std::string strDbg = "special://home/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.challenge";
+  std::string strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.challenge";
   XFILE::CFile f;
   f.OpenForWrite(strDbg, true);
   f.Write(key_request_, key_request_size_);
@@ -354,7 +356,7 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   }
 
 #ifdef _DEBUG
-  strDbg = "special://home/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.response";
+  strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.response";
   f.OpenForWrite(strDbg, true);
   f.Write(response.c_str(), response.size());
   f.Close();
