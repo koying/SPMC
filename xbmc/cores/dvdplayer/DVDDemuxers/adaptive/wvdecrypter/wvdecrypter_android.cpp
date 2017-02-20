@@ -50,7 +50,7 @@ void MediaDrmEventListener(AMediaDrm *media_drm, const AMediaDrmSessionId *sessi
 |   WV_CencSingleSampleDecrypter::WV_CencSingleSampleDecrypter
 +---------------------------------------------------------------------*/
 
-WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseURL, uint8_t* guid, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate)
+WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseType, std::string licenseURL, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate)
   : AP4_CencSingleSampleDecrypter(0)
   , media_drm_(0)
   , license_url_(licenseURL)
@@ -67,15 +67,17 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   f.Write(pssh_.c_str(), pssh_.size());
   f.Close();
 #endif
+  static const uint8_t guid_widevine[] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
+  static const uint8_t guid_playready[] = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
 
-  if (strcmp(&pssh_[4], "pssh") != 0)
+  if (licenseType == "com.widevine.alpha" && strcmp(&pssh_[4], "pssh") != 0)
   {
     static const uint8_t pssh_header[] = { 0x70, 0x73, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00 };
 
     int boxLen = 0;
     pssh_.insert(0, std::string(reinterpret_cast<const char*>(pssh_header), sizeof(pssh_header)));
     boxLen += sizeof(pssh_header);
-    pssh_.insert(boxLen, std::string(reinterpret_cast<const char*>(guid), 16));
+    pssh_.insert(boxLen, std::string(reinterpret_cast<const char*>(guid_widevine), 16));
     boxLen += 16;
     pssh_.insert(boxLen, static_cast<uint32_t>(pssh_.size()), sizeof(uint32_t));
     boxLen += sizeof(uint32_t);
@@ -83,6 +85,13 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
     boxLen += pssh_.size();
     pssh_.insert(0, static_cast<uint32_t>(boxLen), sizeof(uint32_t));
   }
+
+#ifdef _DEBUG
+  strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.init2";
+  f.OpenForWrite(strDbg, true);
+  f.Write(pssh_.c_str(), pssh_.size());
+  f.Close();
+#endif
 
   //Build up a CDM path to store decrypter specific stuff. Each domain gets it own path
   /*
@@ -102,7 +111,7 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   AP4_FormatHex(reinterpret_cast<const uint8_t*>(license_url_.c_str()), bspos - license_url_.c_str(), buffer);
   */
 
-  media_drm_ = AMediaDrm_createByUUID(guid);
+  media_drm_ = AMediaDrm_createByUUID(licenseType == "com.widevine.alpha" ? guid_widevine : guid_playready);
   if (!media_drm_)
   {
     CLog::Log(LOGERROR, "Unable to initialize media_drm");
