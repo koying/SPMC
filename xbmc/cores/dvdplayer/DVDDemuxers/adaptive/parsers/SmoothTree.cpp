@@ -369,8 +369,9 @@ void SmoothTree::parse_protection()
 
   while (strXMLText_.size() & 3)
     strXMLText_ += "=";
-
+  
   adp_pssh_.first = "com.microsoft.playready";
+  adp_pssh_.second = strXMLText_;
 
   unsigned int xml_size = strXMLText_.size();
   uint8_t *buffer = (uint8_t*)malloc(xml_size), *xml_start(buffer);
@@ -380,7 +381,7 @@ void SmoothTree::parse_protection()
     free(buffer);
     return;
   }
-
+  
   while (xml_size && *xml_start != '<')
   {
     xml_start++;

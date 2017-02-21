@@ -50,12 +50,12 @@ void MediaDrmEventListener(AMediaDrm *media_drm, const AMediaDrmSessionId *sessi
 |   WV_CencSingleSampleDecrypter::WV_CencSingleSampleDecrypter
 +---------------------------------------------------------------------*/
 
-WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseType, std::string licenseURL, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate)
+WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseType, std::string licenseURL, AP4_DataBuffer &init_data, AP4_DataBuffer &serverCertificate)
   : AP4_CencSingleSampleDecrypter(0)
   , media_drm_(0)
   , license_type_(licenseType)
   , license_url_(licenseURL)
-  , pssh_(std::string(reinterpret_cast<const char*>(pssh.GetData()), pssh.GetDataSize()))
+  , pssh_(std::string(reinterpret_cast<const char*>(init_data.GetData()), init_data.GetDataSize()))
   , key_size_(0)
   , nal_length_size_(0)
 {

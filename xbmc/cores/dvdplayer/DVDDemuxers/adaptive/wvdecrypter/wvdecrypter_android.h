@@ -31,7 +31,7 @@ class WV_CencSingleSampleDecrypter_android : public AP4_CencSingleSampleDecrypte
 {
 public:
   // methods
-  WV_CencSingleSampleDecrypter_android(std::string licenseType, std::string licenseURL, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate);
+  WV_CencSingleSampleDecrypter_android(std::string licenseType, std::string licenseURL, AP4_DataBuffer &init_data, AP4_DataBuffer &serverCertificate);
   ~WV_CencSingleSampleDecrypter_android();
 
   bool initialized()const { return media_drm_ != 0; }
@@ -84,9 +84,9 @@ public:
     return 0;
   }
 
-  virtual AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec, AP4_DataBuffer &serverCertificate) override
+  virtual AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &init_data, AP4_DataBuffer &serverCertificate) override
   {
-    AP4_CencSingleSampleDecrypter *res = new WV_CencSingleSampleDecrypter_android(licenseType_, licenseKeyUrl_, streamCodec, serverCertificate);
+    AP4_CencSingleSampleDecrypter *res = new WV_CencSingleSampleDecrypter_android(licenseType_, licenseKeyUrl_, init_data, serverCertificate);
     if (!((WV_CencSingleSampleDecrypter_android*)res)->initialized())
     {
       delete res;

@@ -156,10 +156,10 @@ bool CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> 
   return false;
 }
 
-AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec)
+AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &init_data)
 {
   if (decrypter_)
-    return decrypter_->CreateSingleSampleDecrypter(streamCodec, server_certificate_);
+    return decrypter_->CreateSingleSampleDecrypter(init_data, server_certificate_);
   return 0;
 }
 
@@ -262,7 +262,7 @@ bool CDASHSession::initialize()
 
     if (license_key_url_.empty())
       return false;
-    
+        
     if (adaptiveTree_->pssh_.second == "FILE")
     {
       if (license_data_.empty())
@@ -343,6 +343,8 @@ bool CDASHSession::initialize()
     {
       if (manifest_type_ == MANIFEST_TYPE_ISM)
       {
+        if (license_data_.empty())
+          license_data_ = adaptiveTree_->adp_pssh_.second;
         create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
       }
       else
