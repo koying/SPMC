@@ -3582,33 +3582,29 @@ bool CDVDPlayer::OpenSubtitleStream(CDVDStreamInfo& hint)
   return true;
 }
 
-bool CDVDPlayer::AdaptForcedSubtitles()
+void CDVDPlayer::AdaptForcedSubtitles()
 {
-  bool valid = false;
   SelectionStream ss = m_SelectionStreams.Get(STREAM_SUBTITLE, GetSubtitle());
   if (ss.flags & CDemuxStream::FLAG_FORCED)
   {
     SelectionStream as = m_SelectionStreams.Get(STREAM_AUDIO, GetAudioStream());
     SelectionStreams streams = m_SelectionStreams.Get(STREAM_SUBTITLE);
 
+    bool found = false;
     for(SelectionStreams::iterator it = streams.begin(); it != streams.end() && !valid; ++it)
     {
       if (it->flags & CDemuxStream::FLAG_FORCED && g_LangCodeExpander.CompareISO639Codes(it->language, as.language))
       {
-        if(OpenStream(m_CurrentSubtitle, it->id, it->source))
+        if (OpenStream(m_CurrentSubtitle, it->id, it->source))
         {
-          valid = true;
+          found = true;
           SetSubtitleVisibleInternal(true);
         }
       }
     }
-    if(!valid)
-    {
-      CloseStream(m_CurrentSubtitle, true);
+    if(!found)
       SetSubtitleVisibleInternal(false);
-    }
   }
-  return valid;
 }
 
 bool CDVDPlayer::OpenTeletextStream(CDVDStreamInfo& hint)
