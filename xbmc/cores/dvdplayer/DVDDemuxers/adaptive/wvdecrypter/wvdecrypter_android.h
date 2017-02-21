@@ -63,7 +63,7 @@ private:
   const uint8_t *key_request_;
   size_t key_request_size_;
 
-  std::string pssh_, license_url_;
+  std::string pssh_, license_type_, license_url_;
   AP4_UI16 key_size_;
   uint8_t key_[32];
   AP4_UI08 nal_length_size_;
@@ -73,10 +73,10 @@ class WVDecrypter : public SSD::SSD_DECRYPTER
 {
 public:
   // Return supported URN if type matches to capabikitues, otherwise null
-  virtual const char *Supported(const char* licenseType, const char *licenseKey) override
+  virtual const char *Supported(const char* licenseType, const char *licenseKeyUrl) override
   {
     licenseType_ = licenseType;
-    licenseKey_ = licenseKey;
+    licenseKeyUrl_ = licenseKeyUrl;
     if (licenseType_ == "com.widevine.alpha")
       return "urn:uuid:EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED";
     else if (licenseType_ == "com.microsoft.playready")
@@ -86,7 +86,7 @@ public:
 
   virtual AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec, AP4_DataBuffer &serverCertificate) override
   {
-    AP4_CencSingleSampleDecrypter *res = new WV_CencSingleSampleDecrypter_android(licenseType_, licenseKey_, streamCodec, serverCertificate);
+    AP4_CencSingleSampleDecrypter *res = new WV_CencSingleSampleDecrypter_android(licenseType_, licenseKeyUrl_, streamCodec, serverCertificate);
     if (!((WV_CencSingleSampleDecrypter_android*)res)->initialized())
     {
       delete res;
@@ -106,6 +106,6 @@ public:
   }
 private:
   std::string licenseType_;
-  std::string licenseKey_;
+  std::string licenseKeyUrl_;
 };
 

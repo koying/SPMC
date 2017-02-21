@@ -39,12 +39,13 @@
 
 using namespace SSD;
 
-CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const char* strLicKey, const char* profile_path)
+CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const std::string& strLicKey, const std::string& strLicData, const std::string& strServCert, const char* profile_path)
   :single_sample_decryptor_(0)
   , manifest_type_(manifest_type)
   , fileURL_(strURL)
   , license_type_(strLicType)
-  , license_key_(strLicKey)
+  , license_key_url_(strLicKey)
+  , license_data_(strLicData)
   , profile_path_(profile_path)
   , adaptiveTree_(nullptr)
   , width_(width)
@@ -144,7 +145,7 @@ bool CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> 
   SSD_DECRYPTER *decrypter = new WVDecrypter();
   const char *suppUrn(0);
   
-  if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_.c_str())))
+  if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_url_.c_str())))
   {
     CLog::Log(LOGDEBUG, "Found decrypter");
     decrypter_ = decrypter;
@@ -255,7 +256,13 @@ bool CDASHSession::initialize()
   if (adaptiveTree_->encryptionState_)
   {
     AP4_DataBuffer init_data;
+    
+    if (license_key_url_.empty())
+      license_key_url_ = adaptiveTree_->license_key_url_;
 
+    if (license_key_url_.empty())
+      return false;
+    
     if (adaptiveTree_->pssh_.second == "FILE")
     {
       if (license_data_.empty())
@@ -334,11 +341,11 @@ bool CDASHSession::initialize()
     }
     else
     {
-//      if (manifest_type_ == MANIFEST_TYPE_ISM)
-//      {
-//        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
-//      }
-//      else
+      if (manifest_type_ == MANIFEST_TYPE_ISM)
+      {
+        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
+      }
+      else
       {
         init_data.SetBufferSize(1024);
         unsigned int init_data_size(1024);

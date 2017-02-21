@@ -61,7 +61,7 @@ public:
     MANIFEST_TYPE_ISM
   };
   
-  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const char* strLicKey, const char* profile_path);
+  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const std::string& strLicKey, const std::string& strLicData, const std::string& strServCert, const char* profile_path);
   virtual ~CDASHSession();
   bool initialize();
   CDASHFragmentedSampleReader *GetNextSample();
@@ -96,7 +96,7 @@ protected:
 private:
   MANIFEST_TYPE manifest_type_;
   std::string fileURL_;
-  std::string license_key_, license_type_, license_data_;
+  std::string license_key_url_, license_type_, license_data_;
   AP4_DataBuffer server_certificate_;
   std::string profile_path_;
   SSD::SSD_DECRYPTER *decrypter_;

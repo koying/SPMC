@@ -53,6 +53,7 @@ void MediaDrmEventListener(AMediaDrm *media_drm, const AMediaDrmSessionId *sessi
 WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::string licenseType, std::string licenseURL, AP4_DataBuffer &pssh, AP4_DataBuffer &serverCertificate)
   : AP4_CencSingleSampleDecrypter(0)
   , media_drm_(0)
+  , license_type_(licenseType)
   , license_url_(licenseURL)
   , pssh_(std::string(reinterpret_cast<const char*>(pssh.GetData()), pssh.GetDataSize()))
   , key_size_(0)
@@ -70,7 +71,7 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   static const uint8_t guid_widevine[] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
   static const uint8_t guid_playready[] = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
 
-  if (licenseType == "com.widevine.alpha" && strcmp(&pssh_[4], "pssh") != 0)
+  if (license_type_ == "com.widevine.alpha" && strcmp(&pssh_[4], "pssh") != 0)
   {
     static const uint8_t pssh_header[] = { 0x70, 0x73, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00 };
 
@@ -136,12 +137,6 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
     media_drm_ = 0;
     return;
   }
-
-  // For backward compatibility: If no | is found in URL, make the amazon convention out of it
-  /*
-  if (license_url_.find('|') == std::string::npos)
-    license_url_ += "|Content-Type=application%2Fx-www-form-urlencoded|widevine2Challenge=B{SSM}&includeHdcpTestKeyInLicense=false|JBlicense";
-    */
 
 TRYAGAIN:
   if (!GetLicense())
@@ -282,6 +277,12 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   uUrl.SetProtocolOption("acceptencoding", "gzip, deflate");
   uUrl.SetProtocolOption("seekable", "0");
   uUrl.SetProtocolOption("Expect", "");
+  
+  if (license_type_ == "com.microsoft.playready")
+  {
+    uUrl.SetProtocolOption("Content-Type", "text/xml");
+    uUrl.SetProtocolOption("SOAPAction", "http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense");
+  }
 
   XFILE::CFile* file = nullptr;
   size_t nbRead;

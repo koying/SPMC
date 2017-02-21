@@ -54,30 +54,29 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
 {
   CLog::Log(LOGINFO, "CDVDDemuxAdaptive - matching against %d x %d", maxWidth, maxHeight);
   
+  CFileItem item = pInput->GetFileItem();
   CDASHSession::MANIFEST_TYPE type = CDASHSession::MANIFEST_TYPE_UNKNOWN;
   
-  std::string licenseType;
-  if (pInput->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd"
-	  || pInput->GetFileItem().IsType(".mpd")
-	  || pInput->GetFileItem().GetProperty("inputstream.adaptive.manifest_type").asString() == "mpd"
+  if (item.GetMimeType() == "video/vnd.mpeg.dash.mpd"
+	  || item.IsType(".mpd")
+	  || item.GetProperty("inputstream.adaptive.manifest_type").asString() == "mpd"
 	  )
-  {
 	type = CDASHSession::MANIFEST_TYPE_MPD;
-	licenseType = "com.widevine.alpha";
-  }
-  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml"
-           || pInput->GetFileItem().IsType(".ismc")
-           || pInput->GetFileItem().IsType(".ism")
-           || pInput->GetFileItem().GetProperty("inputstream.adaptive.manifest_type").asString() == "ism"
+  else if (item.GetMimeType() == "application/vnd.ms-sstr+xml"
+           || item.IsType(".ismc")
+           || item.IsType(".ism")
+           || item.GetProperty("inputstream.adaptive.manifest_type").asString() == "ism"
            )
-  {
     type = CDASHSession::MANIFEST_TYPE_ISM;
-    licenseType = "com.microsoft.playready";
-  }
+ 
   if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
     return false;
   
-  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, licenseType, "", "special://profile/"));
+  std::string sLicType = item.GetProperty("inputstream.adaptive.license_type").asString();
+  std::string sLicKey = item.GetProperty("inputstream.adaptive.license_key").asString();
+  std::string sLicData = item.GetProperty("inputstream.adaptive.license_data").asString();
+  std::string sServCert = item.GetProperty("inputstream.adaptive.server_certificate").asString();
+  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, sLicType, sLicKey, sLicData, sServCert, "special://profile/"));
 
   if (!m_session->initialize())
   {

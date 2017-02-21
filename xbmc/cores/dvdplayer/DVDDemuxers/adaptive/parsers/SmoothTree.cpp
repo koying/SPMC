@@ -297,6 +297,9 @@ protection_end(void *data, const char *el)
       dash->defaultKID_.resize(16);
       prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
     }
+  } else if (strcmp(el, "LI_URL") == 0)
+  {
+    dash->license_key_url_ = dash->strXMLText_;
   }
 }
 
@@ -368,11 +371,6 @@ void SmoothTree::parse_protection()
     strXMLText_ += "=";
 
   adp_pssh_.first = "com.microsoft.playready";
-  adp_pssh_.second = strXMLText_;
-
-  return;
-
-  //////////
 
   unsigned int xml_size = strXMLText_.size();
   uint8_t *buffer = (uint8_t*)malloc(xml_size), *xml_start(buffer);
