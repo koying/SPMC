@@ -70,21 +70,35 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
 #endif
   static const uint8_t guid_widevine[] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
   static const uint8_t guid_playready[] = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
-
-  if (license_type_ == "com.widevine.alpha" && strcmp(&pssh_[4], "pssh") != 0)
+  
+  const uint8_t* guid;
+  if (license_type_== "com.widevine.alpha")
+    guid = guid_widevine;
+  else if (license_type_== "com.microsoft.playready")
+    guid = guid_playready;
+  else
+  {
+    CLog::Log(LOGERROR, "Unsupported crypto scheme ! : %s", license_type_.c_str());
+    return;
+  }
+  
+  if (strcmp(&pssh_[4], "pssh") != 0)
   {
     static const uint8_t pssh_header[] = { 0x70, 0x73, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00 };
 
-    int boxLen = 0;
-    pssh_.insert(0, std::string(reinterpret_cast<const char*>(pssh_header), sizeof(pssh_header)));
+    uint32_t boxLen = 0;
+    uint32_t dataLen = pssh_.size();
+
+    pssh_.insert(0, reinterpret_cast<const char*>(pssh_header), sizeof(pssh_header));
     boxLen += sizeof(pssh_header);
-    pssh_.insert(boxLen, std::string(reinterpret_cast<const char*>(guid_widevine), 16));
+    pssh_.insert(boxLen, reinterpret_cast<const char*>(guid), 16);
     boxLen += 16;
-    pssh_.insert(boxLen, static_cast<uint32_t>(pssh_.size()), sizeof(uint32_t));
+
+    pssh_.insert(boxLen, reinterpret_cast<const char*>(&dataLen), sizeof(uint32_t));
     boxLen += sizeof(uint32_t);
 
-    boxLen += pssh_.size();
-    pssh_.insert(0, static_cast<uint32_t>(boxLen), sizeof(uint32_t));
+    boxLen += sizeof(uint32_t) /* boxlen */ + dataLen;
+    pssh_.insert(0, reinterpret_cast<const char*>(&boxLen), sizeof(uint32_t));
   }
 
 #ifdef _DEBUG
@@ -112,7 +126,13 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   AP4_FormatHex(reinterpret_cast<const uint8_t*>(license_url_.c_str()), bspos - license_url_.c_str(), buffer);
   */
 
-  media_drm_ = AMediaDrm_createByUUID(licenseType == "com.widevine.alpha" ? guid_widevine : guid_playready);
+  if (!AMediaDrm_isCryptoSchemeSupported(guid, "video/mp4"))
+  {
+    CLog::Log(LOGERROR, "Crypto scheme not supported by device ! : %s", license_type_.c_str());
+    return;
+  }
+  
+  media_drm_ = AMediaDrm_createByUUID(guid);
   if (!media_drm_)
   {
     CLog::Log(LOGERROR, "Unable to initialize media_drm");

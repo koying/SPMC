@@ -297,7 +297,7 @@ protection_end(void *data, const char *el)
       dash->defaultKID_.resize(16);
       prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
     }
-  } else if (strcmp(el, "LI_URL") == 0)
+  } else if (strcmp(el, "LA_URL") == 0)
   {
     dash->license_key_url_ = dash->strXMLText_;
   }

@@ -59,9 +59,13 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
   {
     case MANIFEST_TYPE_MPD:
       adaptiveTree_ = new adaptive::DASHTree;
+      if (license_type_.empty())
+        license_type_ = "com.widevine.alpha";
       break;
     case MANIFEST_TYPE_ISM:
       adaptiveTree_ = new adaptive::SmoothTree;
+      if (license_type_.empty())
+        license_type_ = "com.microsoft.playready";
       break;
     default:;
   };
@@ -341,6 +345,7 @@ bool CDASHSession::initialize()
     }
     else
     {
+      /*
       if (manifest_type_ == MANIFEST_TYPE_ISM)
       {
         if (license_data_.empty())
@@ -348,9 +353,10 @@ bool CDASHSession::initialize()
         create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
       }
       else
+      */
       {
-        init_data.SetBufferSize(1024);
-        unsigned int init_data_size(1024);
+        init_data.SetBufferSize(2048);
+        unsigned int init_data_size(2048);
         b64_decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size(), init_data.UseData(), init_data_size);
         init_data.SetDataSize(init_data_size);
       }
