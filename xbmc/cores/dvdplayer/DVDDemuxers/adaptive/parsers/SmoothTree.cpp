@@ -295,7 +295,8 @@ protection_end(void *data, const char *el)
     if (buffer_size == 16)
     {
       dash->defaultKID_.resize(16);
-      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
+//      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
+      memcpy(buffer, &dash->defaultKID_[0], 16);
     }
   } else if (strcmp(el, "LA_URL") == 0)
   {

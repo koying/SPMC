@@ -29,6 +29,7 @@
 #include "URL.h"
 #include "filesystem/CurlFile.h"
 #include "utils/log.h"
+#include "utils/EndianSwap.h"
 
 using namespace SSD;
 
@@ -87,7 +88,7 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
     static const uint8_t pssh_header[] = { 0x70, 0x73, 0x73, 0x68, 0x00, 0x00, 0x00, 0x00 };
 
     uint32_t boxLen = 0;
-    uint32_t dataLen = pssh_.size();
+    uint32_t dataLen = Endian_SwapBE32(pssh_.size());
 
     pssh_.insert(0, reinterpret_cast<const char*>(pssh_header), sizeof(pssh_header));
     boxLen += sizeof(pssh_header);
@@ -98,7 +99,8 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
     boxLen += sizeof(uint32_t);
 
     boxLen += sizeof(uint32_t) /* boxlen */ + dataLen;
-    pssh_.insert(0, reinterpret_cast<const char*>(&boxLen), sizeof(uint32_t));
+    uint32_t boxlenBE = Endian_SwapBE32(boxLen);
+    pssh_.insert(0, reinterpret_cast<const char*>(&boxlenBE), sizeof(uint32_t));
   }
 
 #ifdef _DEBUG
@@ -213,6 +215,12 @@ bool WV_CencSingleSampleDecrypter_android::ProvisionRequest()
   uUrl.SetProtocolOption("seekable", "0");
   uUrl.SetProtocolOption("postdata", encoded.c_str());
 
+  if (license_type_ == "com.microsoft.playready")
+  {
+    uUrl.SetProtocolOption("Content-Type", "text/xml");
+    uUrl.SetProtocolOption("SOAPAction", "http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense");
+  }
+
   XFILE::CFile* file = new XFILE::CFile();
   if (!file->Open(uUrl, READ_NO_CACHE))
   {
@@ -252,7 +260,9 @@ bool WV_CencSingleSampleDecrypter_android::GetLicense()
 
   CLog::Log(LOGDEBUG, "Key request successful, size: %u", reinterpret_cast<unsigned int>(key_request_size_));
 
-  if (!SendSessionMessage())
+  if (license_type_ == "com.widevine.alpha" && !SendSessionMessageWV())
+    return false;
+  else if (license_type_ == "com.microsoft.playready" && !SendSessionMessagePR())
     return false;
 
   CLog::Log(LOGDEBUG, "License update successful");
@@ -260,7 +270,7 @@ bool WV_CencSingleSampleDecrypter_android::GetLicense()
   return true;
 }
 
-bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
+bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
 {
   std::vector<std::string> headers, header, blocks = split(license_url_, '|');
   if (blocks.size() != 4)
@@ -298,12 +308,6 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
   uUrl.SetProtocolOption("seekable", "0");
   uUrl.SetProtocolOption("Expect", "");
   
-  if (license_type_ == "com.microsoft.playready")
-  {
-    uUrl.SetProtocolOption("Content-Type", "text/xml");
-    uUrl.SetProtocolOption("SOAPAction", "http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense");
-  }
-
   XFILE::CFile* file = nullptr;
   size_t nbRead;
   std::string response;
@@ -439,6 +443,48 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessage()
 SSMFAIL:
   if (file)
     file->Close();
+  return false;
+}
+
+bool WV_CencSingleSampleDecrypter_android::SendSessionMessagePR()
+{     
+#ifdef _DEBUG
+  std::string strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.challenge";
+  XFILE::CFile f;
+  f.OpenForWrite(strDbg, true);
+  f.Write(key_request_, key_request_size_);
+  f.Close();
+#endif
+
+  CURL uUrl(license_url_);
+  uUrl.SetProtocolOption("acceptencoding", "gzip, deflate");
+  uUrl.SetProtocolOption("seekable", "0");
+  uUrl.SetProtocolOption("Expect", "");
+  
+  uUrl.SetProtocolOption("Content-Type", "text/xml");
+  uUrl.SetProtocolOption("SOAPAction", "http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense");
+
+  media_status_t status;
+  AMediaDrmKeySetId dummy_ksid; //STREAMING returns 0
+  XFILE::CCurlFile file;
+  std::string response;
+  if (!file.Post(uUrl.Get(), std::string(reinterpret_cast<const char*>(key_request_), key_request_size_), response))
+  {
+    CLog::Log(LOGERROR, "License server returned failure");
+    goto SSMFAIL;
+  }
+      
+#ifdef _DEBUG
+  strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.response";
+  f.OpenForWrite(strDbg, true);
+  f.Write(response.c_str(), response.size());
+  f.Close();
+#endif
+
+  status = AMediaDrm_provideKeyResponse(media_drm_, &session_id_, reinterpret_cast<const uint8_t*>(response.data()), response.size(), &dummy_ksid);
+
+  return status == AMEDIA_OK;
+SSMFAIL:
   return false;
 }
 

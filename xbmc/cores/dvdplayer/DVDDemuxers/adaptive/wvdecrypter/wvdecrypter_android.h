@@ -56,7 +56,8 @@ public:
 private:
   bool ProvisionRequest();
   bool GetLicense();
-  bool SendSessionMessage();
+  bool SendSessionMessageWV();
+  bool SendSessionMessagePR();
 
   AMediaDrm *media_drm_;
   AMediaDrmByteArray session_id_;
