@@ -10,12 +10,6 @@ rm -r $WORKSPACE/addons/skin.re-touched
 fi
 git submodule update --init $WORKSPACE/addons/skin.re-touched
 
-if test -d $WORKSPACE/xbmc/android/jni
-then
-rm -r $WORKSPACE/xbmc/android/jni
-fi
-git submodule update --init $WORKSPACE/xbmc/android/jni
-
 if test -d $WORKSPACE/addons/script.xbmc.debug.log
 then
 rm -r $WORKSPACE/addons/script.xbmc.debug.log
