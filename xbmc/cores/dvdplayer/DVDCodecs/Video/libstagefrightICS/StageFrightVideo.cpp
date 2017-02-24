@@ -35,7 +35,7 @@
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
 #include "settings/AdvancedSettings.h"
-#include "android/jni/Build.h"
+#include "androidjni/Build.h"
 
 #include "xbmc/guilib/FrameBufferObject.h"
 

@@ -35,9 +35,9 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 
-#include "android/jni/Context.h"
-#include "android/jni/StorageManager.h"
-#include "android/jni/Environment.h"
+#include "androidjni/Context.h"
+#include "androidjni/StorageManager.h"
+#include "androidjni/Environment.h"
 
 static const char * typeWL[] = { "vfat", "exfat", "sdcardfs", "fuse", "ntfs", "fat32", "ext3", "ext4", "esdfs" };
 static const char * mountWL[] = { "/mnt", "/Removable", "/storage" };

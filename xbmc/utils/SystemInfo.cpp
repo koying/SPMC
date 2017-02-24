@@ -54,7 +54,7 @@
 #include "utils/StringUtils.h"
 #include "utils/XMLUtils.h"
 #if defined(TARGET_ANDROID)
-#include "android/jni/Build.h"
+#include "androidjni/Build.h"
 #include "utils/SysfsUtils.h"
 #include "utils/AMLUtils.h"
 #endif

@@ -32,7 +32,7 @@
 #include "threads/Thread.h"
 #include "threads/SingleLock.h"
 #include "android/activity/JNIXBMCVideoView.h"
-#include "android/jni/Surface.h"
+#include "androidjni/Surface.h"
 #include "guilib/Geometry.h"
 
 #include <media/NdkMediaCodec.h>

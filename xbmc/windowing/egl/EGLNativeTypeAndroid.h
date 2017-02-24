@@ -21,7 +21,7 @@
  */
 
 #include "EGLNativeType.h"
-#include "android/jni/Display.h"
+#include "androidjni/Display.h"
 
 class CEGLNativeTypeAndroid : public CEGLNativeType
 {

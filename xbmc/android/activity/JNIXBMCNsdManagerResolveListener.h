@@ -19,9 +19,9 @@
  *
  */
 
-#include "android/jni/JNIBase.h"
+#include "androidjni/JNIBase.h"
 
-#include "android/jni/NsdManager.h"
+#include "androidjni/NsdManager.h"
 
 namespace jni
 {

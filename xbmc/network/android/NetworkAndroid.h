@@ -22,11 +22,11 @@
 #include "network/Network.h"
 #include "threads/CriticalSection.h"
 
-#include "android/jni/Network.h"
-#include "android/jni/NetworkInfo.h"
-#include "android/jni/LinkProperties.h"
-#include "android/jni/RouteInfo.h"
-#include "android/jni/NetworkInterface.h"
+#include "androidjni/Network.h"
+#include "androidjni/NetworkInfo.h"
+#include "androidjni/LinkProperties.h"
+#include "androidjni/RouteInfo.h"
+#include "androidjni/NetworkInterface.h"
 
 class CNetworkAndroid;
 

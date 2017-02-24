@@ -35,7 +35,7 @@
 
 #ifdef TARGET_ANDROID
 #include "android/activity/XBMCApp.h"
-#include "android/jni/Image.h"
+#include "androidjni/Image.h"
 extern "C" {
 #include "libswscale/swscale.h"
 }

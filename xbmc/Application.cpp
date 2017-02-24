@@ -209,9 +209,9 @@
 #if defined(TARGET_ANDROID)
 #include "android/activity/XBMCApp.h"
 #include "android/activity/AndroidFeatures.h"
-#include "android/jni/Build.h"
-#include "android/jni/System.h"
-#include "android/jni/ApplicationInfo.h"
+#include "androidjni/Build.h"
+#include "androidjni/System.h"
+#include "androidjni/ApplicationInfo.h"
 #endif
 
 #ifdef TARGET_WINDOWS

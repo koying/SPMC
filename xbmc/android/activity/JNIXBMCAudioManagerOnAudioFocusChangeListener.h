@@ -19,9 +19,9 @@
  *
  */
 
-#include "android/jni/JNIBase.h"
+#include "androidjni/JNIBase.h"
 
-#include "android/jni/AudioManager.h"
+#include "androidjni/AudioManager.h"
 
 class CJNIXBMCAudioManagerOnAudioFocusChangeListener : public CJNIAudioManagerAudioFocusChangeListener, public CJNIInterfaceImplem<CJNIXBMCAudioManagerOnAudioFocusChangeListener>
 {

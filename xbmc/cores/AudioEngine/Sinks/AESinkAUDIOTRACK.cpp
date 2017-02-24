@@ -31,11 +31,11 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
-#include "android/jni/AudioFormat.h"
-#include "android/jni/AudioManager.h"
-#include "android/jni/AudioTrack.h"
-#include "android/jni/Build.h"
-#include "android/jni/System.h"
+#include "androidjni/AudioFormat.h"
+#include "androidjni/AudioManager.h"
+#include "androidjni/AudioTrack.h"
+#include "androidjni/Build.h"
+#include "androidjni/System.h"
 
 #include <algorithm>
 #include <iostream>

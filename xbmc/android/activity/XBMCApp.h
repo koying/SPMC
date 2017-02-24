@@ -27,6 +27,7 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <memory>
 
 #include <android/native_activity.h>
 
@@ -34,11 +35,11 @@
 #include "IInputHandler.h"
 
 #include "xbmc.h"
-#include "android/jni/Activity.h"
-#include "android/jni/BroadcastReceiver.h"
-#include "android/jni/AudioManager.h"
-#include "android/jni/AudioDeviceInfo.h"
-#include "android/jni/Image.h"
+#include "androidjni/Activity.h"
+#include "androidjni/BroadcastReceiver.h"
+#include "androidjni/AudioManager.h"
+#include "androidjni/AudioDeviceInfo.h"
+#include "androidjni/Image.h"
 #include "threads/Event.h"
 #include "interfaces/IAnnouncer.h"
 #include "guilib/Geometry.h"

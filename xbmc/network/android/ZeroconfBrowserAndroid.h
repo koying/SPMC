@@ -21,8 +21,8 @@
 
 #include "network/ZeroconfBrowser.h"
 
-#include "android/jni/NsdManager.h"
-#include "android/jni/NsdServiceInfo.h"
+#include "androidjni/NsdManager.h"
+#include "androidjni/NsdServiceInfo.h"
 
 #include "android/activity/JNIXBMCNsdManagerDiscoveryListener.h"
 #include "android/activity/JNIXBMCNsdManagerResolveListener.h"

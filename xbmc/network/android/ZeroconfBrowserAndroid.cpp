@@ -30,8 +30,8 @@
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 
-#include "android/jni/jutils/jutils-details.hpp"
-#include "android/jni/Context.h"
+#include "androidjni/jutils-details.hpp"
+#include "androidjni/Context.h"
 
 CZeroconfBrowserAndroid::CZeroconfBrowserAndroid()
 {

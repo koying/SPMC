@@ -19,11 +19,11 @@
  *
  */
 
-#include "android/jni/JNIBase.h"
+#include "androidjni/JNIBase.h"
 
-#include "android/jni/MediaMetadata.h"
-#include "android/jni/PlaybackState.h"
-#include "android/jni/Intent.h"
+#include "androidjni/MediaMetadata.h"
+#include "androidjni/PlaybackState.h"
+#include "androidjni/Intent.h"
 
 namespace jni
 {

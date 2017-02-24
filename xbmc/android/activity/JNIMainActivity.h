@@ -19,11 +19,11 @@
  *
  */
 
-#include "android/jni/Activity.h"
-#include "android/jni/Intent.h"
-#include "android/jni/AudioDeviceInfo.h"
-#include "android/jni/Image.h"
-#include "android/jni/Rect.h"
+#include "androidjni/Activity.h"
+#include "androidjni/Intent.h"
+#include "androidjni/AudioDeviceInfo.h"
+#include "androidjni/Image.h"
+#include "androidjni/Rect.h"
 
 class CJNIMainActivity : public CJNIActivity
 {

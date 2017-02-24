@@ -29,13 +29,13 @@
 #include "utils/URIUtils.h"
 #include <jni.h>
 #include <android/bitmap.h>
-#include "android/jni/Context.h"
-#include "android/jni/Build.h"
-#include "android/jni/DisplayMetrics.h"
-#include "android/jni/Resources.h"
-#include "android/jni/Bitmap.h"
-#include "android/jni/BitmapDrawable.h"
-#include "android/jni/PackageManager.h"
+#include "androidjni/Context.h"
+#include "androidjni/Build.h"
+#include "androidjni/DisplayMetrics.h"
+#include "androidjni/Resources.h"
+#include "androidjni/Bitmap.h"
+#include "androidjni/BitmapDrawable.h"
+#include "androidjni/PackageManager.h"
 using namespace XFILE;
 
 CFileAndroidApp::CFileAndroidApp(void)
