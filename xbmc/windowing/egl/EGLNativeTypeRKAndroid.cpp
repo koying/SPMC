@@ -26,7 +26,7 @@
 #include "utils/log.h"
 #include "guilib/gui3d.h"
 #include "android/activity/XBMCApp.h"
-#include "android/jni/Build.h"
+#include "androidjni/Build.h"
 #include "utils/StringUtils.h"
 #include "utils/SysfsUtils.h"
 #include "utils/RKutils.h"

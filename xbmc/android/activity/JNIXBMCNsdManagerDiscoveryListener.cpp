@@ -19,11 +19,13 @@
  */
 
 #include "JNIXBMCNsdManagerDiscoveryListener.h"
-#include "android/jni/jutils/jutils-details.hpp"
+#include "androidjni/jutils-details.hpp"
 
-#include "android/jni/Context.h"
+#include "androidjni/Context.h"
 #include "CompileInfo.h"
-#include "android/jni/NsdServiceInfo.h"
+#include "androidjni/NsdServiceInfo.h"
+
+#include "utils/log.h"
 
 using namespace jni;
 

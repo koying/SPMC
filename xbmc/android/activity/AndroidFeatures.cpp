@@ -22,9 +22,9 @@
 #include "utils/log.h"
 
 #include <cpu-features.h>
-#include "android/jni/Context.h"
-#include "android/jni/JNIThreading.h"
-#include "android/jni/PackageManager.h"
+#include "androidjni/Context.h"
+#include "androidjni/JNIThreading.h"
+#include "androidjni/PackageManager.h"
 
 bool CAndroidFeatures::HasNeon()
 {

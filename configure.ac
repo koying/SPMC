@@ -711,6 +711,7 @@ if test "$target_platform" = "target_android" ; then
   webserver_checkdepends=yes
   CFLAGS="$CFLAGS -Wno-psabi"
   CXXFLAGS="$CXXFLAGS -Wno-psabi"
+  LIBS="$LIBS -landroidjni"
   AC_DEFINE(HAS_EGLGLES, [1], [Define if supporting EGL based GLES Framebuffer])
 fi
 
@@ -2439,7 +2440,6 @@ OUTPUT_FILES="Makefile \
 
 OUTPUT_FILES_DROID=" \
     xbmc/android/activity/Makefile \
-    xbmc/android/jni/Makefile  \
     "
 
 OUTPUT_FILES_JAVA_DROID=" \

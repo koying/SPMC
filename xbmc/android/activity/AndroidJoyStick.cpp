@@ -21,7 +21,7 @@
 #include "AndroidJoyStick.h"
 #include "AndroidExtra.h"
 #include "XBMCApp.h"
-#include "android/jni/View.h"
+#include "androidjni/View.h"
 #include "android/activity/AndroidFeatures.h"
 #include "utils/log.h"
 #include "windowing/WinEvents.h"

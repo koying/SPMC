@@ -20,7 +20,7 @@
 
 #include "JNIMainActivity.h"
 
-#include "android/jni/jutils/jutils-details.hpp"
+#include "androidjni/jutils-details.hpp"
 
 using namespace jni;
 

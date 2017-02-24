@@ -23,8 +23,8 @@
 
 #include "threads/CriticalSection.h"
 
-#include "android/jni/NsdManager.h"
-#include "android/jni/NsdServiceInfo.h"
+#include "androidjni/NsdManager.h"
+#include "androidjni/NsdServiceInfo.h"
 #include "android/activity/JNIXBMCNsdManagerRegistrationListener.h"
 
 class CZeroconfAndroid : public CZeroconf

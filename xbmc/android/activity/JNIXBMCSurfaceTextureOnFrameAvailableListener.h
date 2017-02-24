@@ -19,9 +19,9 @@
  *
  */
 
-#include "android/jni/JNIBase.h"
+#include "androidjni/JNIBase.h"
 
-#include "android/jni/SurfaceTexture.h"
+#include "androidjni/SurfaceTexture.h"
 
 class CJNIXBMCSurfaceTextureOnFrameAvailableListener : public CJNISurfaceTextureOnFrameAvailableListener, public CJNIInterfaceImplem<CJNIXBMCSurfaceTextureOnFrameAvailableListener>
 {

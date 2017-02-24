@@ -24,7 +24,7 @@
 #include "threads/CriticalSection.h"
 #include <set>
 
-#include "android/jni/AudioTrack.h"
+#include "androidjni/AudioTrack.h"
 
 class AERingBuffer;
 

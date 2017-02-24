@@ -27,12 +27,12 @@
 #include "guilib/gui3d.h"
 #include "android/activity/XBMCApp.h"
 #include "utils/StringUtils.h"
-#include "android/jni/SystemProperties.h"
-#include "android/jni/View.h"
-#include "android/jni/Window.h"
-#include "android/jni/WindowManager.h"
-#include "android/jni/Build.h"
-#include "android/jni/System.h"
+#include "androidjni/SystemProperties.h"
+#include "androidjni/View.h"
+#include "androidjni/Window.h"
+#include "androidjni/WindowManager.h"
+#include "androidjni/Build.h"
+#include "androidjni/System.h"
 
 #include "utils/SysfsUtils.h"
 

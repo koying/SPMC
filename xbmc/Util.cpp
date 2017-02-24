@@ -40,7 +40,7 @@
 #if defined(TARGET_ANDROID)
 #include "android/bionic_supplement/bionic_supplement.h"
 #include "android/activity/XBMCApp.h"
-#include "android/jni/ApplicationInfo.h"
+#include "androidjni/ApplicationInfo.h"
 #include "CompileInfo.h"
 #endif
 #include <stdlib.h>

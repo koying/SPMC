@@ -22,13 +22,13 @@
 #include "NetworkAndroid.h"
 
 #include "android/activity/XBMCApp.h"
-#include "android/jni/ConnectivityManager.h"
-#include "android/jni/LinkAddress.h"
-#include "android/jni/InetAddress.h"
-#include "android/jni/RouteInfo.h"
+#include "androidjni/ConnectivityManager.h"
+#include "androidjni/LinkAddress.h"
+#include "androidjni/InetAddress.h"
+#include "androidjni/RouteInfo.h"
 
-#include "android/jni/WifiManager.h"
-#include "android/jni/WifiInfo.h"
+#include "androidjni/WifiManager.h"
+#include "androidjni/WifiInfo.h"
 
 #include "utils/StringUtils.h"
 #include "utils/log.h"

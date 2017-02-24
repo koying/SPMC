@@ -28,7 +28,7 @@
 #include "adaptive/DASHByteStream.h"
 
 #ifdef TARGET_ANDROID
-#include "android/jni/SystemProperties.h"
+#include "androidjni/SystemProperties.h"
 #endif
 #ifdef TARGET_WINDOWS
 #pragma comment(lib, "libexpat.lib")

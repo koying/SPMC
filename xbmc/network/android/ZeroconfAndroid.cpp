@@ -23,7 +23,7 @@
 #include "utils/log.h"
 #include "threads/SingleLock.h"
 
-#include "android/jni/Context.h"
+#include "androidjni/Context.h"
 
 CZeroconfAndroid::CZeroconfAndroid()
 {
