@@ -4,6 +4,3 @@
 [submodule "addons/script.xbmc.debug.log"]
 	path = addons/script.xbmc.debug.log
 	url = git://github.com/koying/script.xbmc.debug.log.git
-[submodule "xbmc/android/jni"]
-	path = xbmc/android/jni
-	url = https://github.com/koying/libdroidjni.git
