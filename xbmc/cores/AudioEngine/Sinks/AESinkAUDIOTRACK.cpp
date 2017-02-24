@@ -142,9 +142,10 @@ static int AEChannelMapToAUDIOTRACKChannelMask(CAEChannelInfo info)
   return atMask;
 }
 
-static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int channelMask, int encoding, int bufferSize)
+jni::CJNIAudioTrack *CAESinkAUDIOTRACK::CreateAudioTrack(int stream, int sampleRate, int channelMask, int encoding, int bufferSize)
 {
   jni::CJNIAudioTrack *jniAt = NULL;
+  m_jniAudioFormat = encoding;
 
   try
   {
@@ -163,20 +164,28 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
       // Force direct output
       attrbuilder.setFlags(CJNIAudioAttributes::FLAG_HW_AV_SYNC);
 
-      jniAt = new CJNIAudioTrack(attrbuilder.build(),
+      jniAt = new jni::CJNIAudioTrack(attrbuilder.build(),
                                  fmtbuilder.build(),
                                  bufferSize,
                                  CJNIAudioTrack::MODE_STREAM,
                                  0);
+      if (m_jniAudioFormat == CJNIAudioFormat::ENCODING_PCM_FLOAT)
+        m_jniBuffer = jharray(xbmc_jnienv()->NewFloatArray(bufferSizeInBytes / sizeof(float)));
+      else
+        m_jniBuffer = jharray(xbmc_jnienv()->NewByteArray(bufferSizeInBytes));
+    
+      m_buffer.setGlobal();
     }
     else
 #endif
-      jniAt = new CJNIAudioTrack(stream,
+    {
+      jniAt = new jni::CJNIAudioTrack(stream,
                                  sampleRate,
                                  channelMask,
                                  encoding,
                                  bufferSize,
                                  CJNIAudioTrack::MODE_STREAM);
+    }
   }
   catch (const std::invalid_argument& e)
   {
@@ -186,6 +195,54 @@ static jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int cha
   return jniAt;
 }
 
+int CAESinkAUDIOTRACK::AudioTrackWrite(char* audioData, int offsetInBytes, int sizeInBytes)
+{
+  int     written = 0;
+  if (CJNIBase::GetSDKVersion() >= 21 && m_jniAudioFormat == CJNIAudioFormat::ENCODING_PCM_FLOAT)
+  {
+    std::vector<float> buf;
+    buf.reserve(sizeInBytes / sizeof(float));
+    memcpy(buf.data(), audioData + offsetInBytes, sizeInBytes / sizeof(float));
+    written = m_at_jni->write(buf, 0, sizeInBytes / sizeof(float), CJNIAudioTrack::WRITE_NON_BLOCKING);
+    written *= sizeof(float);
+  }
+  else if (m_jniAudioFormat == CJNIAudioFormat::ENCODING_IEC61937)
+  {
+    std::vector<int16_t> buf;
+    buf.reserve(sizeInBytes / sizeof(int16_t));
+    memcpy(buf.data(), audioData + offsetInBytes, sizeInBytes / sizeof(int16_t));
+    if (CJNIBase::GetSDKVersion() >= 23)
+      written = m_at_jni->write(buf, 0, sizeInBytes / sizeof(int16_t), CJNIAudioTrack::WRITE_NON_BLOCKING);
+    else
+      written = m_at_jni->write(buf, 0, sizeInBytes / sizeof(int16_t));
+    written *= sizeof(uint16_t);
+  }
+  else
+  {
+    std::vector<char> buf;
+    buf.reserve(sizeInBytes);
+    memcpy(buf.data(), audioData + offsetInBytes, sizeInBytes);
+    if (CJNIBase::GetSDKVersion() >= 23)
+      written = m_at_jni->write(buf, 0, sizeInBytes, CJNIAudioTrack::WRITE_NON_BLOCKING);
+    else
+      written = m_at_jni->write(buf, 0, sizeInBytes);
+  }
+  
+  return written;
+}
+
+int CAESinkAUDIOTRACK::AudioTrackWrite(char* audioData, int sizeInBytes, int64_t timestamp)
+{
+  int     written = 0;
+  std::vector<char> buf;
+  buf.reserve(sizeInBytes);
+  memcpy(buf.data(), audioData, sizeInBytes);
+
+  CJNIByteBuffer bytebuf = CJNIByteBuffer::wrap(buf);
+  written = m_at_jni->write(bytebuf.get_raw(), sizeInBytes, CJNIAudioTrack::WRITE_BLOCKING, timestamp);
+
+  return written;
+}
 
 std::set<unsigned int> CAESinkAUDIOTRACK::m_sink_sampleRates;
 
@@ -658,7 +715,7 @@ unsigned int CAESinkAUDIOTRACK::AddPackets(uint8_t **data, unsigned int frames, 
     while (toWrite > 0)
     {
       int bsize = std::min(toWrite, m_buffer_size);
-      int len = m_at_jni->write((char*)(&out_buf[written]), 0, bsize);
+      int len = AudioTrackWrite((char*)(&out_buf[written]), 0, bsize);
       // int len = m_at_jni->write((char*)(&out_buf[written]), bsize, (int64_t)(m_duration_written * 1000000));  // by timestamp
       if (len < 0)
       {
