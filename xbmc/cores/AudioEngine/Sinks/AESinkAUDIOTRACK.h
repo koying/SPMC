@@ -24,11 +24,9 @@
 #include "threads/CriticalSection.h"
 #include <set>
 
+#include "android/jni/AudioTrack.h"
+
 class AERingBuffer;
-namespace jni
-{
-class CJNIAudioTrack;
-};
 
 class CAESinkAUDIOTRACK : public IAESink
 {
@@ -51,11 +49,16 @@ public:
   static void          EnumerateDevicesEx(AEDeviceInfoList &list, bool force = false);
 
 protected:
+  jni::CJNIAudioTrack *CreateAudioTrack(int stream, int sampleRate, int channelMask, int encoding, int bufferSize);
   static bool IsSupported(int sampleRateInHz, int channelConfig, int audioFormat);
   static bool HasAmlHD();
-
+  
+  int AudioTrackWrite(char* audioData, int offsetInBytes, int sizeInBytes);
+  int AudioTrackWrite(char* audioData, int sizeInBytes, int64_t timestamp);
 private:
   jni::CJNIAudioTrack  *m_at_jni;
+  int     m_jniAudioFormat;
+  
   double                m_duration_written;
   double                m_last_duration_written;
   uint64_t              m_last_head_pos;
