@@ -464,7 +464,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       m_mime = "video/avc";
       m_formatname = "amc-h264";
       // check for h264-avcC and convert to h264-annex-b
-      if (m_hints.extradata && !m_hints.cryptoSession)
+      if (m_hints.extradata)
       {
         m_bitstream = new CBitstreamConverter;
         if (!m_bitstream->Open(m_hints.codec, (uint8_t*)m_hints.extradata, m_hints.extrasize, true))
@@ -479,7 +479,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       m_mime = "video/hevc";
       m_formatname = "amc-h265";
       // check for hevc-hvcC and convert to h265-annex-b
-      if (m_hints.extradata && !m_hints.cryptoSession)
+      if (m_hints.extradata)
       {
         m_bitstream = new CBitstreamConverter;
         if (!m_bitstream->Open(m_hints.codec, (uint8_t*)m_hints.extradata, m_hints.extrasize, true))
@@ -772,6 +772,8 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
   if (g_advancedSettings.CanLogComponent(LOGVIDEO))
   {
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode state (%d) - pts/dts (%f/%f) - size(%d) - 0x%p", m_state, packet.pts, packet.dts, packet.iSize, packet.pData);
+    CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode data");
+    DebugBinary(reinterpret_cast<const char*>(packet.pData), std::min(16, packet.iSize));
   }
   // Are we stopped? If so, wait and loop
   if (m_state == MEDIACODEC_STATE_STOPPED)
@@ -897,6 +899,22 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
               dst_ptr[3] = 0x0d;
               memcpy(dst_ptr+4, pData, iSize);
               iSize += 4;
+            }
+
+            break;
+          }
+
+          case AV_CODEC_ID_H264:
+          {
+            if (iSize >= 4 && pData[0] == 0x00 && pData[1] == 0x00 && pData[2] == 0x00 && pData[3] == 0x01)
+              memcpy(dst_ptr, pData, iSize);
+            else
+            {
+              dst_ptr[0] = 0x00;
+              dst_ptr[1] = 0x00;
+              dst_ptr[2] = 0x00;
+              dst_ptr[3] = 0x01;
+              memcpy(dst_ptr+4, pData + 4, iSize - 4);
             }
 
             break;

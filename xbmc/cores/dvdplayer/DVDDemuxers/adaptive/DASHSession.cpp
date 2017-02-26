@@ -83,6 +83,7 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
   }
   else
     adaptiveTree_->bandwidth_ = 4000000;
+
   adaptiveTree_->set_download_speed(adaptiveTree_->bandwidth_);
   CLog::Log(LOGDEBUG, "CDASHSession - Initial bandwidth: %u ", adaptiveTree_->bandwidth_);
 
