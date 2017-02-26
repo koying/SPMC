@@ -22,6 +22,7 @@
 #include "DASHSession.h"
 
 #include "DVDDemuxers/DVDDemux.h"
+#include "DVDDemuxers/DemuxCrypto.h"
 
 #include "DASHByteStream.h"
 #include "helpers.h"
@@ -195,17 +196,6 @@ bool CDASHSession::initialize()
   }
   CLog::Log(LOGINFO, "Successfully parsed adaptive manifest. #Streams: %d Download speed: %0.4f Bytes/s", adaptiveTree_->periods_[0]->adaptationSets_.size(), adaptiveTree_->download_speed_);
 
-  if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
-  {
-    if (!GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_))
-    {
-      CLog::Log(LOGDEBUG, "Unsupported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
-      return false;
-    }
-    else
-      CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
-  }
-
   uint32_t min_bandwidth(0), max_bandwidth(0);
   /*
   {
@@ -215,49 +205,8 @@ bool CDASHSession::initialize()
   }
   */
 
-  // create CDASHSession::STREAM objects. One for each AdaptationSet
-  const adaptive::AdaptiveTree::AdaptationSet *adp;
-
-  for (std::vector<STREAM*>::iterator b(streams_.begin()), e(streams_.end()); b != e; ++b)
-    SAFE_DELETE(*b);
-  streams_.clear();
-
-  for (unsigned int i=0; (adp = adaptiveTree_->GetAdaptationSet(i)); ++i)
-  {
-    size_t repId = manual_streams_ ? adp->repesentations_.size() : 0;
-
-    do {
-      streams_.push_back(new STREAM(*adaptiveTree_, adp->type_));
-      STREAM &stream(*streams_.back());
-      stream.stream_.prepare_stream(adp, width_, height_, min_bandwidth, max_bandwidth, repId);
-
-      switch (adp->type_)
-      {
-        case adaptive::AdaptiveTree::VIDEO:
-          stream.dmuxstrm = new CDemuxStreamVideo();
-          break;
-        case adaptive::AdaptiveTree::AUDIO:
-          stream.dmuxstrm = new CDemuxStreamAudio();
-          break;
-        case adaptive::AdaptiveTree::TEXT:
-          stream.dmuxstrm = new CDemuxStreamTeletext();
-          break;
-        default:
-          break;
-      }
-      stream.dmuxstrm->iId = i;
-      stream.dmuxstrm->iPhysicalId = i | (repId << 16);
-      strcpy(stream.dmuxstrm->language, adp->language_.c_str());
-      stream.dmuxstrm->ExtraData = nullptr;
-      stream.dmuxstrm->ExtraSize = 0;
-
-      UpdateStream(stream);
-
-    } while (repId--);
-  }
-
   // Try to initialize an SingleSampleDecryptor
-  if (adaptiveTree_->encryptionState_)
+  if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
   {
     AP4_DataBuffer init_data;
     
@@ -267,6 +216,14 @@ bool CDASHSession::initialize()
     if (license_key_url_.empty())
       return false;
         
+    if (!GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_))
+    {
+      CLog::Log(LOGDEBUG, "Unsupported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+      return false;
+    }
+    else
+      CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+
     if (adaptiveTree_->pssh_.second == "FILE")
     {
       if (license_data_.empty())
@@ -369,10 +326,66 @@ bool CDASHSession::initialize()
       m_cryptoData.Reserve(1024);
       single_sample_decryptor_->DecryptSampleData(in, m_cryptoData, 0, 0, 0, 0);
 #endif
-      return true;
     }
-    CLog::Log(LOGDEBUG, "Decrypter creation failed !!");
-    return false;
+    else
+    {
+      CLog::Log(LOGDEBUG, "Decrypter creation failed !!");
+      return false;
+    }
+  }
+
+  // create CDASHSession::STREAM objects. One for each AdaptationSet
+  const adaptive::AdaptiveTree::AdaptationSet *adp;
+
+  for (std::vector<STREAM*>::iterator b(streams_.begin()), e(streams_.end()); b != e; ++b)
+    SAFE_DELETE(*b);
+  streams_.clear();
+
+  for (unsigned int i=0; (adp = adaptiveTree_->GetAdaptationSet(i)); ++i)
+  {
+    size_t repId = manual_streams_ ? adp->repesentations_.size() : 0;
+
+    do {
+      streams_.push_back(new STREAM(*adaptiveTree_, adp->type_));
+      STREAM &stream(*streams_.back());
+      stream.stream_.prepare_stream(adp, width_, height_, min_bandwidth, max_bandwidth, repId);
+
+      switch (adp->type_)
+      {
+        case adaptive::AdaptiveTree::VIDEO:
+          stream.dmuxstrm = new CDemuxStreamVideo();
+          break;
+        case adaptive::AdaptiveTree::AUDIO:
+          stream.dmuxstrm = new CDemuxStreamAudio();
+          break;
+        case adaptive::AdaptiveTree::TEXT:
+          stream.dmuxstrm = new CDemuxStreamTeletext();
+          break;
+        default:
+          break;
+      }
+      stream.dmuxstrm->iId = i;
+      stream.dmuxstrm->iPhysicalId = i | (repId << 16);
+      strcpy(stream.dmuxstrm->language, adp->language_.c_str());
+      stream.dmuxstrm->ExtraData = nullptr;
+      stream.dmuxstrm->ExtraSize = 0;
+
+      if (m_cryptoData.GetDataSize())
+      {
+        CLog::Log(LOGDEBUG, "GetStream(%d): initalizing crypto session", i);
+        const char *pDataSize(reinterpret_cast<const char *>(m_cryptoData.GetData()) + 8); //skip "CRYPTO" + size
+        stream.dmuxstrm->cryptoSession.reset(
+              new DemuxCryptoSession(
+                manifest_type_ == CDASHSession::MANIFEST_TYPE_ISM ? CRYPTO_SESSION_SYSTEM_PLAYREADY : CRYPTO_SESSION_SYSTEM_WIDEVINE,
+                *pDataSize,
+                (pDataSize + 1)
+              )
+            );
+      }
+
+      UpdateStream(stream);
+
+    } while (repId--);
   }
 
   return true;

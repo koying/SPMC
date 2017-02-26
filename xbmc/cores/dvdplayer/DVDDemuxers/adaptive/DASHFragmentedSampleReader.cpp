@@ -294,8 +294,9 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
           m_DefaultKey = tenc->GetDefaultKid();
       }
 
-//      if (AP4_FAILED(result = AP4_CencSampleDecrypter::Create(sample_table, algorithm_id, 0, 0, 0, m_SingleSampleDecryptor, m_Decrypter)))
-//        return result;
+      m_Decrypter = new AP4_CencSampleDecrypter(m_SingleSampleDecryptor, sample_table);
+      if (!m_Decrypter)
+        return AP4_ERROR_INVALID_PARAMETERS;
     }
   }
 

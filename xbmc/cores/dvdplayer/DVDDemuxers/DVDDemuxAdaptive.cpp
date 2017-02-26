@@ -130,7 +130,7 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
       pData += sizeof(numSubSamples);
       p = CDVDDemuxUtils::AllocateEncryptedDemuxPacket(iSize, numSubSamples);
       memcpy(p->cryptoInfo->clearBytes, pData, numSubSamples * sizeof(uint16_t));
-      pData += (numSubSamples * sizeof(uint32_t));
+      pData += (numSubSamples * sizeof(uint16_t));
       memcpy(p->cryptoInfo->cipherBytes, pData, numSubSamples * sizeof(uint32_t));
       pData += (numSubSamples * sizeof(uint32_t));
       memcpy(p->cryptoInfo->iv, pData, 16);
@@ -152,11 +152,12 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
     p->iSize = iSize;
     memcpy(p->pData, pData, iSize);
 
-    CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
+    CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
 
     sr->ReadSample();
     return p;
   }
+  CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - No sample");
   return NULL;
 }
 
@@ -189,7 +190,6 @@ CDemuxStream* CDVDDemuxAdaptive::GetStream(int streamid)
     CLog::Log(LOGERROR, "CDVDDemuxAdaptive::GetStream(%d): error getting stream", streamid);
     return nullptr;
   }
-
   return stream->dmuxstrm;
 }
 
@@ -246,9 +246,8 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
       AP4_SampleDescription *sample_descryption = new AP4_SampleDescription(AP4_SampleDescription::TYPE_UNKNOWN, 0, 0);
       if (stream->stream_.getAdaptationSet()->encrypted)
       {
-        static const AP4_UI08 default_key[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
         AP4_ContainerAtom schi(AP4_ATOM_TYPE_SCHI);
-        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, default_key));
+        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, m_session->GetDefaultKeyId()));
         sample_descryption = new AP4_ProtectedSampleDescription(0, sample_descryption, 0, AP4_PROTECTION_SCHEME_TYPE_PIFF, 0, "", &schi);
       }
       sample_table->AddSampleDescription(sample_descryption);

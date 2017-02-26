@@ -146,7 +146,7 @@ start(void *data, const char *el, const char **attr)
       //<StreamIndex Type = "video" TimeScale = "10000000" Name = "video" Chunks = "3673" QualityLevels = "6" Url = "QualityLevels({bitrate})/Fragments(video={start time})" MaxWidth = "960" MaxHeight = "540" DisplayWidth = "960" DisplayHeight = "540">
       dash->current_adaptationset_ = new SmoothTree::AdaptationSet();
       dash->current_period_->adaptationSets_.push_back(dash->current_adaptationset_);
-      dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_SUPPORTED;
+      dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED;
       dash->current_adaptationset_->timescale_ = gTimeScale;
           
       for (; *attr;)
@@ -295,8 +295,7 @@ protection_end(void *data, const char *el)
     if (buffer_size == 16)
     {
       dash->defaultKID_.resize(16);
-//      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
-      memcpy(buffer, &dash->defaultKID_[0], 16);
+      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
     }
   } else if (strcmp(el, "LA_URL") == 0)
   {
@@ -341,6 +340,7 @@ bool SmoothTree::open(const char *url)
         cummulated += *bsd;
       }
     }
+    (*ba)->encrypted = (encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED);
   }
   return true;
 }

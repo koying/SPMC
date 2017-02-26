@@ -33,6 +33,9 @@
 
 using namespace SSD;
 
+static const uint8_t guid_widevine[] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
+static const uint8_t guid_playready[] = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
+
 /*******************************************************
 CDM
 ********************************************************/
@@ -69,8 +72,6 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
   f.Write(pssh_.c_str(), pssh_.size());
   f.Close();
 #endif
-  static const uint8_t guid_widevine[] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
-  static const uint8_t guid_playready[] = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
   
   const uint8_t* guid;
   if (license_type_== "com.widevine.alpha")
@@ -464,6 +465,8 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessagePR()
   uUrl.SetProtocolOption("Content-Type", "text/xml");
   uUrl.SetProtocolOption("SOAPAction", "http://schemas.microsoft.com/DRM/2007/03/protocols/AcquireLicense");
 
+  CLog::Log(LOGDEBUG, "Sending key request to: %s / %s", license_url_.c_str(), uUrl.Get().c_str());
+
   media_status_t status;
   AMediaDrmKeySetId dummy_ksid; //STREAMING returns 0
   XFILE::CCurlFile file;
@@ -525,7 +528,11 @@ AP4_Result WV_CencSingleSampleDecrypter_android::DecryptSampleData(
     uint8_t dummy(session_id_.length);
     data_out.AppendData(&dummy, 1);
     data_out.AppendData(session_id_.ptr, session_id_.length);
-    uint8_t keysystem[16] = { 0xed, 0xef, 0x8b, 0xa9, 0x79, 0xd6, 0x4a, 0xce, 0xa3, 0xc8, 0x27, 0xdc, 0xd5, 0x1d, 0x21, 0xed };
+    const uint8_t* keysystem;
+    if (license_type_== "com.widevine.alpha")
+      keysystem = guid_widevine;
+    else if (license_type_== "com.microsoft.playready")
+      keysystem = guid_playready;
     data_out.AppendData(keysystem, 16);
   }
   else
