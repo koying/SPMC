@@ -13,9 +13,6 @@ DVDPCODECS_DIRS= \
 	lib \
 	lib/libdvd 
 
-ifeq (@USE_LIBSTAGEFRIGHT@,1)
-DVDPCODECS_DIRS += xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS
-endif
 
 DVDPLAYER_ARCHIVES=xbmc/cores/dvdplayer/DVDPlayer.a \
                    xbmc/cores/dvdplayer/DVDCodecs/DVDCodecs.a \
@@ -339,12 +336,7 @@ libaddon: exports
 dvdpcodecs: dllloader
 	$(MAKE) -C lib/libdvd
 
-ifeq (@USE_LIBSTAGEFRIGHT@,1)
-dvdpextcodecs: lib@APP_NAME_LC@.so
-	$(MAKE) -C xbmc/cores/dvdplayer/DVDCodecs/Video/libstagefrightICS
-else
 dvdpextcodecs:
-endif
 
 eventclients:
 ifeq ($(findstring osx,@ARCH@), osx)
