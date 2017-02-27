@@ -146,7 +146,7 @@ start(void *data, const char *el, const char **attr)
       //<StreamIndex Type = "video" TimeScale = "10000000" Name = "video" Chunks = "3673" QualityLevels = "6" Url = "QualityLevels({bitrate})/Fragments(video={start time})" MaxWidth = "960" MaxHeight = "540" DisplayWidth = "960" DisplayHeight = "540">
       dash->current_adaptationset_ = new SmoothTree::AdaptationSet();
       dash->current_period_->adaptationSets_.push_back(dash->current_adaptationset_);
-      dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_SUPPORTED;
+      dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED;
       dash->current_adaptationset_->timescale_ = gTimeScale;
           
       for (; *attr;)
@@ -172,8 +172,8 @@ start(void *data, const char *el, const char **attr)
     else if (strcmp(el, "Protection") == 0)
     {
       dash->currentNode_ |= SmoothTree::SSMNODE_PROTECTION;
-      dash->encryptionState_ = SmoothTree::ENCRYTIONSTATE_SUPPORTED;
-	  }
+      dash->encryptionState_ = SmoothTree::ENCRYTIONSTATE_ENCRYPTED;
+    }
   }
   else if (strcmp(el, "SmoothStreamingMedia") == 0)
   {
@@ -236,6 +236,7 @@ end(void *data, const char *el)
       {
         dash->currentNode_ &= ~(SmoothTree::SSMNODE_PROTECTION| SmoothTree::SSMNODE_PROTECTIONTEXT);
         dash->parse_protection();
+        dash->pssh_ = dash->adp_pssh_;
       }
     }
     else if (dash->currentNode_ & SmoothTree::SSMNODE_STREAMINDEX)
@@ -284,19 +285,22 @@ protection_text(void *data, const char *s, int len)
 static void XMLCALL
 protection_end(void *data, const char *el)
 {
-	SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
-    if (strcmp(el, "KID") == 0)
+  SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
+  if (strcmp(el, "KID") == 0)
+  {
+    uint8_t buffer[32];
+    unsigned int buffer_size(32);
+    b64_decode(dash->strXMLText_.data(), dash->strXMLText_.size(), buffer, buffer_size);
+    
+    if (buffer_size == 16)
     {
-      uint8_t buffer[32];
-      unsigned int buffer_size(32);
-      b64_decode(dash->strXMLText_.data(), dash->strXMLText_.size(), buffer, buffer_size);
-
-      if (buffer_size == 16)
-      {
-        dash->defaultKID_.resize(16);
-        prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
-      }
+      dash->defaultKID_.resize(16);
+      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
     }
+  } else if (strcmp(el, "LA_URL") == 0)
+  {
+    dash->license_key_url_ = dash->strXMLText_;
+  }
 }
 
 /*----------------------------------------------------------------------
@@ -336,6 +340,7 @@ bool SmoothTree::open(const char *url)
         cummulated += *bsd;
       }
     }
+    (*ba)->encrypted = (encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED);
   }
   return true;
 }
@@ -365,6 +370,9 @@ void SmoothTree::parse_protection()
 
   while (strXMLText_.size() & 3)
     strXMLText_ += "=";
+  
+  adp_pssh_.first = "com.microsoft.playready";
+  adp_pssh_.second = strXMLText_;
 
   unsigned int xml_size = strXMLText_.size();
   uint8_t *buffer = (uint8_t*)malloc(xml_size), *xml_start(buffer);
@@ -374,7 +382,7 @@ void SmoothTree::parse_protection()
     free(buffer);
     return;
   }
-
+  
   while (xml_size && *xml_start != '<')
   {
     xml_start++;

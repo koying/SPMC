@@ -23,6 +23,7 @@ DVDPLAYER_ARCHIVES=xbmc/cores/dvdplayer/DVDPlayer.a \
                    xbmc/cores/dvdplayer/DVDCodecs/Overlay/Overlay.a \
                    xbmc/cores/dvdplayer/DVDCodecs/Video/Video.a \
                    xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxers.a \
+                   xbmc/cores/dvdplayer/DVDDemuxers/adaptive/DVDDemuxAdaptive.a \
                    xbmc/cores/dvdplayer/DVDInputStreams/DVDInputStreams.a \
                    xbmc/cores/dvdplayer/DVDSubtitles/DVDSubtitles.a
 

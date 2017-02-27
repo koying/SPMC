@@ -22,6 +22,7 @@
 #include "DVDDemuxAdaptive.h"
 
 #include "DVDDemuxPacket.h"
+#include "DemuxCrypto.h"
 #include "DVDDemuxUtils.h"
 #include "DVDInputStreams/DVDInputStream.h"
 
@@ -53,17 +54,29 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
 {
   CLog::Log(LOGINFO, "CDVDDemuxAdaptive - matching against %d x %d", maxWidth, maxHeight);
   
+  CFileItem item = pInput->GetFileItem();
   CDASHSession::MANIFEST_TYPE type = CDASHSession::MANIFEST_TYPE_UNKNOWN;
   
-  if (pInput->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInput->GetFileItem().IsType(".mpd"))  //MPD
-    type = CDASHSession::MANIFEST_TYPE_MPD;
-  else if (pInput->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInput->GetFileItem().IsType(".ismc") || pInput->GetFileItem().IsType(".ism"))  //ISM
+  if (item.GetMimeType() == "video/vnd.mpeg.dash.mpd"
+	  || item.IsType(".mpd")
+	  || item.GetProperty("inputstream.adaptive.manifest_type").asString() == "mpd"
+	  )
+	type = CDASHSession::MANIFEST_TYPE_MPD;
+  else if (item.GetMimeType() == "application/vnd.ms-sstr+xml"
+           || item.IsType(".ismc")
+           || item.IsType(".ism")
+           || item.GetProperty("inputstream.adaptive.manifest_type").asString() == "ism"
+           )
     type = CDASHSession::MANIFEST_TYPE_ISM;
-  
+ 
   if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
     return false;
   
-  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, "", "", "special://profile/"));
+  std::string sLicType = item.GetProperty("inputstream.adaptive.license_type").asString();
+  std::string sLicKey = item.GetProperty("inputstream.adaptive.license_key").asString();
+  std::string sLicData = item.GetProperty("inputstream.adaptive.license_data").asString();
+  std::string sServCert = item.GetProperty("inputstream.adaptive.server_certificate").asString();
+  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, sLicType, sLicKey, sLicData, sServCert, "special://profile/"));
 
   if (!m_session->initialize())
   {
@@ -106,20 +119,45 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
 
   if (sr)
   {
-    DemuxPacket *p = CDVDDemuxUtils::AllocateDemuxPacket(sr->GetSampleDataSize());
+    AP4_Size iSize = sr->GetSampleDataSize();
+    const AP4_UI08 *pData = sr->GetSampleData();
+    DemuxPacket *p;
+
+#ifdef TARGET_ANDROID
+    if (sr->IsEncrypted())
+    {
+      unsigned int numSubSamples = *((unsigned int*)pData); 
+      pData += sizeof(numSubSamples);
+      p = CDVDDemuxUtils::AllocateEncryptedDemuxPacket(iSize, numSubSamples);
+      memcpy(p->cryptoInfo->clearBytes, pData, numSubSamples * sizeof(uint16_t));
+      pData += (numSubSamples * sizeof(uint16_t));
+      memcpy(p->cryptoInfo->cipherBytes, pData, numSubSamples * sizeof(uint32_t));
+      pData += (numSubSamples * sizeof(uint32_t));
+      memcpy(p->cryptoInfo->iv, pData, 16);
+      pData += 16;
+      memcpy(p->cryptoInfo->kid, pData, 16);
+      pData += 16;
+      iSize -= (pData - sr->GetSampleData());
+      p->cryptoInfo->flags = 0;
+    }
+    else
+#endif
+      p = CDVDDemuxUtils::AllocateDemuxPacket(sr->GetSampleDataSize());
+
     p->dts = sr->DTS() * 1000000;
     p->pts = sr->PTS() * 1000000;
     p->duration = sr->GetDuration() * 1000000;
     p->iStreamId = sr->GetStreamId();
     p->iGroupId = 0;
-    p->iSize = sr->GetSampleDataSize();
-    memcpy(p->pData, sr->GetSampleData(), p->iSize);
+    p->iSize = iSize;
+    memcpy(p->pData, pData, iSize);
 
-    CLog::Log(LOGDEBUG, "DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
+    CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
 
     sr->ReadSample();
     return p;
   }
+  CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - No sample");
   return NULL;
 }
 
@@ -152,7 +190,6 @@ CDemuxStream* CDVDDemuxAdaptive::GetStream(int streamid)
     CLog::Log(LOGERROR, "CDVDDemuxAdaptive::GetStream(%d): error getting stream", streamid);
     return nullptr;
   }
-
   return stream->dmuxstrm;
 }
 
@@ -209,9 +246,8 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
       AP4_SampleDescription *sample_descryption = new AP4_SampleDescription(AP4_SampleDescription::TYPE_UNKNOWN, 0, 0);
       if (stream->stream_.getAdaptationSet()->encrypted)
       {
-        static const AP4_UI08 default_key[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
         AP4_ContainerAtom schi(AP4_ATOM_TYPE_SCHI);
-        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, default_key));
+        schi.AddChild(new AP4_TencAtom(AP4_CENC_ALGORITHM_ID_CTR, 8, m_session->GetDefaultKeyId()));
         sample_descryption = new AP4_ProtectedSampleDescription(0, sample_descryption, 0, AP4_PROTECTION_SCHEME_TYPE_PIFF, 0, "", &schi);
       }
       sample_table->AddSampleDescription(sample_descryption);

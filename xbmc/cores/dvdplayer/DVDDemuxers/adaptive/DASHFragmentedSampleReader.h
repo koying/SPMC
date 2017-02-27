@@ -50,6 +50,7 @@ public:
   AP4_Size GetSampleDataSize() const { return m_sample_data_.GetDataSize(); }
   const AP4_Byte *GetSampleData() const { return m_sample_data_.GetData(); }
   double GetDuration() const { return (double)m_sample_.GetDuration() / (double)m_Track->GetMediaTimeScale(); }
+  bool IsEncrypted() { return m_Protected_desc != nullptr; }
   const AP4_UI08 *GetExtraData() { return m_codecHandler->extra_data; }
   AP4_Size GetExtraDataSize() { return m_codecHandler ? m_codecHandler->extra_data_size : 0; }
   bool GetVideoInformation(int &width, int &height) { return  m_codecHandler->GetVideoInformation(width, height); }
@@ -69,6 +70,7 @@ private:
   AP4_Track *m_Track;
   AP4_UI32 m_StreamId;
   AP4_UI32 m_SampleDescIndex;
+  unsigned int m_fail_count_;
   
   bool m_eos, m_started;
   double m_dts, m_pts;

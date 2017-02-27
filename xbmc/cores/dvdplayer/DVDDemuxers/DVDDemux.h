@@ -21,10 +21,13 @@
  */
 
 #include <string>
+#include <memory>
+
 #include "system.h"
 #include "DVDDemuxPacket.h"
 
 class CDVDInputStream;
+struct DemuxCryptoSession;
 
 #ifndef __GNUC__
 #pragma warning(push)
@@ -137,6 +140,8 @@ public:
   , FLAG_HEARING_IMPAIRED = 0x0080
   , FLAG_VISUAL_IMPAIRED  = 0x0100
   } flags;
+
+  std::shared_ptr<DemuxCryptoSession> cryptoSession;
 };
 
 class CDemuxStreamVideo : public CDemuxStream
