@@ -35,6 +35,7 @@ typedef struct DemuxPacket
     , iSize(0)
     , pts(DVD_NOPTS_VALUE)
     , dts(DVD_NOPTS_VALUE)
+    , dataOwned(false)
   {}
   
   DemuxPacket(unsigned char *pData, int const iSize, double const pts, double const dts)
@@ -42,8 +43,54 @@ typedef struct DemuxPacket
     , iSize(iSize)
     , pts(pts)
     , dts(dts)
+    , dataOwned(false)
   {}
   
+  DemuxPacket(const DemuxPacket& other)
+    : iSize(other.iSize)
+    , iStreamId(other.iStreamId)
+    , iGroupId(other.iGroupId)
+    , pts(other.pts)
+    , dts(other.dts)
+    , duration(other.duration)
+    , cryptoInfo(other.cryptoInfo)
+    , dataOwned(true)
+  {
+    pData = reinterpret_cast<unsigned char *>(malloc(iSize));
+    memcpy(pData, other.pData, iSize);
+  }
+
+  DemuxPacket& operator=(const DemuxPacket& other)
+  {
+    iSize = other.iSize;
+    iStreamId = other.iStreamId;
+    iGroupId = other.iGroupId;
+    pts = other.pts;
+    dts = other.dts;
+    duration = other.duration;
+    cryptoInfo = other.cryptoInfo;
+    dataOwned = true;
+
+    pData = reinterpret_cast<unsigned char *>(malloc(iSize));
+    memcpy(pData, other.pData, iSize);
+    
+    return *this;
+  }
+  
+  ~DemuxPacket()
+  {
+    FreeData();
+  }
+
+  void FreeData()
+  {
+    if (pData && dataOwned)
+    {
+      free(pData);
+      pData = nullptr;
+    }
+  }
+
   unsigned char* pData;   // data
   int iSize;     // data size
   int iStreamId; // integer representing the stream index
@@ -52,6 +99,8 @@ typedef struct DemuxPacket
   double pts; // pts in DVD_TIME_BASE
   double dts; // dts in DVD_TIME_BASE
   double duration; // duration in DVD_TIME_BASE if available
+  
+  bool dataOwned;
   
   std::shared_ptr<DemuxCryptoInfo> cryptoInfo;
   

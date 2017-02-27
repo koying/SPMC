@@ -64,8 +64,8 @@
 #define XMEDIAFORMAT_KEY_CROP_TOP "crop-top"
 #define XMEDIAFORMAT_KEY_CROP_BOTTOM "crop-bottom"
 
-AMediaUUID WIDEVINE_UUID = { 0xED, 0xEF, 0x8B, 0xA9, 0x79, 0xD6, 0x4A, 0xCE, 0xA3, 0xC8, 0x27, 0xDC, 0xD5, 0x1D, 0x21, 0xED };
-AMediaUUID PLAYREADY_UUID = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
+static const AMediaUUID WIDEVINE_UUID = { 0xED, 0xEF, 0x8B, 0xA9, 0x79, 0xD6, 0x4A, 0xCE, 0xA3, 0xC8, 0x27, 0xDC, 0xD5, 0x1D, 0x21, 0xED };
+static const AMediaUUID PLAYREADY_UUID = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
 
 using namespace KODI::MESSAGING;
 
@@ -79,23 +79,6 @@ enum MEDIACODEC_STATES
   MEDIACODEC_STATE_ERROR,
   MEDIACODEC_STATE_STOPPED
 };
-
-static void DebugBinary(const char *data, uint32_t dataSize)
-{
-  if (!dataSize)
-    return;
-
-  std::string line;
-  for (unsigned int y=0; y*8 < dataSize; ++y)
-  {
-    line = "";
-    for (unsigned int x=0; x<8 && y*8 + x < dataSize; ++x)
-    {
-      line += StringUtils::Format("%02x ", ((char *)data)[y*8+x]);
-    }
-    CLog::Log(LOGDEBUG, "%s", line.c_str());
-  }
-}
 
 static bool CanSurfaceRenderBlackList(const std::string &name)
 {
@@ -372,7 +355,6 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(bool surface_re
 , m_state(MEDIACODEC_STATE_UNINITIALIZED)
 {
   memset(&m_videobuffer, 0x00, sizeof(DVDVideoPicture));
-  memset(&m_demux_pkt, 0, sizeof(m_demux_pkt));
 }
 
 CDVDVideoCodecAndroidMediaCodec::~CDVDVideoCodecAndroidMediaCodec()
@@ -492,8 +474,8 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       if (m_hints.extrasize == 4 || m_hints.extrasize == 5)
       {
         // Convert to SMPTE 421M-2006 Annex-L
-        static char annexL_hdr1[] = {0x8e, 0x01, 0x00, 0xc5, 0x04, 0x00, 0x00, 0x00};
-        static char annexL_hdr2[] = {0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        static unsigned char annexL_hdr1[] = {0x8e, 0x01, 0x00, 0xc5, 0x04, 0x00, 0x00, 0x00};
+        static unsigned char annexL_hdr2[] = {0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         free(m_hints.extradata);
         m_hints.extrasize = 36;
         m_hints.extradata = malloc(m_hints.extrasize);
@@ -553,7 +535,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   if (g_advancedSettings.CanLogComponent(LOGVIDEO))
   {
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec: Extradata size: %d", m_hints.extrasize);
-    DebugBinary(reinterpret_cast<const char*>(m_hints.extradata), m_hints.extrasize);
+    CLog::MemDump(reinterpret_cast<char*>(m_hints.extradata), m_hints.extrasize);
   }
 
   if (m_crypto)
@@ -709,7 +691,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     SAFE_DELETE(m_bitstream);
 
   m_opened = true;
-  memset(&m_demux_pkt, 0, sizeof(m_demux_pkt));
 
   return m_opened;
 }
@@ -773,7 +754,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
   {
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode state (%d) - pts/dts (%f/%f) - size(%d) - 0x%p", m_state, packet.pts, packet.dts, packet.iSize, packet.pData);
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode data");
-    DebugBinary(reinterpret_cast<const char*>(packet.pData), std::min(16, packet.iSize));
+    CLog::MemDump(reinterpret_cast<char*>(packet.pData), std::min(16, packet.iSize));
   }
   // Are we stopped? If so, wait and loop
   if (m_state == MEDIACODEC_STATE_STOPPED)
@@ -869,9 +850,9 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
         {
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto, numSamples(%d) - clearBytes(%d) - cipherBytes(%d)", packet.cryptoInfo->numSubSamples, clearBytes, cipherBytes);
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto  kid");
-          DebugBinary(reinterpret_cast<const char*>(packet.cryptoInfo->kid), 16);
+          CLog::MemDump(reinterpret_cast<char*>(packet.cryptoInfo->kid), 16);
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto  iv");
-          DebugBinary(reinterpret_cast<const char*>(packet.cryptoInfo->iv), 16);
+          CLog::MemDump(reinterpret_cast<char*>(packet.cryptoInfo->iv), 16);
         }
         cryptoInfo = AMediaCodecCryptoInfo_new(
               packet.cryptoInfo->numSubSamples,
@@ -952,7 +933,6 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
       else
         mstat = AMediaCodec_queueInputBuffer(m_codec, index, offset, iSize, presentationTimeUs, flags);
 
-      CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode After enqueue");
       if (mstat != AMEDIA_OK)
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode error(%d)", mstat);
       else
@@ -960,11 +940,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
           m_ptsList.insert(presentationTimeUs);
 
       // Free saved buffer it there was one
-      if (m_demux_pkt.pData)
-      {
-        free(m_demux_pkt.pData);
-        memset(&m_demux_pkt, 0, sizeof(m_demux_pkt));
-      }
+      m_demux_pkt.FreeData();
     }
     else
     {
@@ -972,13 +948,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
 
       // We couldn't get an input buffer. Save the packet for next iteration, if it wasn't already
       if (!m_demux_pkt.pData)
-      {
-        m_demux_pkt.dts = dts;
-        m_demux_pkt.pts = pts;
-        m_demux_pkt.iSize = iSize;
-        m_demux_pkt.pData = (uint8_t*)malloc(iSize);
-        memcpy(m_demux_pkt.pData, pData, iSize);
-      }
+        m_demux_pkt = packet;
 
       rtn &= ~VC_BUFFER;
     }
@@ -993,11 +963,7 @@ void CDVDVideoCodecAndroidMediaCodec::Reset()
     return;
 
   // dump any pending demux packets
-  if (m_demux_pkt.pData)
-  {
-    free(m_demux_pkt.pData);
-    memset(&m_demux_pkt, 0, sizeof(m_demux_pkt));
-  }
+  m_demux_pkt.FreeData();
 
   if (m_codec)
   {
