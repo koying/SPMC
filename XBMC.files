@@ -6175,7 +6175,7 @@ xbmc/android/bionic_supplement/getdelim.c
 xbmc/android/bionic_supplement/rand_r.c
 xbmc/android/jni/PendingIntent.cpp
 xbmc/android/jni/PendingIntent.h
-xbmc/android/jni/jutils/jutils-details.hpp
+xbmc/android/jni/jutils-details.hpp
 xbmc/android/jni/jutils/jutils.hpp
 xbmc/android/jni/ApplicationInfo.cpp
 xbmc/android/jni/ApplicationInfo.h
@@ -9980,3 +9980,4 @@ xbmc/cores/dvdplayer/DVDDemuxers/adaptive/oscompat.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/adaptive/oscompat.h
 xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxAdaptive.cpp
 xbmc/cores/dvdplayer/DVDDemuxers/DVDDemuxAdaptive.h
+xbmc/android/jni/jutils/jutils.cpp
