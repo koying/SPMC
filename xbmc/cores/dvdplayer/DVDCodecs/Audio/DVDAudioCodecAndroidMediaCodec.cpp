@@ -40,6 +40,9 @@
 #include "android/activity/AndroidFeatures.h"
 #include "androidjni/Surface.h"
 
+#include "android/jni/MediaCodecList.h"
+#include "android/jni/MediaCodecInfo.h"
+
 #include "utils/StringUtils.h"
 #include "settings/AdvancedSettings.h"
 
@@ -48,6 +51,19 @@
 static const AEChannel KnownChannels[] = { AE_CH_FL, AE_CH_FR, AE_CH_FC, AE_CH_LFE, AE_CH_SL, AE_CH_SR, AE_CH_BL, AE_CH_BR, AE_CH_BC, AE_CH_BLOC, AE_CH_BROC, AE_CH_NULL };
 static const AMediaUUID WIDEVINE_UUID = { 0xED, 0xEF, 0x8B, 0xA9, 0x79, 0xD6, 0x4A, 0xCE, 0xA3, 0xC8, 0x27, 0xDC, 0xD5, 0x1D, 0x21, 0xED };
 static const AMediaUUID PLAYREADY_UUID = { 0x9A, 0x04, 0xF0, 0x79, 0x98, 0x40, 0x42, 0x86, 0xAB, 0x92, 0xE6, 0x5B, 0xE0, 0x88, 0x5F, 0x95 };
+
+static bool IsBlacklisted(const std::string &name)
+{
+  static const char *blacklisted_decoders[] = {
+    NULL
+  };
+  for (const char **ptr = blacklisted_decoders; *ptr; ptr++)
+  {
+    if (!strnicmp(*ptr, name.c_str(), strlen(*ptr)))
+      return true;
+  }
+  return false;
+}
 
 /****************************/
 
@@ -76,17 +92,17 @@ bool CDVDAudioCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
 {
   m_hints = hints;
 
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec::Open codec(%d), profile(%d), tag(%d), extrasize(%d)", hints.codec, hints.profile, hints.codec_tag, hints.extrasize);
+  CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec::Open codec(0x%x), profile(%d), tag(%d), extrasize(%d)", hints.codec, hints.profile, hints.codec_tag, hints.extrasize);
 
   switch(m_hints.codec)
   {
     case AV_CODEC_ID_AAC:
     case AV_CODEC_ID_AAC_LATM:
-      if (!m_hints.extrasize)
-      {
-        //TODO Support adts
-        return false;
-      }
+//      if (!m_hints.extrasize)
+//      {
+//        //TODO Support adts
+//        return false;
+//      }
       m_mime = "audio/mp4a-latm";
       m_formatname = "amc-aac";
       break;
@@ -167,15 +183,57 @@ bool CDVDAudioCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       CLog::Log(LOGERROR, "CDVDAudioCodecAndroidMediaCodec: Cannot initilize crypto");
       return false;
     }
-    needSecureDecoder = AMediaCrypto_requiresSecureDecoderComponent(m_mime.c_str());
+    needSecureDecoder = true;
   }
   else
     m_crypto = nullptr;
 
-  m_codec = AMediaCodec_createDecoderByType(m_mime.c_str());
+  int num_codecs = CJNIMediaCodecList::getCodecCount();
+  for (int i = 0; i < num_codecs; i++)
+  {
+    CJNIMediaCodecInfo codec_info = CJNIMediaCodecList::getCodecInfoAt(i);
+    if (codec_info.isEncoder())
+      continue;
+    m_codecname = codec_info.getName();
+    if (IsBlacklisted(m_codecname))
+      continue;
+
+    CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
+    if (xbmc_jnienv()->ExceptionCheck())
+    {
+      // Unsupported type?
+      xbmc_jnienv()->ExceptionClear();
+      continue;
+    }
+
+    if (needSecureDecoder)
+      m_codecname += ".secure";
+// Not 100% working, yet
+//    if (needSecureDecoder && !codec_caps.isFeatureSupported(CJNIMediaCodecInfoCodecCapabilities::FEATURE_SecurePlayback))
+//      continue;
+
+    std::vector<std::string> types = codec_info.getSupportedTypes();
+    // return the 1st one we find, that one is typically 'the best'
+    for (size_t j = 0; j < types.size(); ++j)
+    {
+      if (types[j] == m_mime)
+      {
+        m_codec = AMediaCodec_createCodecByName(m_codecname.c_str());
+        if (!m_codec)
+        {
+          CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Open cannot create codec");
+          m_codec = nullptr;
+          continue;
+        }
+        break;
+      }
+    }
+    if (m_codec)
+      break;
+  }
   if (!m_codec)
   {
-    CLog::Log(LOGERROR, "CDVDAudioCodecAndroidMediaCodec:: Failed to create Android MediaCodec");
+    CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec:: Failed to create Android MediaCodec");
     return false;
   }
 

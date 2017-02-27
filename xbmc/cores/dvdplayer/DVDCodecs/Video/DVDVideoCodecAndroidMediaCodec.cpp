@@ -393,7 +393,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   if (g_advancedSettings.CanLogComponent(LOGVIDEO))
   {
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: fpsrate %d / fpsscale %d\n", m_hints.fpsrate, m_hints.fpsscale);
-    CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: CodecID %d \n", m_hints.codec);
+    CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: CodecID 0x%x \n", m_hints.codec);
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: StreamType %d \n", m_hints.type);
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: Level %d \n", m_hints.level);
     CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Open hints: Profile %d \n", m_hints.profile);
@@ -561,14 +561,11 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: Cannot initilize crypto");
       return false;
     }
-    needSecureDecoder = AMediaCrypto_requiresSecureDecoderComponent(m_mime.c_str());
+    needSecureDecoder = true;
   }
   else
     m_crypto = nullptr;
 
-  // CJNIMediaCodec::createDecoderByXXX doesn't handle errors nicely,
-  // it crashes if the codec isn't found. This is fixed in latest AOSP,
-  // but not in current 4.1 devices. So 1st search for a matching codec, then create it.
   m_codec = nullptr;
   m_colorFormat = -1;
 
@@ -582,9 +579,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     if (IsBlacklisted(m_codecname))
       continue;
 
-    if (needSecureDecoder)
-      m_codecname += ".secure";
-
     CJNIMediaCodecInfoCodecCapabilities codec_caps = codec_info.getCapabilitiesForType(m_mime);
     if (xbmc_jnienv()->ExceptionCheck())
     {
@@ -592,6 +586,12 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       xbmc_jnienv()->ExceptionClear();
       continue;
     }
+
+    if (needSecureDecoder)
+      m_codecname += ".secure";
+// Not 100% working, yet
+//    if (needSecureDecoder && !codec_caps.isFeatureSupported(CJNIMediaCodecInfoCodecCapabilities::FEATURE_SecurePlayback))
+//      continue;
 
     std::vector<int> color_formats = codec_caps.colorFormats();
 
