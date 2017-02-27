@@ -26,11 +26,14 @@
 
 #include "DVDDemuxers/DVDDemux.h"
 
+#include <memory>
+
 extern "C" {
 #include "libavcodec/avcodec.h"
 }
 
 class CDemuxStream;
+struct DemuxCryptoSession;
 
 class CDVDStreamInfo
 {
@@ -87,6 +90,9 @@ public:
   void*        extradata; // extra data for codec to use
   unsigned int extrasize; // size of extra data
   unsigned int codec_tag; // extra identifier hints for decoding
+
+  // CRYPTO
+  std::shared_ptr<DemuxCryptoSession> cryptoSession;
 
   bool operator==(const CDVDStreamInfo& right)      { return Equal(right, true);}
   bool operator!=(const CDVDStreamInfo& right)      { return !Equal(right, true);}

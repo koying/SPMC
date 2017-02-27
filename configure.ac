@@ -2386,6 +2386,7 @@ OUTPUT_FILES="Makefile \
     xbmc/cores/dvdplayer/DVDCodecs/Overlay/Makefile \
     xbmc/cores/dvdplayer/DVDCodecs/Video/Makefile \
     xbmc/cores/dvdplayer/DVDDemuxers/Makefile \
+    xbmc/cores/dvdplayer/DVDDemuxers/adaptive/Makefile \
     xbmc/cores/dvdplayer/DVDSubtitles/Makefile \
     xbmc/cores/AudioEngine/Makefile \
     xbmc/cores/paplayer/Makefile \

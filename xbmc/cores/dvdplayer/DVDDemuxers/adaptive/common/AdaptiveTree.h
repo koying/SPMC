@@ -199,6 +199,7 @@ namespace adaptive
     double download_speed_, average_download_speed_;
     
     std::pair<std::string, std::string> pssh_, adp_pssh_;
+    std::string license_key_url_;
     std::string defaultKID_;
 
     enum
