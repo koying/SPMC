@@ -3,7 +3,7 @@ DEPS= ../../Makefile.include Makefile
 
 # lib name, version
 LIBNAME=libdroidjni
-VERSION=4efb98b
+VERSION=f66cce2d9e09b4c6186f127acc99ead71f4a08b1
 SOURCE=archive
 ARCHIVE=$(VERSION).tar.gz
 GIT_BASE_URL=https://github.com/koying
