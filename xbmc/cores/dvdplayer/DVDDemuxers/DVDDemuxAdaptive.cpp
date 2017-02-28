@@ -152,7 +152,7 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
     p->iSize = iSize;
     memcpy(p->pData, pData, iSize);
 
-    CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d", p->dts, p->pts, p->iStreamId, p->iSize);
+    CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d CRYPT: %s", p->dts, p->pts, p->iStreamId, p->iSize, sr->IsEncrypted() ? "true" : "false");
 
     sr->ReadSample();
     return p;

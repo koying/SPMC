@@ -55,13 +55,7 @@ public:
 
 protected:
   bool            ConfigureMediaCodec(void);
-  int             GetOutputPicture(void);
   void            ConfigureOutputFormat(AMediaFormat* mediaformat);
-
-  // surface handling functions
-  static void     CallbackInitSurfaceTexture(void*);
-  void            InitSurfaceTexture(void);
-  void            ReleaseSurfaceTexture(void);
 
   CDVDStreamInfo  m_hints;
   std::string     m_mime;
@@ -71,7 +65,7 @@ protected:
   int             m_samplerate;
   int             m_channels;
   uint8_t*        m_buffer;
-  size_t          m_bufferSize;
+  int32_t         m_bufferSize;
   int             m_bufferUsed;
 
   AMediaCodec*    m_codec;
