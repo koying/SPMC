@@ -453,6 +453,13 @@ void CDASHSession::UpdateStream(STREAM &stream)
     astrm->iSampleRate = rep->samplingRate_;
     astrm->iChannels = rep->channelCount_;
     astrm->sStreamInfo = StringUtils::Format("ADP Audio: %s / %d ch / %d Hz / %d kbps", stream.codecName.c_str(), rep->channelCount_, rep->samplingRate_, rep->bandwidth_ / 1024);
+
+    if (!astrm->ExtraSize && rep->codec_private_data_.size())
+    {
+      astrm->ExtraSize = rep->codec_private_data_.size();
+      astrm->ExtraData = (uint8_t*)malloc(astrm->ExtraSize);
+      memcpy((void*)astrm->ExtraData, rep->codec_private_data_.data(), astrm->ExtraSize);
+    }
   }
 }
 
