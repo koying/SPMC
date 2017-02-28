@@ -177,18 +177,16 @@ protected:
     CDVDMsgDemuxerPacket*  msg;
     uint8_t*               data;
     int                    size;
-    double                 dts;
+    DemuxPacket* packet;
 
     void Attach(CDVDMsgDemuxerPacket* msg2)
     {
       if(msg) msg->Release();
       msg = msg2;
       msg->Acquire();
-      DemuxPacket* p = msg->GetPacket();
-      data = p->pData;
-      size = p->iSize;
-      dts = p->dts;
-
+      packet = msg->GetPacket();
+      data = packet->pData;
+      size = packet->iSize;
     }
     void Release()
     {
@@ -196,7 +194,6 @@ protected:
       msg  = NULL;
       data = NULL;
       size = 0;
-      dts  = DVD_NOPTS_VALUE;
     }
   } m_decode;
 

@@ -849,10 +849,12 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
         if (g_advancedSettings.CanLogComponent(LOGVIDEO))
         {
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto, numSamples(%d) - clearBytes(%d) - cipherBytes(%d)", packet.cryptoInfo->numSubSamples, clearBytes, cipherBytes);
+#if 0
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto  kid");
           CLog::MemDump(reinterpret_cast<char*>(packet.cryptoInfo->kid), 16);
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto  iv");
           CLog::MemDump(reinterpret_cast<char*>(packet.cryptoInfo->iv), 16);
+#endif
         }
         cryptoInfo = AMediaCodecCryptoInfo_new(
               packet.cryptoInfo->numSubSamples,
@@ -1226,7 +1228,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
     {
       size_t out_size;
       uint8_t* buffer = AMediaCodec_getOutputBuffer(m_codec, index, &out_size);
-      if (buffer && out_size)
+      if (buffer && bufferInfo.size)
       {
         int loop_end = 0;
         if (m_videobuffer.format == RENDER_FMT_NV12)

@@ -305,9 +305,8 @@ int CDVDAudioCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
       }
 
 
-#ifdef DEBUG_VERBOSE
-      CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec::Decode iSize(%d)", iSize);
-#endif
+      if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+        CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec::Decode iSize(%d) crypto(%s)", iSize, packet.cryptoInfo ? "true" : "false");
 
       int64_t presentationTimeUs = 0;
       if (pts != DVD_NOPTS_VALUE)
@@ -458,28 +457,27 @@ int CDVDAudioCodecAndroidMediaCodec::GetData(uint8_t** dst)
 
     size_t out_size;
     uint8_t* buffer = AMediaCodec_getOutputBuffer(m_codec, index, &out_size);
-    if (buffer && out_size)
+    if (buffer && bufferInfo.size)
     {
-      if (out_size > m_bufferSize)
+      if (bufferInfo.size > m_bufferSize)
       {
-        m_bufferSize = out_size;
+        m_bufferSize = bufferInfo.size;
         m_buffer = (uint8_t*)realloc(m_buffer, m_bufferSize);
       }
 
-      memcpy(m_buffer, buffer, out_size);
-      m_bufferUsed = out_size;
+      memcpy(m_buffer, buffer + bufferInfo.offset, bufferInfo.size);
+      m_bufferUsed = bufferInfo.size;
     }
     else
       return 0;
 
     media_status_t mstat = AMediaCodec_releaseOutputBuffer(m_codec, index, false);
     if (mstat != AMEDIA_OK)
-      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::GetOutputPicture error: releaseOutputBuffer(%d)", mstat);
+      CLog::Log(LOGERROR, "CDVDAudioCodecAndroidMediaCodec::GetData error: releaseOutputBuffer(%d)", mstat);
 
-#ifdef DEBUG_VERBOSE
-    CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec::GetData "
-      "index(%d), size(%d)", index, m_bufferUsed);
-#endif
+    if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+      CLog::Log(LOGDEBUG, "CDVDAudioCodecAndroidMediaCodec::GetData "
+                          "index(%d), size(%d)", index, m_bufferUsed);
   }
   else if (index == AMEDIACODEC_INFO_OUTPUT_FORMAT_CHANGED)
   {
