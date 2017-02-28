@@ -561,7 +561,7 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: Cannot initilize crypto");
       return false;
     }
-    needSecureDecoder = true;
+    needSecureDecoder = AMediaCrypto_requiresSecureDecoderComponent(m_mime.c_str());
   }
   else
     m_crypto = nullptr;
@@ -887,6 +887,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
 
           case AV_CODEC_ID_H264:
           {
+            // TODO: Check why crypted SS are not annexB
             if (iSize >= 4 && pData[0] == 0x00 && pData[1] == 0x00 && pData[2] == 0x00 && pData[3] == 0x01)
               memcpy(dst_ptr, pData, iSize);
             else
