@@ -248,6 +248,8 @@ bool WV_CencSingleSampleDecrypter_android::ProvisionRequest()
 
 bool WV_CencSingleSampleDecrypter_android::GetLicense()
 {
+  CLog::Log(LOGDEBUG, "pssh");
+  CLog::MemDump(pssh_.data(), pssh_.size());
   media_status_t status = AMediaDrm_getKeyRequest(media_drm_, &session_id_,
     reinterpret_cast<const uint8_t*>(pssh_.data()), pssh_.size(), "video/mp4", KEY_TYPE_STREAMING,
     0, 0,
