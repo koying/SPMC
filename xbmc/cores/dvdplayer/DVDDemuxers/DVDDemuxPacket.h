@@ -21,6 +21,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <memory>
 
 #define DMX_SPECIALID_STREAMINFO    -10
@@ -50,15 +51,15 @@ typedef struct DemuxPacket
   {}
   
   DemuxPacket(const DemuxPacket& other)
-    : iSize(other.iSize)
-    , offset(0)
+    : offset(0)
+    , iSize(other.iSize)
     , iStreamId(other.iStreamId)
     , iGroupId(other.iGroupId)
     , pts(other.pts)
     , dts(other.dts)
     , duration(other.duration)
-    , cryptoInfo(other.cryptoInfo)
     , dataOwned(true)
+    , cryptoInfo(other.cryptoInfo)
   {
     pData = reinterpret_cast<unsigned char *>(malloc(iSize));
     memcpy(pData, other.pData + other.offset, iSize);
@@ -66,8 +67,8 @@ typedef struct DemuxPacket
 
   DemuxPacket& operator=(const DemuxPacket& other)
   {
-    iSize = other.iSize;
     offset = 0;
+    iSize = other.iSize;
     iStreamId = other.iStreamId;
     iGroupId = other.iGroupId;
     pts = other.pts;

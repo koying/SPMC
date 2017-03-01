@@ -252,7 +252,7 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe)
   {
     bool switched = false;
     /* NOTE: the audio packet can contain several frames */
-    while( !m_bStop && m_decode.packet->iSize > 0 )
+    while( !m_bStop && (m_decode.packet && m_decode.packet->iSize > 0) )
     {
       if( !m_pAudioCodec )
         return DECODE_FLAG_ERROR;
