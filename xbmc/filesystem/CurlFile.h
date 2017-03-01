@@ -65,8 +65,11 @@ namespace XFILE
       virtual std::string GetContentCharset(void)                { return GetServerReportedCharset(); }
 
       bool Delete(const std::string& strURL, const std::string& strData, std::string& strHTML);
+      bool Put(const CURL& strURL, const std::string& strData, std::string& strHTML);
       bool Put(const std::string& strURL, const std::string& strData, std::string& strHTML);
+      bool Post(const CURL& strURL, const std::string& strPostData, std::string& strHTML);
       bool Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
+      bool Get(const CURL& strURL, std::string& strHTML);
       bool Get(const std::string& strURL, std::string& strHTML);
       bool ReadData(std::string& strHTML);
       bool Download(const std::string& strURL, const std::string& strFileName, LPDWORD pdwSize = NULL);
@@ -156,7 +159,7 @@ namespace XFILE
       void SetCommonOptions(CReadState* state);
       void SetRequestHeaders(CReadState* state);
       void SetCorrectHeaders(CReadState* state);
-      bool Service(const std::string& strURL, std::string& strHTML);
+      bool Service(const CURL& strURL, std::string& strHTML);
 
     protected:
       CReadState*     m_state;
