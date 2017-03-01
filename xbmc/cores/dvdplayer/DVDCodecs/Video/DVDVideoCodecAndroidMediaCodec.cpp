@@ -760,13 +760,7 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
   if (m_state == MEDIACODEC_STATE_STOPPED)
   {
     if (!m_demux_pkt.pData)
-    {
-      m_demux_pkt.dts = packet.dts;
-      m_demux_pkt.pts = packet.pts;
-      m_demux_pkt.iSize = packet.iSize;
-      m_demux_pkt.pData = (uint8_t*)malloc(packet.iSize);
-      memcpy(m_demux_pkt.pData, packet.pData, packet.iSize);
-    }
+      m_demux_pkt = packet;
 
     Sleep(20);
     return 0;
