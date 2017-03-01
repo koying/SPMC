@@ -165,13 +165,14 @@ protected:
   {
     PacketStatus()
     {
-        msg = NULL;
-        Release();
+      packet = nullptr;
+      msg = nullptr;
+      Release();
     }
 
    ~PacketStatus()
     {
-        Release();
+      Release();
     }
 
     CDVDMsgDemuxerPacket*  msg;
@@ -187,7 +188,8 @@ protected:
     void Release()
     {
       if(msg) msg->Release();
-      msg  = NULL;
+      msg  = nullptr;
+      packet = nullptr;
     }
   } m_decode;
 
