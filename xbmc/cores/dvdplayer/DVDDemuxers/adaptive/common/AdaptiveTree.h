@@ -229,7 +229,7 @@ namespace adaptive
     virtual bool open(const char *url) = 0;
   protected:
     virtual bool download(const char* url);
-    virtual bool write_data(void *buffer, size_t buffer_size) = 0;
+    virtual bool write_data(const char *buffer, size_t buffer_size) = 0;
 };
 
 }

@@ -178,18 +178,6 @@ bool CDASHSession::initialize()
   if (!adaptiveTree_)
     return false;
 
-  // Open mpd file
-  size_t paramPos = fileURL_.find('?');
-  adaptiveTree_->base_url_ = (paramPos == std::string::npos) ? fileURL_ : fileURL_.substr(0, paramPos);
-  
-  paramPos = adaptiveTree_->base_url_.find_last_of('/', adaptiveTree_->base_url_.length());
-  if (paramPos == std::string::npos)
-  {
-    CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", fileURL_.c_str());
-    return false;
-  }
-  adaptiveTree_->base_url_.resize(paramPos + 1);
-
   if (!adaptiveTree_->open(fileURL_.c_str()) || adaptiveTree_->empty())
   {
     CLog::Log(LOGERROR, "Could not open / parse adaptive URL (%s)", fileURL_.c_str());

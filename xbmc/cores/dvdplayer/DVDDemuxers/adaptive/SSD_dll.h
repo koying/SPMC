@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string.h>
+
 //Functionality wich is supported by the Decrypter
 class AP4_CencSingleSampleDecrypter;
 class AP4_DataBuffer;

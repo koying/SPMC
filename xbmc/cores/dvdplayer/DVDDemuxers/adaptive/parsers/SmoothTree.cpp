@@ -345,10 +345,10 @@ bool SmoothTree::open(const char *url)
   return true;
 }
 
-bool SmoothTree::write_data(void *buffer, size_t buffer_size)
+bool SmoothTree::write_data(const char *buffer, size_t buffer_size)
 {
   bool done(false);
-  XML_Status retval = XML_Parse(parser_, (const char*)buffer, buffer_size, done);
+  XML_Status retval = XML_Parse(parser_, buffer, buffer_size, done);
 
   if (retval == XML_STATUS_ERROR)
   {
