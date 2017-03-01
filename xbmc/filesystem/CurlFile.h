@@ -94,6 +94,8 @@ namespace XFILE
       void SetRequestHeader(const std::string& header, const std::string& value);
       void SetRequestHeader(const std::string& header, long value);
 
+      std::string GetLastEffectiveUrl();
+
       void ClearRequestHeaders();
       void SetBufferSize(unsigned int size);
 
@@ -168,6 +170,7 @@ namespace XFILE
       int64_t         m_writeOffset;
 
       std::string     m_url;
+      std::string     m_lastEffectiveUrl;
       std::string     m_userAgent;
       std::string     m_proxy;
       std::string     m_proxyuserpass;

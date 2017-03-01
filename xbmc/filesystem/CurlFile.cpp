@@ -1105,6 +1105,7 @@ bool CCurlFile::Open(const CURL& url)
     }
     m_url = efurl;
   }
+  m_lastEffectiveUrl = m_url;
 
   return true;
 }
@@ -1135,6 +1136,7 @@ bool CCurlFile::OpenForWrite(const CURL& url, bool bOverWrite)
   char* efurl;
   if (CURLE_OK == g_curlInterface.easy_getinfo(m_state->m_easyHandle, CURLINFO_EFFECTIVE_URL,&efurl) && efurl)
     m_url = efurl;
+  m_lastEffectiveUrl = m_url;
 
   m_opened = true;
   m_forWrite = true;
@@ -1779,6 +1781,11 @@ void CCurlFile::SetRequestHeader(const std::string& header, const std::string& v
 void CCurlFile::SetRequestHeader(const std::string& header, long value)
 {
   m_requestheaders[header] = StringUtils::Format("%ld", value);
+}
+
+std::string CCurlFile::GetLastEffectiveUrl()
+{
+  return m_lastEffectiveUrl;
 }
 
 std::string CCurlFile::GetServerReportedCharset(void)
