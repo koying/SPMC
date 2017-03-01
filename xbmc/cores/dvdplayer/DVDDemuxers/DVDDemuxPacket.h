@@ -20,6 +20,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <memory>
 
 #define DMX_SPECIALID_STREAMINFO    -10
@@ -32,6 +33,7 @@ typedef struct DemuxPacket
 {
   DemuxPacket() 
     : pData(nullptr)
+    , offset(0)
     , iSize(0)
     , pts(DVD_NOPTS_VALUE)
     , dts(DVD_NOPTS_VALUE)
@@ -40,6 +42,7 @@ typedef struct DemuxPacket
   
   DemuxPacket(unsigned char *pData, int const iSize, double const pts, double const dts)
     : pData(pData)
+    , offset(0)
     , iSize(iSize)
     , pts(pts)
     , dts(dts)
@@ -48,6 +51,7 @@ typedef struct DemuxPacket
   
   DemuxPacket(const DemuxPacket& other)
     : iSize(other.iSize)
+    , offset(0)
     , iStreamId(other.iStreamId)
     , iGroupId(other.iGroupId)
     , pts(other.pts)
@@ -57,12 +61,13 @@ typedef struct DemuxPacket
     , dataOwned(true)
   {
     pData = reinterpret_cast<unsigned char *>(malloc(iSize));
-    memcpy(pData, other.pData, iSize);
+    memcpy(pData, other.pData + other.offset, iSize);
   }
 
   DemuxPacket& operator=(const DemuxPacket& other)
   {
     iSize = other.iSize;
+    offset = 0;
     iStreamId = other.iStreamId;
     iGroupId = other.iGroupId;
     pts = other.pts;
@@ -72,7 +77,7 @@ typedef struct DemuxPacket
     dataOwned = true;
 
     pData = reinterpret_cast<unsigned char *>(malloc(iSize));
-    memcpy(pData, other.pData, iSize);
+    memcpy(pData, other.pData + other.offset, iSize);
     
     return *this;
   }
@@ -92,6 +97,7 @@ typedef struct DemuxPacket
   }
 
   unsigned char* pData;   // data
+  size_t offset; // offset from start of buffer
   int iSize;     // data size
   int iStreamId; // integer representing the stream index
   int iGroupId;  // the group this data belongs to, used to group data from different streams together

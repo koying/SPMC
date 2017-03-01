@@ -137,7 +137,7 @@ int CDVDAudioCodecFFmpeg::Decode(const DemuxPacket &packet)
 
   AVPacket avpkt;
   av_init_packet(&avpkt);
-  avpkt.data = packet.pData;
+  avpkt.data = packet.pData + packet.offset;
   avpkt.size = packet.iSize;
   avpkt.dts = (packet.dts == DVD_NOPTS_VALUE) ? AV_NOPTS_VALUE : packet.dts / DVD_TIME_BASE * AV_TIME_BASE;
   avpkt.pts = (packet.pts == DVD_NOPTS_VALUE) ? AV_NOPTS_VALUE : packet.pts / DVD_TIME_BASE * AV_TIME_BASE;

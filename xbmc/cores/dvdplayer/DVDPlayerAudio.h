@@ -175,8 +175,6 @@ protected:
     }
 
     CDVDMsgDemuxerPacket*  msg;
-    uint8_t*               data;
-    int                    size;
     DemuxPacket* packet;
 
     void Attach(CDVDMsgDemuxerPacket* msg2)
@@ -185,15 +183,11 @@ protected:
       msg = msg2;
       msg->Acquire();
       packet = msg->GetPacket();
-      data = packet->pData;
-      size = packet->iSize;
     }
     void Release()
     {
       if(msg) msg->Release();
       msg  = NULL;
-      data = NULL;
-      size = 0;
     }
   } m_decode;
 
