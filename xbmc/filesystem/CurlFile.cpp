@@ -902,11 +902,8 @@ bool CCurlFile::Delete(const std::string& strURL, const std::string& strData, st
   return result == CURLE_OK;
 }
 
-bool CCurlFile::Put(const std::string& strURL, const std::string& strData, std::string& strHTML)
+bool CCurlFile::Put(const CURL& url2, const std::string& strData, std::string& strHTML)
 {
-  CURL url2(strURL);
-  ParseAndCorrectUrl(url2);
-
   assert(m_state->m_easyHandle == NULL);
   g_curlInterface.easy_aquire(
     url2.GetProtocol().c_str(), url2.GetHostName().c_str(), &m_state->m_easyHandle, NULL);
@@ -932,24 +929,42 @@ bool CCurlFile::Put(const std::string& strURL, const std::string& strData, std::
   return result == CURLE_OK;
 }
 
-bool CCurlFile::Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML)
+bool CCurlFile::Put(const std::string& strURL, const std::string& strData, std::string& strHTML)
+{
+  CURL url2(strURL);
+  ParseAndCorrectUrl(url2);
+  return Put(url2, strData, strHTML);
+}
+
+bool CCurlFile::Post(const CURL& strURL, const std::string& strPostData, std::string& strHTML)
 {
   m_postdata = strPostData;
   m_postdataset = true;
   return Service(strURL, strHTML);
 }
 
-bool CCurlFile::Get(const std::string& strURL, std::string& strHTML)
+bool CCurlFile::Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML)
+{
+  const CURL pathToUrl(strURL);
+  return Post(pathToUrl, strPostData, strHTML);
+}
+
+bool CCurlFile::Get(const CURL& strURL, std::string& strHTML)
 {
   m_postdata = "";
   m_postdataset = false;
   return Service(strURL, strHTML);
 }
 
-bool CCurlFile::Service(const std::string& strURL, std::string& strHTML)
+bool CCurlFile::Get(const std::string& strURL, std::string& strHTML)
 {
   const CURL pathToUrl(strURL);
-  if (Open(pathToUrl))
+  return Get(pathToUrl, strHTML);
+}
+
+bool CCurlFile::Service(const CURL& strURL, std::string& strHTML)
+{
+  if (Open(strURL))
   {
     if (ReadData(strHTML))
     {
