@@ -22,6 +22,9 @@
 #include "URL.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"
+#include "filesystem/CurlFile.h"
+
+#include "utils/log.h"
 
 namespace adaptive
 {
@@ -69,8 +72,8 @@ namespace adaptive
   uint32_t AdaptiveTree::estimate_segcount(uint32_t duration, uint32_t timescale)
   {
     double tmp(duration);
-    duration /= timescale;
-    return static_cast<uint32_t>((overallSeconds_ / duration)*1.01);
+    tmp /= timescale;
+    return static_cast<uint32_t>((overallSeconds_ / tmp)*1.01);
   }
 
   void AdaptiveTree::set_download_speed(double speed)
@@ -123,23 +126,44 @@ namespace adaptive
     {
       uUrl.SetProtocolOption("seekable", "0");
       uUrl.SetProtocolOption("acceptencoding", "gzip");
+
+      std::string data;
+      XFILE::CCurlFile* file = new XFILE::CCurlFile();
+      if (!file->Get(uUrl, data))
+        return false;
+
+      std::string realUrl = file->GetLastEffectiveUrl();
+      size_t paramPos = realUrl.find('?');
+      base_url_ = (paramPos == std::string::npos) ? realUrl : realUrl.substr(0, paramPos);
+
+      paramPos = base_url_.find_last_of('/', base_url_.length());
+      if (paramPos == std::string::npos)
+      {
+        CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", realUrl.c_str());
+        return false;
+      }
+      base_url_.resize(paramPos + 1);
+
+      bool ret =  write_data(data.c_str(), data.size());
+      return ret;
     }
-    
-    XFILE::CFile* file = new XFILE::CFile();
-    if (!file->Open(uUrl, READ_CHUNKED | READ_NO_CACHE))
-      return false;
-    
-    // read the file
-    static const unsigned int CHUNKSIZE = 16384;
-    char buf[CHUNKSIZE];
-    size_t nbRead;
-    while ((nbRead = file->Read(buf, CHUNKSIZE)) > 0 && ~nbRead && write_data(buf, nbRead));
-    
-    //download_speed_ = xbmc->GetFileDownloadSpeed(file);
-    
-    file->Close();
-    delete file;
-    
-    return nbRead == 0; 
+    else
+    {
+      size_t nbRead = 0;
+      XFILE::CFile file;
+      if (!file.Open(uUrl, READ_CHUNKED | READ_NO_CACHE))
+        return false;
+
+      // read the file
+      static const unsigned int CHUNKSIZE = 16384;
+      char buf[CHUNKSIZE];
+      while ((nbRead = file.Read(buf, CHUNKSIZE)) > 0 && ~nbRead && write_data(buf, nbRead));
+
+      //download_speed_ = xbmc->GetFileDownloadSpeed(file);
+
+      file.Close();
+      return nbRead == 0;
+    }
+    return false;
   }
 }
