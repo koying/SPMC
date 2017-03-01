@@ -11,8 +11,8 @@ As far as I'm concerned, Nvidia Shield has basically cornered the market, so is 
 **Note 2:** For recommendations and android voice search, SPMC must be already running.  
 
 Latest Jarvis build is: **16.6.0** [link](https://github.com/koying/SPMC/releases/tag/16.6.0-spmc)   
-ARM32 APK: [link](https://github.com/koying/SPMC/releases/download/16.6.0-spmc/SPMC-16.6.0-spmc-4d8da72-armeabi-v7a.apk)  
-ARM32 Launcher APK: [link](https://github.com/koying/SPMC/releases/download/16.6.0-spmc/SPMC-16.6.0-spmc-4d8da72-armeabi-v7a_launcher.apk)  
+ARM32 APK: [link](https://github.com/koying/SPMC/releases/download/16.6.0-spmc/SPMC-16.6.0-spmc-68a86a2-armeabi-v7a.apk)  
+ARM32 Launcher APK: [link](https://github.com/koying/SPMC/releases/download/16.6.0-spmc/SPMC-16.6.0-spmc-68a86a2-armeabi-v7a_launcher.apk)  
 More downloads at: [link](https://github.com/koying/SPMC/releases/tag/16.6.0-spmc)  
 
 Google Play: [link](https://play.google.com/store/apps/details?id=com.semperpax.spmc16)  
