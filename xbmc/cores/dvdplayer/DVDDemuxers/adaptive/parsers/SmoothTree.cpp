@@ -115,29 +115,28 @@ start(void *data, const char *el, const char **attr)
       }
       else if (strcmp(el, "c") == 0)
       {
-        //<c n = "0" d = "20000000" / >
-        uint32_t push_duration(~0);
+        //<c n="0" d="20000000" t="14588653245" / >
+        uint32_t push_duration(0);
+        bool firstSeg = dash->current_adaptationset_->segment_durations_.data.empty();
 
         for (; *attr;)
         {
           if (*(const char*)*attr == 't')
           {
             uint64_t lt(atoll((const char*)*(attr + 1)));
-            if (!dash->current_adaptationset_->segment_durations_.data.empty())
+            if (!firstSeg)
               dash->current_adaptationset_->segment_durations_.data.back() = static_cast<uint32_t>(lt - dash->pts_helper_);
             else
               dash->current_adaptationset_->startPTS_ = lt;
             dash->pts_helper_ = lt;
-            push_duration = 0;
           }
           else if (*(const char*)*attr == 'd')
           {
             push_duration = atoi((const char*)*(attr + 1));
-            break;
           }
           attr += 2;
         }
-        if (~push_duration)
+        if (push_duration)
           dash->current_adaptationset_->segment_durations_.data.push_back(push_duration);
       }
     }
