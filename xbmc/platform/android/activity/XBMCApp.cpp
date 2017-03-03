@@ -64,6 +64,7 @@
 #include "AndroidKey.h"
 #include "settings/AdvancedSettings.h"
 #include "cores/AudioEngine/AEFactory.h"
+#include "AndroidFeatures.h"
 #include "Application.h"
 #include "AppParamParser.h"
 #include "messaging/ApplicationMessenger.h"
@@ -813,9 +814,11 @@ std::vector<androidPackage> CXBMCApp::GetApplications()
     int numPackages = packageList.size();
     for (int i = 0; i < numPackages; i++)
     {
-      CJNIIntent intent = GetPackageManager().getLaunchIntentForPackage(packageList.get(i).packageName);
-      if (!intent && CJNIBuild::SDK_INT >= 21)
+      CJNIIntent intent;
+      if (CAndroidFeatures::IsLeanback())
         intent = GetPackageManager().getLeanbackLaunchIntentForPackage(packageList.get(i).packageName);
+      if (!intent)
+        intent = GetPackageManager().getLaunchIntentForPackage(packageList.get(i).packageName);
       if (!intent)
         continue;
 
@@ -838,12 +841,18 @@ bool CXBMCApp::HasLaunchIntent(const std::string &package)
 // Note intent, dataType, dataURI all default to ""
 bool CXBMCApp::StartActivity(const std::string &package, const std::string &intent, const std::string &dataType, const std::string &dataURI)
 {
-  CJNIIntent newIntent = intent.empty() ?
-    GetPackageManager().getLaunchIntentForPackage(package) :
-    CJNIIntent(intent);
+  CJNIIntent newIntent;
+  if (!intent.empty())
+    newIntent = CJNIIntent(intent);
 
-  if (!newIntent && CJNIBuild::SDK_INT >= 21)
-    newIntent = GetPackageManager().getLeanbackLaunchIntentForPackage(package);
+  if (!newIntent)
+  {
+    if (CAndroidFeatures::IsLeanback())
+      newIntent = GetPackageManager().getLeanbackLaunchIntentForPackage(package);
+    if (!newIntent)
+      newIntent = GetPackageManager().getLaunchIntentForPackage(package);
+  }
+
   if (!newIntent)
     return false;
 

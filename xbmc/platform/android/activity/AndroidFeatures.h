@@ -29,4 +29,5 @@ class CAndroidFeatures
   static int          GetVersion();
   static int          GetCPUCount();
   static bool         HasTouchScreen();
+  static bool         IsLeanback();
 };
