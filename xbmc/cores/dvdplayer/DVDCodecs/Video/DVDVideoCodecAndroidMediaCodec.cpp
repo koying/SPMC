@@ -890,23 +890,6 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
             break;
           }
 
-          case AV_CODEC_ID_H264:
-          {
-            // TODO: Check why crypted SS are not annexB
-            if (iSize >= 4 && pData[0] == 0x00 && pData[1] == 0x00 && pData[2] == 0x00 && pData[3] == 0x01)
-              memcpy(dst_ptr, pData, iSize);
-            else
-            {
-              dst_ptr[0] = 0x00;
-              dst_ptr[1] = 0x00;
-              dst_ptr[2] = 0x00;
-              dst_ptr[3] = 0x01;
-              memcpy(dst_ptr+4, pData + 4, iSize - 4);
-            }
-
-            break;
-          }
-
           default:
             memcpy(dst_ptr, pData, iSize);
             break;
