@@ -90,3 +90,17 @@ bool CAndroidFeatures::HasTouchScreen()
 
   return (hastouchscreen == 1);
 }
+
+bool CAndroidFeatures::IsLeanback()
+{
+  static int isleanback = -1;
+  if (isleanback == -1)
+  {
+    if (CJNIContext::GetPackageManager().hasSystemFeature("android.software.leanback"))
+      isleanback = 1;
+    else
+      isleanback = 0;
+  }
+
+  return (isleanback == 1);
+}
