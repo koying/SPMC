@@ -838,25 +838,34 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
       AMediaCodecCryptoInfo* cryptoInfo = nullptr;
       if (m_crypto && packet.cryptoInfo)
       {
-        size_t clearBytes = packet.cryptoInfo->clearBytes[0];
-        size_t cipherBytes = packet.cryptoInfo->cipherBytes[0];
+        size_t totClear = 0;
+        size_t totCypher = 0;
+        size_t clearBytes[packet.cryptoInfo->numSubSamples]; // = packet.cryptoInfo->clearBytes[0];
+        size_t cipherBytes[packet.cryptoInfo->numSubSamples]; // = packet.cryptoInfo->cipherBytes[0];
+        for (size_t i=0; i < packet.cryptoInfo->numSubSamples; ++i)
+        {
+          clearBytes[i] = packet.cryptoInfo->clearBytes[i];
+          cipherBytes[i] = packet.cryptoInfo->cipherBytes[i];
+          
+          totClear += clearBytes[i];
+          totCypher += cipherBytes[i];
+          
+        }
         if (g_advancedSettings.CanLogComponent(LOGVIDEO))
         {
-          CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto, numSamples(%d) - clearBytes(%d) - cipherBytes(%d)", packet.cryptoInfo->numSubSamples, clearBytes, cipherBytes);
-#if 0
+          CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto, numSamples(%d) - tot clearBytes(%d) - tot cipherBytes(%d)", packet.cryptoInfo->numSubSamples, totClear, totCypher);
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto  kid");
           CLog::MemDump(reinterpret_cast<char*>(packet.cryptoInfo->kid), 16);
           CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec::Decode Crypto  iv");
           CLog::MemDump(reinterpret_cast<char*>(packet.cryptoInfo->iv), 16);
-#endif
         }
         cryptoInfo = AMediaCodecCryptoInfo_new(
               packet.cryptoInfo->numSubSamples,
               packet.cryptoInfo->kid,
               packet.cryptoInfo->iv,
               AMEDIACODECRYPTOINFO_MODE_AES_CTR,
-              &clearBytes,
-              &cipherBytes);
+              clearBytes,
+              cipherBytes);
       }
 
       if (dst_ptr)
