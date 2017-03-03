@@ -58,6 +58,7 @@ public:
 
 private:
   unsigned int countPictureSetIds;
+  bool needSliceInfo;
 };
 
 /***********************   HEVC   ************************/
