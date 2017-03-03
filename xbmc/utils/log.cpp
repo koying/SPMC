@@ -115,18 +115,20 @@ bool CLog::Init(const std::string& path)
   return s_globals.m_platform.OpenLogFile(path + appName + ".log", path + appName + ".old.log");
 }
 
-void CLog::MemDump(char *pData, int length)
+void CLog::MemDump(const char *pData, int length)
 {
   Log(LOGDEBUG, "MEM_DUMP: Dumping from %p", pData);
+  size_t offset = 0;
   for (int i = 0; i < length; i+=16)
   {
     std::string strLine = StringUtils::Format("MEM_DUMP: %04x ", i);
-    char *alpha = pData;
+    size_t offsetAlpha = offset;
     for (int k=0; k < 4 && i + 4*k < length; k++)
     {
       for (int j=0; j < 4 && i + 4*k + j < length; j++)
       {
-        std::string strFormat = StringUtils::Format(" %02x", (unsigned char)*pData++);
+        std::string strFormat = StringUtils::Format(" %02x", (unsigned char)*(pData + offset));
+        offset++;        
         strLine += strFormat;
       }
       strLine += " ";
@@ -136,11 +138,11 @@ void CLog::MemDump(char *pData, int length)
       strLine += " ";
     for (int j=0; j < 16 && i + j < length; j++)
     {
-      if (*alpha > 31)
-        strLine += *alpha;
+      if (*(pData + offsetAlpha) > 31)
+        strLine += *(pData + offsetAlpha);
       else
         strLine += '.';
-      alpha++;
+      offsetAlpha++;
     }
     Log(LOGDEBUG, "%s", strLine.c_str());
   }
