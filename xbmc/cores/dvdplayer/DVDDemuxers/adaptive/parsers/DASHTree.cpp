@@ -463,10 +463,12 @@ start(void *data, const char *el, const char **attr)
                 sscanf((const char*)*(attr + 1), "%u-%u" , &dash->current_representation_->indexRangeMin_, &dash->current_representation_->indexRangeMax_);
               else if (strcmp((const char*)*attr, "indexRangeExact") == 0 && strcmp((const char*)*(attr + 1), "true") == 0)
                 dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::INDEXRANGEEXACT;
+              else if (strcmp((const char*)*attr, "timescale") == 0)
+                dash->current_representation_->timescale_ = atoi((const char*)*(attr + 1));
               dash->current_representation_->flags_ |= adaptive::AdaptiveTree::Representation::SEGMENTBASE;
               attr += 2;
             }
-            if((dash->current_representation_->flags_ & adaptive::AdaptiveTree::Representation::INDEXRANGEEXACT) && dash->current_representation_->indexRangeMax_)
+            if(dash->current_representation_->indexRangeMax_)
               dash->currentNode_ |= DASHTree::MPDNODE_SEGMENTLIST;
           }
           else if (strcmp(el, "SegmentTemplate") == 0)
@@ -603,23 +605,40 @@ start(void *data, const char *el, const char **attr)
         }
         else if (strcmp(el, "ContentProtection") == 0)
         {
+          if (dash->adp_pssh_.second.empty())
+            dash->adp_pssh_.second = "PROTECTED";
+
           dash->strXMLText_.clear();
           dash->encryptionState_ |= adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED;
-          bool urnFound(false);
+          bool urnFound(false), mpdFound(false);
+          const char *defaultKID(0);
           for (; *attr;)
           {
             if (strcmp((const char*)*attr, "schemeIdUri") == 0)
             {
-              urnFound = stricmp(dash->adp_pssh_.first.c_str(), (const char*)*(attr + 1))==0;
-              break;
+              if (strcmp((const char*)*(attr + 1), "urn:mpeg:dash:mp4protection:2011") == 0)
+              {
+                mpdFound = true;
+                if (dash->adp_pssh_.first.empty())
+                  dash->adp_pssh_.first = "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
+              }
+              else
+              {
+                urnFound = stricmp(dash->adp_pssh_.first.c_str(), (const char*)*(attr + 1)) == 0;
+                break;
+              }
             }
+            else if (strcmp((const char*)*attr, "cenc:default_KID") == 0)
+              defaultKID = (const char*)*(attr + 1);
             attr += 2;
           }
           if (urnFound)
           {
             dash->currentNode_ |= DASHTree::MPDNODE_CONTENTPROTECTION;
-            dash->encryptionState_ |= adaptive::AdaptiveTree::ENCRYTIONSTATE_SUPPORTED;
+            dash->encryptionState_ |= DASHTree::ENCRYTIONSTATE_SUPPORTED;
           }
+          else if (mpdFound && defaultKID && strlen(defaultKID) == 36)
+            dash->defaultKID_ = defaultKID;
         }
         else if (strcmp(el, "AudioChannelConfiguration") == 0)
         {
@@ -911,7 +930,7 @@ end(void *data, const char *el)
           }
           else if (strcmp(el, "ContentProtection") == 0)
           {
-            if (dash->adp_pssh_.second.empty())
+            if (dash->adp_pssh_.second == "PROTECTED")
               dash->adp_pssh_.second = "FILE";
             dash->currentNode_ &= ~DASHTree::MPDNODE_CONTENTPROTECTION;
           }
@@ -942,7 +961,7 @@ end(void *data, const char *el)
         {
           dash->currentNode_ &= ~DASHTree::MPDNODE_ADAPTIONSET;
           if (dash->current_adaptationset_->type_ == adaptive::AdaptiveTree::NOTYPE
-          || ((dash->encryptionState_ & adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED) && dash->adp_pssh_.second.empty())
+          || dash->adp_pssh_.second == "PROTECTED"
           || dash->current_adaptationset_->repesentations_.empty())
           {
             delete dash->current_adaptationset_;
