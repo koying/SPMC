@@ -79,7 +79,7 @@ public:
     licenseType_ = licenseType;
     licenseKeyUrl_ = licenseKeyUrl;
     if (licenseType_ == "com.widevine.alpha")
-      return "urn:uuid:EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED";
+      return "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed";
     else if (licenseType_ == "com.microsoft.playready")
       return "urn:uuid:9a04f079-9840-4286-ab92e65be0885f95";
     return 0;
