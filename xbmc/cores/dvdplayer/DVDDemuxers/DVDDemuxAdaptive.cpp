@@ -73,10 +73,15 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
   if (type == CDASHSession::MANIFEST_TYPE_UNKNOWN)
     return false;
   
-  std::string sLicType = item.GetProperty("inputstream.adaptive.license_type").asString();
-  std::string sLicKey = item.GetProperty("inputstream.adaptive.license_key").asString();
-  std::string sLicData = item.GetProperty("inputstream.adaptive.license_data").asString();
-  std::string sServCert = item.GetProperty("inputstream.adaptive.server_certificate").asString();
+  std::string sLicType, sLicKey, sLicData, sServCert;
+  if (item.HasProperty("inputstream.adaptive.license_type"))
+    sLicType = item.GetProperty("inputstream.adaptive.license_type").asString();
+  if (item.HasProperty("inputstream.adaptive.license_key"))
+    sLicKey = item.GetProperty("inputstream.adaptive.license_key").asString();
+  if (item.HasProperty("inputstream.adaptive.license_data"))
+    sLicData = item.GetProperty("inputstream.adaptive.license_data").asString();
+  if (item.HasProperty("inputstream.adaptive.server_certificate"))
+    sServCert = item.GetProperty("inputstream.adaptive.server_certificate").asString();
   m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, sLicType, sLicKey, sLicData, sServCert, "special://profile/"));
 
   if (!m_session->initialize())
@@ -125,7 +130,7 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
     DemuxPacket *p;
 
 #ifdef TARGET_ANDROID
-    if (sr->IsEncrypted())
+    if (iSize && pData && sr->IsEncrypted())
     {
       unsigned int numSubSamples = *((unsigned int*)pData); 
       pData += sizeof(numSubSamples);

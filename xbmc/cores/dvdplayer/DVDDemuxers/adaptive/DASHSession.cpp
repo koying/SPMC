@@ -70,6 +70,8 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
       break;
     default:;
   };
+
+  CLog::Log(LOGDEBUG, "CDASHSession license_type_(%s) license_key_url_(%s) license_data_(%d)", license_type_.c_str(), license_key_url_.c_str(), license_data_.c_str());
   
   XFILE::CFile f;
 
@@ -195,7 +197,7 @@ bool CDASHSession::initialize()
   */
 
   // Try to initialize an SingleSampleDecryptor
-  if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
+  if (adaptiveTree_->encryptionState_ & adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
   {
     AP4_DataBuffer init_data;
     
@@ -263,14 +265,7 @@ bool CDASHSession::initialize()
       }
       else if (!adaptiveTree_->defaultKID_.empty())
       {
-        init_data.SetDataSize(16);
-        AP4_Byte *data(init_data.UseData());
-        const char *src(adaptiveTree_->defaultKID_.c_str());
-        AP4_ParseHex(src, data, 4);
-        AP4_ParseHex(src + 9, data + 4, 2);
-        AP4_ParseHex(src + 14, data + 6, 2);
-        AP4_ParseHex(src + 19, data + 8, 2);
-        AP4_ParseHex(src + 24, data + 10, 6);
+        init_data.SetData((AP4_Byte*)adaptiveTree_->defaultKID_.data(),16);
 
         uint8_t ld[1024];
         unsigned int ld_size(1014);
@@ -282,6 +277,8 @@ bool CDASHSession::initialize()
           memmove(uuid + 11, uuid, ld_size - (uuid - ld));
           memcpy(uuid, init_data.GetData(), init_data.GetDataSize());
           init_data.SetData(ld, ld_size + 11);
+
+          init_data.SetDataSize(16);
         }
         else
           init_data.SetData(ld, ld_size);
@@ -291,21 +288,10 @@ bool CDASHSession::initialize()
     }
     else
     {
-      /*
-      if (manifest_type_ == MANIFEST_TYPE_ISM)
-      {
-        if (license_data_.empty())
-          license_data_ = adaptiveTree_->adp_pssh_.second;
-        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
-      }
-      else
-      */
-      {
-        init_data.SetBufferSize(2048);
-        unsigned int init_data_size(2048);
-        b64_decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size(), init_data.UseData(), init_data_size);
-        init_data.SetDataSize(init_data_size);
-      }
+      init_data.SetBufferSize(2048);
+      unsigned int init_data_size(2048);
+      b64_decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size(), init_data.UseData(), init_data_size);
+      init_data.SetDataSize(init_data_size);
     }
     if ((single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data)) != 0)
     {
