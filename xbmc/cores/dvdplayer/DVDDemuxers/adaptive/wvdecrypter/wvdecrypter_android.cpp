@@ -275,12 +275,9 @@ bool WV_CencSingleSampleDecrypter_android::GetLicense()
 
 bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
 {
+  XFILE::CCurlFile file;
+  std::string request, response;
   std::vector<std::string> headers, header, blocks = split(license_url_, '|');
-  if (blocks.size() != 4)
-  {
-    CLog::Log(LOGERROR, "4 '|' separated blocks in licURL expected (req / header / body / response)");
-    return false;
-  }
 
 #ifdef _DEBUG
   std::string strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.challenge";
@@ -307,27 +304,23 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
   }
 
   CURL uUrl(blocks[0].c_str());
-  uUrl.SetProtocolOption("acceptencoding", "gzip, deflate");
+  uUrl.SetProtocolOption("Accept-Encoding", "application/octet-stream");
+  uUrl.SetProtocolOption("Accept-Encoding", "gzip, deflate");
   uUrl.SetProtocolOption("seekable", "0");
-  uUrl.SetProtocolOption("Expect", "");
-  
-  XFILE::CFile* file = nullptr;
-  size_t nbRead;
-  std::string response;
-  char buf[2048];
-  AMediaDrmKeySetId dummy_ksid; //STREAMING returns 0
-  media_status_t status;
 
   //Process headers
-  headers = split(blocks[1], '&');
-  for (std::vector<std::string>::iterator b(headers.begin()), e(headers.end()); b != e; ++b)
+  if (blocks.size()>1 && !blocks[1].empty())
   {
-    header = split(*b, '=');
-    uUrl.SetProtocolOption(trim(header[0]).c_str(), header.size() > 1 ? url_decode(trim(header[1])).c_str() : "");
+    headers = split(blocks[1], '&');
+    for (std::vector<std::string>::iterator b(headers.begin()), e(headers.end()); b != e; ++b)
+    {
+      header = split(*b, '=');
+      uUrl.SetProtocolOption(trim(header[0]).c_str(), header.size() > 1 ? url_decode(trim(header[1])).c_str() : "");
+    }
   }
 
   //Process body
-  if (!blocks[2].empty())
+  if (blocks.size()>1 && !blocks[2].empty())
   {
     insPos = blocks[2].find("{SSM}");
     if (insPos != std::string::npos)
@@ -369,28 +362,24 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
         }
       }
     }
-    std::string decoded = b64_encode(reinterpret_cast<const unsigned char*>(blocks[2].data()), blocks[2].size(), false);
-    uUrl.SetProtocolOption("postdata", decoded.c_str());
+    request = b64_encode(reinterpret_cast<const unsigned char*>(blocks[2].data()), blocks[2].size(), false);
+  }
+  else
+  {
+    request = std::string(reinterpret_cast<const char*>(key_request_), key_request_size_);
   }
 
-  file = new XFILE::CFile();
-  if (!file->Open(uUrl, READ_NO_CACHE))
+  CLog::Log(LOGDEBUG, "Sending key request to: %s / %s", license_url_.c_str(), uUrl.Get().c_str());
+  CLog::MemDump(request.data(), std::min((size_t)20, request.size()));
+
+  if (!file.Post(uUrl.Get(), request, response))
   {
     CLog::Log(LOGERROR, "License server returned failure");
     goto SSMFAIL;
   }
 
-  // read the file
-  while ((nbRead = file->Read(buf, 1024)) > 0)
-    response += std::string((const char*)buf, nbRead);
-  file->Close();
-  delete file;
-
-  if (nbRead != 0)
-  {
-    CLog::Log(LOGERROR, "Could not read full SessionMessage response");
-    goto SSMFAIL;
-  }
+  AMediaDrmKeySetId dummy_ksid; //STREAMING returns 0
+  media_status_t status;
 
 #ifdef _DEBUG
   strDbg = "special://temp/EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED.response";
@@ -399,7 +388,7 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
   f.Close();
 #endif
 
-  if (!blocks[3].empty())
+  if (blocks.size()>1 && !blocks[3].empty())
   {
     if (blocks[3][0] == 'J')
     {
@@ -444,8 +433,6 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
 
   return status == AMEDIA_OK;
 SSMFAIL:
-  if (file)
-    file->Close();
   return false;
 }
 
