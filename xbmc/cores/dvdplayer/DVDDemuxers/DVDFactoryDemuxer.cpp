@@ -49,7 +49,7 @@ CDVDDemux* CDVDFactoryDemuxer::CreateDemuxer(CDVDInputStream* pInputStream, bool
 
   // Try to open the Adaptive demuxer
   if (pInputStream->GetFileItem().GetMimeType() == "video/vnd.mpeg.dash.mpd" || pInputStream->GetFileItem().IsType(".mpd")
-      || pInputStream->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInputStream->GetFileItem().IsType(".ismc")
+      || pInputStream->GetFileItem().GetMimeType() == "application/vnd.ms-sstr+xml" || pInputStream->GetFileItem().IsType(".ismc") || pInputStream->GetFileItem().IsType(".ismc") || pInputStream->GetFileItem().IsType(".isml")
       || pInputStream->GetFileItem().GetProperty("inputstreamaddon").c_str() != nullptr
       )
   {

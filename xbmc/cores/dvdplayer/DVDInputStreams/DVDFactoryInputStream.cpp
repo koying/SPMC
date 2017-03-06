@@ -45,7 +45,7 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IDVDPlayer* pPlayer, 
   std::string file = fileitem.GetPath();
 
   if (fileitem.GetMimeType() == "video/vnd.mpeg.dash.mpd" || fileitem.IsType(".mpd")
-      || fileitem.GetMimeType() == "application/vnd.ms-sstr+xml" || fileitem.IsType(".ismc")
+      || fileitem.GetMimeType() == "application/vnd.ms-sstr+xml" || fileitem.IsType(".ismc") || fileitem.IsType(".ism") || fileitem.IsType(".isml")
       || fileitem.GetProperty("inputstreamaddon").c_str() != nullptr
       )
   {

@@ -66,6 +66,7 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
   else if (item.GetMimeType() == "application/vnd.ms-sstr+xml"
            || item.IsType(".ismc")
            || item.IsType(".ism")
+           || item.IsType(".isml")
            || item.GetProperty("inputstream.adaptive.manifest_type").asString() == "ism"
            )
     type = CDASHSession::MANIFEST_TYPE_ISM;
