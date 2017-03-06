@@ -39,6 +39,7 @@ using namespace XFILE;
 #define M3U_STREAM_MARKER  "#EXT-X-STREAM-INF"
 #define M3U_BANDWIDTH_MARKER  "BANDWIDTH"
 #define M3U_OFFSET_MARKER  "#EXT-KX-OFFSET"
+#define M3U_PROP_MARKER  "#EXT-X-PROP"
 
 // example m3u file:
 //   #EXTM3U
@@ -75,6 +76,7 @@ bool CPlayListM3U::Load(const std::string& strFileName)
   long lDuration = 0;
   int iStartOffset = 0;
   int iEndOffset = 0;
+  std::map<std::string, std::string> properties;
 
   Clear();
 
@@ -109,6 +111,17 @@ bool CPlayListM3U::Load(const std::string& strFileName)
         iComma++;
         strInfo = strLine.substr(iComma);
         g_charsetConverter.unknownToUTF8(strInfo);
+      }
+    }
+    else if (StringUtils::StartsWith(strLine, M3U_PROP_MARKER))
+    {
+      size_t iColon = strLine.find(":");
+      if (iColon != std::string::npos)
+      {
+        std::string prop = strLine.substr(iColon+1);
+        size_t equ = prop.find("=");
+        if (equ != std::string::npos)
+          properties[prop.substr(0, equ)] = prop.substr(equ+1);
       }
     }
     else if (StringUtils::StartsWith(strLine, M3U_OFFSET_MARKER))
@@ -169,6 +182,8 @@ bool CPlayListM3U::Load(const std::string& strFileName)
           if (iEndOffset)
             lDuration = (iEndOffset - iStartOffset + 37) / 75;
         }
+        for (std::map<std::string, std::string>::iterator it = properties.begin(); it != properties.end(); ++it)
+          newItem->SetProperty(it->first, it->second);
         if (newItem->IsVideo() && !newItem->HasVideoInfoTag()) // File is a video and needs a VideoInfoTag
           newItem->GetVideoInfoTag()->Reset(); // Force VideoInfoTag creation
         if (lDuration && newItem->IsAudio())
