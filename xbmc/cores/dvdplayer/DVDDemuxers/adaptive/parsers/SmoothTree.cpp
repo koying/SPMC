@@ -154,6 +154,7 @@ start(void *data, const char *el, const char **attr)
           dash->current_adaptationset_->type_ =
           stricmp((const char*)*(attr + 1), "video") == 0 ? SmoothTree::VIDEO
           : stricmp((const char*)*(attr + 1), "audio") == 0 ? SmoothTree::AUDIO
+          : stricmp((const char*)*(attr + 1), "text") == 0 ? SmoothTree::TEXT
           : SmoothTree::NOTYPE;
         else if (strcmp((const char*)*attr, "Language") == 0)
           dash->current_adaptationset_->language_ = (const char*)*(attr + 1);
