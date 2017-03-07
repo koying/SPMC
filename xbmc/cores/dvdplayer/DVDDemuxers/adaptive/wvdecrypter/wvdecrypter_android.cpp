@@ -99,8 +99,7 @@ WV_CencSingleSampleDecrypter_android::WV_CencSingleSampleDecrypter_android(std::
     pssh_.insert(boxLen, reinterpret_cast<const char*>(&dataLen), sizeof(uint32_t));
     boxLen += sizeof(uint32_t);
 
-    boxLen += sizeof(uint32_t) /* boxlen */ + dataLen;
-    uint32_t boxlenBE = Endian_SwapBE32(boxLen);
+    uint32_t boxlenBE = Endian_SwapBE32(sizeof(uint32_t) /* boxlen */ + pssh_.size());
     pssh_.insert(0, reinterpret_cast<const char*>(&boxlenBE), sizeof(uint32_t));
   }
 
