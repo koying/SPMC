@@ -36,6 +36,7 @@
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
+#include "utils/Base64.h"
 #include "filesystem/File.h"
 
 using namespace SSD;
@@ -288,10 +289,10 @@ bool CDASHSession::initialize()
     }
     else
     {
-      init_data.SetBufferSize(2048);
-      unsigned int init_data_size(2048);
-      b64_decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size(), init_data.UseData(), init_data_size);
-      init_data.SetDataSize(init_data_size);
+      std::string decoded = Base64::Decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size());
+      init_data.SetData(reinterpret_cast<const AP4_Byte*>(decoded.data()), decoded.size());
+      CLog::Log(LOGDEBUG, "init_data: %d", init_data.GetDataSize());
+      CLog::MemDump(reinterpret_cast<const char*>(init_data.UseData()), init_data.GetDataSize());
     }
     if ((single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data)) != 0)
     {
