@@ -288,14 +288,11 @@ protection_end(void *data, const char *el)
   SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
   if (strcmp(el, "KID") == 0)
   {
-    uint8_t buffer[32];
-    unsigned int buffer_size(32);
-    b64_decode(dash->strXMLText_.data(), dash->strXMLText_.size(), buffer, buffer_size);
-    
-    if (buffer_size == 16)
+    std::string decoded = Base64::Decode(dash->strXMLText_);   
+    if (decoded.size() == 16)
     {
       dash->defaultKID_.resize(16);
-      prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
+      prkid2wvkid(reinterpret_cast<const char *>(decoded.data()), &dash->defaultKID_[0]);
     }
   } else if (strcmp(el, "LA_URL") == 0)
   {
@@ -374,15 +371,10 @@ void SmoothTree::parse_protection()
   adp_pssh_.first = "com.microsoft.playready";
   adp_pssh_.second = strXMLText_;
 
-  unsigned int xml_size = strXMLText_.size();
-  uint8_t *buffer = (uint8_t*)malloc(xml_size), *xml_start(buffer);
+  std::string decoded = Base64::Decode(strXMLText_);
+  unsigned int xml_size = decoded.size();
+  const char *xml_start = decoded.data();
 
-  if (!b64_decode(strXMLText_.c_str(), xml_size, buffer, xml_size))
-  {
-    free(buffer);
-    return;
-  }
-  
   while (xml_size && *xml_start != '<')
   {
     xml_start++;
@@ -391,10 +383,7 @@ void SmoothTree::parse_protection()
 
   XML_Parser pp = XML_ParserCreate("UTF-16");
   if (!pp)
-  {
-    free(buffer);
     return;
-  }
 
   XML_SetUserData(pp, (void*)this);
   XML_SetElementHandler(pp, protection_start, protection_end);
@@ -404,7 +393,6 @@ void SmoothTree::parse_protection()
   XML_Parse(pp, (const char*)(xml_start), xml_size, done);
 
   XML_ParserFree(pp);
-  free(buffer);
 
   strXMLText_.clear();
 }

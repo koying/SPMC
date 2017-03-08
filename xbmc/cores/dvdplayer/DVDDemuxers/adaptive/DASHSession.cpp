@@ -264,28 +264,17 @@ bool CDASHSession::initialize()
         }
         stream->disable();
       }
-      else if (!adaptiveTree_->defaultKID_.empty())
-      {
-        init_data.SetData((AP4_Byte*)adaptiveTree_->defaultKID_.data(),16);
-
-        uint8_t ld[1024];
-        unsigned int ld_size(1014);
-        b64_decode(license_data_.c_str(), license_data_.size(), ld, ld_size);
-
-        uint8_t *uuid((uint8_t*)strstr((const char*)ld, "{KID}"));
-        if (uuid)
-        {
-          memmove(uuid + 11, uuid, ld_size - (uuid - ld));
-          memcpy(uuid, init_data.GetData(), init_data.GetDataSize());
-          init_data.SetData(ld, ld_size + 11);
-
-          init_data.SetDataSize(16);
-        }
-        else
-          init_data.SetData(ld, ld_size);
-      }
       else
-        return false;
+      {
+        std::string decoded = Base64::Decode(license_data_);
+        if (!adaptiveTree_->defaultKID_.empty())
+        {
+          size_t pos;
+          if ((pos = decoded.find("{KID}")) != std::string::npos)
+            decoded.replace(pos, 5, adaptiveTree_->defaultKID_);
+        }
+        init_data.SetData(reinterpret_cast<const AP4_Byte*>(decoded.data()), decoded.size());
+      }
     }
     else
     {
