@@ -30,6 +30,7 @@
 #include "filesystem/CurlFile.h"
 #include "utils/log.h"
 #include "utils/EndianSwap.h"
+#include "utils/Base64.h"
 
 using namespace SSD;
 
@@ -208,7 +209,7 @@ bool WV_CencSingleSampleDecrypter_android::ProvisionRequest()
   tmp_str += std::string(reinterpret_cast<const char*>(key_request_), prov_size);
   tmp_str += "\"}";
 
-  std::string encoded = b64_encode(reinterpret_cast<const unsigned char*>(tmp_str.data()), tmp_str.size(), false);
+  std::string encoded = Base64::Encode(tmp_str);
 
   CURL uUrl(url);
   uUrl.SetProtocolOption("Content-Type", "application/json");
@@ -292,7 +293,7 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
   {
     if (insPos >= 0 && blocks[0][insPos - 1] == 'B')
     {
-      std::string msgEncoded = b64_encode(key_request_, key_request_size_, true);
+      std::string msgEncoded = Base64::Encode(reinterpret_cast<const char*>(key_request_), key_request_size_);
       blocks[0].replace(insPos - 1, 6, msgEncoded);
     }
     else
@@ -329,7 +330,9 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
       {
         if (blocks[2][insPos - 1] == 'B' || blocks[2][insPos - 1] == 'b')
         {
-          std::string msgEncoded = b64_encode(key_request_, key_request_size_, blocks[2][insPos - 1] == 'B');
+          std::string msgEncoded = Base64::Encode(reinterpret_cast<const char*>(key_request_), key_request_size_);
+          if (blocks[2][insPos - 1] == 'B')
+            msgEncoded = CURL::Encode(msgEncoded);
           blocks[2].replace(insPos - 1, 6, msgEncoded);
         }
         else
@@ -348,7 +351,9 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
         {
           if (blocks[2][insPos - 1] == 'B' || blocks[2][insPos - 1] == 'b')
           {
-            std::string msgEncoded = b64_encode(session_id_.ptr, session_id_.length, blocks[2][insPos - 1] == 'B');
+            std::string msgEncoded = Base64::Encode(reinterpret_cast<const char*>(session_id_.ptr), session_id_.length);
+            if (blocks[2][insPos - 1] == 'B')
+              msgEncoded = CURL::Encode(msgEncoded);
             blocks[2].replace(insPos - 1, 6, msgEncoded);
           }
           else
@@ -361,7 +366,7 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
         }
       }
     }
-    request = b64_encode(reinterpret_cast<const unsigned char*>(blocks[2].data()), blocks[2].size(), false);
+    request = Base64::Encode(reinterpret_cast<const char*>(blocks[2].data()), blocks[2].size());
   }
   else
   {
@@ -406,11 +411,8 @@ bool WV_CencSingleSampleDecrypter_android::SendSessionMessageWV()
       {
         if (blocks[3][1] == 'B')
         {
-          unsigned int decoded_size = 2048;
-          uint8_t decoded[2048];
-
-          b64_decode(response.c_str() + tokens[i + 1].start, tokens[i + 1].end - tokens[i + 1].start, decoded, decoded_size);
-          status = AMediaDrm_provideKeyResponse(media_drm_, &session_id_, decoded, decoded_size, &dummy_ksid);
+          std::string decoded = Base64::Decode(response.c_str() + tokens[i + 1].start, tokens[i + 1].end - tokens[i + 1].start);
+          status = AMediaDrm_provideKeyResponse(media_drm_, &session_id_, reinterpret_cast<const uint8_t*>(decoded.data()), decoded.size(), &dummy_ksid);
         }
         else
           status = AMediaDrm_provideKeyResponse(media_drm_, &session_id_, reinterpret_cast<const uint8_t*>(response.c_str() + tokens[i + 1].start), tokens[i + 1].end - tokens[i + 1].start, &dummy_ksid);

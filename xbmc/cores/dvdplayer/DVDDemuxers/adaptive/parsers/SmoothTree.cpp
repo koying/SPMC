@@ -28,6 +28,8 @@
 
 #include "PlatformDefs.h"
 #include "utils/Base64.h"
+#include "utils/log.h"
+#include "utils/StringUtils.h"
 
 using namespace adaptive;
 
@@ -226,10 +228,10 @@ start(void *data, const char *el, const char **attr)
 static void XMLCALL
 text(void *data, const char *s, int len)
 {
-	SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
+  SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
 
-    if (dash->currentNode_  & SmoothTree::SSMNODE_PROTECTIONTEXT)
-      dash->strXMLText_ += std::string(s, len);
+  if (dash->currentNode_  & SmoothTree::SSMNODE_PROTECTIONTEXT)
+    dash->strXMLText_ += std::string(s, len);
 }
 
 /*----------------------------------------------------------------------
@@ -247,11 +249,11 @@ end(void *data, const char *el)
       if (dash->currentNode_ & SmoothTree::SSMNODE_PROTECTIONHEADER)
       {
         if (strcmp(el, "ProtectionHeader") == 0)
-          dash->currentNode_ &= ~SmoothTree::SSMNODE_PROTECTIONHEADER;
+          dash->currentNode_ &= ~(SmoothTree::SSMNODE_PROTECTIONHEADER | SmoothTree::SSMNODE_PROTECTIONTEXT);
       }
       else if (strcmp(el, "Protection") == 0)
       {
-        dash->currentNode_ &= ~(SmoothTree::SSMNODE_PROTECTION| SmoothTree::SSMNODE_PROTECTIONTEXT);
+        dash->currentNode_ &= ~SmoothTree::SSMNODE_PROTECTION;
         dash->parse_protection();
         dash->pssh_ = dash->adp_pssh_;
       }
@@ -432,6 +434,8 @@ void SmoothTree::parse_protection()
   std::string::size_type pos = 0;
   while ((pos = strXMLText_.find('\n', 0)) != std::string::npos)
     strXMLText_.erase(pos, 1);
+
+  StringUtils::Trim(strXMLText_);
 
   while (strXMLText_.size() & 3)
     strXMLText_ += "=";
