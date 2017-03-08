@@ -118,7 +118,7 @@ namespace adaptive
       (*b)->segments_.insert(seg);
   }
   
-  bool AdaptiveTree::download(const char* url)
+  bool AdaptiveTree::download_manifest(const char* url)
   {
     // open the file
     CURL uUrl(url);
@@ -132,19 +132,19 @@ namespace adaptive
       if (!file->Get(uUrl, data))
         return false;
 
-      std::string realUrl = file->GetLastEffectiveUrl();
-      size_t paramPos = realUrl.find('?');
-      base_url_ = (paramPos == std::string::npos) ? realUrl : realUrl.substr(0, paramPos);
+      m_manifestUrl = file->GetLastEffectiveUrl();
+      size_t paramPos = m_manifestUrl.find('?');
+      base_url_ = (paramPos == std::string::npos) ? m_manifestUrl : m_manifestUrl.substr(0, paramPos);
 
       paramPos = base_url_.find_last_of('/', base_url_.length());
       if (paramPos == std::string::npos)
       {
-        CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", realUrl.c_str());
+        CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", m_manifestUrl.c_str());
         return false;
       }
       base_url_.resize(paramPos + 1);
 
-      bool ret =  write_data(data.c_str(), data.size());
+      bool ret =  write_manifest_data(data.c_str(), data.size());
       return ret;
     }
     else
@@ -157,7 +157,7 @@ namespace adaptive
       // read the file
       static const unsigned int CHUNKSIZE = 16384;
       char buf[CHUNKSIZE];
-      while ((nbRead = file.Read(buf, CHUNKSIZE)) > 0 && ~nbRead && write_data(buf, nbRead));
+      while ((nbRead = file.Read(buf, CHUNKSIZE)) > 0 && ~nbRead && write_manifest_data(buf, nbRead));
 
       //download_speed_ = xbmc->GetFileDownloadSpeed(file);
 

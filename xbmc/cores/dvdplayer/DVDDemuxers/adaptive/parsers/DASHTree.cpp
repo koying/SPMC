@@ -1023,7 +1023,7 @@ end(void *data, const char *el)
 |   DASHTree
 +---------------------------------------------------------------------*/
 
-bool DASHTree::open(const char *url)
+bool DASHTree::open_manifest(const char *url)
 {
   parser_ = XML_ParserCreate(NULL);
   if (!parser_)
@@ -1034,7 +1034,7 @@ bool DASHTree::open(const char *url)
   currentNode_ = 0;
   strXMLText_.clear();
 
-  bool ret = download(url);
+  bool ret = download_manifest(url);
 
   XML_ParserFree(parser_);
   parser_ = 0;
@@ -1042,7 +1042,7 @@ bool DASHTree::open(const char *url)
   return ret;
 }
 
-bool DASHTree::write_data(const char *buffer, size_t buffer_size)
+bool DASHTree::write_manifest_data(const char *buffer, size_t buffer_size)
 {
   bool done(false);
   XML_Status retval = XML_Parse(parser_, buffer, buffer_size, done);
