@@ -104,6 +104,7 @@ CDASHSession::~CDASHSession()
     delete decrypter_;
     decrypter_ = nullptr;
   }
+  SAFE_DELETE(adaptiveTree_);
 
   XFILE::CFile f;
 
@@ -181,7 +182,7 @@ bool CDASHSession::initialize()
   if (!adaptiveTree_)
     return false;
 
-  if (!adaptiveTree_->open(fileURL_.c_str()) || adaptiveTree_->empty())
+  if (!adaptiveTree_->open_manifest(fileURL_.c_str()) || adaptiveTree_->empty())
   {
     CLog::Log(LOGERROR, "Could not open / parse adaptive URL (%s)", fileURL_.c_str());
     return false;

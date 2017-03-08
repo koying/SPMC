@@ -26,14 +26,31 @@
 #include "../oscompat.h"
 #include "../helpers.h"
 
+#include "PlatformDefs.h"
+#include "utils/Base64.h"
+
 using namespace adaptive;
 
 uint32_t gTimeScale = 10000000;
 
-SmoothTree::SmoothTree()
+SmoothTree::SmoothTree(bool main)
+  : m_refreshThread(nullptr)
+  , m_stopRefreshing(false)
+  , m_main(main)
 {
   current_period_ = new AdaptiveTree::Period;
   periods_.push_back(current_period_);
+}
+
+SmoothTree::~SmoothTree()
+{
+  if (m_refreshThread)
+  {
+    m_stopRefreshing = true;
+    m_refreshThread->StopThread();
+    delete m_refreshThread;
+    m_refreshThread = NULL;
+  }  
 }
 
 /*----------------------------------------------------------------------
@@ -288,7 +305,7 @@ protection_end(void *data, const char *el)
   SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
   if (strcmp(el, "KID") == 0)
   {
-    std::string decoded = Base64::Decode(dash->strXMLText_);   
+    std::string decoded = Base64::Decode(dash->strXMLText_);
     if (decoded.size() == 16)
     {
       dash->defaultKID_.resize(16);
@@ -304,7 +321,7 @@ protection_end(void *data, const char *el)
 |   SmoothTree
 +---------------------------------------------------------------------*/
 
-bool SmoothTree::open(const char *url)
+bool SmoothTree::open_manifest(const char *url)
 {
   parser_ = XML_ParserCreate(NULL);
   if (!parser_)
@@ -315,7 +332,7 @@ bool SmoothTree::open(const char *url)
   currentNode_ = 0;
   strXMLText_.clear();
 
-  bool ret = download(url);
+  bool ret = download_manifest(url);
 
   XML_ParserFree(parser_);
   parser_ = 0;
@@ -339,10 +356,58 @@ bool SmoothTree::open(const char *url)
     }
     (*ba)->encrypted = (encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED);
   }
+  
+  if (has_timeshift_buffer_ && m_main)
+  {
+    // LIVE stream
+    m_refreshThread = new CThread(this, "SMoothTreeRefresh");
+    m_refreshThread->Create();
+    m_refreshThread->SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
+  }
   return true;
 }
 
-bool SmoothTree::write_data(const char *buffer, size_t buffer_size)
+void adaptive::SmoothTree::Run()
+{
+  
+  while (!m_stopRefreshing)
+  {
+    XbmcThreads::ThreadSleep(5000 /* msec */);
+    
+    adaptive::AdaptiveTree* adp = new SmoothTree(false);
+    adp->set_download_speed(bandwidth_);
+    if (adp->open_manifest(m_manifestUrl.c_str()))
+    {
+      std::vector<AdaptationSet*>::iterator cur_ba = current_period_->adaptationSets_.begin();
+      for (std::vector<AdaptationSet*>::iterator ba(adp->current_period_->adaptationSets_.begin()), ea(adp->current_period_->adaptationSets_.end()); ba != ea; ++ba)
+      {
+        bool dur_appended = false;
+        std::vector<SmoothTree::Representation*>::iterator cur_b = (*cur_ba)->repesentations_.begin();
+        for (std::vector<SmoothTree::Representation*>::iterator b((*ba)->repesentations_.begin()), e((*ba)->repesentations_.end()); b != e; ++b)
+        {
+          SmoothTree::Segment last_bs = (*cur_b)->segments_.data.back();
+          std::vector<uint32_t>::iterator bsd((*ba)->segment_durations_.data.begin());
+          for (std::vector<SmoothTree::Segment>::iterator bs((*b)->segments_.data.begin()), es((*b)->segments_.data.end()); bs != es; ++bsd, ++bs)
+          {
+            if (bs->range_end_ > last_bs.range_end_)
+            {
+              (*cur_b)->segments_.data.push_back(*bs);
+              if (!dur_appended)
+                (*cur_ba)->segment_durations_.data.push_back(*bsd);
+            }
+          }
+          dur_appended = true;
+          ++cur_b;
+        }
+        ++cur_ba;
+      }
+    }
+    
+    delete adp;
+  }
+}
+
+bool SmoothTree::write_manifest_data(const char *buffer, size_t buffer_size)
 {
   bool done(false);
   XML_Status retval = XML_Parse(parser_, buffer, buffer_size, done);

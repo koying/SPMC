@@ -46,8 +46,8 @@ namespace adaptive
     DASHTree();
     virtual ~DASHTree();
     
-    virtual bool open(const char *url) override;
-    virtual bool write_data(const char *buffer, size_t buffer_size) override;
+    virtual bool open_manifest(const char *url) override;
+    virtual bool write_manifest_data(const char *buffer, size_t buffer_size) override;
 };
 
 }
