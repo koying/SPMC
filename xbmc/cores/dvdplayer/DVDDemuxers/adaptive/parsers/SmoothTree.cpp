@@ -352,14 +352,15 @@ bool SmoothTree::open_manifest(const char *url)
       for (std::vector<SmoothTree::Segment>::iterator bs((*b)->segments_.data.begin()), es((*b)->segments_.data.end()); bs != es; ++bsd, ++bs)
       {
         bs->range_begin_ = ~0;
-        bs->range_end_ = bs->startPTS_ = cummulated;
+        bs->range_end_ = cummulated;
+        bs->startPTS_ = cummulated - base_time_;
         cummulated += *bsd;
       }
     }
     (*ba)->encrypted = (encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED);
-    base_time_ = 0;
   }
-  
+  base_time_ = 0;
+
   if (has_timeshift_buffer_ && m_main)
   {
     // LIVE stream
