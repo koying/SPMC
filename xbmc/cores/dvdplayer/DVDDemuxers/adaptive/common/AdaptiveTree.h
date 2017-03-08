@@ -24,12 +24,14 @@
 #include <inttypes.h>
 #include "expat.h"
 
+#include "threads/Thread.h"
+
 namespace adaptive
 {
   template <typename T>
   struct SPINCACHE
   {
-    SPINCACHE() :basePos(0) {};
+    SPINCACHE() :basePos(0) {}
 
     size_t basePos;
 
@@ -45,17 +47,25 @@ namespace adaptive
           return 0;
       }
       return &data[realPos];
-    };
+    }
+
+    const T *last() const
+    {
+      int32_t realPos = basePos - 1;
+      if (realPos < 0)
+        realPos += data.size();
+      return &data[realPos];
+    }
 
     uint32_t pos(const T* elem) const
     {
-      size_t realPos = elem - &data[0];
+      int32_t realPos = elem - &data[0];
       if (realPos < basePos)
         realPos += data.size() - basePos;
       else
         realPos -= basePos;
       return static_cast<std::uint32_t>(realPos);
-    };
+    }
 
     void insert(const T &elem)
     {
@@ -201,6 +211,8 @@ namespace adaptive
     std::pair<std::string, std::string> pssh_, adp_pssh_;
     std::string license_key_url_;
     std::string defaultKID_;
+
+    CCriticalSection m_updateSection;
 
     enum
     {

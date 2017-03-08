@@ -104,7 +104,6 @@ CDASHSession::~CDASHSession()
     delete decrypter_;
     decrypter_ = nullptr;
   }
-  SAFE_DELETE(adaptiveTree_);
 
   XFILE::CFile f;
 
@@ -117,6 +116,8 @@ CDASHSession::~CDASHSession()
   }
   else
     CLog::Log(LOGERROR, "CDASHSession - Cannot write bandwidth.bin");
+
+  SAFE_DELETE(adaptiveTree_);
 }
 
 CDASHSession::STREAM::STREAM(adaptive::AdaptiveTree& t, adaptive::AdaptiveTree::StreamType s)
