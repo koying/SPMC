@@ -146,9 +146,9 @@ bool DASHStream::start_stream(const uint32_t seg_offset, uint16_t width, uint16_
       pos = static_cast<int32_t>(((tree_.stream_start_ - tree_.available_time_)*current_rep_->timescale_) / current_rep_->duration_);
       if (!pos) pos = 1;
     }
-    //go at least 12 secs back
+    //go at least 30 secs back
     uint64_t duration(current_rep_->get_segment(pos)->startPTS_ - current_rep_->get_segment(pos - 1)->startPTS_);
-    pos -= 12 * current_rep_->timescale_ / duration;
+    pos -= 30 * current_rep_->timescale_ / duration;
     current_seg_ = current_rep_->get_segment(pos < 0 ? 0: pos);
   }
   else
@@ -177,6 +177,8 @@ uint32_t DASHStream::read(void* buffer, uint32_t  bytesToRead)
 
   if (segment_read_pos_ >= segment_buffer_.size())
   {
+    CSingleLock lock(tree_.m_updateSection);
+
     current_seg_ = current_rep_->get_next_segment(current_seg_);
     if (!download_segment() || segment_buffer_.empty())
     {

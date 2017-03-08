@@ -346,7 +346,7 @@ bool SmoothTree::open_manifest(const char *url)
     {
       (*b)->segments_.data.resize((*ba)->segment_durations_.data.size());
       std::vector<uint32_t>::iterator bsd((*ba)->segment_durations_.data.begin());
-      uint64_t cummulated = (*ba)->startPTS_ - base_time_;
+      uint64_t cummulated = (*ba)->startPTS_;
       for (std::vector<SmoothTree::Segment>::iterator bs((*b)->segments_.data.begin()), es((*b)->segments_.data.end()); bs != es; ++bsd, ++bs)
       {
         bs->range_begin_ = ~0;
@@ -355,6 +355,7 @@ bool SmoothTree::open_manifest(const char *url)
       }
     }
     (*ba)->encrypted = (encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED);
+    base_time_ = 0;
   }
   
   if (has_timeshift_buffer_ && m_main)
@@ -378,6 +379,8 @@ void adaptive::SmoothTree::Run()
     adp->set_download_speed(bandwidth_);
     if (adp->open_manifest(m_manifestUrl.c_str()))
     {
+      CSingleLock lock(m_updateSection);
+
       std::vector<AdaptationSet*>::iterator cur_ba = current_period_->adaptationSets_.begin();
       for (std::vector<AdaptationSet*>::iterator ba(adp->current_period_->adaptationSets_.begin()), ea(adp->current_period_->adaptationSets_.end()); ba != ea; ++ba)
       {
@@ -385,15 +388,15 @@ void adaptive::SmoothTree::Run()
         std::vector<SmoothTree::Representation*>::iterator cur_b = (*cur_ba)->repesentations_.begin();
         for (std::vector<SmoothTree::Representation*>::iterator b((*ba)->repesentations_.begin()), e((*ba)->repesentations_.end()); b != e; ++b)
         {
-          SmoothTree::Segment last_bs = (*cur_b)->segments_.data.back();
+          const SmoothTree::Segment* last_bs = (*cur_b)->segments_.last();
           std::vector<uint32_t>::iterator bsd((*ba)->segment_durations_.data.begin());
           for (std::vector<SmoothTree::Segment>::iterator bs((*b)->segments_.data.begin()), es((*b)->segments_.data.end()); bs != es; ++bsd, ++bs)
           {
-            if (bs->range_end_ > last_bs.range_end_)
+            if (bs->range_end_ > last_bs->range_end_)
             {
-              (*cur_b)->segments_.data.push_back(*bs);
+              (*cur_b)->segments_.insert(*bs);
               if (!dur_appended)
-                (*cur_ba)->segment_durations_.data.push_back(*bsd);
+                (*cur_ba)->segment_durations_.insert(*bsd);
             }
           }
           dur_appended = true;
