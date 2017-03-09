@@ -39,6 +39,7 @@
 
 #include "utils/StringUtils.h"
 #include "utils/log.h"
+#include "settings/AdvancedSettings.h"
 
 CDVDDemuxAdaptive::CDVDDemuxAdaptive()
   : CDVDDemux()
@@ -159,7 +160,8 @@ DemuxPacket*CDVDDemuxAdaptive::Read()
     p->iSize = iSize;
     memcpy(p->pData, pData, iSize);
 
-//    CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d CRYPT: %s", p->dts, p->pts, p->iStreamId, p->iSize, sr->IsEncrypted() ? "true" : "false");
+    if (g_advancedSettings.CanLogComponent(LOGVIDEO))
+    CLog::Log(LOGDEBUG, "CDVDDemuxAdaptive::Read - DTS: %0.4f, PTS:%0.4f, ID: %u SZ: %d CRYPT: %s", p->dts, p->pts, p->iStreamId, p->iSize, sr->IsEncrypted() ? "true" : "false");
 
     sr->ReadSample();
     return p;

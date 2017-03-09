@@ -123,12 +123,15 @@ bool CAVCDASHCodecHandler::GetVideoInformation(int& width, int& height)
 
   if (AP4_VideoSampleDescription *avc = AP4_DYNAMIC_CAST(AP4_VideoSampleDescription, sample_description))
   {
-    width = avc->GetWidth();
-    height = avc->GetHeight();
-    return true;
+    if (avc->GetWidth() != width || avc->GetHeight() != height)
+    {
+      width = avc->GetWidth();
+      height = avc->GetHeight();
+      return true;
+    }
   }
   return false;
-};
+}
 
 
 CHEVCDASHCodecHandler::CHEVCDASHCodecHandler(AP4_SampleDescription* sd)
