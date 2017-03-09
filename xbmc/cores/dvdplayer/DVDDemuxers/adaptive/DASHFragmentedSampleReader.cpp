@@ -121,12 +121,9 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
   AP4_Result result;
   if (AP4_FAILED(result = ReadNextSample(m_Track->GetId(), m_sample_, m_Protected_desc ? m_encrypted : m_sample_data_)))
   {
-    if (result == AP4_ERROR_EOS) {
+    if (result == AP4_ERROR_EOS)
       m_eos = true;
-    }
-    else {
-      return result;
-    }
+    return result;
   }
 
   if (m_Protected_desc)
@@ -256,6 +253,8 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
 
     //Check if the sample table description has changed
     AP4_ContainerAtom *traf = AP4_DYNAMIC_CAST(AP4_ContainerAtom, moof->GetChild(AP4_ATOM_TYPE_TRAF, 0));
+    if (!traf)
+      return AP4_ERROR_INVALID_FORMAT;
     AP4_TfhdAtom *tfhd = AP4_DYNAMIC_CAST(AP4_TfhdAtom, traf->GetChild(AP4_ATOM_TYPE_TFHD, 0));
     if (tfhd && tfhd->GetSampleDescriptionIndex() != m_SampleDescIndex)
     {
@@ -272,18 +271,15 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
     {
       //Setup the decryption
       AP4_CencSampleInfoTable *sample_table;
+
       AP4_UI32 algorithm_id = 0;
 
       delete m_Decrypter;
       m_Decrypter = 0;
 
-      AP4_ContainerAtom *traf = AP4_DYNAMIC_CAST(AP4_ContainerAtom, moof->GetChild(AP4_ATOM_TYPE_TRAF, 0));
-
-      if (!m_Protected_desc || !traf)
-        return AP4_ERROR_INVALID_FORMAT;
-
       if (AP4_FAILED(result = AP4_CencSampleInfoTable::Create(m_Protected_desc, traf, algorithm_id, *m_FragmentStream, moof_offset, sample_table)))
-        return result;
+        // we assume unencrypted fragment here
+        return AP4_SUCCESS;
 
       AP4_ContainerAtom *schi;
       m_DefaultKey = 0;
