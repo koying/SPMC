@@ -126,11 +126,8 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
     return result;
   }
 
-  if (m_Protected_desc)
+  if (m_Protected_desc && m_Decrypter)
   {
-    if (!m_Decrypter)
-      return AP4_ERROR_EOS;
-
     // Make sure that the decrypter is NOT allocating memory!
     // If decrypter and addon are compiled with different DEBUG / RELEASE
     // options freeing HEAP memory will fail.
@@ -250,11 +247,11 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
 
   if (AP4_SUCCEEDED(result))
   {
-
     //Check if the sample table description has changed
     AP4_ContainerAtom *traf = AP4_DYNAMIC_CAST(AP4_ContainerAtom, moof->GetChild(AP4_ATOM_TYPE_TRAF, 0));
     if (!traf)
       return AP4_ERROR_INVALID_FORMAT;
+
     AP4_TfhdAtom *tfhd = AP4_DYNAMIC_CAST(AP4_TfhdAtom, traf->GetChild(AP4_ATOM_TYPE_TFHD, 0));
     if (tfhd && tfhd->GetSampleDescriptionIndex() != m_SampleDescIndex)
     {
@@ -271,7 +268,6 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
     {
       //Setup the decryption
       AP4_CencSampleInfoTable *sample_table;
-
       AP4_UI32 algorithm_id = 0;
 
       delete m_Decrypter;
