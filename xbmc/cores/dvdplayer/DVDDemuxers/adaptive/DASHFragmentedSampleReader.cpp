@@ -209,7 +209,7 @@ uint64_t CDASHFragmentedSampleReader::GetFragmentDuration()
 
 AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4_Position moof_offset, AP4_Position mdat_payload_offset)
 {
-  AP4_Result result;
+  AP4_Result result = AP4_SUCCESS;
 
   if (m_Observer)
     m_Observer->BeginFragment(m_StreamId);
@@ -217,11 +217,11 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
   // create a new fragment
   delete m_Fragment;
   m_Fragment = new AP4_MovieFragment(moof);
-      
+
   // update the trackers
   AP4_Array<AP4_UI32> ids;
   m_Fragment->GetTrackIds(ids);
-  for (unsigned int i=0; i<m_Trackers.ItemCount(); i++) 
+  for (unsigned int i=0; i<m_Trackers.ItemCount() && AP4_SUCCEEDED(result); i++)
   {
     Tracker* tracker = m_Trackers[i];
     if (tracker->m_SampleTableIsOwned) {
@@ -229,14 +229,14 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
     }
     tracker->m_SampleTable = NULL;
     tracker->m_NextSampleIndex = 0;
-    for (unsigned int j=0; j<ids.ItemCount(); j++) {
+    for (unsigned int j=0; j<ids.ItemCount() && AP4_SUCCEEDED(result); j++) {
       if (ids.ItemCount()==1 || ids[j] == tracker->m_Track->GetId()) {
         AP4_FragmentSampleTable* sample_table = NULL;
-        result = m_Fragment->CreateSampleTable(&m_Movie, 
-                                               ids[j], 
-                                               m_FragmentStream, 
-                                               moof_offset, 
-                                               mdat_payload_offset, 
+        result = m_Fragment->CreateSampleTable(&m_Movie,
+                                               ids[j],
+                                               m_FragmentStream,
+                                               moof_offset,
+                                               mdat_payload_offset,
                                                tracker->m_NextDts,
                                                sample_table);
         if (AP4_FAILED(result)) break;
@@ -247,7 +247,7 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
       }
     }
   }
-  
+
   if (AP4_SUCCEEDED(result))
   {
 
