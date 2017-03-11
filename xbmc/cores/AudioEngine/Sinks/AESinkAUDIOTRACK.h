@@ -79,4 +79,8 @@ private:
   int                m_skip_delay;
   double             m_sink_delay;
   uint32_t           m_lastAddTimeMs;
+
+  std::vector<float> m_floatbuf;
+  std::vector<int16_t> m_shortbuf;
+  std::vector<char> m_charbuf;
 };

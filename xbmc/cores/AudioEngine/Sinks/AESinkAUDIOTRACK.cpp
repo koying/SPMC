@@ -200,32 +200,32 @@ int CAESinkAUDIOTRACK::AudioTrackWrite(char* audioData, int offsetInBytes, int s
   int     written = 0;
   if (CJNIBase::GetSDKVersion() >= 21 && m_jniAudioFormat == CJNIAudioFormat::ENCODING_PCM_FLOAT)
   {
-    std::vector<float> buf;
-    buf.resize(sizeInBytes / sizeof(float));
-    memcpy(buf.data(), audioData + offsetInBytes, sizeInBytes - offsetInBytes);
-    written = m_at_jni->write(buf, 0, (sizeInBytes - offsetInBytes) / sizeof(float), CJNIAudioTrack::WRITE_NON_BLOCKING);
+    if (m_floatbuf.size() != (sizeInBytes - offsetInBytes) / sizeof(float))
+      m_floatbuf.resize((sizeInBytes - offsetInBytes) / sizeof(float));
+    memcpy(m_floatbuf.data(), audioData + offsetInBytes, sizeInBytes - offsetInBytes);
+    written = m_at_jni->write(m_floatbuf, 0, (sizeInBytes - offsetInBytes) / sizeof(float), CJNIAudioTrack::WRITE_NON_BLOCKING);
     written *= sizeof(float);
   }
   else if (m_jniAudioFormat == CJNIAudioFormat::ENCODING_IEC61937)
   {
-    std::vector<int16_t> buf;
-    buf.resize(sizeInBytes / sizeof(int16_t));
-    memcpy(buf.data(), audioData + offsetInBytes, sizeInBytes - offsetInBytes);
+    if (m_shortbuf.size() != (sizeInBytes - offsetInBytes) / sizeof(int16_t))
+      m_shortbuf.resize((sizeInBytes - offsetInBytes) / sizeof(int16_t));
+    memcpy(m_shortbuf.data(), audioData + offsetInBytes, sizeInBytes - offsetInBytes);
     if (CJNIBase::GetSDKVersion() >= 23)
-      written = m_at_jni->write(buf, 0, (sizeInBytes - offsetInBytes) / sizeof(int16_t), CJNIAudioTrack::WRITE_NON_BLOCKING);
+      written = m_at_jni->write(m_shortbuf, 0, (sizeInBytes - offsetInBytes) / sizeof(int16_t), CJNIAudioTrack::WRITE_NON_BLOCKING);
     else
-      written = m_at_jni->write(buf, 0, (sizeInBytes - offsetInBytes) / sizeof(int16_t));
+      written = m_at_jni->write(m_shortbuf, 0, (sizeInBytes - offsetInBytes) / sizeof(int16_t));
     written *= sizeof(uint16_t);
   }
   else
   {
-    std::vector<char> buf;
-    buf.resize(sizeInBytes - offsetInBytes);
-    memcpy(buf.data(), audioData + offsetInBytes, sizeInBytes - offsetInBytes);
+    if (m_charbuf.size() != (sizeInBytes - offsetInBytes))
+      m_charbuf.resize(sizeInBytes - offsetInBytes);
+    memcpy(m_charbuf.data(), audioData + offsetInBytes, sizeInBytes - offsetInBytes);
     if (CJNIBase::GetSDKVersion() >= 23)
-      written = m_at_jni->write(buf, 0, sizeInBytes - offsetInBytes, CJNIAudioTrack::WRITE_NON_BLOCKING);
+      written = m_at_jni->write(m_charbuf, 0, sizeInBytes - offsetInBytes, CJNIAudioTrack::WRITE_NON_BLOCKING);
     else
-      written = m_at_jni->write(buf, 0, sizeInBytes - offsetInBytes);
+      written = m_at_jni->write(m_charbuf, 0, sizeInBytes - offsetInBytes);
   }
   
   return written;
