@@ -64,6 +64,7 @@ bool DASHStream::download_segment()
     {
       strURL = current_rep_->url_;
       sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
+      CLog::Log(LOGDEBUG, "SEGMENTBASE segment: %s", rangebuf);
       rangeHeader = rangebuf;
       absolute_position_ = current_seg_->range_begin_;
     }
@@ -98,6 +99,7 @@ bool DASHStream::download_segment()
   {
     strURL = current_rep_->url_;
     sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
+    CLog::Log(LOGDEBUG, "OTHER segment: %s", rangebuf);
     rangeHeader = rangebuf;
   }  
   
@@ -292,7 +294,7 @@ bool DASHStream::download(const char* url, const char* rangeHeader)
 bool DASHStream::parseIndexRange()
 {
   // open the file
-  CLog::Log(LOGDEBUG, "Downloading %s for SIDX generation", getRepresentation()->url_.c_str());
+  CLog::Log(LOGDEBUG, "Downloading %s for SIDX generation (%d-%d)", getRepresentation()->url_.c_str(), getRepresentation()->indexRangeMin_, getRepresentation()->indexRangeMax_);
 
   CURL uUrl(getRepresentation()->url_);
   uUrl.SetProtocolOption("seekable", "0");
