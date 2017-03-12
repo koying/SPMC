@@ -305,8 +305,6 @@ void CDVDDemuxAdaptive::EnableStream(int streamid, bool enable)
       stream->dmuxstrm->ExtraSize = stream->reader_->GetExtraDataSize();      
       stream->dmuxstrm->ExtraData = (uint8_t*)malloc(stream->dmuxstrm->ExtraSize);
       memcpy((void*)stream->dmuxstrm->ExtraData, stream->reader_->GetExtraData(), stream->dmuxstrm->ExtraSize);
-      // Set the session Changed to force new GetStreamInfo call from kodi -> addon
-      m_session->CheckChange(true);
     }
     return;
   }

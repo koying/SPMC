@@ -126,27 +126,35 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
     return result;
   }
 
-  if (m_Protected_desc && m_Decrypter)
+  if (m_Protected_desc)
   {
-    // Make sure that the decrypter is NOT allocating memory!
-    // If decrypter and addon are compiled with different DEBUG / RELEASE
-    // options freeing HEAP memory will fail.
-    m_sample_data_.Reserve(m_encrypted.GetDataSize() + 4096);
-    m_SingleSampleDecryptor->SetFrameInfo(m_DefaultKey?16:0, m_DefaultKey, m_codecHandler->naluLengthSize);
-
-    if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
+    if (m_Decrypter)
     {
-      CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
-      if (++m_fail_count_ > 50)
+      // Make sure that the decrypter is NOT allocating memory!
+      // If decrypter and addon are compiled with different DEBUG / RELEASE
+      // options freeing HEAP memory will fail.
+      m_sample_data_.Reserve(m_encrypted.GetDataSize() + 4096);
+      m_SingleSampleDecryptor->SetFrameInfo(m_DefaultKey?16:0, m_DefaultKey, m_codecHandler->naluLengthSize);
+
+      if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
       {
-        Reset(true);
-        return result;
+        CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
+        if (++m_fail_count_ > 50)
+        {
+          Reset(true);
+          return result;
+        }
+        else
+          m_sample_data_.SetDataSize(0);
       }
       else
-        m_sample_data_.SetDataSize(0);
+        m_fail_count_ = 0;
     }
     else
-      m_fail_count_ = 0;
+    {
+      result = m_sample_data_.SetData(m_encrypted.GetData(), m_encrypted.GetDataSize());
+      CLog::Log(LOGDEBUG, "Unencrypted? %d(%d)", m_encrypted.GetDataSize(), result);
+    }
   }
 
   m_dts = (double)m_sample_.GetDts() / (double)m_Track->GetMediaTimeScale() - m_presentationTimeOffset;
@@ -274,8 +282,11 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
       m_Decrypter = 0;
 
       if (AP4_FAILED(result = AP4_CencSampleInfoTable::Create(m_Protected_desc, traf, algorithm_id, *m_FragmentStream, moof_offset, sample_table)))
+      {
         // we assume unencrypted fragment here
+        CLog::Log(LOGDEBUG, "AP4_CencSampleInfoTable::Create failed !!");
         return AP4_SUCCESS;
+      }
 
       AP4_ContainerAtom *schi;
       m_DefaultKey = 0;
@@ -289,6 +300,7 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
       m_Decrypter = new AP4_CencSampleDecrypter(m_SingleSampleDecryptor, sample_table, false);
       if (!m_Decrypter)
         return AP4_ERROR_INVALID_PARAMETERS;
+      CLog::Log(LOGDEBUG, "got decrypter");
     }
   }
 

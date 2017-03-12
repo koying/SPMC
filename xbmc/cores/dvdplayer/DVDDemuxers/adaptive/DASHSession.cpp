@@ -455,12 +455,21 @@ CDASHFragmentedSampleReader *CDASHSession::GetNextSample()
     CDemuxStreamVideo* vstrm = dynamic_cast<CDemuxStreamVideo*>(res->dmuxstrm);
     if (vstrm)
     {
+      int oldW = vstrm->iWidth;
+      int oldH = vstrm->iHeight;
       if (res->reader_->GetVideoInformation(vstrm->iWidth, vstrm->iHeight))
+      {
+        CLog::Log(LOGDEBUG, "DASHSession: video changed %dx%d -> %dx%d", oldW, oldH, vstrm->iWidth, vstrm->iHeight);
         changed_ = true;
+      }
     } else {
       CDemuxStreamAudio* astrm = dynamic_cast<CDemuxStreamAudio*>(res->dmuxstrm);
+      int oldC = astrm->iChannels;
       if (res->reader_->GetAudioInformation(astrm->iChannels))
+      {
+        CLog::Log(LOGDEBUG, "DASHSession: audio changed %d -> %d", oldC, astrm->iChannels);
         changed_ = true;
+      }
     }
     last_pts_ = res->reader_->PTS();
     return res->reader_;
