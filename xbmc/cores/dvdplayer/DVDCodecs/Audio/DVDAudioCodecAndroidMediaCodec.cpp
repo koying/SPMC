@@ -40,8 +40,8 @@
 #include "android/activity/AndroidFeatures.h"
 #include "androidjni/Surface.h"
 
-#include "android/jni/MediaCodecList.h"
-#include "android/jni/MediaCodecInfo.h"
+#include "androidjni/MediaCodecList.h"
+#include "androidjni/MediaCodecInfo.h"
 
 #include "utils/StringUtils.h"
 #include "settings/AdvancedSettings.h"
