@@ -687,9 +687,6 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   CLog::Log(LOGINFO, "CDVDVideoCodecAndroidMediaCodec:: "
     "Open Android MediaCodec %s", m_codecname.c_str());
 
-  if (m_hints.cryptoSession)
-    SAFE_DELETE(m_bitstream);
-
   m_opened = true;
 
   return m_opened;
@@ -820,21 +817,6 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
       if (!(m_state == MEDIACODEC_STATE_FLUSHED || m_state == MEDIACODEC_STATE_RUNNING))
         CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode Dequeue: Wrong state (%d)", m_state);
 
-      // we have an input buffer, fill it.
-      if (m_bitstream)
-      {
-        m_bitstream->Convert(pData, iSize);
-        iSize = m_bitstream->GetConvertSize();
-        pData = m_bitstream->GetConvertBuffer();
-      }
-      size_t out_size;
-      uint8_t* dst_ptr = AMediaCodec_getInputBuffer(m_codec, index, &out_size);
-      if ((size_t)iSize > out_size)
-      {
-        CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode, iSize(%d) > size(%d)", iSize, out_size);
-        iSize = out_size;
-      }
-
       AMediaCodecCryptoInfo* cryptoInfo = nullptr;
       if (m_crypto && packet.cryptoInfo)
       {
@@ -866,6 +848,23 @@ int CDVDVideoCodecAndroidMediaCodec::Decode(const DemuxPacket &packet)
               AMEDIACODECRYPTOINFO_MODE_AES_CTR,
               clearBytes,
               cipherBytes);
+      }
+      else
+      {
+        if (m_bitstream)
+        {
+          m_bitstream->Convert(pData, iSize);
+          iSize = m_bitstream->GetConvertSize();
+          pData = m_bitstream->GetConvertBuffer();
+        }
+      }
+
+      size_t out_size;
+      uint8_t* dst_ptr = AMediaCodec_getInputBuffer(m_codec, index, &out_size);
+      if ((size_t)iSize > out_size)
+      {
+        CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode, iSize(%d) > size(%d)", iSize, out_size);
+        iSize = out_size;
       }
 
       if (dst_ptr)
