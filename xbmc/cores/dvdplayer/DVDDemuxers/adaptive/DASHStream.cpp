@@ -64,7 +64,6 @@ bool DASHStream::download_segment()
     {
       strURL = current_rep_->url_;
       sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
-      CLog::Log(LOGDEBUG, "SEGMENTBASE segment: %s", rangebuf);
       rangeHeader = rangebuf;
       absolute_position_ = current_seg_->range_begin_;
     }
@@ -99,7 +98,6 @@ bool DASHStream::download_segment()
   {
     strURL = current_rep_->url_;
     sprintf(rangebuf, "bytes=%" PRIu64 "-%" PRIu64, current_seg_->range_begin_, current_seg_->range_end_);
-    CLog::Log(LOGDEBUG, "OTHER segment: %s", rangebuf);
     rangeHeader = rangebuf;
   }  
   

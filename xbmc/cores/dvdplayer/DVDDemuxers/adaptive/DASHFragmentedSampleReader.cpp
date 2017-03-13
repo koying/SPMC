@@ -151,10 +151,7 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
         m_fail_count_ = 0;
     }
     else
-    {
       result = m_sample_data_.SetData(m_encrypted.GetData(), m_encrypted.GetDataSize());
-      CLog::Log(LOGDEBUG, "Unencrypted? %d(%d)", m_encrypted.GetDataSize(), result);
-    }
   }
 
   m_dts = (double)m_sample_.GetDts() / (double)m_Track->GetMediaTimeScale() - m_presentationTimeOffset;
@@ -300,7 +297,6 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
       m_Decrypter = new AP4_CencSampleDecrypter(m_SingleSampleDecryptor, sample_table, false);
       if (!m_Decrypter)
         return AP4_ERROR_INVALID_PARAMETERS;
-      CLog::Log(LOGDEBUG, "got decrypter");
     }
   }
 
