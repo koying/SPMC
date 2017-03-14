@@ -20,15 +20,18 @@
 
 #include "../common/AdaptiveTree.h"
 
+#include "threads/Thread.h"
+
 namespace adaptive
 {
 
-  class SmoothTree : public AdaptiveTree
+  class SmoothTree : public AdaptiveTree, public IRunnable
   {
   public:
-    SmoothTree();
-    virtual bool open(const char *url) override;
-    virtual bool write_data(void *buffer, size_t buffer_size) override;
+    SmoothTree(bool main=true);
+    virtual ~SmoothTree();
+    virtual bool open_manifest(const char *url) override;
+    virtual bool write_manifest_data(const char *buffer, size_t buffer_size) override;
 
     void parse_protection();
 
@@ -42,6 +45,15 @@ namespace adaptive
     };
 
     uint64_t pts_helper_;
+    
+    // IRunnable interface
+  public:
+    virtual void Run() override;
+
+  protected:
+    CThread *m_refreshThread;
+    bool m_stopRefreshing;
+    bool m_main;
   };
 
 }

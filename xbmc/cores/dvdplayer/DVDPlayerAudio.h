@@ -165,38 +165,31 @@ protected:
   {
     PacketStatus()
     {
-        msg = NULL;
-        Release();
+      packet = nullptr;
+      msg = nullptr;
+      Release();
     }
 
    ~PacketStatus()
     {
-        Release();
+      Release();
     }
 
     CDVDMsgDemuxerPacket*  msg;
-    uint8_t*               data;
-    int                    size;
-    double                 dts;
+    DemuxPacket* packet;
 
     void Attach(CDVDMsgDemuxerPacket* msg2)
     {
       if(msg) msg->Release();
       msg = msg2;
       msg->Acquire();
-      DemuxPacket* p = msg->GetPacket();
-      data = p->pData;
-      size = p->iSize;
-      dts = p->dts;
-
+      packet = msg->GetPacket();
     }
     void Release()
     {
       if(msg) msg->Release();
-      msg  = NULL;
-      data = NULL;
-      size = 0;
-      dts  = DVD_NOPTS_VALUE;
+      msg  = nullptr;
+      packet = nullptr;
     }
   } m_decode;
 

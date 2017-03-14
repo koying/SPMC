@@ -28,14 +28,8 @@
 #include "DVDStreamInfo.h"
 #include "cores/AudioEngine/Utils/AEAudioFormat.h"
 
-class CJNIMediaCodec;
-class CJNIMediaFormat;
-class CJNIByteBuffer;
-
-typedef struct amcaudio_demux {
-  uint8_t  *pData;
-  int       iSize;
-} amcaudio_demux;
+#include <media/NdkMediaCodec.h>
+#include <media/NdkMediaCrypto.h>
 
 class CDVDAudioCodecAndroidMediaCodec : public CDVDAudioCodec
 {
@@ -61,13 +55,7 @@ public:
 
 protected:
   bool            ConfigureMediaCodec(void);
-  int             GetOutputPicture(void);
-  void            ConfigureOutputFormat(CJNIMediaFormat* mediaformat);
-
-  // surface handling functions
-  static void     CallbackInitSurfaceTexture(void*);
-  void            InitSurfaceTexture(void);
-  void            ReleaseSurfaceTexture(void);
+  void            ConfigureOutputFormat(AMediaFormat* mediaformat);
 
   CDVDStreamInfo  m_hints;
   std::string     m_mime;
@@ -77,11 +65,10 @@ protected:
   int             m_samplerate;
   int             m_channels;
   uint8_t*        m_buffer;
-  int             m_bufferSize;
+  int32_t         m_bufferSize;
   int             m_bufferUsed;
 
-  std::shared_ptr<CJNIMediaCodec> m_codec;
-  amcaudio_demux m_demux_pkt;
-  std::vector<CJNIByteBuffer> m_input;
-  std::vector<CJNIByteBuffer> m_output;
+  AMediaCodec*    m_codec;
+  AMediaCrypto*   m_crypto;
+  DemuxPacket     m_demux_pkt;
 };

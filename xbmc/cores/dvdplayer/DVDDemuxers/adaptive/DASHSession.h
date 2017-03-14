@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <float.h>
 
+#include "SSD_dll.h"
 #include "DASHFragmentObserver.h"
 #include "DASHFragmentedSampleReader.h"
 #include "DASHStream.h"
@@ -60,7 +61,7 @@ public:
     MANIFEST_TYPE_ISM
   };
   
-  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path);
+  CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const std::string& strLicKey, const std::string& strLicData, const std::string& strServCert, const char* profile_path);
   virtual ~CDASHSession();
   bool initialize();
   CDASHFragmentedSampleReader *GetNextSample();
@@ -70,6 +71,7 @@ public:
   std::string GetUrl() { return fileURL_; }
   STREAM *GetStream(unsigned int sid) const { return (sid < streams_.size() ? streams_[sid] : 0); }
   unsigned int GetStreamCount() const { return streams_.size(); }
+  const AP4_DataBuffer &GetCryptoData() { return m_cryptoData; }
   std::uint16_t GetWidth() const { return width_; }
   std::uint16_t GetHeight() const { return height_; }
   AP4_CencSingleSampleDecrypter * GetSingleSampleDecryptor() const { return single_sample_decryptor_; }
@@ -88,16 +90,18 @@ public:
   void EndFragment(AP4_UI32 streamId) override;
 
 protected:
-  //  void GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn);
-  //  AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
+  bool GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn);
+  AP4_CencSingleSampleDecrypter *CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec);
 
 private:
   MANIFEST_TYPE manifest_type_;
   std::string fileURL_;
-  std::string license_key_, license_type_;
+  std::string license_key_url_, license_type_, license_data_;
+  AP4_DataBuffer server_certificate_;
   std::string profile_path_;
-  void * decrypterModule_;
-
+  SSD::SSD_DECRYPTER *decrypter_;
+  AP4_DataBuffer m_cryptoData;
+  
   adaptive::AdaptiveTree* adaptiveTree_;
 
   std::vector<STREAM*> streams_;

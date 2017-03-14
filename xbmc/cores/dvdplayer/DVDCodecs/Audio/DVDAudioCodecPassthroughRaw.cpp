@@ -213,7 +213,7 @@ int CDVDAudioCodecPassthroughRaw::Decode(const DemuxPacket &packet)
   unsigned int used = 0;
 
   unsigned int size = m_infobufferSize;
-  used = m_info.AddData(packet.pData, packet.iSize, &m_infobuffer, &size);
+  used = m_info.AddData(packet.pData + packet.offset, packet.iSize, &m_infobuffer, &size);
   if (g_advancedSettings.CanLogComponent(LOGAUDIO))
     CLog::Log(LOGDEBUG, "CDVDAudioCodecPassthroughRaw::Decode iSize(%d), size(%d), used(%d)", packet.iSize, size, used);
   m_infobufferSize = std::max(m_infobufferSize, size);

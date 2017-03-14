@@ -252,18 +252,18 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe)
   {
     bool switched = false;
     /* NOTE: the audio packet can contain several frames */
-    while( !m_bStop && m_decode.size > 0 )
+    while( !m_bStop && (m_decode.packet && m_decode.packet->iSize > 0) )
     {
       if( !m_pAudioCodec )
         return DECODE_FLAG_ERROR;
 
       /* the packet dts refers to the first audioframe that starts in the packet */
-      double dts = m_ptsInput.Get(m_decode.size + m_pAudioCodec->GetBufferSize(), true);
+      double dts = m_ptsInput.Get(m_decode.packet->iSize + m_pAudioCodec->GetBufferSize(), true);
       if (dts != DVD_NOPTS_VALUE)
         m_audioClock = dts;
 
-      int len = m_pAudioCodec->Decode(DemuxPacket(m_decode.data, m_decode.size, dts, dts));
-      if (len < 0 || len > m_decode.size)
+      int len = m_pAudioCodec->Decode(*m_decode.packet);
+      if (len < 0 || len > m_decode.packet->iSize)
       {
         /* if error, we skip the packet */
         CLog::Log(LOGERROR, "CDVDPlayerAudio::DecodeFrame - Decode Error. Skipping audio packet (%d)", len);
@@ -274,8 +274,8 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe)
 
       m_audioStats.AddSampleBytes(len);
 
-      m_decode.data += len;
-      m_decode.size -= len;
+      m_decode.packet->offset += len;
+      m_decode.packet->iSize -= len;
 
       // get decoded data and the size of it
       m_pAudioCodec->GetData(audioframe);
@@ -294,8 +294,8 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe)
         m_streaminfo.samplerate = audioframe.encoded_sample_rate;
         if (!switched && SwitchCodecIfNeeded()) {
           // passthrough has been enabled/disabled, reprocess the packet
-          m_decode.data -= len;
-          m_decode.size += len;
+          m_decode.packet->offset -= len;
+          m_decode.packet->iSize += len;
           switched = true;
           continue;
         }
@@ -345,7 +345,7 @@ int CDVDPlayerAudio::DecodeFrame(DVDAudioFrame &audioframe)
     if (pMsg->IsType(CDVDMsg::DEMUXER_PACKET))
     {
       m_decode.Attach((CDVDMsgDemuxerPacket*)pMsg);
-      m_ptsInput.Add( m_decode.size, m_decode.dts );
+      m_ptsInput.Add( m_decode.packet->iSize, m_decode.packet->dts );
     }
     else if (pMsg->IsType(CDVDMsg::GENERAL_SYNCHRONIZE))
     {

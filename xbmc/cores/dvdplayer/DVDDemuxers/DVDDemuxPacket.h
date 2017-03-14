@@ -20,27 +20,85 @@
  *
  */
 
+#include <stdlib.h>
+#include <string.h>
+#include <memory>
+
 #define DMX_SPECIALID_STREAMINFO    -10
 #define DMX_SPECIALID_STREAMCHANGE  -11
 #define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and int64_t
 
- typedef struct DemuxPacket
+struct DemuxCryptoInfo;
+
+typedef struct DemuxPacket
 {
   DemuxPacket() 
     : pData(nullptr)
+    , offset(0)
     , iSize(0)
     , pts(DVD_NOPTS_VALUE)
     , dts(DVD_NOPTS_VALUE)
+    , dataOwned(false)
   {}
   
   DemuxPacket(unsigned char *pData, int const iSize, double const pts, double const dts)
     : pData(pData)
+    , offset(0)
     , iSize(iSize)
     , pts(pts)
     , dts(dts)
+    , dataOwned(false)
   {}
   
+  DemuxPacket(const DemuxPacket& other)
+    : offset(0)
+    , iSize(other.iSize)
+    , iStreamId(other.iStreamId)
+    , iGroupId(other.iGroupId)
+    , pts(other.pts)
+    , dts(other.dts)
+    , duration(other.duration)
+    , dataOwned(true)
+    , cryptoInfo(other.cryptoInfo)
+  {
+    pData = reinterpret_cast<unsigned char *>(malloc(iSize));
+    memcpy(pData, other.pData + other.offset, iSize);
+  }
+
+  DemuxPacket& operator=(const DemuxPacket& other)
+  {
+    offset = 0;
+    iSize = other.iSize;
+    iStreamId = other.iStreamId;
+    iGroupId = other.iGroupId;
+    pts = other.pts;
+    dts = other.dts;
+    duration = other.duration;
+    cryptoInfo = other.cryptoInfo;
+    dataOwned = true;
+
+    pData = reinterpret_cast<unsigned char *>(malloc(iSize));
+    memcpy(pData, other.pData + other.offset, iSize);
+    
+    return *this;
+  }
+  
+  ~DemuxPacket()
+  {
+    FreeData();
+  }
+
+  void FreeData()
+  {
+    if (pData && dataOwned)
+    {
+      free(pData);
+      pData = nullptr;
+    }
+  }
+
   unsigned char* pData;   // data
+  size_t offset; // offset from start of buffer
   int iSize;     // data size
   int iStreamId; // integer representing the stream index
   int iGroupId;  // the group this data belongs to, used to group data from different streams together
@@ -48,4 +106,9 @@
   double pts; // pts in DVD_TIME_BASE
   double dts; // dts in DVD_TIME_BASE
   double duration; // duration in DVD_TIME_BASE if available
+  
+  bool dataOwned;
+  
+  std::shared_ptr<DemuxCryptoInfo> cryptoInfo;
+  
 } DemuxPacket;

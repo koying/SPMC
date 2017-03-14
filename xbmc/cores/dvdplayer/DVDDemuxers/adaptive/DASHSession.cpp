@@ -22,29 +22,38 @@
 #include "DASHSession.h"
 
 #include "DVDDemuxers/DVDDemux.h"
+#include "DVDDemuxers/DemuxCrypto.h"
 
+#include "DASHByteStream.h"
+#include "helpers.h"
 #include "parsers/DASHTree.h"
 #include "parsers/SmoothTree.h"
+#ifdef TARGET_ANDROID
+#include "wvdecrypter/wvdecrypter_android.h"
+#endif
 
 #include "system.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
+#include "utils/Base64.h"
 #include "filesystem/File.h"
 
-CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const char *strLicType, const char* strLicKey, const char* profile_path)
+using namespace SSD;
+
+CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const std::string& strLicKey, const std::string& strLicData, const std::string& strServCert, const char* profile_path)
   :single_sample_decryptor_(0)
   , manifest_type_(manifest_type)
   , fileURL_(strURL)
   , license_type_(strLicType)
-  , license_key_(strLicKey)
+  , license_key_url_(strLicKey)
+  , license_data_(strLicData)
   , profile_path_(profile_path)
   , adaptiveTree_(nullptr)
   , width_(width)
   , height_(height)
   , last_pts_(0)
-  , decrypterModule_(0)
-//  , decrypter_(0)
+  , decrypter_(0)
   , changed_(false)
   , manual_streams_(false)
 {
@@ -52,12 +61,18 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
   {
     case MANIFEST_TYPE_MPD:
       adaptiveTree_ = new adaptive::DASHTree;
+      if (license_type_.empty())
+        license_type_ = "com.widevine.alpha";
       break;
     case MANIFEST_TYPE_ISM:
       adaptiveTree_ = new adaptive::SmoothTree;
+      if (license_type_.empty())
+        license_type_ = "com.microsoft.playready";
       break;
     default:;
   };
+
+  CLog::Log(LOGDEBUG, "CDASHSession license_type_(%s) license_key_url_(%s) license_data_(%d)", license_type_.c_str(), license_key_url_.c_str(), license_data_.c_str());
   
   XFILE::CFile f;
 
@@ -71,6 +86,7 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
   }
   else
     adaptiveTree_->bandwidth_ = 4000000;
+
   adaptiveTree_->set_download_speed(adaptiveTree_->bandwidth_);
   CLog::Log(LOGDEBUG, "CDASHSession - Initial bandwidth: %u ", adaptiveTree_->bandwidth_);
 
@@ -83,12 +99,11 @@ CDASHSession::~CDASHSession()
     SAFE_DELETE(*b);
   streams_.clear();
 
-//  if (decrypterModule_)
-//  {
-//    dlclose(decrypterModule_);
-//    decrypterModule_ = 0;
-//    decrypter_ = 0;
-//  }
+  if (decrypter_)
+  {
+    delete decrypter_;
+    decrypter_ = nullptr;
+  }
 
   XFILE::CFile f;
 
@@ -101,6 +116,8 @@ CDASHSession::~CDASHSession()
   }
   else
     CLog::Log(LOGERROR, "CDASHSession - Cannot write bandwidth.bin");
+
+  SAFE_DELETE(adaptiveTree_);
 }
 
 CDASHSession::STREAM::STREAM(adaptive::AdaptiveTree& t, adaptive::AdaptiveTree::StreamType s)
@@ -133,63 +150,29 @@ void CDASHSession::STREAM::disable()
   }
 }
 
-//void CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn)
-//{
-//  typedef SSD_DECRYPTER *(*CreateDecryptorInstanceFunc)(SSD_HOST *host, uint32_t version);
+bool CDASHSession::GetSupportedDecrypterURN(std::pair<std::string, std::string> &urn)
+{
+#if defined(TARGET_ANDROID)
+  SSD_DECRYPTER *decrypter = new WVDecrypter();
+  const char *suppUrn(0);
+  
+  if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_url_.c_str())))
+  {
+    CLog::Log(LOGDEBUG, "Found decrypter");
+    decrypter_ = decrypter;
+    urn.first = suppUrn;
+    return true;
+  }
+#endif
+  return false;
+}
 
-//  char specialpath[1024];
-//  if (!xbmc->GetSetting("DECRYPTERPATH", specialpath))
-//  {
-//    CLog::Log(LOGDEBUG, "DECRYPTERPATH not specified in settings.xml");
-//    return;
-//  }
-//  addonstring path(xbmc->TranslateSpecialProtocol(specialpath));
-
-//  kodihost.SetLibraryPath(path.c_str());
-
-//  VFSDirEntry *items(0);
-//  unsigned int num_items(0);
-
-//  CLog::Log(LOGDEBUG, "Searching for decrypters in: %s", path.c_str());
-
-//  if (!xbmc->GetDirectory(path.c_str(), "", &items, &num_items))
-//    return;
-
-//  for (unsigned int i(0); i < num_items; ++i)
-//  {
-//    if (strncmp(items[i].label, "ssd_", 4) && strncmp(items[i].label, "libssd_", 7))
-//      continue;
-
-//    void * mod(dlopen(items[i].path, RTLD_LAZY));
-//    if (mod)
-//    {
-//      CreateDecryptorInstanceFunc startup;
-//      if ((startup = (CreateDecryptorInstanceFunc)dlsym(mod, "CreateDecryptorInstance")))
-//      {
-//        SSD_DECRYPTER *decrypter = startup(&kodihost, SSD_HOST::version);
-//        const char *suppUrn(0);
-
-//        if (decrypter && (suppUrn = decrypter->Supported(license_type_.c_str(), license_key_.c_str())))
-//        {
-//          CLog::Log(LOGDEBUG, "Found decrypter: %s", items[i].path);
-//          decrypterModule_ = mod;
-//          decrypter_ = decrypter;
-//          urn.first = suppUrn;
-//          break;
-//        }
-//      }
-//      dlclose(mod);
-//    }
-//  }
-//  xbmc->FreeDirectory(items, num_items);
-//}
-
-//AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &streamCodec)
-//{
-//  if (decrypter_)
-//    return decrypter_->CreateSingleSampleDecrypter(streamCodec);
-//  return 0;
-//};
+AP4_CencSingleSampleDecrypter *CDASHSession::CreateSingleSampleDecrypter(AP4_DataBuffer &init_data)
+{
+  if (decrypter_)
+    return decrypter_->CreateSingleSampleDecrypter(init_data, server_certificate_);
+  return 0;
+}
 
 /*----------------------------------------------------------------------
 |   initialize
@@ -197,37 +180,15 @@ void CDASHSession::STREAM::disable()
 
 bool CDASHSession::initialize()
 {
-  // Get URN's wich are supported by this addon
-//  if (!license_type_.empty())
-//  {
-//    GetSupportedDecrypterURN(dashtree_->adp_pssh_);
-//    CLog::Log(LOGDEBUG, "Supported URN: %s", dashtree_->adp_pssh_.first.c_str());
-//  }
-
-  // Open mpd file
-  size_t paramPos = fileURL_.find('?');
-  adaptiveTree_->base_url_ = (paramPos == std::string::npos) ? fileURL_ : fileURL_.substr(0, paramPos);
-  
-  paramPos = adaptiveTree_->base_url_.find_last_of('/', adaptiveTree_->base_url_.length());
-  if (paramPos == std::string::npos)
-  {
-    CLog::Log(LOGERROR, "Invalid adaptive URL: / expected (%s)", fileURL_.c_str());
+  if (!adaptiveTree_)
     return false;
-  }
-  adaptiveTree_->base_url_.resize(paramPos + 1);
 
-  if (!adaptiveTree_->open(fileURL_.c_str()) || adaptiveTree_->empty())
+  if (!adaptiveTree_->open_manifest(fileURL_.c_str()) || adaptiveTree_->empty())
   {
     CLog::Log(LOGERROR, "Could not open / parse adaptive URL (%s)", fileURL_.c_str());
     return false;
   }
   CLog::Log(LOGINFO, "Successfully parsed adaptive manifest. #Streams: %d Download speed: %0.4f Bytes/s", adaptiveTree_->periods_[0]->adaptationSets_.size(), adaptiveTree_->download_speed_);
-
-  if (adaptiveTree_->encryptionState_ == adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
-  {
-    CLog::Log(LOGERROR, "Unable to handle decryption. Unsupported!");
-    return false;
-  }
 
   uint32_t min_bandwidth(0), max_bandwidth(0);
   /*
@@ -237,6 +198,108 @@ bool CDASHSession::initialize()
     xbmc->GetSetting("MAXBANDWIDTH", (char*)&buf); max_bandwidth = buf;
   }
   */
+
+  // Try to initialize an SingleSampleDecryptor
+  if (adaptiveTree_->encryptionState_ & adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)
+  {
+    AP4_DataBuffer init_data;
+    
+    if (license_key_url_.empty())
+      license_key_url_ = adaptiveTree_->license_key_url_;
+
+    if (license_key_url_.empty())
+      return false;
+        
+    if (!GetSupportedDecrypterURN(adaptiveTree_->adp_pssh_))
+    {
+      CLog::Log(LOGDEBUG, "Unsupported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+      return false;
+    }
+    else
+      CLog::Log(LOGDEBUG, "Supported URN: %s", adaptiveTree_->adp_pssh_.first.c_str());
+
+    if (adaptiveTree_->pssh_.second == "FILE")
+    {
+      if (license_data_.empty())
+      {
+        std::string strkey(adaptiveTree_->adp_pssh_.first.substr(9));
+        size_t pos;
+        while ((pos = strkey.find('-')) != std::string::npos)
+          strkey.erase(pos, 1);
+        if (strkey.size() != 32)
+        {
+          CLog::Log(LOGERROR, "Key system mismatch (%s)!", adaptiveTree_->adp_pssh_.first.c_str());
+          return false;
+        }
+
+        unsigned char key_system[16];
+        AP4_ParseHex(strkey.c_str(), key_system, 16);
+
+        CDASHSession::STREAM *stream(streams_[0]);
+
+        stream->enabled = true;
+        stream->stream_.start_stream(0, width_, height_);
+        stream->stream_.select_stream(true, false, stream->dmuxstrm->iPhysicalId >> 16);
+
+        stream->input_ = new CDASHByteStream(&stream->stream_);
+        stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
+        AP4_Movie* movie = stream->input_file_->GetMovie();
+        if (movie == NULL)
+        {
+          CLog::Log(LOGERROR, "No MOOV in stream!");
+          stream->disable();
+          return false;
+        }
+        AP4_Array<AP4_PsshAtom*>& pssh = movie->GetPsshAtoms();
+
+        for (unsigned int i = 0; !init_data.GetDataSize() && i < pssh.ItemCount(); i++)
+        {
+          if (memcmp(pssh[i]->GetSystemId(), key_system, 16) == 0)
+            init_data.AppendData(pssh[i]->GetData().GetData(), pssh[i]->GetData().GetDataSize());
+        }
+
+        if (!init_data.GetDataSize())
+        {
+          CLog::Log(LOGERROR, "Could not extract license from video stream (PSSH not found)");
+          stream->disable();
+          return false;
+        }
+        stream->disable();
+      }
+      else
+      {
+        std::string decoded = Base64::Decode(license_data_);
+        if (!adaptiveTree_->defaultKID_.empty())
+        {
+          size_t pos;
+          if ((pos = decoded.find("{KID}")) != std::string::npos)
+            decoded.replace(pos, 5, adaptiveTree_->defaultKID_);
+        }
+        init_data.SetData(reinterpret_cast<const AP4_Byte*>(decoded.data()), decoded.size());
+      }
+    }
+    else
+    {
+      std::string decoded = Base64::Decode(adaptiveTree_->pssh_.second.data(), adaptiveTree_->pssh_.second.size());
+      init_data.SetData(reinterpret_cast<const AP4_Byte*>(decoded.data()), decoded.size());
+      CLog::Log(LOGDEBUG, "init_data: %d", init_data.GetDataSize());
+      CLog::MemDump(reinterpret_cast<const char*>(init_data.UseData()), init_data.GetDataSize());
+    }
+    if ((single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data)) != 0)
+    {
+      CLog::Log(LOGDEBUG, "Decrypter creation successfull");
+#ifdef TARGET_ANDROID
+      AP4_DataBuffer in;
+      m_cryptoData.Reserve(1024);
+      single_sample_decryptor_->DecryptSampleData(in, m_cryptoData, 0, 0, 0, 0);
+#endif
+    }
+    else
+    {
+      CLog::Log(LOGDEBUG, "Decrypter creation failed !!");
+      return false;
+    }
+  }
 
   // create CDASHSession::STREAM objects. One for each AdaptationSet
   const adaptive::AdaptiveTree::AdaptationSet *adp;
@@ -274,78 +337,24 @@ bool CDASHSession::initialize()
       stream.dmuxstrm->ExtraData = nullptr;
       stream.dmuxstrm->ExtraSize = 0;
 
+      if (m_cryptoData.GetDataSize())
+      {
+        CLog::Log(LOGDEBUG, "GetStream(%d): initalizing crypto session", i);
+        const char *pDataSize(reinterpret_cast<const char *>(m_cryptoData.GetData()) + 8); //skip "CRYPTO" + size
+        stream.dmuxstrm->cryptoSession.reset(
+              new DemuxCryptoSession(
+                manifest_type_ == CDASHSession::MANIFEST_TYPE_ISM ? CRYPTO_SESSION_SYSTEM_PLAYREADY : CRYPTO_SESSION_SYSTEM_WIDEVINE,
+                *pDataSize,
+                (pDataSize + 1)
+              )
+            );
+      }
+
       UpdateStream(stream);
 
     } while (repId--);
   }
 
-//  // Try to initialize an SingleSampleDecryptor
-//  if (dashtree_->encryptionState_)
-//  {
-//    AP4_DataBuffer init_data;
-
-//    if (dashtree_->adp_pssh_.second == "FILE")
-//    {
-//      std::string strkey(dashtree_->adp_pssh_.first.substr(9));
-//      size_t pos;
-//      while ((pos = strkey.find('-')) != std::string::npos)
-//        strkey.erase(pos, 1);
-//      if (strkey.size() != 32)
-//      {
-//        CLog::Log(LOGERROR, "Key system mismatch (%s)!", dashtree_->adp_pssh_.first.c_str());
-//        return false;
-//      }
-
-//      unsigned char key_system[16];
-//      AP4_ParseHex(strkey.c_str(), key_system, 16);
-
-//      CDASHSession::STREAM *stream(streams_[0]);
-
-//      stream->enabled = true;
-//      stream->stream_.start_stream(0, width_, height_);
-//      stream->stream_.select_stream(true,false, stream->info_.m_pID>>16);
-
-//      stream->input_ = new AP4_DASHStream(&stream->stream_);
-//      stream->input_file_ = new AP4_File(*stream->input_, AP4_DefaultAtomFactory::Instance_, true);
-//      AP4_Movie* movie = stream->input_file_->GetMovie();
-//      if (movie == NULL)
-//      {
-//        CLog::Log(LOGERROR, "No MOOV in stream!");
-//        stream->disable();
-//        return false;
-//      }
-//      AP4_Array<AP4_PsshAtom*>& pssh = movie->GetPsshAtoms();
-
-//      for (unsigned int i = 0; !init_data.GetDataSize() && i < pssh.ItemCount(); i++)
-//      {
-//        if (memcmp(pssh[i]->GetSystemId(), key_system, 16) == 0)
-//          init_data.AppendData(pssh[i]->GetData().GetData(), pssh[i]->GetData().GetDataSize());
-//      }
-
-//      if (!init_data.GetDataSize())
-//      {
-//        CLog::Log(LOGERROR, "Could not extract license from video stream (PSSH not found)");
-//        stream->disable();
-//        return false;
-//      }
-//      stream->disable();
-//    }
-//    else
-//    {
-//      if (manifest_type_ == MANIFEST_TYPE_ISM)
-//      {
-//        create_ism_license(adaptiveTree_->defaultKID_, license_data_, init_data);
-//      }
-//      else
-//      {
-//        init_data.SetBufferSize(1024);
-//        unsigned int init_data_size(1024);
-//        b64_decode(dashtree_->pssh_.second.data(), dashtree_->pssh_.second.size(), init_data.UseData(), init_data_size);
-//        init_data.SetDataSize(init_data_size);
-//      }
-//    }
-//    return (single_sample_decryptor_ = CreateSingleSampleDecrypter(init_data))!=0;
-//  }
   return true;
 }
 
@@ -410,6 +419,13 @@ void CDASHSession::UpdateStream(STREAM &stream)
     astrm->iSampleRate = rep->samplingRate_;
     astrm->iChannels = rep->channelCount_;
     astrm->sStreamInfo = StringUtils::Format("ADP Audio: %s / %d ch / %d Hz / %d kbps", stream.codecName.c_str(), rep->channelCount_, rep->samplingRate_, rep->bandwidth_ / 1024);
+
+    if (!astrm->ExtraSize && rep->codec_private_data_.size())
+    {
+      astrm->ExtraSize = rep->codec_private_data_.size();
+      astrm->ExtraData = (uint8_t*)malloc(astrm->ExtraSize);
+      memcpy((void*)astrm->ExtraData, rep->codec_private_data_.data(), astrm->ExtraSize);
+    }
   }
 }
 
@@ -439,12 +455,21 @@ CDASHFragmentedSampleReader *CDASHSession::GetNextSample()
     CDemuxStreamVideo* vstrm = dynamic_cast<CDemuxStreamVideo*>(res->dmuxstrm);
     if (vstrm)
     {
+      int oldW = vstrm->iWidth;
+      int oldH = vstrm->iHeight;
       if (res->reader_->GetVideoInformation(vstrm->iWidth, vstrm->iHeight))
+      {
+        CLog::Log(LOGDEBUG, "DASHSession: video changed %dx%d -> %dx%d", oldW, oldH, vstrm->iWidth, vstrm->iHeight);
         changed_ = true;
+      }
     } else {
       CDemuxStreamAudio* astrm = dynamic_cast<CDemuxStreamAudio*>(res->dmuxstrm);
+      int oldC = astrm->iChannels;
       if (res->reader_->GetAudioInformation(astrm->iChannels))
+      {
+        CLog::Log(LOGDEBUG, "DASHSession: audio changed %d -> %d", oldC, astrm->iChannels);
         changed_ = true;
+      }
     }
     last_pts_ = res->reader_->PTS();
     return res->reader_;

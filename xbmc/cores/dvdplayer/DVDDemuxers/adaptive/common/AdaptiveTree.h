@@ -24,12 +24,14 @@
 #include <inttypes.h>
 #include "expat.h"
 
+#include "threads/Thread.h"
+
 namespace adaptive
 {
   template <typename T>
   struct SPINCACHE
   {
-    SPINCACHE() :basePos(0) {};
+    SPINCACHE() :basePos(0) {}
 
     size_t basePos;
 
@@ -45,17 +47,25 @@ namespace adaptive
           return 0;
       }
       return &data[realPos];
-    };
+    }
+
+    const T *last() const
+    {
+      int32_t realPos = basePos - 1;
+      if (realPos < 0)
+        realPos += data.size();
+      return &data[realPos];
+    }
 
     uint32_t pos(const T* elem) const
     {
-      size_t realPos = elem - &data[0];
+      int32_t realPos = elem - &data[0];
       if (realPos < basePos)
         realPos += data.size() - basePos;
       else
         realPos -= basePos;
       return static_cast<std::uint32_t>(realPos);
-    };
+    }
 
     void insert(const T &elem)
     {
@@ -199,7 +209,10 @@ namespace adaptive
     double download_speed_, average_download_speed_;
     
     std::pair<std::string, std::string> pssh_, adp_pssh_;
+    std::string license_key_url_;
     std::string defaultKID_;
+
+    CCriticalSection m_updateSection;
 
     enum
     {
@@ -215,6 +228,7 @@ namespace adaptive
     std::string strXMLText_;
 
     AdaptiveTree();
+    virtual ~AdaptiveTree() {}
     bool has_type(StreamType t);
     uint32_t estimate_segcount(uint32_t duration, uint32_t timescale);
     double get_download_speed() const { return download_speed_; };
@@ -225,10 +239,12 @@ namespace adaptive
     bool empty(){ return !current_period_ || current_period_->adaptationSets_.empty(); };
     const AdaptationSet *GetAdaptationSet(unsigned int pos) const { return current_period_ && pos < current_period_->adaptationSets_.size() ? current_period_->adaptationSets_[pos] : 0; };
 
-    virtual bool open(const char *url) = 0;
+    virtual bool open_manifest(const char *url) = 0;
   protected:
-    virtual bool download(const char* url);
-    virtual bool write_data(void *buffer, size_t buffer_size) = 0;
+    virtual bool download_manifest(const char* url);
+    virtual bool write_manifest_data(const char *buffer, size_t buffer_size) = 0;
+    
+    std::string m_manifestUrl;
 };
 
 }

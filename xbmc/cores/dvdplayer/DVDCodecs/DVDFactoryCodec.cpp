@@ -375,26 +375,33 @@ CDVDAudioCodec* CDVDFactoryCodec::CreateAudioCodec(CDVDStreamInfo &hint, bool al
 
 #if defined(TARGET_ANDROID)
   // we don't use passthrough if "sync playback to display" is enabled
-  if (allowpassthrough)
+  if (allowpassthrough && !hint.cryptoSession)
   {
     pCodec = OpenCodec( new CDVDAudioCodecPassthroughRaw(), hint, options );
     if( pCodec ) return pCodec;
   }
 
-//  pCodec = OpenCodec( new CDVDAudioCodecAndroidMediaCodec(), hint, options );
-//  if( pCodec ) return pCodec;
+  if (hint.cryptoSession)
+  {
+    pCodec = OpenCodec( new CDVDAudioCodecAndroidMediaCodec(), hint, options );
+    if (pCodec)
+      return pCodec;
+  }
 #endif
   // we don't use passthrough if "sync playback to display" is enabled
-  if (allowpassthrough)
+  if (allowpassthrough && !hint.cryptoSession)
   {
     pCodec = OpenCodec(new CDVDAudioCodecPassthrough(), hint, options);
     if (pCodec)
       return pCodec;
   }
 
-  pCodec = OpenCodec(new CDVDAudioCodecFFmpeg(), hint, options);
-  if (pCodec)
-    return pCodec;
+  if (!hint.cryptoSession)
+  {
+    pCodec = OpenCodec(new CDVDAudioCodecFFmpeg(), hint, options);
+    if (pCodec)
+      return pCodec;
+  }
 
   return NULL;
 }

@@ -21,28 +21,35 @@
 
 #include "DASHCodecHandler.h"
 
+#include "utils/log.h"
+
 CAVCDASHCodecHandler::CAVCDASHCodecHandler(AP4_SampleDescription* sd)
   : CDASHCodecHandler(sd)
   , countPictureSetIds(0)
+  , needSliceInfo(false)
 {
   unsigned int width(0), height(0);
   if (AP4_VideoSampleDescription *video_sample_description = AP4_DYNAMIC_CAST(AP4_VideoSampleDescription, sample_description))
   {
     width = video_sample_description->GetWidth();
     height = video_sample_description->GetHeight();
+    CLog::Log(LOGDEBUG, "CAVCDASHCodecHandler wxh (%dx%d)", width, height);
   }
   if (AP4_AvcSampleDescription *avc = AP4_DYNAMIC_CAST(AP4_AvcSampleDescription, sample_description))
   {
     extra_data_size = avc->GetRawBytes().GetDataSize();
     extra_data = avc->GetRawBytes().GetData();
     countPictureSetIds = avc->GetPictureParameters().ItemCount();
-    if (countPictureSetIds > 1 || !width || !height)
-      naluLengthSize = avc->GetNaluLengthSize();
+    naluLengthSize = avc->GetNaluLengthSize();
+    needSliceInfo = (countPictureSetIds > 1 || !width || !height);
   }
 }
 
 void CAVCDASHCodecHandler::UpdatePPSId(const AP4_DataBuffer& buffer)
 {
+  if (!needSliceInfo)
+     return;
+
   //Search the Slice header NALU
   const AP4_UI08 *data(buffer.GetData());
   unsigned int data_size(buffer.GetDataSize());
@@ -65,7 +72,7 @@ void CAVCDASHCodecHandler::UpdatePPSId(const AP4_DataBuffer& buffer)
 
     // Stop further NALU processing
     if (countPictureSetIds < 2)
-      naluLengthSize = 0;
+      needSliceInfo = false;
 
     unsigned int nal_unit_type = *data & 0x1F;
 
@@ -116,12 +123,15 @@ bool CAVCDASHCodecHandler::GetVideoInformation(int& width, int& height)
 
   if (AP4_VideoSampleDescription *avc = AP4_DYNAMIC_CAST(AP4_VideoSampleDescription, sample_description))
   {
-    width = avc->GetWidth();
-    height = avc->GetHeight();
-    return true;
+    if (avc->GetWidth() != width || avc->GetHeight() != height)
+    {
+      width = avc->GetWidth();
+      height = avc->GetHeight();
+      return true;
+    }
   }
   return false;
-};
+}
 
 
 CHEVCDASHCodecHandler::CHEVCDASHCodecHandler(AP4_SampleDescription* sd)

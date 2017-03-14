@@ -36,6 +36,7 @@
 #include "guilib/Geometry.h"
 
 #include <media/NdkMediaCodec.h>
+#include <media/NdkMediaCrypto.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 
@@ -146,8 +147,9 @@ protected:
   ANativeWindow*  m_surface;
   std::shared_ptr<CJNISurfaceTexture> m_surfaceTexture;
   std::shared_ptr<CDVDMediaCodecOnFrameAvailable> m_frameAvailable;
+  AMediaCrypto*   m_crypto;
 
-  amc_demux m_demux_pkt;
+  DemuxPacket     m_demux_pkt;
   std::vector<CDVDMediaCodecInfo*> m_inflight;
   std::set<int64_t> m_ptsList;
   ssize_t m_savIndex;

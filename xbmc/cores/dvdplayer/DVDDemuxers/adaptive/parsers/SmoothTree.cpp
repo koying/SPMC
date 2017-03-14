@@ -26,14 +26,33 @@
 #include "../oscompat.h"
 #include "../helpers.h"
 
+#include "PlatformDefs.h"
+#include "utils/Base64.h"
+#include "utils/log.h"
+#include "utils/StringUtils.h"
+
 using namespace adaptive;
 
 uint32_t gTimeScale = 10000000;
 
-SmoothTree::SmoothTree()
+SmoothTree::SmoothTree(bool main)
+  : m_refreshThread(nullptr)
+  , m_stopRefreshing(false)
+  , m_main(main)
 {
   current_period_ = new AdaptiveTree::Period;
   periods_.push_back(current_period_);
+}
+
+SmoothTree::~SmoothTree()
+{
+  if (m_refreshThread)
+  {
+    m_stopRefreshing = true;
+    m_refreshThread->StopThread();
+    delete m_refreshThread;
+    m_refreshThread = NULL;
+  }  
 }
 
 /*----------------------------------------------------------------------
@@ -115,29 +134,28 @@ start(void *data, const char *el, const char **attr)
       }
       else if (strcmp(el, "c") == 0)
       {
-        //<c n = "0" d = "20000000" / >
-        uint32_t push_duration(~0);
+        //<c n="0" d="20000000" t="14588653245" / >
+        uint32_t push_duration(0);
+        bool firstSeg = dash->current_adaptationset_->segment_durations_.data.empty();
 
         for (; *attr;)
         {
           if (*(const char*)*attr == 't')
           {
             uint64_t lt(atoll((const char*)*(attr + 1)));
-            if (!dash->current_adaptationset_->segment_durations_.data.empty())
+            if (!firstSeg)
               dash->current_adaptationset_->segment_durations_.data.back() = static_cast<uint32_t>(lt - dash->pts_helper_);
             else
               dash->current_adaptationset_->startPTS_ = lt;
             dash->pts_helper_ = lt;
-            push_duration = 0;
           }
           else if (*(const char*)*attr == 'd')
           {
             push_duration = atoi((const char*)*(attr + 1));
-            break;
           }
           attr += 2;
         }
-        if (~push_duration)
+        if (push_duration)
           dash->current_adaptationset_->segment_durations_.data.push_back(push_duration);
       }
     }
@@ -146,7 +164,7 @@ start(void *data, const char *el, const char **attr)
       //<StreamIndex Type = "video" TimeScale = "10000000" Name = "video" Chunks = "3673" QualityLevels = "6" Url = "QualityLevels({bitrate})/Fragments(video={start time})" MaxWidth = "960" MaxHeight = "540" DisplayWidth = "960" DisplayHeight = "540">
       dash->current_adaptationset_ = new SmoothTree::AdaptationSet();
       dash->current_period_->adaptationSets_.push_back(dash->current_adaptationset_);
-      dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_SUPPORTED;
+      dash->current_adaptationset_->encrypted = dash->encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED;
       dash->current_adaptationset_->timescale_ = gTimeScale;
           
       for (; *attr;)
@@ -155,6 +173,7 @@ start(void *data, const char *el, const char **attr)
           dash->current_adaptationset_->type_ =
           stricmp((const char*)*(attr + 1), "video") == 0 ? SmoothTree::VIDEO
           : stricmp((const char*)*(attr + 1), "audio") == 0 ? SmoothTree::AUDIO
+          : stricmp((const char*)*(attr + 1), "text") == 0 ? SmoothTree::TEXT
           : SmoothTree::NOTYPE;
         else if (strcmp((const char*)*attr, "Language") == 0)
           dash->current_adaptationset_->language_ = (const char*)*(attr + 1);
@@ -172,8 +191,8 @@ start(void *data, const char *el, const char **attr)
     else if (strcmp(el, "Protection") == 0)
     {
       dash->currentNode_ |= SmoothTree::SSMNODE_PROTECTION;
-      dash->encryptionState_ = SmoothTree::ENCRYTIONSTATE_SUPPORTED;
-	  }
+      dash->encryptionState_ = SmoothTree::ENCRYTIONSTATE_ENCRYPTED;
+    }
   }
   else if (strcmp(el, "SmoothStreamingMedia") == 0)
   {
@@ -209,10 +228,10 @@ start(void *data, const char *el, const char **attr)
 static void XMLCALL
 text(void *data, const char *s, int len)
 {
-	SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
+  SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
 
-    if (dash->currentNode_  & SmoothTree::SSMNODE_PROTECTIONTEXT)
-      dash->strXMLText_ += std::string(s, len);
+  if (dash->currentNode_  & SmoothTree::SSMNODE_PROTECTIONTEXT)
+    dash->strXMLText_ += std::string(s, len);
 }
 
 /*----------------------------------------------------------------------
@@ -230,12 +249,13 @@ end(void *data, const char *el)
       if (dash->currentNode_ & SmoothTree::SSMNODE_PROTECTIONHEADER)
       {
         if (strcmp(el, "ProtectionHeader") == 0)
-          dash->currentNode_ &= ~SmoothTree::SSMNODE_PROTECTIONHEADER;
+          dash->currentNode_ &= ~(SmoothTree::SSMNODE_PROTECTIONHEADER | SmoothTree::SSMNODE_PROTECTIONTEXT);
       }
       else if (strcmp(el, "Protection") == 0)
       {
-        dash->currentNode_ &= ~(SmoothTree::SSMNODE_PROTECTION| SmoothTree::SSMNODE_PROTECTIONTEXT);
+        dash->currentNode_ &= ~SmoothTree::SSMNODE_PROTECTION;
         dash->parse_protection();
+        dash->pssh_ = dash->adp_pssh_;
       }
     }
     else if (dash->currentNode_ & SmoothTree::SSMNODE_STREAMINDEX)
@@ -284,26 +304,26 @@ protection_text(void *data, const char *s, int len)
 static void XMLCALL
 protection_end(void *data, const char *el)
 {
-	SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
-    if (strcmp(el, "KID") == 0)
+  SmoothTree *dash(reinterpret_cast<SmoothTree*>(data));
+  if (strcmp(el, "KID") == 0)
+  {
+    std::string decoded = Base64::Decode(dash->strXMLText_);
+    if (decoded.size() == 16)
     {
-      uint8_t buffer[32];
-      unsigned int buffer_size(32);
-      b64_decode(dash->strXMLText_.data(), dash->strXMLText_.size(), buffer, buffer_size);
-
-      if (buffer_size == 16)
-      {
-        dash->defaultKID_.resize(16);
-        prkid2wvkid(reinterpret_cast<const char *>(buffer), &dash->defaultKID_[0]);
-      }
+      dash->defaultKID_.resize(16);
+      prkid2wvkid(reinterpret_cast<const char *>(decoded.data()), &dash->defaultKID_[0]);
     }
+  } else if (strcmp(el, "LA_URL") == 0)
+  {
+    dash->license_key_url_ = dash->strXMLText_;
+  }
 }
 
 /*----------------------------------------------------------------------
 |   SmoothTree
 +---------------------------------------------------------------------*/
 
-bool SmoothTree::open(const char *url)
+bool SmoothTree::open_manifest(const char *url)
 {
   parser_ = XML_ParserCreate(NULL);
   if (!parser_)
@@ -314,7 +334,7 @@ bool SmoothTree::open(const char *url)
   currentNode_ = 0;
   strXMLText_.clear();
 
-  bool ret = download(url);
+  bool ret = download_manifest(url);
 
   XML_ParserFree(parser_);
   parser_ = 0;
@@ -328,22 +348,75 @@ bool SmoothTree::open(const char *url)
     {
       (*b)->segments_.data.resize((*ba)->segment_durations_.data.size());
       std::vector<uint32_t>::iterator bsd((*ba)->segment_durations_.data.begin());
-      uint64_t cummulated = (*ba)->startPTS_ - base_time_;
+      uint64_t cummulated = (*ba)->startPTS_;
       for (std::vector<SmoothTree::Segment>::iterator bs((*b)->segments_.data.begin()), es((*b)->segments_.data.end()); bs != es; ++bsd, ++bs)
       {
         bs->range_begin_ = ~0;
-        bs->range_end_ = bs->startPTS_ = cummulated;
+        bs->range_end_ = cummulated;
+        bs->startPTS_ = cummulated - base_time_;
         cummulated += *bsd;
       }
     }
+    (*ba)->encrypted = (encryptionState_ == SmoothTree::ENCRYTIONSTATE_ENCRYPTED);
+  }
+  base_time_ = 0;
+
+  if (has_timeshift_buffer_ && m_main)
+  {
+    // LIVE stream
+    m_refreshThread = new CThread(this, "SMoothTreeRefresh");
+    m_refreshThread->Create();
+    m_refreshThread->SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
   }
   return true;
 }
 
-bool SmoothTree::write_data(void *buffer, size_t buffer_size)
+void adaptive::SmoothTree::Run()
+{
+  
+  while (!m_stopRefreshing)
+  {
+    XbmcThreads::ThreadSleep(5000 /* msec */);
+    
+    adaptive::AdaptiveTree* adp = new SmoothTree(false);
+    adp->set_download_speed(bandwidth_);
+    if (adp->open_manifest(m_manifestUrl.c_str()))
+    {
+      CSingleLock lock(m_updateSection);
+
+      std::vector<AdaptationSet*>::iterator cur_ba = current_period_->adaptationSets_.begin();
+      for (std::vector<AdaptationSet*>::iterator ba(adp->current_period_->adaptationSets_.begin()), ea(adp->current_period_->adaptationSets_.end()); ba != ea; ++ba)
+      {
+        bool dur_appended = false;
+        std::vector<SmoothTree::Representation*>::iterator cur_b = (*cur_ba)->repesentations_.begin();
+        for (std::vector<SmoothTree::Representation*>::iterator b((*ba)->repesentations_.begin()), e((*ba)->repesentations_.end()); b != e; ++b)
+        {
+          const SmoothTree::Segment* last_bs = (*cur_b)->segments_.last();
+          std::vector<uint32_t>::iterator bsd((*ba)->segment_durations_.data.begin());
+          for (std::vector<SmoothTree::Segment>::iterator bs((*b)->segments_.data.begin()), es((*b)->segments_.data.end()); bs != es; ++bsd, ++bs)
+          {
+            if (bs->range_end_ > last_bs->range_end_)
+            {
+              (*cur_b)->segments_.insert(*bs);
+              if (!dur_appended)
+                (*cur_ba)->segment_durations_.insert(*bsd);
+            }
+          }
+          dur_appended = true;
+          ++cur_b;
+        }
+        ++cur_ba;
+      }
+    }
+    
+    delete adp;
+  }
+}
+
+bool SmoothTree::write_manifest_data(const char *buffer, size_t buffer_size)
 {
   bool done(false);
-  XML_Status retval = XML_Parse(parser_, (const char*)buffer, buffer_size, done);
+  XML_Status retval = XML_Parse(parser_, buffer, buffer_size, done);
 
   if (retval == XML_STATUS_ERROR)
   {
@@ -363,17 +436,17 @@ void SmoothTree::parse_protection()
   while ((pos = strXMLText_.find('\n', 0)) != std::string::npos)
     strXMLText_.erase(pos, 1);
 
+  StringUtils::Trim(strXMLText_);
+
   while (strXMLText_.size() & 3)
     strXMLText_ += "=";
+  
+  adp_pssh_.first = "com.microsoft.playready";
+  adp_pssh_.second = strXMLText_;
 
-  unsigned int xml_size = strXMLText_.size();
-  uint8_t *buffer = (uint8_t*)malloc(xml_size), *xml_start(buffer);
-
-  if (!b64_decode(strXMLText_.c_str(), xml_size, buffer, xml_size))
-  {
-    free(buffer);
-    return;
-  }
+  std::string decoded = Base64::Decode(strXMLText_);
+  unsigned int xml_size = decoded.size();
+  const char *xml_start = decoded.data();
 
   while (xml_size && *xml_start != '<')
   {
@@ -383,10 +456,7 @@ void SmoothTree::parse_protection()
 
   XML_Parser pp = XML_ParserCreate("UTF-16");
   if (!pp)
-  {
-    free(buffer);
     return;
-  }
 
   XML_SetUserData(pp, (void*)this);
   XML_SetElementHandler(pp, protection_start, protection_end);
@@ -396,7 +466,6 @@ void SmoothTree::parse_protection()
   XML_Parse(pp, (const char*)(xml_start), xml_size, done);
 
   XML_ParserFree(pp);
-  free(buffer);
 
   strXMLText_.clear();
 }

@@ -138,10 +138,17 @@ bool DASHStream::start_stream(const uint32_t seg_offset, uint16_t width, uint16_
 {
   if (!~seg_offset && tree_.available_time_ && current_rep_->segments_.data.size()>1)
   {
-    //go at least 12 secs back
-    std::int32_t pos(static_cast<int32_t>(current_rep_->segments_.data.size() - 1));
+    std::int32_t pos;
+    if (tree_.has_timeshift_buffer_ || tree_.available_time_ >= tree_.stream_start_)
+      pos = static_cast<int32_t>(current_rep_->segments_.data.size() - 1);
+    else
+    {
+      pos = static_cast<int32_t>(((tree_.stream_start_ - tree_.available_time_)*current_rep_->timescale_) / current_rep_->duration_);
+      if (!pos) pos = 1;
+    }
+    //go at least 30 secs back
     uint64_t duration(current_rep_->get_segment(pos)->startPTS_ - current_rep_->get_segment(pos - 1)->startPTS_);
-    pos -= 12 * current_rep_->timescale_ / duration;
+    pos -= 30 * current_rep_->timescale_ / duration;
     current_seg_ = current_rep_->get_segment(pos < 0 ? 0: pos);
   }
   else
@@ -170,6 +177,8 @@ uint32_t DASHStream::read(void* buffer, uint32_t  bytesToRead)
 
   if (segment_read_pos_ >= segment_buffer_.size())
   {
+    CSingleLock lock(tree_.m_updateSection);
+
     current_seg_ = current_rep_->get_next_segment(current_seg_);
     if (!download_segment() || segment_buffer_.empty())
     {
@@ -283,7 +292,7 @@ bool DASHStream::download(const char* url, const char* rangeHeader)
 bool DASHStream::parseIndexRange()
 {
   // open the file
-  CLog::Log(LOGDEBUG, "Downloading %s for SIDX generation", getRepresentation()->url_.c_str());
+  CLog::Log(LOGDEBUG, "Downloading %s for SIDX generation (%d-%d)", getRepresentation()->url_.c_str(), getRepresentation()->indexRangeMin_, getRepresentation()->indexRangeMax_);
 
   CURL uUrl(getRepresentation()->url_);
   uUrl.SetProtocolOption("seekable", "0");

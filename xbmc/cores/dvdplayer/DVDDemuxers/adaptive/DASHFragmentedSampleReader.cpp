@@ -22,11 +22,14 @@
 
 #include "DASHFragmentedSampleReader.h"
 
+#include "utils/log.h"
+
 CDASHFragmentedSampleReader::CDASHFragmentedSampleReader(AP4_ByteStream* input, AP4_Movie* movie, AP4_Track* track, AP4_UI32 streamId, AP4_CencSingleSampleDecrypter* ssd, const double pto)
   : AP4_LinearReader(*movie, input)
   , m_Track(track)
   , m_dts(0.0)
   , m_pts(0.0)
+  , m_fail_count_(0)
   , m_eos(false)
   , m_started(false)
   , m_StreamId(streamId)
@@ -118,28 +121,38 @@ AP4_Result CDASHFragmentedSampleReader::ReadSample()
   AP4_Result result;
   if (AP4_FAILED(result = ReadNextSample(m_Track->GetId(), m_sample_, m_Protected_desc ? m_encrypted : m_sample_data_)))
   {
-    if (result == AP4_ERROR_EOS) {
+    if (result == AP4_ERROR_EOS)
       m_eos = true;
-    }
-    else {
-      return result;
-    }
+    return result;
   }
 
-//    if (m_Protected_desc)
-//    {
-//      // Make sure that the decrypter is NOT allocating memory!
-//      // If decrypter and addon are compiled with different DEBUG / RELEASE
-//      // options freeing HEAP memory will fail.
-//      m_sample_data_.Reserve(m_encrypted.GetDataSize());
-//      m_SingleSampleDecryptor->SetKeyId(m_DefaultKey?16:0, m_DefaultKey);
-//      if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
-//      {
-//        CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
-//        Reset(true);
-//        return result;
-//      }
-//    }
+  if (m_Protected_desc)
+  {
+    if (m_Decrypter)
+    {
+      // Make sure that the decrypter is NOT allocating memory!
+      // If decrypter and addon are compiled with different DEBUG / RELEASE
+      // options freeing HEAP memory will fail.
+      m_sample_data_.Reserve(m_encrypted.GetDataSize() + 4096);
+      m_SingleSampleDecryptor->SetFrameInfo(m_DefaultKey?16:0, m_DefaultKey, m_codecHandler->naluLengthSize);
+
+      if (AP4_FAILED(result = m_Decrypter->DecryptSampleData(m_encrypted, m_sample_data_, NULL)))
+      {
+        CLog::Log(LOGERROR, "Decrypt Sample returns failure!");
+        if (++m_fail_count_ > 50)
+        {
+          Reset(true);
+          return result;
+        }
+        else
+          m_sample_data_.SetDataSize(0);
+      }
+      else
+        m_fail_count_ = 0;
+    }
+    else
+      result = m_sample_data_.SetData(m_encrypted.GetData(), m_encrypted.GetDataSize());
+  }
 
   m_dts = (double)m_sample_.GetDts() / (double)m_Track->GetMediaTimeScale() - m_presentationTimeOffset;
   m_pts = (double)m_sample_.GetCts() / (double)m_Track->GetMediaTimeScale() - m_presentationTimeOffset;
@@ -198,7 +211,7 @@ uint64_t CDASHFragmentedSampleReader::GetFragmentDuration()
 
 AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4_Position moof_offset, AP4_Position mdat_payload_offset)
 {
-  AP4_Result result;
+  AP4_Result result = AP4_SUCCESS;
 
   if (m_Observer)
     m_Observer->BeginFragment(m_StreamId);
@@ -206,11 +219,11 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
   // create a new fragment
   delete m_Fragment;
   m_Fragment = new AP4_MovieFragment(moof);
-      
+
   // update the trackers
   AP4_Array<AP4_UI32> ids;
   m_Fragment->GetTrackIds(ids);
-  for (unsigned int i=0; i<m_Trackers.ItemCount(); i++) 
+  for (unsigned int i=0; i<m_Trackers.ItemCount() && AP4_SUCCEEDED(result); i++)
   {
     Tracker* tracker = m_Trackers[i];
     if (tracker->m_SampleTableIsOwned) {
@@ -218,14 +231,14 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
     }
     tracker->m_SampleTable = NULL;
     tracker->m_NextSampleIndex = 0;
-    for (unsigned int j=0; j<ids.ItemCount(); j++) {
+    for (unsigned int j=0; j<ids.ItemCount() && AP4_SUCCEEDED(result); j++) {
       if (ids.ItemCount()==1 || ids[j] == tracker->m_Track->GetId()) {
         AP4_FragmentSampleTable* sample_table = NULL;
-        result = m_Fragment->CreateSampleTable(&m_Movie, 
-                                               ids[j], 
-                                               m_FragmentStream, 
-                                               moof_offset, 
-                                               mdat_payload_offset, 
+        result = m_Fragment->CreateSampleTable(&m_Movie,
+                                               ids[j],
+                                               m_FragmentStream,
+                                               moof_offset,
+                                               mdat_payload_offset,
                                                tracker->m_NextDts,
                                                sample_table);
         if (AP4_FAILED(result)) break;
@@ -236,12 +249,14 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
       }
     }
   }
-  
+
   if (AP4_SUCCEEDED(result))
   {
-
     //Check if the sample table description has changed
     AP4_ContainerAtom *traf = AP4_DYNAMIC_CAST(AP4_ContainerAtom, moof->GetChild(AP4_ATOM_TYPE_TRAF, 0));
+    if (!traf)
+      return AP4_ERROR_INVALID_FORMAT;
+
     AP4_TfhdAtom *tfhd = AP4_DYNAMIC_CAST(AP4_TfhdAtom, traf->GetChild(AP4_ATOM_TYPE_TFHD, 0));
     if (tfhd && tfhd->GetSampleDescriptionIndex() != m_SampleDescIndex)
     {
@@ -263,13 +278,12 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
       delete m_Decrypter;
       m_Decrypter = 0;
 
-      AP4_ContainerAtom *traf = AP4_DYNAMIC_CAST(AP4_ContainerAtom, moof->GetChild(AP4_ATOM_TYPE_TRAF, 0));
-
-      if (!m_Protected_desc || !traf)
-        return AP4_ERROR_INVALID_FORMAT;
-
       if (AP4_FAILED(result = AP4_CencSampleInfoTable::Create(m_Protected_desc, traf, algorithm_id, *m_FragmentStream, moof_offset, sample_table)))
-        return result;
+      {
+        // we assume unencrypted fragment here
+        CLog::Log(LOGDEBUG, "AP4_CencSampleInfoTable::Create failed !!");
+        return AP4_SUCCESS;
+      }
 
       AP4_ContainerAtom *schi;
       m_DefaultKey = 0;
@@ -280,8 +294,9 @@ AP4_Result CDASHFragmentedSampleReader::ProcessMoof(AP4_ContainerAtom* moof, AP4
           m_DefaultKey = tenc->GetDefaultKid();
       }
 
-//      if (AP4_FAILED(result = AP4_CencSampleDecrypter::Create(sample_table, algorithm_id, 0, 0, 0, m_SingleSampleDecryptor, m_Decrypter)))
-//        return result;
+      m_Decrypter = new AP4_CencSampleDecrypter(m_SingleSampleDecryptor, sample_table, false);
+      if (!m_Decrypter)
+        return AP4_ERROR_INVALID_PARAMETERS;
     }
   }
 

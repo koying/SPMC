@@ -23,6 +23,7 @@
 #endif
 #include "DVDDemuxUtils.h"
 #include "DVDClock.h"
+#include "DemuxCrypto.h"
 #include "utils/log.h"
 
 extern "C" {
@@ -86,4 +87,12 @@ DemuxPacket* CDVDDemuxUtils::AllocateDemuxPacket(int iDataSize)
     pPacket = NULL;
   }
   return pPacket;
+}
+
+DemuxPacket* CDVDDemuxUtils::AllocateEncryptedDemuxPacket(unsigned int iDataSize, unsigned int encryptedSubsampleCount)
+{
+  DemuxPacket *ret(AllocateDemuxPacket(iDataSize));
+  if (ret && encryptedSubsampleCount > 0)
+    ret->cryptoInfo = std::shared_ptr<DemuxCryptoInfo>(new DemuxCryptoInfo(encryptedSubsampleCount));
+  return ret;
 }
