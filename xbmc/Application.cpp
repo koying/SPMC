@@ -3050,6 +3050,9 @@ void CApplication::Stop(int exitCode)
     CAEFactory::Shutdown();
     CAEFactory::UnLoadEngine();
 
+    // deinitialize network protocols
+    avformat_network_deinit();
+
     // unregister ffmpeg lock manager call back
     av_lockmgr_register(NULL);
 
