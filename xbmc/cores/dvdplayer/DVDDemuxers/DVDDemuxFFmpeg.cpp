@@ -1846,7 +1846,9 @@ unsigned int CDVDDemuxFFmpeg::HLSSelectProgram()
 
   int bandwidth = CSettings::GetInstance().GetInt(CSettings::SETTING_NETWORK_BANDWIDTH) * 1000;
   if (bandwidth <= 0)
-    bandwidth = INT_MAX;
+  {
+    bandwidth = XFILE::CFile::GetBandwidth();
+  }
 
   int selectedBitrate = 0;
   int selectedRes = 0;

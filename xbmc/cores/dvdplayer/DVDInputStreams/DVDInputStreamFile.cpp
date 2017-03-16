@@ -101,6 +101,7 @@ bool CDVDInputStreamFile::Open()
   if (m_pFile->GetImplemenation() && (content.empty() || content == "application/octet-stream"))
     m_content = m_pFile->GetImplemenation()->GetContent();
 
+  CFile::InitBandwidth();
   m_eof = false;
   return true;
 }
@@ -114,6 +115,7 @@ void CDVDInputStreamFile::Close()
     delete m_pFile;
   }
 
+  CFile::SaveBandwidth();
   CDVDInputStream::Close();
   m_pFile = NULL;
   m_eof = true;
@@ -131,6 +133,13 @@ int CDVDInputStreamFile::Read(uint8_t* buf, int buf_size)
   /* we currently don't support non completing reads */
   if (ret == 0) 
     m_eof = true;
+
+  if (ret > 0 && URIUtils::IsInternetStream(m_item.GetPath()))
+  {
+    BitstreamStats* stats = m_pFile->GetBitstreamStats();
+    stats->CalculateBitrate(true);
+    CFile::UpdateBandwidth(stats->GetBitrate());
+  }
 
   return (int)ret;
 }
