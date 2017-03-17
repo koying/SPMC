@@ -52,8 +52,6 @@ namespace adaptive
     , base_time_(0)
     , minPresentationOffset(0.0)
     , has_timeshift_buffer_(false)
-    , download_speed_(0.0)
-    , average_download_speed_(0.0f)
     , encryptionState_(ENCRYTIONSTATE_UNENCRYPTED)
   {
   }
@@ -75,15 +73,6 @@ namespace adaptive
     tmp /= timescale;
     return static_cast<uint32_t>((overallSeconds_ / tmp)*1.01);
   }
-
-  void AdaptiveTree::set_download_speed(double speed)
-  {
-    download_speed_ = speed;
-    if (!average_download_speed_)
-      average_download_speed_ = download_speed_;
-    else
-      average_download_speed_ = average_download_speed_*0.9 + download_speed_*0.1;
-  };
 
   void AdaptiveTree::SetFragmentDuration(const AdaptationSet* adp, const Representation* rep, size_t pos, uint32_t fragmentDuration, uint32_t movie_timescale)
   {

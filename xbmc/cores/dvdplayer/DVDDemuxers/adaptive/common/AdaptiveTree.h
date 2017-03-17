@@ -204,10 +204,6 @@ namespace adaptive
     double minPresentationOffset;
     bool has_timeshift_buffer_;
 
-    uint32_t bandwidth_;
-
-    double download_speed_, average_download_speed_;
-    
     std::pair<std::string, std::string> pssh_, adp_pssh_;
     std::string license_key_url_;
     std::string defaultKID_;
@@ -231,9 +227,6 @@ namespace adaptive
     virtual ~AdaptiveTree() {}
     bool has_type(StreamType t);
     uint32_t estimate_segcount(uint32_t duration, uint32_t timescale);
-    double get_download_speed() const { return download_speed_; };
-    double get_average_download_speed() const { return average_download_speed_; };
-    void set_download_speed(double speed);
     void SetFragmentDuration(const AdaptationSet* adp, const Representation* rep, size_t pos, uint32_t fragmentDuration, uint32_t movie_timescale);
 
     bool empty(){ return !current_period_ || current_period_->adaptationSets_.empty(); };

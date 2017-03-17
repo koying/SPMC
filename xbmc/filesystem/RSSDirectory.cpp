@@ -23,6 +23,7 @@
 #include <climits>
 #include <utility>
 
+#include "File.h"
 #include "CurlFile.h"
 #include "FileItem.h"
 #include "settings/AdvancedSettings.h"
@@ -470,7 +471,7 @@ static void ParseItem(CFileItem* item, TiXmlElement* root, const std::string& pa
 
   int maxrate = CSettings::GetInstance().GetInt(CSettings::SETTING_NETWORK_BANDWIDTH);
   if(maxrate == 0)
-    maxrate = INT_MAX;
+    maxrate = XFILE::CFile::GetBandwidth();
 
   SResources::iterator best = resources.end();
   for(const char** type = prio; *type && best == resources.end(); type++)

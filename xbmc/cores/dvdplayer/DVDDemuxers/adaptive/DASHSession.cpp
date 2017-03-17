@@ -38,17 +38,17 @@
 #include "utils/StringUtils.h"
 #include "utils/Base64.h"
 #include "filesystem/File.h"
+#include "settings/Settings.h"
 
 using namespace SSD;
 
-CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const std::string& strLicKey, const std::string& strLicData, const std::string& strServCert, const char* profile_path)
+CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, const std::string& strURL, int width, int height, const std::string& strLicType, const std::string& strLicKey, const std::string& strLicData, const std::string& strServCert)
   :single_sample_decryptor_(0)
   , manifest_type_(manifest_type)
   , fileURL_(strURL)
   , license_type_(strLicType)
   , license_key_url_(strLicKey)
   , license_data_(strLicData)
-  , profile_path_(profile_path)
   , adaptiveTree_(nullptr)
   , width_(width)
   , height_(height)
@@ -72,23 +72,8 @@ CDASHSession::CDASHSession(const CDASHSession::MANIFEST_TYPE manifest_type, cons
     default:;
   };
 
-  CLog::Log(LOGDEBUG, "CDASHSession license_type_(%s) license_key_url_(%s) license_data_(%d)", license_type_.c_str(), license_key_url_.c_str(), license_data_.c_str());
-  
-  XFILE::CFile f;
-
-  std::string fn = URIUtils::AddFileToFolder(profile_path_, "bandwidth.bin");
-  if (f.Open(fn, READ_NO_CACHE))
-  {
-    double val;
-    f.Read((void*)&val, sizeof(double));
-    adaptiveTree_->bandwidth_ = static_cast<uint32_t>(val);
-    f.Close();
-  }
-  else
-    adaptiveTree_->bandwidth_ = 4000000;
-
-  adaptiveTree_->set_download_speed(adaptiveTree_->bandwidth_);
-  CLog::Log(LOGDEBUG, "CDASHSession - Initial bandwidth: %u ", adaptiveTree_->bandwidth_);
+  CLog::Log(LOGDEBUG, "CDASHSession license_type_(%s) license_key_url_(%s) license_data_(%s)", license_type_.c_str(), license_key_url_.c_str(), license_data_.c_str());
+  CLog::Log(LOGDEBUG, "CDASHSession Initial bandwidth: %f ", XFILE::CFile::GetBandwidth());
 
   manual_streams_ = false;
 }
@@ -105,17 +90,7 @@ CDASHSession::~CDASHSession()
     decrypter_ = nullptr;
   }
 
-  XFILE::CFile f;
-
-  std::string fn = URIUtils::AddFileToFolder(profile_path_, "bandwidth.bin");
-  if (f.OpenForWrite(fn, READ_NO_CACHE))
-  {
-    double val(adaptiveTree_->get_average_download_speed());
-    f.Write((const void*)&val, sizeof(double));
-    f.Close();
-  }
-  else
-    CLog::Log(LOGERROR, "CDASHSession - Cannot write bandwidth.bin");
+  XFILE::CFile::SaveBandwidth();
 
   SAFE_DELETE(adaptiveTree_);
 }
@@ -188,16 +163,10 @@ bool CDASHSession::initialize()
     CLog::Log(LOGERROR, "Could not open / parse adaptive URL (%s)", fileURL_.c_str());
     return false;
   }
-  CLog::Log(LOGINFO, "Successfully parsed adaptive manifest. #Streams: %d Download speed: %0.4f Bytes/s", adaptiveTree_->periods_[0]->adaptationSets_.size(), adaptiveTree_->download_speed_);
+  CLog::Log(LOGINFO, "Successfully parsed adaptive manifest. #Streams: %d", adaptiveTree_->periods_[0]->adaptationSets_.size());
 
-  uint32_t min_bandwidth(0), max_bandwidth(0);
-  /*
-  {
-    int buf;
-    xbmc->GetSetting("MINBANDWIDTH", (char*)&buf); min_bandwidth = buf;
-    xbmc->GetSetting("MAXBANDWIDTH", (char*)&buf); max_bandwidth = buf;
-  }
-  */
+  uint32_t min_bandwidth(0);
+  uint32_t max_bandwidth = CSettings::GetInstance().GetInt(CSettings::SETTING_NETWORK_BANDWIDTH);
 
   // Try to initialize an SingleSampleDecryptor
   if (adaptiveTree_->encryptionState_ & adaptive::AdaptiveTree::ENCRYTIONSTATE_ENCRYPTED)

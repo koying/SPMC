@@ -129,6 +129,12 @@ public:
   }
 
   bool SkipNext();
+
+  /* Bandwidth handling */
+  static void InitBandwidth();
+  static double GetBandwidth();
+  static void UpdateBandwidth(double val);
+  static void SaveBandwidth();
   BitstreamStats* GetBitstreamStats() { return m_bitStreamStats; }
 
   int IoControl(EIoControl request, void* param);
@@ -193,6 +199,8 @@ private:
   IFile* m_pFile;
   CFileStreamBuffer* m_pBuffer;
   BitstreamStats* m_bitStreamStats;
+
+  static double   m_bandwidth;
 };
 
 // streambuf for file io, only supports buffered input currently

@@ -51,8 +51,6 @@ namespace dash
     bool seek_time(double seek_seconds, double current_seconds, bool &needReset);
     adaptive::AdaptiveTree::AdaptationSet const *getAdaptationSet() { return current_adp_; };
     adaptive::AdaptiveTree::Representation const *getRepresentation(){ return current_rep_; };
-    double get_download_speed() const { return tree_.get_download_speed(); };
-    void set_download_speed(double speed) { tree_.set_download_speed(speed); };
     size_t getSegmentPos() { return current_rep_->segments_.pos(current_seg_); };
     uint64_t GetPTSOffset() { return current_seg_ ? current_seg_->startPTS_ : 0; };
   protected:

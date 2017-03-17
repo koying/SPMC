@@ -84,7 +84,7 @@ bool CDVDDemuxAdaptive::Open(CDVDInputStream* pInput, uint32_t maxWidth, uint32_
     sLicData = item.GetProperty("inputstream.adaptive.license_data").asString();
   if (item.HasProperty("inputstream.adaptive.server_certificate"))
     sServCert = item.GetProperty("inputstream.adaptive.server_certificate").asString();
-  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, sLicType, sLicKey, sLicData, sServCert, "special://profile/"));
+  m_session.reset(new CDASHSession(type, pInput->GetFileName(), maxWidth, maxHeight, sLicType, sLicKey, sLicData, sServCert));
 
   if (!m_session->initialize())
   {

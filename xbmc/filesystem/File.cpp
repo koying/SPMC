@@ -45,6 +45,8 @@ using namespace XFILE;
 #pragma warning (disable:4244)
 #endif
 
+double CFile::m_bandwidth = -1;
+
 //*********************************************************************************************
 CFile::CFile()
 {
@@ -983,6 +985,54 @@ bool CFile::Touch(const std::string& fileName)
 {
   CFile newfile;
   return newfile.OpenForWrite(fileName);
+}
+
+void CFile::InitBandwidth()
+{
+  if (m_bandwidth > -1)
+    return;
+
+  XFILE::CFile f;
+  std::string fn = "special://profile/bandwidth.bin";
+  if (f.Open(fn, READ_NO_CACHE))
+  {
+    double val;
+    f.Read((void*)&val, sizeof(double));
+    m_bandwidth = val;
+    f.Close();
+  }
+  else
+    m_bandwidth = 4000000.0;
+  CLog::Log(LOGDEBUG, "CFile - initial bandwidth: %f", m_bandwidth);
+}
+
+void CFile::SaveBandwidth()
+{
+  XFILE::CFile f;
+  std::string fn = "special://profile/bandwidth.bin";
+  if (f.OpenForWrite(fn, READ_NO_CACHE))
+  {
+    f.Write((const void*)&m_bandwidth, sizeof(double));
+    f.Close();
+    CLog::Log(LOGDEBUG, "CFile - saved bandwidth: %f", m_bandwidth);
+  }
+  else
+    CLog::Log(LOGERROR, "CFile - Cannot write bandwidth.bin");
+}
+
+double CFile::GetBandwidth()
+{
+  InitBandwidth();
+  CLog::Log(LOGDEBUG, "CFile - current bandwidth: %f", m_bandwidth);
+  return m_bandwidth;
+}
+
+void CFile::UpdateBandwidth(double val)
+{
+  if (m_bandwidth == -1)
+    m_bandwidth = val;
+  else
+    m_bandwidth = m_bandwidth*0.9 + val*0.1;
 }
 
 //*********************************************************************************************

@@ -379,7 +379,6 @@ void adaptive::SmoothTree::Run()
     XbmcThreads::ThreadSleep(5000 /* msec */);
     
     adaptive::AdaptiveTree* adp = new SmoothTree(false);
-    adp->set_download_speed(bandwidth_);
     if (adp->open_manifest(m_manifestUrl.c_str()))
     {
       CSingleLock lock(m_updateSection);

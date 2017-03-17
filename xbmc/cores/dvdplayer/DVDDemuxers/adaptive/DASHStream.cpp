@@ -117,7 +117,7 @@ bool DASHStream::prepare_stream(const adaptive::AdaptiveTree::AdaptationSet *adp
   width_ = type_ == adaptive::AdaptiveTree::VIDEO ? width : 0;
   height_ = type_ == adaptive::AdaptiveTree::VIDEO ? height : 0;
 
-  uint32_t avg_bandwidth = tree_.bandwidth_;
+  uint32_t avg_bandwidth = CFile::GetBandwidth();
 
   bandwidth_ = min_bandwidth;
   if (avg_bandwidth > bandwidth_)
@@ -282,7 +282,7 @@ bool DASHStream::download(const char* url, const char* rangeHeader)
 
   BitstreamStats* stats = file.GetBitstreamStats();
   stats->CalculateBitrate(true);
-  set_download_speed(stats->GetBitrate());
+  CFile::UpdateBandwidth(stats->GetBitrate());
 
   file.Close();
 
