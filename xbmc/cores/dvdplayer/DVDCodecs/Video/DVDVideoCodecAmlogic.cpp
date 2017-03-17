@@ -96,7 +96,7 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
         return false;
       }
       m_pFormatName = "am-h264";
-      if (m_hints.codec_tag == AV_CODEC_ID_H264MVC)
+      if (m_hints.codec_tag == AV_CODEC_ID_H264_MVC)
         m_pFormatName = "am-h264mvc";
       // convert h264-avcC to h264-annex-b as h264-avcC
       // under streamers can have issues when seeking.

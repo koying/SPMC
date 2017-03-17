@@ -1451,7 +1451,7 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         if (m_bSSIF && pStream->id == 0x1011)
         {
           // Mark stream as MVC
-          pStream->codec->codec_tag = AV_CODEC_ID_H264MVC;
+          pStream->codec->codec_tag = AV_CODEC_ID_H264_MVC;
         }
 
         st->iWidth = pStream->codec->width;

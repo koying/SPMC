@@ -1,5 +1,5 @@
 LIBNAME=ffmpeg
-BASE_URL=https://github.com/koying/FFmpeg/archive
-VERSION=2.8.6-Jarvis-16.0-spmc
+BASE_URL=https://github.com/afedchin/FFmpeg/archive
+VERSION=3.1.6-krypton-mvc
 ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
 
