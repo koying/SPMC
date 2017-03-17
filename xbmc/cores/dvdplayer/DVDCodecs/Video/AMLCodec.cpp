@@ -1486,7 +1486,7 @@ bool CAMLCodec::OpenDecoder(CDVDStreamInfo &hints)
   // handle extradata
   am_private->video_format      = codecid_to_vformat(hints.codec);
   if (am_private->video_format == VFORMAT_H264) {
-    if (hints.profile == 118 || hints.profile == 128 || hints.codec_tag == AV_CODEC_ID_H264MVC)
+    if (hints.profile == 118 || hints.profile == 128 || hints.codec_tag == AV_CODEC_ID_H264_MVC)
     {
       CLog::Log(LOGDEBUG, "CAMLCodec::OpenDecoder: MVC detected");
       am_private->video_format = VFORMAT_H264MVC;

@@ -19,7 +19,6 @@ ffmpg_config += --enable-muxer=asf --enable-muxer=ipod
 ffmpg_config += --enable-encoder=ac3 --enable-encoder=aac
 ffmpg_config += --enable-encoder=wmav2 --enable-protocol=http
 ffmpg_config += --enable-gnutls
-ffmpg_config += --enable-libdcadec
 
 ifeq ($(CROSS_COMPILING), yes)
   ffmpg_config += --arch=$(CPU) --enable-cross-compile
@@ -30,6 +29,7 @@ ifeq ($(OS), linux)
 endif
 ifeq ($(OS), android)
   ifeq ($(findstring arm64, $(CPU)), arm64)
+    ffmpg_config += --arch=aarch64 --cpu=cortex-a53
   else ifeq ($(findstring arm, $(CPU)), arm)
     ffmpg_config += --cpu=cortex-a9
   else
