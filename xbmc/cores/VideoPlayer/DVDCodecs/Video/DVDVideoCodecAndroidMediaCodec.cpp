@@ -27,6 +27,15 @@
 
 #include "DVDVideoCodecAndroidMediaCodec.h"
 
+#include <androidjni/ByteBuffer.h>
+#include <androidjni/MediaCodec.h>
+#include <androidjni/MediaCrypto.h>
+#include <androidjni/MediaFormat.h>
+#include <androidjni/MediaCodecList.h>
+#include <androidjni/MediaCodecInfo.h>
+#include <androidjni/Surface.h>
+#include <androidjni/SurfaceTexture.h>
+
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
 #include "DVDClock.h"
@@ -39,14 +48,6 @@
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
 
-#include "androidjni/ByteBuffer.h"
-#include "androidjni/MediaCodec.h"
-#include "androidjni/MediaCrypto.h"
-#include "androidjni/MediaFormat.h"
-#include "androidjni/MediaCodecList.h"
-#include "androidjni/MediaCodecInfo.h"
-#include "androidjni/Surface.h"
-#include "androidjni/SurfaceTexture.h"
 #include "platform/android/activity/AndroidFeatures.h"
 #include "settings/Settings.h"
 
