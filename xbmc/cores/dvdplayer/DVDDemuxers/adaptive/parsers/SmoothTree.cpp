@@ -325,6 +325,10 @@ protection_end(void *data, const char *el)
 
 bool SmoothTree::open_manifest(const char *url)
 {
+  std::string manifest_url(url);
+  if (StringUtils::EndsWithNoCase(manifest_url, "ism") || StringUtils::EndsWithNoCase(manifest_url, "isml"))
+    manifest_url += "/Manifest";
+
   parser_ = XML_ParserCreate(NULL);
   if (!parser_)
     return false;
@@ -334,7 +338,7 @@ bool SmoothTree::open_manifest(const char *url)
   currentNode_ = 0;
   strXMLText_.clear();
 
-  bool ret = download_manifest(url);
+  bool ret = download_manifest(manifest_url.c_str());
 
   XML_ParserFree(parser_);
   parser_ = 0;
