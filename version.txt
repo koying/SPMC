@@ -1,6 +1,9 @@
-APP_NAME Kodi
-COMPANY_NAME XBMC-Foundation
-WEBSITE http://kodi.tv
+APP_NAME SPMC
+APP_PACKAGE com.semperpax.spmc17
+COMPANY_NAME Semperpax
+WEBSITE http://spmc.semperpax.com/
+APP_EMAIL spmc.support@semperpax.com
+APP_STICKYURL http://paste.semperpax.com
 VERSION_MAJOR 17
 VERSION_MINOR 3
 VERSION_TAG
