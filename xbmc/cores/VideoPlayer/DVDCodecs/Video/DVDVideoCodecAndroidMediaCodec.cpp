@@ -246,7 +246,11 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
     if (m_frameready)
       m_frameready->Reset();
 
-  media_status_t mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, render);
+  media_status_t mstat;
+  if (render)
+    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, (int64_t)1);  // Make sure buffer pts is ignored
+  else
+    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
 
   if (mstat != AMEDIA_OK)
