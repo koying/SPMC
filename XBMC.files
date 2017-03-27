@@ -5949,6 +5949,7 @@ system/Lircmap.xml
 system/peripherals.xml
 system/playercorefactory.xml
 system/X10-Lola-IRSSmap.xml
+tools/android/packaging/xbmc/AndroidManifest.xml.in
 tools/depends/target/android-sources-ics/libbinder.cpp
 tools/depends/target/android-sources-ics/libcutils.c
 tools/depends/target/android-sources-ics/libgui.cpp
