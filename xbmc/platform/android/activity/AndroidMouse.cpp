@@ -74,7 +74,7 @@ bool CAndroidMouse::onMouseEvent(AInputEvent* event)
   return false;
 }
 
-void CAndroidMouse::OnResetDevice()
+void CAndroidMouse::OnResetDisplay()
 {
   m_droid2guiRatio = CXBMCApp::GetDroidToGuiRatio();
 }
