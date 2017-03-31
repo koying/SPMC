@@ -10,7 +10,7 @@ rm -r $WORKSPACE/addons/skin.re-touched
 fi
 git submodule update --init $WORKSPACE/addons/skin.re-touched
 
-f test -d $WORKSPACE/addons/script.xbmc.debug.log
+if test -d $WORKSPACE/addons/script.xbmc.debug.log
 then
 rm -r $WORKSPACE/addons/script.xbmc.debug.log
 fi
