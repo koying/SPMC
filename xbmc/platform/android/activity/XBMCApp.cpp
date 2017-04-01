@@ -339,8 +339,6 @@ void CXBMCApp::Initialize()
 
 void CXBMCApp::Deinitialize()
 {
-  g_application.m_ServiceManager->GetAnnouncementManager().RemoveAnnouncer(CXBMCApp::get());
-
   while(!m_texturePool.empty())
   {
     GLuint texture_id = m_texturePool.back();
