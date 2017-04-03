@@ -135,8 +135,8 @@ res:
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
-	rm -rf xbmc/lib/$(CPU) xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
-	mkdir -p xbmc/lib/$(CPU) xbmc/assets/python2.7/lib/ xbmc/libs/$(CPU) xbmc/obj/local/$(CPU)
+	rm -rf xbmc/lib/$(CPU) xbmc/obj/local/$(CPU)
+	mkdir -p xbmc/lib/$(CPU) xbmc/assets/python2.7/lib/ xbmc/obj/local/$(CPU)
 	cp -fpL $(SRCLIBS) xbmc/obj/local/$(CPU)/
 	cp -fp $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so xbmc/obj/local/$(CPU)/
 	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \;
@@ -145,12 +145,11 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 	cd xbmc/obj/local/$(CPU)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
 	cp -fp xbmc/obj/local/$(CPU)/*.so xbmc/lib/$(CPU)/
 	$(STRIP) --strip-unneeded xbmc/lib/$(CPU)/*.so
-	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/libs
-	install -p $(GDBPATH) ./xbmc/libs/$(CPU)/gdbserver
-	echo "set solib-search-path ./obj/local/$(CPU)" > ./xbmc/libs/$(CPU)/gdb.setup
+	cp -fp $(SDKROOT)/extras/android/support/v4/android-support-v4.jar xbmc/lib
+	install -p $(GDBPATH) ./xbmc/lib/$(CPU)/gdbserver
+	echo "set solib-search-path ./obj/local/$(CPU)" > ./xbmc/lib/$(CPU)/gdb.setup
 	echo "directory $(TOOLCHAIN)/sysroot/usr/include $(NDKROOT)/sources/android/native_app_glue" \
-	     "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(CORE_SOURCE_DIR)  $(PREFIX)/include jni" >> ./xbmc/libs/$(CPU)/gdb.setup
-	cp -fp xbmc/libs/$(CPU)/* xbmc/lib/$(CPU)
+             "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(CORE_SOURCE_DIR)  $(PREFIX)/include jni" >> ./xbmc/lib/$(CPU)/gdb.setup
 
 xbmc/classes.dex: res
 	mkdir -p xbmc/java/@APP_PACKAGE_DIR@ xbmc/java/@APP_PACKAGE_DIR@/interfaces xbmc/obj
@@ -181,7 +180,6 @@ apk-clean:
 	rm -rf xbmc/java
 	rm -rf xbmc/gen
 	rm -rf xbmc/lib
-	rm -rf xbmc/libs
 	rm -rf xbmc/assets
 	rm -rf xbmc/obj
 	rm -rf xbmc/res/raw
