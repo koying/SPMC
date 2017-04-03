@@ -483,3 +483,8 @@ xbmc/platform/android/activity
 cmake/scripts/common
 cmake/scripts/android
 xbmc/listproviders
+project/cmake
+project/cmake/scripts/android
+project/cmake/platform/android
+project/cmake/treedata/android
+xbmc/network/android
