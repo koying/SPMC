@@ -146,6 +146,7 @@ public:
   static bool ToUtf8(const std::string& strSourceCharset, const std::string& stringSrc, std::string& utf8StringDst, bool failOnBadChar = false);
 
   static bool wToUTF8(const std::wstring& wStringSrc, std::string& utf8StringDst, bool failOnBadChar = false);
+  static bool wToASCII(const std::wstring& wStringSrc, std::string& asciiStringDst, bool failOnBadChar = false);
   static bool utf16BEtoUTF8(const std::u16string& utf16StringSrc, std::string& utf8StringDst);
   static bool utf16LEtoUTF8(const std::u16string& utf16StringSrc, std::string& utf8StringDst);
   static bool ucs2ToUTF8(const std::u16string& ucs2StringSrc, std::string& utf8StringDst);
