@@ -469,6 +469,17 @@ bool SorterAscending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, true, result, labelLeft, labelRight))
     return result;
 
+#ifdef TARGET_ANDROID
+  // Android does not support locale; Translate to ASCII
+  std::string dest;
+
+  CCharsetConverter::wToASCII(labelLeft, dest);
+  labelLeft = std::wstring(dest.begin(), dest.end());
+
+  CCharsetConverter::wToASCII(labelRight, dest);
+  labelRight = std::wstring(dest.begin(), dest.end());
+#endif
+
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) < 0;
 }
 
@@ -478,6 +489,17 @@ bool SorterDescending(const SortItem &left, const SortItem &right)
   std::wstring labelLeft, labelRight;
   if (preliminarySort(left, right, true, result, labelLeft, labelRight))
     return result;
+
+#ifdef TARGET_ANDROID
+  // Android does not support locale; Translate to ASCII
+  std::string dest;
+
+  CCharsetConverter::wToASCII(labelLeft, dest);
+  labelLeft = std::wstring(dest.begin(), dest.end());
+
+  CCharsetConverter::wToASCII(labelRight, dest);
+  labelRight = std::wstring(dest.begin(), dest.end());
+#endif
 
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) > 0;
 }
@@ -489,6 +511,17 @@ bool SorterIgnoreFoldersAscending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, false, result, labelLeft, labelRight))
     return result;
 
+#ifdef TARGET_ANDROID
+  // Android does not support locale; Translate to ASCII
+  std::string dest;
+
+  CCharsetConverter::wToASCII(labelLeft, dest);
+  labelLeft = std::wstring(dest.begin(), dest.end());
+
+  CCharsetConverter::wToASCII(labelRight, dest);
+  labelRight = std::wstring(dest.begin(), dest.end());
+#endif
+
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) < 0;
 }
 
@@ -498,6 +531,17 @@ bool SorterIgnoreFoldersDescending(const SortItem &left, const SortItem &right)
   std::wstring labelLeft, labelRight;
   if (preliminarySort(left, right, false, result, labelLeft, labelRight))
     return result;
+
+#ifdef TARGET_ANDROID
+  // Android does not support locale; Translate to ASCII
+  std::string dest;
+
+  CCharsetConverter::wToASCII(labelLeft, dest);
+  labelLeft = std::wstring(dest.begin(), dest.end());
+
+  CCharsetConverter::wToASCII(labelRight, dest);
+  labelRight = std::wstring(dest.begin(), dest.end());
+#endif
 
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) > 0;
 }
