@@ -26,6 +26,8 @@
 #include "utils/CharsetConverter.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
+#include "utils/TimeUtils.h"
 
 #include <algorithm>
 
@@ -396,6 +398,8 @@ std::string ByDateTaken(SortAttribute attributes, const SortItem &values)
   return values.at(FieldDateTaken).asString();
 }
 
+static double totElapsed = 0;
+
 bool preliminarySort(const SortItem &left, const SortItem &right, bool handleFolder, bool &result, std::wstring &labelLeft, std::wstring &labelRight)
 {
   // make sure both items have the necessary data to do the sorting
@@ -459,6 +463,32 @@ bool preliminarySort(const SortItem &left, const SortItem &right, bool handleFol
   labelLeft = itLeftSort->second.asWideString();
   labelRight = itRightSort->second.asWideString();
 
+  //#ifdef TARGET_ANDROID
+  // Android does not support locale; Translate to ASCII
+  uint64_t now = CurrentHostCounter();
+
+  std::string dest;
+
+  CCharsetConverter::wToASCII(labelLeft, dest);
+  labelLeft.clear();
+  for (char c : dest)
+  {
+    if (::isalnum(c) || c == ' ')
+      labelLeft.push_back(c);
+  }
+
+  CCharsetConverter::wToASCII(labelRight, dest);
+  labelRight.clear();
+  for (char c : dest)
+  {
+    if (::isalnum(c) || c == ' ')
+      labelRight.push_back(c);
+  }
+  double elapsed = (double)(CurrentHostCounter() - now) / CurrentHostFrequency();
+  totElapsed += elapsed;
+  CLog::Log(LOGDEBUG, "Sort: %ls vs %ls (%f)", labelLeft.c_str(), labelRight.c_str(), elapsed);
+  //#endif
+
   return false;
 }
 
@@ -468,17 +498,6 @@ bool SorterAscending(const SortItem &left, const SortItem &right)
   std::wstring labelLeft, labelRight;
   if (preliminarySort(left, right, true, result, labelLeft, labelRight))
     return result;
-
-#ifdef TARGET_ANDROID
-  // Android does not support locale; Translate to ASCII
-  std::string dest;
-
-  CCharsetConverter::wToASCII(labelLeft, dest);
-  labelLeft = std::wstring(dest.begin(), dest.end());
-
-  CCharsetConverter::wToASCII(labelRight, dest);
-  labelRight = std::wstring(dest.begin(), dest.end());
-#endif
 
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) < 0;
 }
@@ -490,17 +509,6 @@ bool SorterDescending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, true, result, labelLeft, labelRight))
     return result;
 
-#ifdef TARGET_ANDROID
-  // Android does not support locale; Translate to ASCII
-  std::string dest;
-
-  CCharsetConverter::wToASCII(labelLeft, dest);
-  labelLeft = std::wstring(dest.begin(), dest.end());
-
-  CCharsetConverter::wToASCII(labelRight, dest);
-  labelRight = std::wstring(dest.begin(), dest.end());
-#endif
-
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) > 0;
 }
 
@@ -511,17 +519,6 @@ bool SorterIgnoreFoldersAscending(const SortItem &left, const SortItem &right)
   if (preliminarySort(left, right, false, result, labelLeft, labelRight))
     return result;
 
-#ifdef TARGET_ANDROID
-  // Android does not support locale; Translate to ASCII
-  std::string dest;
-
-  CCharsetConverter::wToASCII(labelLeft, dest);
-  labelLeft = std::wstring(dest.begin(), dest.end());
-
-  CCharsetConverter::wToASCII(labelRight, dest);
-  labelRight = std::wstring(dest.begin(), dest.end());
-#endif
-
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) < 0;
 }
 
@@ -531,17 +528,6 @@ bool SorterIgnoreFoldersDescending(const SortItem &left, const SortItem &right)
   std::wstring labelLeft, labelRight;
   if (preliminarySort(left, right, false, result, labelLeft, labelRight))
     return result;
-
-#ifdef TARGET_ANDROID
-  // Android does not support locale; Translate to ASCII
-  std::string dest;
-
-  CCharsetConverter::wToASCII(labelLeft, dest);
-  labelLeft = std::wstring(dest.begin(), dest.end());
-
-  CCharsetConverter::wToASCII(labelRight, dest);
-  labelRight = std::wstring(dest.begin(), dest.end());
-#endif
 
   return StringUtils::AlphaNumericCompare(labelLeft.c_str(), labelRight.c_str()) > 0;
 }
@@ -731,7 +717,10 @@ void SortUtils::Sort(SortBy sortBy, SortOrder sortOrder, SortAttribute attribute
       }
 
       // Do the sorting
+      totElapsed = 0;
+      CLog::Log(LOGDEBUG, "--- Start Sort");
       std::stable_sort(items.begin(), items.end(), getSorter(sortOrder, attributes));
+      CLog::Log(LOGDEBUG, "--- Stop Sort: %f", totElapsed);
     }
   }
 
