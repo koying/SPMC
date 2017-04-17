@@ -1,2 +1,2 @@
 include 'xbmc'
-project(':xbmc').projectDir = new File('tools/android/packaging/xbmc')
+project(':xbmc').projectDir = new File('build/tools/android/packaging/xbmc')

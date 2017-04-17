@@ -28,6 +28,7 @@ set(package_files strings.xml
                   colors.xml
                   searchable.xml
                   AndroidManifest.xml
+                  build.gradle
                   src/org/xbmc/kodi/Main.java
                   src/org/xbmc/kodi/Splash.java
                   src/org/xbmc/kodi/XBMCBroadcastReceiver.java
