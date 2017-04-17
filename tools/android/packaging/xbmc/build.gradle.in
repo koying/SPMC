@@ -7,8 +7,8 @@ android {
         applicationId "@APP_PACKAGE@"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionCode @VERSION_CODE@
+        versionName "@VERSION_MAJOR@.@VERSION_MINOR@(@VERSION_TAG@)"
     }
     buildTypes {
         release {
@@ -20,13 +20,16 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['java']
-            //resources.srcDirs = ['src']
-            //aidl.srcDirs = ['src']
-            //renderscript.srcDirs = ['src']
+            java.srcDirs = ['src/org/xbmc/kodi']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['lib']
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path '../../../../../project/cmake/CMakeLists.txt'
         }
     }
 }
@@ -35,19 +38,7 @@ dependencies {
     compile 'com.android.support:support-v4:23.4.0'
 }
 
-task copyJava(type: Copy) {
-    description = 'copying back java sources'
-    from 'java'
-    into 'src/org/xbmc/kodi'
-    eachFile { FileCopyDetails fcp ->
-        def segments = fcp.relativePath.segments
-        def pathsegments =segments[3..-1] as String[]
-    	fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), pathsegments)
-    }
-    includeEmptyDirs = false
-}
-
 project.afterEvaluate {
-    preBuild.dependsOn copyJava
+    preBuild.dependsOn
 }
 
