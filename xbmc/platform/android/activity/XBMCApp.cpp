@@ -121,6 +121,7 @@ bool CXBMCApp::m_hasFocus = false;
 bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
+bool CXBMCApp::m_hdmiPlugged = true;
 IInputDeviceCallbacks* CXBMCApp::m_inputDeviceCallbacks = nullptr;
 IInputDeviceEventHandler* CXBMCApp::m_inputDeviceEventHandler = nullptr;
 bool CXBMCApp::m_hasReqVisible = false;
@@ -213,6 +214,7 @@ void CXBMCApp::onStart()
     intentFilter.addAction("android.intent.action.SCREEN_ON");
     intentFilter.addAction("android.intent.action.SCREEN_OFF");
     intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+    intentFilter.addAction("android.media.action.HDMI_AUDIO_PLUG");
     intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
     registerReceiver(*this, intentFilter);
 
@@ -491,6 +493,11 @@ void CXBMCApp::RequestVisibleBehind(bool requested)
 bool CXBMCApp::IsHeadsetPlugged()
 {
   return m_headsetPlugged;
+}
+
+bool CXBMCApp::IsHDMIPlugged()
+{
+  return m_hdmiPlugged;
 }
 
 void CXBMCApp::run()
@@ -1020,7 +1027,7 @@ void CXBMCApp::InitDirectories()
 void CXBMCApp::onReceive(CJNIIntent intent)
 {
   std::string action = intent.getAction();
-  android_printf("CXBMCApp::onReceive Got intent. Action: %s", action.c_str());
+  CLog::Log(LOGDEBUG, "CXBMCApp::onReceive Got intent. Action: %s", action.c_str());
   if (action == "android.intent.action.BATTERY_CHANGED")
     m_batteryLevel = intent.getIntExtra("level",-1);
   else if (action == "android.intent.action.DREAMING_STOPPED" || action == "android.intent.action.SCREEN_ON")
@@ -1044,6 +1051,18 @@ void CXBMCApp::onReceive(CJNIIntent intent)
     if (newstate != m_headsetPlugged)
     {
       m_headsetPlugged = newstate;
+      CAEFactory::DeviceChange();
+    }
+  }
+  else if (action == "android.media.action.HDMI_AUDIO_PLUG")
+  {
+    bool newstate;
+    newstate = (intent.getIntExtra("android.media.extra.AUDIO_PLUG_STATE", 0) != 0);
+
+    if (newstate != m_hdmiPlugged)
+    {
+      CLog::Log(LOGDEBUG, "-- HDMI state: %s",  newstate ? "on" : "off");
+      m_hdmiPlugged = newstate;
       CAEFactory::DeviceChange();
     }
   }

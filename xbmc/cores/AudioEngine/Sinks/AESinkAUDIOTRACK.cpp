@@ -309,6 +309,11 @@ bool CAESinkAUDIOTRACK::IsSupported(int sampleRateInHz, int channelConfig, int e
 
 bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
 {
+  if (!CXBMCApp::IsHDMIPlugged())
+  {
+    CLog::Log(LOGERROR, "CAESinkAUDIOTRACK: HDMI not connected. Bailing out.");
+  }
+
   m_format      = format;
   m_volume      = -1;
   m_offset = -1;
@@ -824,7 +829,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(pcminfo.m_sampleRates));
   list.push_back(pcminfo);
 
-  if (!CXBMCApp::IsHeadsetPlugged())
+  if (CXBMCApp::IsHDMIPlugged() && !CXBMCApp::IsHeadsetPlugged())
   {
     CAEDeviceInfo ptinfo = pcminfo;
     ptinfo.m_dataFormats.clear();
