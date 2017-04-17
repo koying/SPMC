@@ -152,8 +152,8 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
              "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(CORE_SOURCE_DIR)  $(PREFIX)/include jni" >> ./xbmc/lib/$(CPU)/gdb.setup
 
 xbmc/classes.dex: res
-        mkdir -p xbmc/obj
-        @javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/@APP_PACKAGE_DIR@/*.java xbmc/src/org/xbmc/kodi/@APP_PACKAGE_DIR@/*.java xbmc/src/org/xbmc/kodi/@APP_PACKAGE_DIR@/interfaces/*.java $(JAVAC_EXTRA_ARGS)
+	mkdir -p xbmc/obj
+	@javac -classpath $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar:$(SDKROOT)/extras/android/support/v4/android-support-v4.jar:xbmc/obj -d xbmc/obj -sourcepath xbmc/src xbmc/gen/@APP_PACKAGE_DIR@/*.java xbmc/src/org/xbmc/kodi/@APP_PACKAGE_DIR@/*.java xbmc/src/org/xbmc/kodi/@APP_PACKAGE_DIR@/interfaces/*.java $(JAVAC_EXTRA_ARGS)
 	@$(DX) --dex --output=xbmc/classes.dex xbmc/obj xbmc/lib
 
 package: libs python xbmc/classes.dex
