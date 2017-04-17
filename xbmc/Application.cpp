@@ -2865,10 +2865,6 @@ bool CApplication::Cleanup()
     CLibcdio::ReleaseInstance();
 #endif
 #endif
-#if defined(TARGET_ANDROID)
-    // enable for all platforms once it's safe
-    g_sectionLoader.UnloadAll();
-#endif
 #ifdef _CRTDBG_MAP_ALLOC
     _CrtDumpMemoryLeaks();
     while(1); // execution ends
@@ -2883,6 +2879,11 @@ bool CApplication::Cleanup()
       m_ServiceManager->Deinit();
       m_ServiceManager.reset();
     }
+
+#if defined(TARGET_ANDROID)
+    // enable for all platforms once it's safe
+    g_sectionLoader.UnloadAll();
+#endif
 
     return true;
   }
