@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "@APP_PACKAGE@"
         minSdkVersion 21
@@ -27,11 +27,6 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path '../../../../../project/cmake/CMakeLists.txt'
-        }
-    }
 }
 
 project.afterEvaluate {
