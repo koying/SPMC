@@ -19,7 +19,7 @@ public class XBMCProperties
 
   public static void initializeProperties()
   {
-    String propfn = Environment.getExternalStorageDirectory().getAbsolutePath() + "/spmc_env.properties";
+    String propfn = Environment.getExternalStorageDirectory().getAbsolutePath() + "/@APP_NAME_LC@_env.properties";
     File fProp = new File(propfn);
     if (!fProp.exists())
     {
