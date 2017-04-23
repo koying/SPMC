@@ -338,22 +338,24 @@ bool CTextureCleanupJob::DoWork()
     XFILE::CSpecialProtocolDirectory thumbDir;
     CFileItemList files;
     int fileIdx = 0;
-    int totdel = 0;
+    int totFileDel = 0;
+    int totDbDel = 0;
 
     auto deleteFile = [&]()
     {
       std::string todel = files.Get(fileIdx)->GetPath();
       CLog::Log(LOGDEBUG, "CTextureCleanupJob: deleting %s", todel.c_str());
       XFILE::CFile::Delete(todel);
-      totdel++;
+      totFileDel++;
       fileIdx++;
     };
 
-    std::vector<std::string> urls = db.GetCachedTextureUrls();
+    std::vector<std::pair<int, std::string>> urls = db.GetCachedTextureUrls();
     for (const auto &url : urls)
     {
-      URIUtils::Split(url, path, fn);
-      std::string cmpurl = "special://thumbnails/" + url;
+      std::string cachedurl = url.second;
+      URIUtils::Split(cachedurl, path, fn);
+      std::string cmpurl = "special://thumbnails/" + cachedurl;
       if (path != prevPath)
       {
         while (fileIdx < files.Size())
@@ -368,10 +370,17 @@ bool CTextureCleanupJob::DoWork()
         deleteFile();
       if (fileIdx < files.Size() && files.Get(fileIdx)->GetPath() == cmpurl)
         fileIdx++;
+      else
+      {
+        // No file for current entry; delete it
+        CLog::Log(LOGDEBUG, "CTextureCleanupJob: deleting from Db: %d / %s", url.first, cachedurl.c_str());
+        db.ClearCachedTexture(url.first, cachedurl);
+        totDbDel++;
+      }
     }
     while (fileIdx < files.Size())
       deleteFile();
-    CLog::Log(LOGDEBUG, "CTextureCleanupJob: %d thumbnails deleted", totdel);
+    CLog::Log(LOGDEBUG, "CTextureCleanupJob: %d thumbnails deleted / %d db entries removed", totFileDel, totDbDel);
   }
   return true;
 }
