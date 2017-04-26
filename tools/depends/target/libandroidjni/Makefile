@@ -2,8 +2,8 @@ include ../../Makefile.include
 DEPS= ../../Makefile.include Makefile
 
 # lib name, version
-LIBNAME=libdroidjni
-VERSION=5ca8800
+LIBNAME=libandroidjni
+VERSION=37d802f24b7035034019bc9393cd257a2d2a1230
 SOURCE=archive
 ARCHIVE=$(VERSION).tar.gz
 GIT_BASE_URL=https://github.com/koying

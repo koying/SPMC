@@ -142,7 +142,7 @@
 #define ACTION_SHOW_PLAYLIST          33 // used to toggle between current view and playlist view. Can b used in all mymusic xml files
 #define ACTION_QUEUE_ITEM             34 // used to queue a item to the playlist. Can b used in all mymusic xml files
 #define ACTION_REMOVE_ITEM            35 // not used anymore
-#define ACTION_SHOW_FULLSCREEN        36 // not used anymore
+#define ACTION_PICTUREINPICTURE       36 //!< Android only: Switch to PIP on API >= 24
 #define ACTION_ZOOM_LEVEL_NORMAL      37 // zoom 1x picture during slideshow. Can b used in slideshow.xml window id=2007
 #define ACTION_ZOOM_LEVEL_1           38 // zoom 2x picture during slideshow. Can b used in slideshow.xml window id=2007
 #define ACTION_ZOOM_LEVEL_2           39 // zoom 3x picture during slideshow. Can b used in slideshow.xml window id=2007

@@ -128,6 +128,8 @@ public:
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices);
   virtual void onVisibleBehindCanceled();
+  virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
+  virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
 
   bool isValid() { return m_activity != NULL; }
 
@@ -198,6 +200,9 @@ public:
   // Application slow ping
   void ProcessSlow();
 
+  //PIP
+  static void RequestPictureInPictureMode();
+
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }
 
@@ -229,6 +234,7 @@ private:
   static bool m_hasAudioFocus;
   static bool m_headsetPlugged;
   static bool m_hasReqVisible;
+  static bool m_hasPIP;
   bool m_videosurfaceInUse;
   bool m_firstrun;
   bool m_exiting;
