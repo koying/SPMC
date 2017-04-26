@@ -2024,6 +2024,23 @@ bool CApplication::OnAppCommand(const CAction &action)
 
 bool CApplication::OnAction(const CAction &action)
 {
+  if (action.GetID() == ACTION_PICTUREINPICTURE)
+  {
+#if defined(TARGET_ANDROID)
+    if (CJNIBase::GetSDKVersion() >= 24)
+    {
+      CXBMCApp::get()->RequestPictureInPictureMode();
+      return true;
+    }
+    else
+#endif
+    if (SwitchToFullScreen())
+    {
+      m_navigationTimer.StartZero();
+      return true;
+    }
+  }
+
   // special case for switching between GUI & fullscreen mode.
   if (action.GetID() == ACTION_SHOW_GUI)
   { // Switch to fullscreen mode if we can

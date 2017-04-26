@@ -126,7 +126,9 @@ public:
   virtual void onAudioFocusChange(int focusChange);
   virtual void doFrame(int64_t frameTimeNanos);
   virtual void onVisibleBehindCanceled();
-  
+  virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
+  virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
+
   // implementation of CJNIInputManagerInputDeviceListener
   void onInputDeviceAdded(int deviceId) override;
   void onInputDeviceChanged(int deviceId) override;
@@ -214,6 +216,9 @@ public:
   // Application slow ping
   void ProcessSlow();
 
+  //PIP
+  static void RequestPictureInPictureMode();
+
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }
 
@@ -251,6 +256,7 @@ private:
   static IInputDeviceCallbacks* m_inputDeviceCallbacks;
   static IInputDeviceEventHandler* m_inputDeviceEventHandler;
   static bool m_hasReqVisible;
+  static bool m_hasPIP;
   bool m_videosurfaceInUse;
   bool m_firstrun;
   bool m_exiting;
