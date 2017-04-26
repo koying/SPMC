@@ -76,6 +76,7 @@ static const ActionMapping actions[] =
     { "skipnext"                 , ACTION_NEXT_ITEM },
     { "skipprevious"             , ACTION_PREV_ITEM },
     { "fullscreen"               , ACTION_SHOW_GUI },
+    { "pictureinpicture"         , ACTION_PICTUREINPICTURE },
     { "aspectratio"              , ACTION_ASPECT_RATIO },
     { "stepforward"              , ACTION_STEP_FORWARD },
     { "stepback"                 , ACTION_STEP_BACK },
