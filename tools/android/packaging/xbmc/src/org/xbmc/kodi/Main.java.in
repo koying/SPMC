@@ -41,6 +41,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private XBMCInputDeviceListener mInputDeviceListener;
   private XBMCJsonRPC mJsonRPC = null;
   private View mDecorView = null;
+  private View mVideoLayout = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
   private XBMCProjection mCaptureProjection = null;
@@ -172,8 +173,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
     try
     {
-      ret.right = thisView.getRootView().getWidth();
-      ret.bottom = thisView.getRootView().getHeight();
+      ret.right = mVideoLayout.getWidth();
+      ret.bottom = mVideoLayout.getHeight();
     }
     catch (Exception e) {}
 
@@ -289,6 +290,7 @@ private void hideSystemUI()
             }
           });
     setContentView(R.layout.activity_main);
+    mVideoLayout = findViewById(R.id.VideoLayout);
   }
 
   @Override
