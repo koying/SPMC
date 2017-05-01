@@ -42,7 +42,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private XBMCJsonRPC mJsonRPC = null;
   private XBMCProjection mCaptureProjection = null;
   private XBMCProjection mScreenshotProjection = null;
-  private View thisView = null;
+  private View mDecorView = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
   private int mNewIntentDelay = 0;
@@ -250,6 +250,20 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mCaptureProjection.stopCapture();
   }
 
+private void hideSystemUI()
+{
+    // Set the IMMERSIVE flag.
+    // Set the content to appear under the system bars so that the content
+    // doesn't resize when the system bars hide and show.
+    mDecorView.setSystemUiVisibility(
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+  }
+
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
@@ -258,7 +272,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     super.onCreate(savedInstanceState);
     getWindow().setFormat(PixelFormat.TRANSPARENT);
 
-    setContentView(R.layout.activity_main);
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
     mSettingsContentObserver = new XBMCSettingsContentObserver(this, handler);
@@ -284,8 +297,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       getIntent().setData(null);
     }
 
-    thisView = getWindow().getDecorView();
-    thisView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
+    mDecorView = getWindow().getDecorView();
+    mDecorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
           {
             @Override
             public void onSystemUiVisibilityChange(int visibility)
@@ -296,25 +309,13 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
                 {
                   public void run()
                   {
-                    if (android.os.Build.VERSION.SDK_INT >= 19) {
-                      // Immersive mode
-
-                      // Constants from API > 17
-                      final int API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 0x00001000;
-
-                      thisView.setSystemUiVisibility(
-                                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                              | View.SYSTEM_UI_FLAG_FULLSCREEN
-                              | API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-                    }
+                    hideSystemUI();
                   }
                 });
               }
             }
           });
+    setContentView(R.layout.activity_main);
   }
 
   @Override
@@ -341,22 +342,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onResume();
 
-    Window window = getWindow();
-    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-    if (android.os.Build.VERSION.SDK_INT >= 19) {
-      // Immersive mode
-
-      // Constants from API > 17
-      final int API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY = 0x00001000;
-
-      thisView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-              | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_FULLSCREEN
-              | API_SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    hideSystemUI();
 
     // New intent ?
     if (mNewIntent != null)
