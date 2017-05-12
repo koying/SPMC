@@ -128,7 +128,7 @@ void CRenderCaptureDroid::ReadOut()
       std::vector<jni::CJNIImagePlane> planes = image.getPlanes();
       CJNIByteBuffer bytebuffer = planes[0].getBuffer();
 
-      struct SwsContext *context = sws_getContext(iWidth, iHeight, AV_PIX_FMT_BGRA,
+      struct SwsContext *context = sws_getContext(iWidth, iHeight, AV_PIX_FMT_RGBA,
                                                   m_width, m_height, AV_PIX_FMT_BGRA,
                                                   SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
