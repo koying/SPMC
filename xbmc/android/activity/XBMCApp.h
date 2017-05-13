@@ -40,18 +40,19 @@
 #include "androidjni/AudioManager.h"
 #include "androidjni/AudioDeviceInfo.h"
 #include "androidjni/Image.h"
+#include <androidjni/SurfaceHolder.h>
 #include "threads/Event.h"
 #include "interfaces/IAnnouncer.h"
 #include "guilib/Geometry.h"
 
-#include "android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
-#include "android/activity/JNIXBMCMediaSession.h"
+#include "JNIMainActivity.h"
+#include "JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
+#include "JNIXBMCMainView.h"
+#include "JNIXBMCMediaSession.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-
-#include "JNIMainActivity.h"
 
 // forward delares
 class CJNIWakeLock;
@@ -108,6 +109,7 @@ class CXBMCApp
     , public CJNIMainActivity
     , public CJNIBroadcastReceiver
     , public ANNOUNCEMENT::IAnnouncer
+    , public CJNISurfaceHolderCallback
 {
 public:
   CXBMCApp(ANativeActivity *nativeActivity);
@@ -218,6 +220,7 @@ protected:
 private:
   static CXBMCApp* m_xbmcappinstance;
   CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
+  static std::unique_ptr<CJNIXBMCMainView> m_mainView;
   std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
   static bool HasLaunchIntent(const std::string &package);
   std::string GetFilenameFromIntent(const CJNIIntent &intent);
@@ -248,7 +251,6 @@ private:
   static std::queue<jni::CJNIImage> m_captureQueue;
 
   static ANativeWindow* m_window;
-  static CEvent m_windowCreated;
   static std::vector<GLuint> m_texturePool;
 
   static CJNIAudioDeviceInfos m_audiodevices;
@@ -258,4 +260,10 @@ private:
 
   bool XBMC_DestroyDisplay();
   bool XBMC_SetupDisplay();
+
+  // CJNISurfaceHolderCallback interface
+public:
+  void surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height) override;
+  void surfaceCreated(CJNISurfaceHolder holder) override;
+  void surfaceDestroyed(CJNISurfaceHolder holder) override;
 };

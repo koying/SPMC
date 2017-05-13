@@ -2450,6 +2450,7 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java \
+    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMainView.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java \
     tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaContentProvider.java \

@@ -7,6 +7,9 @@ import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.hardware.input.InputManager;
+import android.graphics.Rect;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioDeviceCallback;
@@ -37,13 +40,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private static final int INTENT_RESULT_PROJECT_CODE = 4658;
 
   public static Main MainActivity = null;
+  public XBMCMainView mMainView = null;
 
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCJsonRPC mJsonRPC = null;
   private XBMCProjection mCaptureProjection = null;
   private XBMCProjection mScreenshotProjection = null;
   private View mDecorView = null;
-  private View mVideoLayout = null;
+  private RelativeLayout mVideoLayout = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
   private int mNewIntentDelay = 0;
@@ -271,7 +275,6 @@ private void hideSystemUI()
     System.loadLibrary("@APP_NAME_LC@");
 
     super.onCreate(savedInstanceState);
-    getWindow().setFormat(PixelFormat.TRANSPARENT);
 
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -316,9 +319,15 @@ private void hideSystemUI()
               }
             }
           });
+    getWindow().takeSurface(null);
     setContentView(R.layout.activity_main);
-    mVideoLayout = findViewById(R.id.VideoLayout);
-  }
+    mVideoLayout = (RelativeLayout)findViewById(R.id.VideoLayout);
+
+    mMainView = new XBMCMainView(this);
+    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+    mMainView.setElevation(1);  // Always on Top
+    mVideoLayout.addView(mMainView, layoutParams);
+}
 
   @Override
   protected void onNewIntent(Intent intent)
@@ -333,7 +342,6 @@ private void hideSystemUI()
   public void onStart()
   {
     super.onStart();
-    getWindow().setFormat(PixelFormat.TRANSPARENT);
 
     Choreographer.getInstance().removeFrameCallback(this);
     Choreographer.getInstance().postFrameCallback(this);
