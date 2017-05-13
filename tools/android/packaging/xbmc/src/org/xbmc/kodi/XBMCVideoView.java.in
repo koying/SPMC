@@ -56,7 +56,6 @@ public class XBMCVideoView extends SurfaceView implements
     super(context);
     getHolder().addCallback(this);
     getHolder().setFormat(PixelFormat.TRANSPARENT);
-    setZOrderMediaOverlay(true);
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
   }
 
@@ -67,11 +66,8 @@ public class XBMCVideoView extends SurfaceView implements
       @Override
       public void run()
       {
-        mVideoLayout.addView(XBMCVideoView.this);
-
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        setLayoutParams(layoutParams);
-        setBackgroundColor(Color.TRANSPARENT);
+        mVideoLayout.addView(XBMCVideoView.this, layoutParams);
       }
     });
   }
