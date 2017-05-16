@@ -117,6 +117,7 @@ CNetworkServices::CNetworkServices()
   , m_httpWebinterfaceAddonsHandler(*new CHTTPWebinterfaceAddonsHandler)
 #endif // HAS_WEB_INTERFACE
 #endif // HAS_WEB_SERVER
+
 {
 #ifdef HAS_WEB_SERVER
   CWebServer::RegisterRequestHandler(&m_httpImageHandler);
@@ -446,7 +447,8 @@ void CNetworkServices::OnSettingChanged(const CSetting *setting)
   else
 #endif // HAS_WEB_SERVER
   if (settingId == CSettings::SETTING_SMB_WINSSERVER ||
-      settingId == CSettings::SETTING_SMB_WORKGROUP)
+      settingId == CSettings::SETTING_SMB_WORKGROUP ||
+      settingId == CSettings::SETTING_SMB_MAXPROTOCOL)
   {
     // okey we really don't need to restart, only deinit samba, but that could be damn hard if something is playing
     // TODO - General way of handling setting changes that require restart
