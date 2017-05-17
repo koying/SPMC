@@ -32,6 +32,7 @@
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "Util.h"
+#include "filesystem/SpecialProtocol.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/TimeUtils.h"
@@ -96,15 +97,15 @@ void CSMB::Init()
     // Create ~/.smb/smb.conf. This file is used by libsmbclient.
     // http://us1.samba.org/samba/docs/man/manpages-3/libsmbclient.7.html
     // http://us1.samba.org/samba/docs/man/manpages-3/smb.conf.5.html
-    char smb_conf[MAX_PATH];
-    std::string home(getenv("HOME"));
-    URIUtils::RemoveSlashAtEnd(home);
-    snprintf(smb_conf, sizeof(smb_conf), "%s/.smb", home.c_str());
-    int ret = mkdir(smb_conf, 0755);
-    if (ret == 0 || CSettings::GetInstance().GetBool(CSettings::SETTING_SMB_OVERWRITECONF))
+    std::string smb_path(CSpecialProtocol::TranslatePath("special://home/.smb"));
+    std::string smb_conf = smb_path + "/smb.conf";
+    setenv("SMB_CONF_PATH", smb_conf.c_str(), 0);
+    CLog::Log(LOGDEBUG, "smb path: %s", getenv("SMB_CONF_PATH"));
+
+    int ret = mkdir(smb_path.c_str(), 0755);
+    if (ret == 0)
     {
-      snprintf(smb_conf, sizeof(smb_conf), "%s/.smb/smb.conf", getenv("HOME"));
-      FILE* f = fopen(smb_conf, "w");
+      FILE* f = fopen(smb_conf.c_str(), "w");
       if (f != NULL)
       {
         fprintf(f, "[global]\n");
@@ -119,7 +120,7 @@ void CSMB::Init()
         fprintf(f, "\tlanman auth = yes\n");
 
         fprintf(f, "\tsocket options = TCP_NODELAY IPTOS_LOWDELAY SO_RCVBUF=65536 SO_SNDBUF=65536\n");      
-        fprintf(f, "\tlock directory = %s/.smb/\n", getenv("HOME"));
+        fprintf(f, "\tlock directory = %s/\n", smb_path.c_str());
 
         // set wins server if there's one. name resolve order defaults to 'lmhosts host wins bcast'.
         // if no WINS server has been specified the wins method will be ignored.
