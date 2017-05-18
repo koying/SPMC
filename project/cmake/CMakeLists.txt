@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(kodi LANGUAGES CXX C ASM)
+project(spmc LANGUAGES CXX C ASM)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/modules)
 if(DEPENDS_DIR)
