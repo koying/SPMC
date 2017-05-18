@@ -95,6 +95,10 @@
 #include "CompileInfo.h"
 #include "interfaces/AnnouncementManager.h"
 
+#if defined(HAS_LIBAMCODEC)
+#include "utils/AMLUtils.h"
+#endif
+
 #define GIGABYTES       1073741824
 #define CAPTURE_QUEUE_MAXDEPTH 3
 
