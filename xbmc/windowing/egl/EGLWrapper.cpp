@@ -90,19 +90,20 @@ bool CEGLWrapper::Initialize(const std::string &implementation)
 
   // Try to create each backend in sequence and go with the first one
   // that we know will work
-  if (
 #if defined(TARGET_ANDROID) && defined(HAS_LIBAMCODEC)
-      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlAndroid>(implementation))
+  nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlAndroid>(implementation);
+  if (!nativeGuess)
+    nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation);
 #elif defined(TARGET_ANDROID)
-      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation))
+  nativeGuess = CreateEGLNativeType<CEGLNativeTypeAndroid>(implementation);
 #elif defined(TARGET_RASPBERRY_PI)
-      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeRaspberryPI>(implementation))
+  nativeGuess = CreateEGLNativeType<CEGLNativeTypeRaspberryPI>(implementation);
 #elif defined(HAS_IMXVPU)
-      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeIMX>(implementation))
+  nativeGuess = CreateEGLNativeType<CEGLNativeTypeIMX>(implementation);
 #elif defined(TARGET_LINUX) && defined(HAS_LIBAMCODEC)
-      (nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlogic>(implementation))
+  nativeGuess = CreateEGLNativeType<CEGLNativeTypeAmlogic>(implementation);
 #endif
-      )
+  if (nativeGuess)
   {
     m_nativeTypes = nativeGuess;
 
