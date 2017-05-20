@@ -5959,6 +5959,8 @@ system/peripherals.xml
 system/playercorefactory.xml
 system/X10-Lola-IRSSmap.xml
 tools/android/packaging/xbmc/AndroidManifest.xml.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMainView.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java.in
 tools/depends/target/android-sources-ics/libbinder.cpp
 tools/depends/target/android-sources-ics/libcutils.c
 tools/depends/target/android-sources-ics/libgui.cpp
@@ -6149,6 +6151,8 @@ xbmc/network/android/ZeroconfAndroid.h
 xbmc/network/android/ZeroconfBrowserAndroid.cpp
 xbmc/network/android/ZeroconfBrowserAndroid.h
 xbmc/platform/android/activity/CMakeLists.txt
+xbmc/platform/android/activity/JNIXBMCMainView.cpp
+xbmc/platform/android/activity/JNIXBMCMainView.h
 xbmc/platform/android/activity/android_main.cpp
 xbmc/platform/android/activity/AndroidExtra.h
 xbmc/platform/android/activity/AndroidFeatures.cpp
@@ -9186,6 +9190,8 @@ xbmc/windows/GUIWindowScreensaver.cpp
 xbmc/windows/GUIWindowScreensaver.h
 xbmc/windows/GUIWindowScreensaverDim.cpp
 xbmc/windows/GUIWindowScreensaverDim.h
+xbmc/windows/GUIWindowSplash.cpp
+xbmc/windows/GUIWindowSplash.h
 xbmc/windows/GUIWindowStartup.cpp
 xbmc/windows/GUIWindowStartup.h
 xbmc/windows/GUIWindowSystemInfo.cpp
@@ -9275,9 +9281,6 @@ android-ext-player.patch
 copying.txt
 gitrev.sh
 xbmc-xrandr.c
-tools/android/packaging/xbmc/src/com/semperpax/xbmc/XBMCBroadcastReceiver.java
-tools/android/packaging/xbmc/src/com/semperpax/xbmc/Splash.java
-tools/android/packaging/xbmc/src/com/semperpax/xbmc/Main.java
 xbmc/DllPaths_generated_android.h.in
 xbmc/DllPaths_generated.h.in
 Makefile.in
@@ -9293,12 +9296,9 @@ xbmc/filesystem/LocationsDirectory.h
 xbmc/filesystem/LocationsDirectory.cpp
 xbmc/linux/LinuxV4l2.h
 xbmc/linux/LinuxV4l2.cpp
-tools/android/packaging/xbmc/src/com/semperpax/xbmc/XBMCOnFrameAvailableListener.java
 xbmc/platform/android/activity/AndroidJoystick.h
 xbmc/platform/android/activity/AndroidJoyStick.h
 xbmc/platform/android/activity/AndroidJoyStick.cpp
-tools/android/packaging/xbmc/src/org/xbmc/xbmc/XBMCOnFrameAvailableListener.java
-tools/android/packaging/xbmc/src/org/xbmc/xbmc/XBMCBroadcastReceiver.java
 xbmc/platform/android/jni/Build.h
 xbmc/platform/android/jni/Build.cpp
 xbmc/ApplicationPlayer.h
@@ -9449,18 +9449,6 @@ xbmc/messaging/ApplicationMessenger.cpp
 xbmc/platform/android/jni/AudioTrack.h
 xbmc/platform/android/jni/AudioTrack.cpp
 xbmc/platform/android/jni/jutils/jni.inc
-tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaContentProvider.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnAudioFocusChangeListener.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCOnFrameAvailableListener.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java
 xbmc/platform/android/jni/URIPermission.h
 xbmc/platform/android/jni/URIPermission.cpp
 xbmc/filesystem/AndroidContentDirectory.cpp
@@ -9852,7 +9840,6 @@ xbmc/platform/android/activity/AndroidFeatures.h
 xbmc/platform/android/activity/AndroidKey.h
 xbmc/platform/android/activity/AndroidTouch.cpp
 xbmc/platform/android/activity/AndroidJoyStick.cpp
-tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCInputDeviceListener.java
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCInputDeviceListener.java.in
 xbmc/ServiceManager.cpp
 xbmc/ServiceManager.h
@@ -9922,3 +9909,8 @@ xbmc/listproviders/MultiProvider.cpp
 xbmc/listproviders/MultiProvider.h
 xbmc/listproviders/StaticProvider.cpp
 xbmc/listproviders/StaticProvider.h
+tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerDiscoveryListener.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerRegistrationListener.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerResolveListener.java.in
+tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java.in

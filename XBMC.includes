@@ -488,3 +488,4 @@ project/cmake/scripts/android
 project/cmake/platform/android
 project/cmake/treedata/android
 xbmc/network/android
+tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces
