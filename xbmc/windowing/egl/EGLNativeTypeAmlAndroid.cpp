@@ -39,9 +39,8 @@ bool CEGLNativeTypeAmlAndroid::CheckCompatibility()
       m_isWritable = true;
     else
       CLog::Log(LOGINFO, "AMLEGL: no rw on /sys/class/display/mode");
-    return true;
   }
-  return false;
+  return m_isWritable;
 }
 
 bool CEGLNativeTypeAmlAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
