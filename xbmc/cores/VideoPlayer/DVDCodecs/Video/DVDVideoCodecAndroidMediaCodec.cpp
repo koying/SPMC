@@ -63,6 +63,7 @@
 #define XMEDIAFORMAT_KEY_CROP_RIGHT "crop-right"
 #define XMEDIAFORMAT_KEY_CROP_TOP "crop-top"
 #define XMEDIAFORMAT_KEY_CROP_BOTTOM "crop-bottom"
+#define XMEDIAFORMAY_KEY_FRAME_RATE "frame-rate"
 
 using namespace KODI::MESSAGING;
 
@@ -1046,6 +1047,7 @@ bool CDVDVideoCodecAndroidMediaCodec::ConfigureMediaCodec(void)
   AMediaFormat_setInt32(mediaformat, AMEDIAFORMAT_KEY_WIDTH, m_hints.width);
   AMediaFormat_setInt32(mediaformat, AMEDIAFORMAT_KEY_HEIGHT, m_hints.height);
   AMediaFormat_setInt32(mediaformat, AMEDIAFORMAT_KEY_MAX_INPUT_SIZE, 0);
+  AMediaFormat_setFloat(mediaformat, XMEDIAFORMAY_KEY_FRAME_RATE, (double)m_hints.fpsrate / m_hints.fpsscale);
 
   if (CJNIBase::GetSDKVersion() >= 23 && m_render_surface)
   {
