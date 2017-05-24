@@ -117,7 +117,7 @@ endif()
 # Optional dependencies
 set(optional_deps LCMS2 MicroHttpd MySqlClient SSH XSLT
                   Alsa UDEV DBus Avahi SmbClient CCache
-                  PulseAudio VDPAU VAAPI Bluetooth CAP)
+                  PulseAudio VDPAU VAAPI Bluetooth CAP Breakpad)
 
 # Required, dyloaded deps
 set(required_dyload Curl ASS)
