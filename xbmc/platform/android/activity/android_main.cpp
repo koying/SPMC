@@ -30,6 +30,7 @@
 #include "CompileInfo.h"
 #include "EventLoop.h"
 #if defined(HAVE_BREAKPAD)
+#define __STDC_FORMAT_MACROS
 #include "client/linux/handler/minidump_descriptor.h"
 #include "client/linux/handler/exception_handler.h"
 #endif
