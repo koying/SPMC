@@ -199,6 +199,9 @@ public:
   void OnPlayBackPaused();
   void OnPlayBackStopped();
 
+  // Info callback
+  void UpdateSessionMetadata();
+
   // Application slow ping
   void ProcessSlow();
 
