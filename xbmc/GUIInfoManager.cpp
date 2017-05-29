@@ -92,6 +92,7 @@
 
 #include "addons/AddonManager.h"
 #include "interfaces/info/InfoBool.h"
+#include "interfaces/AnnouncementManager.h"
 #include "video/VideoThumbLoader.h"
 #include "music/MusicThumbLoader.h"
 #include "video/VideoDatabase.h"
@@ -4608,6 +4609,7 @@ void CGUIInfoManager::SetCurrentItem(CFileItem &item)
 
   SetChanged();
   NotifyObservers(ObservableMessageCurrentItem);
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Info, "xbmc", "OnChanged");
 }
 
 void CGUIInfoManager::SetCurrentAlbumThumb(const std::string &thumbFileName)
