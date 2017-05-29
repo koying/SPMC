@@ -206,6 +206,9 @@ public:
   void OnPlayBackPaused();
   void OnPlayBackStopped();
 
+  // Info callback
+  void UpdateSessionMetadata();
+
   // input device methods
   static void RegisterInputDeviceCallbacks(IInputDeviceCallbacks* handler);
   static void UnregisterInputDeviceCallbacks();
