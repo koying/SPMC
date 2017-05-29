@@ -254,12 +254,6 @@ CUPnPRenderer::Announce(AnnouncementFlag flag, const char *sender, const char *m
             avt->SetStateVariable("AVTransportURI", g_application.CurrentFile().c_str());
             avt->SetStateVariable("CurrentTrackURI", g_application.CurrentFile().c_str());
 
-            NPT_String meta;
-            if (NPT_SUCCEEDED(GetMetadata(meta))) {
-                avt->SetStateVariable("CurrentTrackMetadata", meta);
-                avt->SetStateVariable("AVTransportURIMetaData", meta);
-            }
-
             avt->SetStateVariable("TransportPlaySpeed", NPT_String::FromInteger(data["speed"].asInteger()));
             avt->SetStateVariable("TransportState", "PLAYING");
 
@@ -274,6 +268,16 @@ CUPnPRenderer::Announce(AnnouncementFlag flag, const char *sender, const char *m
         else if (strcmp(message, "OnSpeedChanged") == 0) {
             avt->SetStateVariable("TransportPlaySpeed", NPT_String::FromInteger(data["speed"].asInteger()));
         }
+    }
+    else if (flag == Info && strcmp(message, "OnChanged") == 0) {
+      if (NPT_FAILED(FindServiceByType("urn:schemas-upnp-org:service:AVTransport:1", avt)))
+          return;
+
+      NPT_String meta;
+      if (NPT_SUCCEEDED(GetMetadata(meta))) {
+          avt->SetStateVariable("CurrentTrackMetadata", meta);
+          avt->SetStateVariable("AVTransportURIMetaData", meta);
+      }
     }
     else if (flag == Application && strcmp(message, "OnVolumeChanged") == 0) {
         if (NPT_FAILED(FindServiceByType("urn:schemas-upnp-org:service:RenderingControl:1", rct)))
