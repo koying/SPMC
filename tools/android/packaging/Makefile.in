@@ -119,14 +119,15 @@ res:
 	mkdir -p xbmc/gen/@APP_PACKAGE_DIR@ xbmc/res xbmc/res/raw xbmc/res/values images
 	@echo "native_arch=$(CPU)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(CORE_SOURCE_DIR)/media/Splash.png xbmc/res/drawable/splash.png
-	cp -fp media/drawable-hdpi/ic_launcher.png xbmc/res/drawable-hdpi/ic_launcher.png
-	cp -fp media/drawable-ldpi/ic_launcher.png xbmc/res/drawable-ldpi/ic_launcher.png
-	cp -fp media/drawable-mdpi/ic_launcher.png xbmc/res/drawable-mdpi/ic_launcher.png
-	cp -fp media/drawable-xhdpi/ic_launcher.png xbmc/res/drawable-xhdpi/ic_launcher.png
-	cp -fp media/drawable-xxhdpi/ic_launcher.png xbmc/res/drawable-xxhdpi/ic_launcher.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon36x36.png xbmc/res/drawable/notif_icon.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon36x36.png xbmc/res/drawable-ldpi/ic_launcher.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon48x48.png xbmc/res/drawable-mdpi/ic_launcher.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon72x72.png xbmc/res/drawable-hdpi/ic_launcher.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon96x96.png xbmc/res/drawable-xhdpi/ic_launcher.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon144x144.png xbmc/res/drawable-xxhdpi/ic_launcher.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon192x192.png xbmc/res/drawable-xxxhdpi/ic_launcher.png
 	cp -fp $(CORE_SOURCE_DIR)/media/Splash.png xbmc/res/drawable-xxxhdpi/splash.png
-	cp -fp media/drawable-xxxhdpi/ic_launcher.png xbmc/res/drawable-xxxhdpi/ic_launcher.png
-	cp -fp media/drawable-xhdpi/banner.png xbmc/res/drawable-xhdpi/banner.png
+	cp -fp $(CORE_SOURCE_DIR)/media/banner.png xbmc/res/drawable-xhdpi/banner.png
 	cp xbmc/strings.xml xbmc/res/values/
 	cp xbmc/colors.xml xbmc/res/values/
 	cp xbmc/activity_main.xml xbmc/res/layout/
