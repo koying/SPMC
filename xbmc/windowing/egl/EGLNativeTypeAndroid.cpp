@@ -308,7 +308,7 @@ bool CEGLNativeTypeAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
 
   EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
   if (nativeWindow)
-    CXBMCApp::SetBuffersGeometry(res.iWidth, res.iHeight, 0);
+    CXBMCApp::SetBuffersGeometry(res.iWidth, res.iHeight);
 
   return true;
 }
