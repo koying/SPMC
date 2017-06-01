@@ -565,9 +565,9 @@ bool CXBMCApp::XBMC_DestroyDisplay()
   return result;
 }
 
-int CXBMCApp::SetBuffersGeometry(int width, int height, int format)
+int CXBMCApp::SetBuffersGeometry(int width, int height)
 {
-  return ANativeWindow_setBuffersGeometry(m_window, width, height, format);
+  return ANativeWindow_setBuffersGeometry(m_window, width, height, WINDOW_FORMAT_RGBA_8888);
 }
 
 #include "threads/Event.h"
