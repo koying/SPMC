@@ -569,20 +569,16 @@ void CXBMCApp::run()
   m_exiting=true;
 }
 
-bool CXBMCApp::XBMC_SetupDisplay()
+void CXBMCApp::XBMC_SetupDisplay()
 {
   android_printf("XBMC_SetupDisplay()");
-  bool result;
-  CApplicationMessenger::GetInstance().SendMsg(TMSG_DISPLAY_SETUP, -1, -1, static_cast<void*>(&result));
-  return result;
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_SETUP);
 }
 
-bool CXBMCApp::XBMC_DestroyDisplay()
+void CXBMCApp::XBMC_DestroyDisplay()
 {
   android_printf("XBMC_DestroyDisplay()");
-  bool result;
-  CApplicationMessenger::GetInstance().SendMsg(TMSG_DISPLAY_DESTROY, -1, -1, static_cast<void*>(&result));
-  return result;
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_DESTROY);
 }
 
 int CXBMCApp::SetBuffersGeometry(int width, int height)
@@ -1469,10 +1465,7 @@ void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
     android_printf(" => invalid ANativeWindow object");
     return;
   }
-  if(!m_firstrun)
-  {
-    XBMC_SetupDisplay();
-  }
+  XBMC_SetupDisplay();
 }
 
 void CXBMCApp::surfaceDestroyed(CJNISurfaceHolder holder)

@@ -261,8 +261,8 @@ private:
   static uint64_t m_vsynctime;
   static CEvent m_vsyncEvent;
 
-  bool XBMC_DestroyDisplay();
-  bool XBMC_SetupDisplay();
+  void XBMC_DestroyDisplay();
+  void XBMC_SetupDisplay();
 
   // CJNISurfaceHolderCallback interface
 public:

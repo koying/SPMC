@@ -2596,13 +2596,16 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
 
 #ifdef TARGET_ANDROID
   case TMSG_DISPLAY_SETUP:
+    // If we are rendering GUI, we are in first run
+    if (m_renderGUI)
+      break;
     // We might come from a refresh rate switch destroying the native window; use the context resolution
-    *static_cast<bool*>(pMsg->lpVoid) = InitWindow(g_graphicsContext.GetVideoResolution());
+    InitWindow(g_graphicsContext.GetVideoResolution());
     SetRenderGUI(true);
     break;
 
   case TMSG_DISPLAY_DESTROY:
-    *static_cast<bool*>(pMsg->lpVoid) = DestroyWindow();
+    DestroyWindow();
     SetRenderGUI(false);
     break;
 #endif
