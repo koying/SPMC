@@ -120,6 +120,7 @@ res:
 	@echo "native_arch=$(CPU)" > xbmc/res/raw/xbmc.properties
 	cp -fp $(CORE_SOURCE_DIR)/media/Splash.png xbmc/res/drawable-nodpi/splash.png
 	cp -fp $(CORE_SOURCE_DIR)/media/banner.png xbmc/res/drawable-xhdpi/banner.png
+	cp -fp $(CORE_SOURCE_DIR)/media/icon36x36.png xbmc/res/drawable/notif_icon.png
 	cp -fp $(CORE_SOURCE_DIR)/media/icon36x36.png xbmc/res/drawable-ldpi/ic_launcher.png
 	cp -fp $(CORE_SOURCE_DIR)/media/icon48x48.png xbmc/res/drawable-mdpi/ic_launcher.png
 	cp -fp $(CORE_SOURCE_DIR)/media/icon72x72.png xbmc/res/drawable-hdpi/ic_launcher.png
