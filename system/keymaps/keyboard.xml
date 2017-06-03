@@ -333,9 +333,9 @@
       <period>StepForward</period>
       <comma>StepBack</comma>
       <backspace>Stop</backspace>
-      <backspace mod="longpress">DroidPIP</backspace>
+      <backspace mod="longpress">PictureInPicture</backspace>
       <browser_back>Stop</browser_back>
-      <browser_back mod="longpress">DroidPIP</browser_back>
+      <browser_back mod="longpress">PictureInPicture</browser_back>
       <quote>Seek(-7)</quote> <!-- Replaces smallstepback -->
       <opensquarebracket>BigStepForward</opensquarebracket>
       <closesquarebracket>BigStepBack</closesquarebracket>
