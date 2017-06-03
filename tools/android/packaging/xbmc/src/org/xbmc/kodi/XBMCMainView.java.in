@@ -25,8 +25,9 @@ public class XBMCMainView extends SurfaceView implements SurfaceHolder.Callback
   public XBMCMainView(Context context)
   {
     super(context);
-    getHolder().setFormat(PixelFormat.TRANSPARENT);
+    setZOrderOnTop(true);
     getHolder().addCallback(this);
+    getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
     Log.d(TAG, "Created");
 }
@@ -34,7 +35,11 @@ public class XBMCMainView extends SurfaceView implements SurfaceHolder.Callback
   public XBMCMainView(Context context, AttributeSet attrs, int defStyle)
   {
     super(context, attrs, defStyle);
+    setZOrderOnTop(true);
     getHolder().addCallback(this);
+    getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+    Log.d(TAG, "Created");
   }
 
   public XBMCMainView(Context context, AttributeSet attrs)
