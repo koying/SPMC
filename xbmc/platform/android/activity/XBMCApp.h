@@ -287,6 +287,7 @@ private:
   void XBMC_SetupDisplay();
 
   static uint32_t m_playback_state;
+  static CRect m_surface_rect;
 
   // CJNISurfaceHolderCallback interface
 public:
