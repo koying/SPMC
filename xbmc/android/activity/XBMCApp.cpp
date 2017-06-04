@@ -104,6 +104,11 @@
 
 #define ACTION_XBMC_RESUME "android.intent.XBMC_RESUME"
 
+#define PLAYBACK_STATE_STOPPED  0x0000
+#define PLAYBACK_STATE_PLAYING  0x0001
+#define PLAYBACK_STATE_VIDEO    0x0100
+#define PLAYBACK_STATE_AUDIO    0x0200
+
 using namespace std;
 using namespace jni;
 using namespace KODI::MESSAGING;
@@ -140,6 +145,7 @@ uint64_t CXBMCApp::m_vsynctime = 0;
 CEvent CXBMCApp::m_vsyncEvent;
 std::vector<GLuint> CXBMCApp::m_texturePool;
 CJNIAudioDeviceInfos CXBMCApp::m_audiodevices;
+uint32_t CXBMCApp::m_playback_state = PLAYBACK_STATE_STOPPED;
 
 void LogAudoDevices(const char* stage, const CJNIAudioDeviceInfos& devices)
 {
@@ -296,7 +302,7 @@ void CXBMCApp::onResume()
   }
 
   // Re-request Visible Behind
-  if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
+  if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
     RequestVisibleBehind(true);
   
   m_isResumed = true;
@@ -324,14 +330,8 @@ void CXBMCApp::onStop()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
 
-  if (g_application.m_pPlayer->IsPlaying())
-  {
-    if (g_application.m_pPlayer->HasVideo())
-    {
-      if (!g_application.m_pPlayer->IsPaused() && !m_hasReqVisible)
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
-    }
-  }
+  if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO) && !m_hasReqVisible)
+    CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
 }
 
 void CXBMCApp::onDestroy()
@@ -792,7 +792,7 @@ void CXBMCApp::UpdateSessionMetadata()
       ;
 
   std::string thumb;
-  if (g_application.m_pPlayer->HasVideo())
+  if (m_playback_state & PLAYBACK_STATE_VIDEO)
   {
     builder
         .putString(CJNIMediaMetadata::METADATA_KEY_DISPLAY_SUBTITLE, g_infoManager.GetLabel(VIDEOPLAYER_TAGLINE))
@@ -826,6 +826,12 @@ void CXBMCApp::OnPlayBackStarted()
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
+  m_playback_state = PLAYBACK_STATE_PLAYING;
+  if (g_application.m_pPlayer->HasVideo())
+    m_playback_state |= PLAYBACK_STATE_VIDEO;
+  if (g_application.m_pPlayer->HasAudio())
+    m_playback_state |= PLAYBACK_STATE_AUDIO;
+
   m_mediaSession->activate(true);
 
   CJNIIntent intent(ACTION_XBMC_RESUME, CJNIURI::EMPTY, *this, get_class(CJNIContext::get_raw()));
@@ -839,6 +845,8 @@ void CXBMCApp::OnPlayBackPaused()
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
+  m_playback_state &= ~PLAYBACK_STATE_PLAYING;
+
   RequestVisibleBehind(false);
   m_xbmcappinstance->ReleaseAudioFocus();
 }
@@ -846,6 +854,8 @@ void CXBMCApp::OnPlayBackPaused()
 void CXBMCApp::OnPlayBackStopped()
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  m_playback_state = PLAYBACK_STATE_STOPPED;
 
   RequestVisibleBehind(false);
   CAndroidKey::SetHandleMediaKeys(false);
@@ -861,14 +871,14 @@ void CXBMCApp::ProcessSlow()
     int state = CJNIPlaybackState::STATE_NONE;
     int64_t pos = 0;
     float speed = 0.0;
-    if (g_application.m_pPlayer->IsPlaying())
+    if (m_playback_state != PLAYBACK_STATE_STOPPED)
     {
       pos = g_application.m_pPlayer->GetTime();
       speed = g_application.m_pPlayer->GetPlaySpeed();
-      if (g_application.m_pPlayer->IsPaused())
-        state = CJNIPlaybackState::STATE_PAUSED;
-      else
+      if (m_playback_state & PLAYBACK_STATE_PLAYING)
         state = CJNIPlaybackState::STATE_PLAYING;
+      else
+        state = CJNIPlaybackState::STATE_PAUSED;
     }
     else
       state = CJNIPlaybackState::STATE_STOPPED;
@@ -1100,7 +1110,7 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.SCREEN_OFF")
   {
-    if (g_application.m_pPlayer->IsPlayingVideo())
+    if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
   }
   else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
@@ -1109,7 +1119,7 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.MEDIA_BUTTON")
   {
-    if (!g_application.m_pPlayer->IsPlaying())
+    if (m_playback_state == PLAYBACK_STATE_STOPPED)
     {
       CLog::Log(LOGINFO, "Ignore MEDIA_BUTTON intent: no media playing");
       return;
@@ -1188,11 +1198,11 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
   }
   else if (action == ACTION_XBMC_RESUME)
   {
-    if (g_application.m_pPlayer->IsPlaying())
+    if (m_playback_state != PLAYBACK_STATE_STOPPED)
     {
-      if (g_application.m_pPlayer->HasVideo())
+      if (m_playback_state & PLAYBACK_STATE_VIDEO)
         RequestVisibleBehind(true);
-      if (g_application.m_pPlayer->IsPaused())
+      if (!(m_playback_state & PLAYBACK_STATE_PLAYING))
         CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
     }
   }
@@ -1282,7 +1292,7 @@ void CXBMCApp::onVisibleBehindCanceled()
   m_hasReqVisible = false;
 
   // Pressing the pause button calls OnStop() (cf. https://code.google.com/p/android/issues/detail?id=186469)
-  if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
+  if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
     CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
 }
 
@@ -1341,7 +1351,7 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
     m_hasAudioFocus = false;
     m_mediaSession->activate(false);
 
-    if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+    if (m_playback_state & PLAYBACK_STATE_PLAYING)
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
   }
 /*
@@ -1349,7 +1359,7 @@ void CXBMCApp::onAudioFocusChange(int focusChange)
   {
     m_hasAudioFocus = true;
     registerMediaButtonEventReceiver();
-    if (g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->IsPaused())
+    if (m_playback_state && !(m_playback_state & PLAYBACK_STATE_PLAYING))
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
   }
 */
