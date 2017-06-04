@@ -208,6 +208,7 @@ public:
 
   // Info callback
   void UpdateSessionMetadata();
+  void UpdateSessionState();
 
   // input device methods
   static void RegisterInputDeviceCallbacks(IInputDeviceCallbacks* handler);
