@@ -152,12 +152,6 @@ void CJNIMainActivity::_doFrame(JNIEnv *env, jobject context, jlong frameTimeNan
     m_appInstance->doFrame(frameTimeNanos);
 }
 
-CJNIRect CJNIMainActivity::getDisplayRect()
-{
-  return call_method<jhobject>(m_context,
-                               "getDisplayRect", "()Landroid/graphics/Rect;");
-}
-
 void CJNIMainActivity::registerMediaButtonEventReceiver()
 {
   call_method<void>(m_context,

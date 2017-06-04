@@ -185,24 +185,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     MainActivity = this;
   }
 
-  public Rect getDisplayRect()
-  {
-    Rect ret = new Rect();
-    ret.top = 0;
-    ret.left = 0;
-    ret.right = 0;
-    ret.bottom = 0;
-
-    try
-    {
-      ret.right = mVideoLayout.getWidth();
-      ret.bottom = mVideoLayout.getHeight();
-    }
-    catch (Exception e) {}
-
-    return ret;
-  }
-
   public void registerMediaButtonEventReceiver()
   {
     AudioManager manager = (AudioManager) getSystemService(AUDIO_SERVICE);

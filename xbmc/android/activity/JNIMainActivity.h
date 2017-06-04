@@ -53,8 +53,6 @@ public:
   static void startCrashHandler();
   static void uploadLog();
 
-  CJNIRect getDisplayRect();
-  
   static void takeScreenshot();
   static void startProjection();
   static void startCapture(int width, int height);

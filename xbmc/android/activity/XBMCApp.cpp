@@ -146,6 +146,7 @@ CEvent CXBMCApp::m_vsyncEvent;
 std::vector<GLuint> CXBMCApp::m_texturePool;
 CJNIAudioDeviceInfos CXBMCApp::m_audiodevices;
 uint32_t CXBMCApp::m_playback_state = PLAYBACK_STATE_STOPPED;
+CRect CXBMCApp::m_surface_rect;
 
 void LogAudoDevices(const char* stage, const CJNIAudioDeviceInfos& devices)
 {
@@ -748,15 +749,11 @@ CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
   float scaleX = 1.0;
   float scaleY = 1.0;
 
-  if(m_xbmcappinstance)
+  if(m_xbmcappinstance && m_surface_rect.x2 && m_surface_rect.y2)
   {
-    CJNIRect r = m_xbmcappinstance->getDisplayRect();
-    if (r.width() && r.height())
-    {
-      RESOLUTION_INFO renderRes = CDisplaySettings::GetInstance().GetResolutionInfo(g_renderManager.GetResolution());
-      scaleX = (double)r.width() / renderRes.iWidth;
-      scaleY = (double)r.height() / renderRes.iHeight;
-    }
+    RESOLUTION_INFO renderRes = CDisplaySettings::GetInstance().GetResolutionInfo(g_renderManager.GetResolution());
+    scaleX = (double)m_surface_rect.x2 / renderRes.iWidth;
+    scaleY = (double)m_surface_rect.y2 / renderRes.iHeight;
   }
 
   return CRect(srcRect.x1 * scaleX, srcRect.y1 * scaleY, srcRect.x2 * scaleX, srcRect.y2 * scaleY);
@@ -767,15 +764,11 @@ CPoint CXBMCApp::GetDroidToGuiRatio()
   float scaleX = 1.0;
   float scaleY = 1.0;
 
-  if (m_xbmcappinstance)
+  if(m_xbmcappinstance && m_surface_rect.x2 && m_surface_rect.y2)
   {
-    CJNIRect r = m_xbmcappinstance->getDisplayRect();
-    if (r.width() && r.height())
-    {
-      CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
-      scaleX = gui.Width() / (double)r.width();
-      scaleY = gui.Height() / (double)r.height();
-    }
+    CRect gui = CRect(0, 0, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iWidth, CDisplaySettings::GetInstance().GetCurrentResolutionInfo().iHeight);
+    scaleX = gui.Width() / (double)m_surface_rect.x2;
+    scaleY = gui.Height() / (double)m_surface_rect.y2;
   }
 
   return CPoint(scaleX, scaleY);
@@ -1471,6 +1464,8 @@ const ANativeWindow** CXBMCApp::GetNativeWindow(int timeout)
 
 void CXBMCApp::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {
+  m_surface_rect.x2 = width;
+  m_surface_rect.y2 = height;
 }
 
 void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
