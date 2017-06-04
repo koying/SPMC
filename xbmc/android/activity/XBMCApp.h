@@ -201,6 +201,7 @@ public:
 
   // Info callback
   void UpdateSessionMetadata();
+  void UpdateSessionState();
 
   // Application slow ping
   void ProcessSlow();
