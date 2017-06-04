@@ -285,6 +285,8 @@ private:
   void XBMC_DestroyDisplay();
   void XBMC_SetupDisplay();
 
+  static uint32_t m_playback_state;
+
   // CJNISurfaceHolderCallback interface
 public:
   void surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height) override;
