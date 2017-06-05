@@ -262,6 +262,7 @@ void CXBMCApp::onResume()
     m_applications.clear();
   }
 
+  m_hasReqVisible = false;
   // Re-request Visible Behind
   if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
     RequestVisibleBehind(true);
@@ -287,7 +288,6 @@ void CXBMCApp::onPause()
 
   EnableWakeLock(false);
   m_isResumed = false;
-  m_hasReqVisible = false;
 }
 
 void CXBMCApp::onStop()
