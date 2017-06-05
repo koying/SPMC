@@ -110,9 +110,16 @@ public class XBMCMediaSession
     });
   }
 
-  public void activate(boolean state)
+  public void activate(final boolean state)
   {
-    mSession.setActive(state);
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        mSession.setActive(state);
+      }
+    });
   }
 
   private void updatePlaybackState(PlaybackState mystate)
