@@ -13,7 +13,7 @@ endif
 
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
-          ./configure --prefix=$(PREFIX) --disable-shared --disable-openssl $(CONFIGURE_FLAGS)
+          ./configure --prefix=$(PREFIX) --disable-shared --disable-openssl --disable-documentation $(CONFIGURE_FLAGS)
 
 LIBDYLIB=$(PLATFORM)/lib$(LIBNAME).a
 
