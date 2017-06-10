@@ -5959,6 +5959,7 @@ system/peripherals.xml
 system/playercorefactory.xml
 system/X10-Lola-IRSSmap.xml
 tools/android/packaging/xbmc/AndroidManifest.xml.in
+tools/android/packaging/xbmc/build.gradle.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java.in
