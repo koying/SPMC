@@ -2900,11 +2900,6 @@ bool CApplication::Cleanup()
       m_ServiceManager.reset();
     }
 
-#if defined(TARGET_ANDROID)
-    // enable for all platforms once it's safe
-    g_sectionLoader.UnloadAll();
-#endif
-
     return true;
   }
   catch (...)
