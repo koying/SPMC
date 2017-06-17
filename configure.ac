@@ -2446,29 +2446,29 @@ OUTPUT_FILES_JAVA_DROID=" \
     tools/android/packaging/Makefile \
     tools/android/packaging/xbmc/build.gradle \
     tools/android/packaging/xbmc/AndroidManifest.xml \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/Splash.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/Main.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCBroadcastReceiver.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSettingsContentObserver.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMainView.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCVideoView.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCImageContentProvider.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaContentProvider.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCRecommendationBuilder.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCJsonRPC.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCSearchableActivity.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProperties.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCCrashHandler.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCProjection.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/XBMCMediaSession.java \
+    tools/android/packaging/xbmc/src/Splash.java \
+    tools/android/packaging/xbmc/src/Main.java \
+    tools/android/packaging/xbmc/src/XBMCBroadcastReceiver.java \
+    tools/android/packaging/xbmc/src/XBMCSettingsContentObserver.java \
+    tools/android/packaging/xbmc/src/XBMCMainView.java \
+    tools/android/packaging/xbmc/src/XBMCVideoView.java \
+    tools/android/packaging/xbmc/src/XBMCImageContentProvider.java \
+    tools/android/packaging/xbmc/src/XBMCMediaContentProvider.java \
+    tools/android/packaging/xbmc/src/XBMCRecommendationBuilder.java \
+    tools/android/packaging/xbmc/src/XBMCJsonRPC.java \
+    tools/android/packaging/xbmc/src/XBMCSearchableActivity.java \
+    tools/android/packaging/xbmc/src/XBMCProperties.java \
+    tools/android/packaging/xbmc/src/XBMCCrashHandler.java \
+    tools/android/packaging/xbmc/src/XBMCProjection.java \
+    tools/android/packaging/xbmc/src/XBMCMediaSession.java \
     tools/android/packaging/xbmc/activity_main.xml \
     tools/android/packaging/xbmc/searchable.xml \
     tools/android/packaging/xbmc/strings.xml \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerDiscoveryListener.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerRegistrationListener.java \
-    tools/android/packaging/xbmc/src/org/xbmc/kodi/interfaces/XBMCNsdManagerResolveListener.java \
+    tools/android/packaging/xbmc/src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java \
+    tools/android/packaging/xbmc/src/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java \
+    tools/android/packaging/xbmc/src/interfaces/XBMCNsdManagerDiscoveryListener.java \
+    tools/android/packaging/xbmc/src/interfaces/XBMCNsdManagerRegistrationListener.java \
+    tools/android/packaging/xbmc/src/interfaces/XBMCNsdManagerResolveListener.java \
     "
 
 if test "$target_platform" = "target_android" ; then
