@@ -29,7 +29,7 @@ case $XBMC_PLATFORM_DIR in
     ;;
 
   android)
-    DEFAULT_SDK_VERSION="23"
+    DEFAULT_SDK_VERSION="24"
     DEFAULT_NDK_LEVEL="21"
     DEFAULT_NDK_VERSION="12b"
     DEFAULT_XBMC_DEPENDS_ROOT=$WORKSPACE/tools/depends/xbmc-depends
