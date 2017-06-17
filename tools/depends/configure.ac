@@ -74,7 +74,7 @@ AC_ARG_WITH([sdk-path],
 
 AC_ARG_WITH([sdk],
   [AS_HELP_STRING([--with-sdk],
-  [specify sdk platform version (optional for android). default is android-23])],
+  [specify sdk platform version (optional for android). default is android-24])],
   [use_sdk=$withval])
 
 AC_ARG_WITH([ndk],
@@ -147,7 +147,7 @@ case $host in
     if test "x$use_cpu" = "xauto"; then
       use_cpu="armeabi-v7a"
     fi
-    use_sdk="${use_sdk:-android-23}"
+    use_sdk="${use_sdk:-android-24}"
     use_ndk="${use_ndk:-21}"
     deps_dir="$use_host-$use_ndk"
     platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC"
@@ -165,7 +165,7 @@ case $host in
     if test "x$use_cpu" = "xauto"; then
       use_cpu="arm64-v8a"
     fi
-    use_sdk="${use_sdk:-android-23}"
+    use_sdk="${use_sdk:-android-24}"
     use_ndk="${use_ndk:-21}"
     deps_dir="$use_host-$use_ndk"
     platform_cflags="-DANDROID -Os -fexceptions  -fPIC -DPIC"
@@ -183,7 +183,7 @@ case $host in
     if test "x$use_cpu" = "xauto"; then
       use_cpu=$host_cpu
     fi
-    use_sdk="${use_sdk:-android-23}"
+    use_sdk="${use_sdk:-android-24}"
     use_ndk="${use_ndk:-21}"
     deps_dir="$use_host-$use_ndk"
     platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC"
