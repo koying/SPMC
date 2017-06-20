@@ -7,19 +7,19 @@ if(NOT DEFINED KODI_MIRROR)
   set(KODI_MIRROR "http://mirrors.kodi.tv")
 endif()
 
-### copy all the addon binding header files to include/spmc
+### copy all the addon binding header files to include/kodi
 # make sure include/kodi exists and is empty
-set(APP_LIB_DIR ${ADDON_DEPENDS_PATH}/lib/spmc)
+set(APP_LIB_DIR ${ADDON_DEPENDS_PATH}/lib/kodi)
 if(NOT EXISTS "${APP_LIB_DIR}/")
   file(MAKE_DIRECTORY ${APP_LIB_DIR})
 endif()
 
-set(APP_DATA_DIR ${ADDON_DEPENDS_PATH}/share/spmc)
+set(APP_DATA_DIR ${ADDON_DEPENDS_PATH}/share/kodi)
 if(NOT EXISTS "${APP_DATA_DIR}/")
   file(MAKE_DIRECTORY ${APP_DATA_DIR})
 endif()
 
-set(APP_INCLUDE_DIR ${ADDON_DEPENDS_PATH}/include/spmc)
+set(APP_INCLUDE_DIR ${ADDON_DEPENDS_PATH}/include/kodi)
 if(NOT EXISTS "${APP_INCLUDE_DIR}/")
   file(MAKE_DIRECTORY ${APP_INCLUDE_DIR})
 endif()
@@ -35,12 +35,12 @@ endif()
 # generate the proper KodiConfig.cmake file
 configure_file(${CORE_SOURCE_DIR}/project/cmake/KodiConfig.cmake.in ${APP_LIB_DIR}/KodiConfig.cmake @ONLY)
 
-# copy cmake helpers to lib/spmc
+# copy cmake helpers to lib/kodi
 file(COPY ${CORE_SOURCE_DIR}/project/cmake/scripts/common/AddonHelpers.cmake
           ${CORE_SOURCE_DIR}/project/cmake/scripts/common/AddOptions.cmake
      DESTINATION ${APP_LIB_DIR})
 
-### copy all the addon binding header files to include/spmc
+### copy all the addon binding header files to include/kodi
 # parse addon-bindings.mk to get the list of header files to copy
 core_file_read_filtered(bindings ${CORE_SOURCE_DIR}/xbmc/addons/addon-bindings.mk)
 foreach(binding ${bindings})
