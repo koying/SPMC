@@ -1,0 +1,28 @@
+if(CORE_SYSTEM_NAME STREQUAL windows)
+  list(APPEND SOURCES RenderCaptureDX.cpp)
+  list(APPEND HEADERS RenderCaptureDX.h)
+
+elseif(CORE_SYSTEM_NAME STREQUAL rbpi)
+  list(APPEND SOURCES RenderCaptureRPI.cpp)
+  list(APPEND HEADERS RenderCaptureRPI.h)
+
+elseif(CORE_SYSTEM_NAME STREQUAL android)
+  list(APPEND SOURCES RenderCaptureAndroid.cpp)
+  list(APPEND HEADERS RenderCaptureAndroid.h)
+
+else ()
+  if(IMX_FOUND)
+    list(APPEND SOURCES RenderCaptureIMX.cpp)
+    list(APPEND HEADERS RenderCaptureIMX.h)
+  elseif(OPENGLES_FOUND)
+    list(APPEND SOURCES RenderCaptureGLES.cpp)
+    list(APPEND HEADERS RenderCaptureGLES.h)
+  elseif(OPENGL_FOUND)
+    list(APPEND SOURCES RenderCaptureGL.cpp)
+    list(APPEND HEADERS RenderCaptureGL.h)
+  endif()
+endif()
+
+if(SOURCES)
+  core_add_library(videocaptures)
+endif()

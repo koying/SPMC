@@ -18,7 +18,7 @@
  *
  */
 
-#include "RenderCapture.h"
+#include "RenderCaptureGLES.h"
 #include "utils/log.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
@@ -27,31 +27,40 @@ extern "C" {
 #include "libavutil/mem.h"
 }
 
-CBaseRenderCapture::CBaseRenderCapture()
-{
-  m_state          = CAPTURESTATE_FAILED;
-  m_userState      = CAPTURESTATE_FAILED;
-  m_pixels         = NULL;
-  m_width          = 0;
-  m_height         = 0;
-  m_bufferSize     = 0;
-  m_flags          = 0;
-  m_asyncSupported = false;
-  m_asyncChecked   = false;
-}
-
-CBaseRenderCapture::~CBaseRenderCapture()
+CRenderCaptureGLES::CRenderCaptureGLES()
 {
 }
 
-bool CBaseRenderCapture::UseOcclusionQuery()
+CRenderCaptureGLES::~CRenderCaptureGLES()
 {
-  if (m_flags & CAPTUREFLAG_IMMEDIATELY)
-    return false;
-  else if ((g_advancedSettings.m_videoCaptureUseOcclusionQuery == 0) ||
-           (g_advancedSettings.m_videoCaptureUseOcclusionQuery == -1 &&
-            g_Windowing.GetRenderQuirks() & RENDER_QUIRKS_BROKEN_OCCLUSION_QUERY))
-    return false;
-  else
-    return true;
+  delete[] m_pixels;
+}
+
+int CRenderCaptureGLES::CRenderCaptureGLES()
+{
+  return CAPTUREFORMAT_BGRA;
+}
+
+void CRenderCaptureGLES::BeginRender()
+{
+  if (m_bufferSize != m_width * m_height * 4)
+  {
+    delete[] m_pixels;
+    m_bufferSize = m_width * m_height * 4;
+    m_pixels = new uint8_t[m_bufferSize];
+  }
+}
+
+void CRenderCaptureGLES::EndRender()
+{
+  SetState(CAPTURESTATE_DONE);
+}
+
+void* CRenderCaptureGLES::GetRenderBuffer()
+{
+  return m_pixels;
+}
+
+void CRenderCaptureGLES::ReadOut()
+{
 }

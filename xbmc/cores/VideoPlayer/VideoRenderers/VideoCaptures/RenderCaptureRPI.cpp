@@ -18,7 +18,7 @@
  *
  */
 
-#include "RenderCapture.h"
+#include "RenderCaptureRPI.h"
 #include "utils/log.h"
 #include "windowing/WindowingFactory.h"
 #include "settings/AdvancedSettings.h"
@@ -27,31 +27,38 @@ extern "C" {
 #include "libavutil/mem.h"
 }
 
-CBaseRenderCapture::CBaseRenderCapture()
+CRenderCaptureDispmanX::CRenderCaptureDispmanX()
 {
-  m_state          = CAPTURESTATE_FAILED;
-  m_userState      = CAPTURESTATE_FAILED;
-  m_pixels         = NULL;
-  m_width          = 0;
-  m_height         = 0;
-  m_bufferSize     = 0;
-  m_flags          = 0;
-  m_asyncSupported = false;
-  m_asyncChecked   = false;
+  m_pixels = nullptr;
 }
 
-CBaseRenderCapture::~CBaseRenderCapture()
+CRenderCaptureDispmanX::~CRenderCaptureDispmanX()
+{
+  delete[] m_pixels;
+}
+
+int CRenderCaptureDispmanX::GetCaptureFormat()
+{
+  return CAPTUREFORMAT_BGRA;
+}
+
+void CRenderCaptureDispmanX::BeginRender()
 {
 }
 
-bool CBaseRenderCapture::UseOcclusionQuery()
+void CRenderCaptureDispmanX::EndRender()
 {
-  if (m_flags & CAPTUREFLAG_IMMEDIATELY)
-    return false;
-  else if ((g_advancedSettings.m_videoCaptureUseOcclusionQuery == 0) ||
-           (g_advancedSettings.m_videoCaptureUseOcclusionQuery == -1 &&
-            g_Windowing.GetRenderQuirks() & RENDER_QUIRKS_BROKEN_OCCLUSION_QUERY))
-    return false;
-  else
-    return true;
+  delete[] m_pixels;
+  m_pixels = g_RBP.CaptureDisplay(m_width, m_height, NULL, true);
+
+  SetState(CAPTURESTATE_DONE);
+}
+
+void* CRenderCaptureDispmanX::GetRenderBuffer()
+{
+  return m_pixels;
+}
+
+void CRenderCaptureDispmanX::ReadOut()
+{
 }

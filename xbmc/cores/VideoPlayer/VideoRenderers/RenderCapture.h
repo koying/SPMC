@@ -22,10 +22,6 @@
 
 #include "system.h" //HAS_DX, HAS_GL, HAS_GLES, opengl headers, direct3d headers
 
-#ifdef HAS_DX
-  #include "guilib/D3DResource.h"
-#endif
-
 #include "threads/Event.h"
 
 enum ECAPTURESTATE
@@ -38,11 +34,11 @@ enum ECAPTURESTATE
   CAPTURESTATE_NEEDSDELETE
 };
 
-class CRenderCaptureBase
+class CBaseRenderCapture
 {
   public:
-    CRenderCaptureBase();
-    ~CRenderCaptureBase();
+    CBaseRenderCapture();
+    ~CBaseRenderCapture();
 
     /* \brief Called by the rendermanager to set the state, should not be called by anything else */
     void SetState(ECAPTURESTATE state) { m_state = state; }
@@ -113,146 +109,21 @@ class CRenderCaptureBase
 };
 
 #if defined(TARGET_ANDROID)
-#include "system_gl.h"
-
-class CRenderCaptureDroid : public CRenderCaptureBase
-{
-public:
-  CRenderCaptureDroid();
-  ~CRenderCaptureDroid();
-
-  int   GetCaptureFormat();
-
-  void  BeginRender();
-  void  EndRender();
-  void  ReadOut();
-
-  void* GetRenderBuffer();
-};
-
-class CRenderCapture : public CRenderCaptureDroid
-{
-public:
-  CRenderCapture() {}
-};
+#include "VideoCaptures/RenderCaptureAndroid.h"
 
 #elif defined(HAS_IMXVPU)
-#include "../VideoPlayer/DVDCodecs/Video/DVDVideoCodecIMX.h"
-
-class CRenderCaptureIMX : public CRenderCaptureBase
-{
-  public:
-    CRenderCaptureIMX();
-    ~CRenderCaptureIMX();
-
-    int   GetCaptureFormat();
-
-    void  BeginRender();
-    void  EndRender();
-    void  ReadOut();
-
-    void* GetRenderBuffer();
-};
-
-class CRenderCapture : public CRenderCaptureIMX
-{
-  public:
-    CRenderCapture() {};
-};
-
+#include "VideoCaptures/RenderCaptureIMX.h"
 
 #elif defined(TARGET_RASPBERRY_PI)
-#include "xbmc/linux/RBP.h"
+#include "VideoCaptures/RenderCaptureRPI.h"
 
-class CRenderCaptureDispmanX : public CRenderCaptureBase
-{
-  public:
-    CRenderCaptureDispmanX();
-    ~CRenderCaptureDispmanX();
+#elif defined(HAS_GL)
+#include "VideoCaptures/RenderCaptureGL.h"
 
-    int   GetCaptureFormat();
-
-    void  BeginRender();
-    void  EndRender();
-    void  ReadOut();
-
-    void* GetRenderBuffer();
-};
-
-//used instead of typedef CRenderCaptureGL CRenderCapture
-//since C++ doesn't allow you to forward declare a typedef
-class CRenderCapture : public CRenderCaptureDispmanX
-{
-  public:
-    CRenderCapture() {};
-};
-
-#elif defined(HAS_GL) || defined(HAS_GLES)
-#include "system_gl.h"
-
-class CRenderCaptureGL : public CRenderCaptureBase
-{
-  public:
-    CRenderCaptureGL();
-    ~CRenderCaptureGL();
-
-    int   GetCaptureFormat();
-
-    void  BeginRender();
-    void  EndRender();
-    void  ReadOut();
-
-    void* GetRenderBuffer();
-
-  private:
-    void   PboToBuffer();
-    GLuint m_pbo;
-    GLuint m_query;
-    bool   m_occlusionQuerySupported;
-};
-
-//used instead of typedef CRenderCaptureGL CRenderCapture
-//since C++ doesn't allow you to forward declare a typedef
-class CRenderCapture : public CRenderCaptureGL
-{
-  public:
-    CRenderCapture() {};
-};
+#elif defined(HAS_GLES)
+#include "VideoCaptures/RenderCaptureGLES.h"
 
 #elif HAS_DX /*HAS_GL*/
-
-class CRenderCaptureDX : public CRenderCaptureBase, public ID3DResource
-{
-  public:
-    CRenderCaptureDX();
-    ~CRenderCaptureDX();
-
-    int  GetCaptureFormat();
-
-    void BeginRender();
-    void EndRender();
-    void ReadOut();
-    
-    virtual void OnDestroyDevice(bool fatal);
-    virtual void OnLostDevice();
-    virtual void OnCreateDevice() {};
-
-  private:
-    void SurfaceToBuffer();
-    void CleanupDX();
-
-    ID3D11Texture2D*        m_renderTexture;
-    ID3D11RenderTargetView* m_renderSurface;
-    ID3D11Texture2D*        m_copySurface;
-    ID3D11Query*            m_query;
-    unsigned int            m_surfaceWidth;
-    unsigned int            m_surfaceHeight;
-};
-
-class CRenderCapture : public CRenderCaptureDX
-{
-  public:
-    CRenderCapture() {};
-};
+#include "VideoCaptures/RenderCaptureDX.h"
 
 #endif
