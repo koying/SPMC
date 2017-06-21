@@ -489,3 +489,5 @@ project/cmake/platform/android
 project/cmake/treedata/android
 xbmc/network/android
 tools/android/packaging/xbmc/src/interfaces
+xbmc/cores/VideoPlayer/VideoRenderers
+xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures
