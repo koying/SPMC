@@ -145,6 +145,15 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     TriggerOSD();
     return true;
 
+  case ACTION_PICTUREINPICTURE:
+#if defined(TARGET_ANDROID)
+    if (CJNIBase::GetSDKVersion() >= 24)
+    {
+      return false;
+    }
+#endif
+    // Fallthrough
+
   case ACTION_SHOW_GUI:
     {
       // switch back to the menu
