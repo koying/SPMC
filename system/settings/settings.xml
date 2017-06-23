@@ -2127,12 +2127,12 @@
     <category id="upnp" label="20187" help="36322">
       <requirement>HAS_UPNP</requirement>
       <group id="1">
-        <setting id="services.upnp" type="boolean" label="1270">
+        <setting id="services.upnp" type="boolean" label="21358">
           <level>0</level>
           <default>false</default>
           <control type="toggle" />
         </setting>
-        <setting id="services.upnpserver" type="boolean" label="21358" help="36323">
+        <setting id="services.upnpserver" type="boolean" label="21360" help="36323">
           <level>1</level>
           <default>false</default>
           <dependencies>
