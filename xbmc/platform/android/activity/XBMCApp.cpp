@@ -878,16 +878,15 @@ bool CXBMCApp::HasLaunchIntent(const std::string &package)
 bool CXBMCApp::StartActivity(const std::string &package, const std::string &intent, const std::string &dataType, const std::string &dataURI)
 {
   CJNIIntent newIntent;
-  if (!intent.empty())
-    newIntent = CJNIIntent(intent);
-
-  if (!newIntent)
+  if (intent.empty())
   {
     if (CAndroidFeatures::IsLeanback())
       newIntent = GetPackageManager().getLeanbackLaunchIntentForPackage(package);
     if (!newIntent)
       newIntent = GetPackageManager().getLaunchIntentForPackage(package);
   }
+  else
+    newIntent = CJNIIntent(intent);
 
   if (!newIntent)
     return false;
