@@ -1,3 +1,15 @@
+[B]3.9.4[/B]
+- Fixed after API layout changes
+
+[B]3.9.3[/B]
+- Update
+
+[B]3.9.2[/B]
+- added: some new languages
+
+[B]3.9.1[/B]
+- added: premiered tag with full release date
+
 [B]3.9.0[/B]
 - Update
 
