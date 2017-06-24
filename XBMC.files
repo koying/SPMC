@@ -5963,6 +5963,7 @@ tools/android/packaging/xbmc/build.gradle.in
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
+tools/android/packaging/xbmc/src/XBMCVideoGLView.java.in
 tools/depends/target/android-sources-ics/libbinder.cpp
 tools/depends/target/android-sources-ics/libcutils.c
 tools/depends/target/android-sources-ics/libgui.cpp

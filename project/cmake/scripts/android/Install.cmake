@@ -45,6 +45,7 @@ set(package_files strings.xml
                   src/XBMCSettingsContentObserver.java
                   src/XBMCProperties.java
                   src/XBMCVideoView.java
+                  src/XBMCVideoGLView.java
                   src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
                   src/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java
                   src/interfaces/XBMCNsdManagerDiscoveryListener.java
