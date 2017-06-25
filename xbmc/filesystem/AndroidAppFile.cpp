@@ -143,6 +143,8 @@ unsigned int CFileAndroidApp::ReadIcon(unsigned char** lpBuf, unsigned int* widt
   if (!info.width || !info.height)
     return 0;
 
+  CLog::Log(LOGDEBUG, "Found icon for pkg: %s : %d x %d", m_packageName.c_str(), info.width, info.height);
+
   *width = info.width;
   *height = info.height;
 

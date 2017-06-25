@@ -67,6 +67,7 @@
 #include "androidjni/Intent.h"
 #include "androidjni/PackageManager.h"
 #include "androidjni/Context.h"
+#include "androidjni/ComponentName.h"
 #include "androidjni/PowerManager.h"
 #include "androidjni/WakeLock.h"
 #include "androidjni/Environment.h"
@@ -92,6 +93,7 @@
 #include "androidjni/Display.h"
 #include "androidjni/SystemClock.h"
 #include "androidjni/BitmapFactory.h"
+#include "androidjni/ResolveInfo.h"
 #include "AndroidKey.h"
 
 #include "CompileInfo.h"
@@ -895,24 +897,52 @@ std::vector<androidPackage> CXBMCApp::GetApplications()
   CSingleLock lock(m_applicationsMutex);
   if (m_applications.empty())
   {
-    CJNIList<CJNIApplicationInfo> packageList = GetPackageManager().getInstalledApplications(CJNIPackageManager::GET_ACTIVITIES);
-    int numPackages = packageList.size();
+    std::map<std::string, androidPackage> applications;
+    CJNIIntent main(CJNIIntent::ACTION_MAIN, CJNIURI());
+
+    if (CAndroidFeatures::IsLeanback())  // First try leanback
+    {
+      main.addCategory(CJNIIntent::CATEGORY_LEANBACK_LAUNCHER);
+
+      CJNIList<CJNIResolveInfo> launchables = GetPackageManager().queryIntentActivities(main, 0);
+      int numPackages = launchables.size();
+      for (int i = 0; i < numPackages; i++)
+      {
+        CJNIResolveInfo launchable = launchables.get(i);
+        CJNIActivityInfo activity = launchable.activityInfo;
+
+        androidPackage newPackage;
+        newPackage.packageName = activity.applicationInfo.packageName;
+        newPackage.className = activity.name;
+        newPackage.packageLabel = launchable.loadLabel(GetPackageManager()).toString();
+        newPackage.icon = activity.applicationInfo.icon;
+        applications.insert(std::make_pair(newPackage.packageName, newPackage));
+      }
+    }
+
+    main.removeCategory(CJNIIntent::CATEGORY_LEANBACK_LAUNCHER);
+    main.addCategory(CJNIIntent::CATEGORY_LAUNCHER);
+
+    CJNIList<CJNIResolveInfo> launchables = GetPackageManager().queryIntentActivities(main, 0);
+    int numPackages = launchables.size();
     for (int i = 0; i < numPackages; i++)
     {
-      CJNIIntent intent;
-      if (CAndroidFeatures::IsLeanback())
-        intent = GetPackageManager().getLeanbackLaunchIntentForPackage(packageList.get(i).packageName);
-      if (!intent)
-        intent = GetPackageManager().getLaunchIntentForPackage(packageList.get(i).packageName);
-      if (!intent)
-        continue;
+      CJNIResolveInfo launchable = launchables.get(i);
+      CJNIActivityInfo activity = launchable.activityInfo;
 
-      androidPackage newPackage;
-      newPackage.packageName = packageList.get(i).packageName;
-      newPackage.packageLabel = GetPackageManager().getApplicationLabel(packageList.get(i)).toString();
-      newPackage.icon = packageList.get(i).icon;
-      m_applications.push_back(newPackage);
+      if (applications.find(activity.applicationInfo.packageName) == applications.end())
+      {
+        androidPackage newPackage;
+        newPackage.packageName = activity.applicationInfo.packageName;
+        newPackage.className = activity.name;
+        newPackage.packageLabel = launchable.loadLabel(GetPackageManager()).toString();
+        newPackage.icon = activity.applicationInfo.icon;
+        applications.insert(std::make_pair(newPackage.packageName, newPackage));
+      }
     }
+
+    for(auto it : applications)
+      m_applications.push_back(it.second);
   }
 
   return m_applications;
@@ -921,6 +951,26 @@ std::vector<androidPackage> CXBMCApp::GetApplications()
 bool CXBMCApp::HasLaunchIntent(const string &package)
 {
   return GetPackageManager().getLaunchIntentForPackage(package) != NULL;
+}
+
+bool CXBMCApp::StartAppActivity(const std::string &package, const std::string &cls)
+{
+  CJNIComponentName name(package, cls);
+  CJNIIntent newIntent(CJNIIntent::ACTION_MAIN);
+
+  newIntent.addCategory(CJNIIntent::CATEGORY_LAUNCHER);
+  newIntent.setFlags(CJNIIntent::FLAG_ACTIVITY_NEW_TASK | CJNIIntent::FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+  newIntent.setComponent(name);
+
+  startActivity(newIntent);
+  if (xbmc_jnienv()->ExceptionCheck())
+  {
+    CLog::Log(LOGERROR, "CXBMCApp::StartActivity - ExceptionOccurred launching %s", package.c_str());
+    xbmc_jnienv()->ExceptionClear();
+    return false;
+  }
+
+  return true;
 }
 
 // Note intent, dataType, dataURI all default to ""

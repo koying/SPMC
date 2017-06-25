@@ -66,10 +66,16 @@ bool CAndroidAppDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         continue;
       CFileItemPtr pItem(new CFileItem((*i).packageName));
       pItem->m_bIsFolder = false;
-      std::string path = StringUtils::Format("androidapp://%s/%s/%s", url.GetHostName().c_str(), dirname.c_str(), (*i).packageName.c_str());
-      pItem->SetPath(path);
+
+      CURL appUrl;
+      appUrl.SetProtocol("androidapp");
+      appUrl.SetHostName(url.GetHostName());
+      appUrl.SetFileName((*i).packageName);
+      appUrl.SetOption("class", (*i).className);
+
+      pItem->SetPath(appUrl.Get());
       pItem->SetLabel((*i).packageLabel);
-      pItem->SetArt("thumb", path+".png");
+      pItem->SetArt("thumb", appUrl.GetWithoutOptions() + ".png");
       pItem->m_dwSize = -1;  // No size
       items.Add(pItem);
     }
