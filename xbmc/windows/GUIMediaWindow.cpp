@@ -1016,9 +1016,10 @@ bool CGUIMediaWindow::OnClick(int iItem, const std::string &player)
 #if defined(TARGET_ANDROID)
   else if (pItem->IsAndroidApp())
   {
-    std::string appName = URIUtils::GetFileName(pItem->GetPath());
-    CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s",appName.c_str());
-    return CXBMCApp::StartActivity(appName);
+    std::string pkgName = URIUtils::GetFileName(pItem->GetPath());
+    CURL url(pItem->GetPath());
+    CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s - %s", pkgName.c_str(), url.GetOption("class").c_str());
+    return CXBMCApp::StartAppActivity(pkgName, url.GetOption("class"));
   }
 #endif
   else

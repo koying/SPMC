@@ -73,6 +73,7 @@ struct androidIcon
 struct androidPackage
 {
   std::string packageName;
+  std::string className;
   std::string packageLabel;
   int icon;
 };
@@ -176,6 +177,7 @@ public:
   static bool IsHeadsetPlugged();
   static bool IsHDMIPlugged();
 
+  static bool StartAppActivity(const std::string &package, const std::string &cls);
   static bool StartActivity(const std::string &package, const std::string &intent = std::string(), const std::string &dataType = std::string(), const std::string &dataURI = std::string());
   static std::vector <androidPackage> GetApplications();
 

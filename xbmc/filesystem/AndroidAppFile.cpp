@@ -56,7 +56,7 @@ bool CFileAndroidApp::Open(const CURL& url)
 {
   m_url = url;
   m_packageName =  URIUtils::GetFileName(url.Get());
-  m_packageName = m_packageName.substr(0, m_packageName.size() - 4);
+  m_packageName = m_packageName.substr(0, m_packageName.size() - 4);  // Remove extension
 
   std::vector<androidPackage> applications = CXBMCApp::GetApplications();
   for(std::vector<androidPackage>::iterator i = applications.begin(); i != applications.end(); ++i)
@@ -75,7 +75,7 @@ bool CFileAndroidApp::Open(const CURL& url)
 bool CFileAndroidApp::Exists(const CURL& url)
 {
   std::string appname =  URIUtils::GetFileName(url.Get());
-  appname = appname.substr(0, appname.size() - 4);
+  appname = appname.substr(0, appname.size() - 4);  // Remove extension
 
   std::vector<androidPackage> applications = CXBMCApp::GetApplications();
   for(std::vector<androidPackage>::iterator i = applications.begin(); i != applications.end(); ++i)
