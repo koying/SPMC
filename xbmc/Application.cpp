@@ -335,6 +335,8 @@ bool CApplication::OnEvent(XBMC_Event& newEvent)
       {
         if (!g_advancedSettings.m_fullScreen)
         {
+          CLog::Log(LOGDEBUG, "%s - Resize to %d x %d", __FUNCTION__, newEvent.resize.w, newEvent.resize.h);
+
           g_Windowing.SetWindowResolution(newEvent.resize.w, newEvent.resize.h);
           g_graphicsContext.SetVideoResolution(RES_WINDOW, true);
           CSettings::GetInstance().SetInt(CSettings::SETTING_WINDOW_WIDTH, newEvent.resize.w);

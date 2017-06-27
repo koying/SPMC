@@ -55,6 +55,7 @@ public:
   virtual bool  BringToFront();
 
 protected:
+  bool m_isFullscreen;
   int m_width;
   int m_height;
 
