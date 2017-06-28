@@ -193,8 +193,16 @@ std::string CFavouritesDirectory::GetExecutePath(const CFileItem &item, const st
   /* TODO:STRING_CLEANUP */
   else if (item.IsScript() && item.GetPath().size() > 9) // plugin://<foo>
     execute = StringUtils::Format("RunScript(%s)", StringUtils::Paramify(item.GetPath().substr(9)).c_str());
-  else if (item.IsAndroidApp() && item.GetPath().size() > 26) // androidapp://sources/apps/<foo>
-    execute = StringUtils::Format("StartAndroidActivity(%s)", StringUtils::Paramify(item.GetPath().substr(26)).c_str());
+  else if (item.IsAndroidApp())
+  {
+    CLog::Log(LOGDEBUG, "%s - androidapp: %s", __FUNCTION__, item.GetPath().c_str());
+    CURL url(item.GetPath());
+    std::string cls = url.GetOption("class");
+    if (!cls.empty())
+      execute = StringUtils::Format("StartAndroidActivity(%s)", StringUtils::Paramify(URIUtils::GetFileName(url.GetWithoutOptions()) + "/" + cls).c_str());
+    else
+      execute = StringUtils::Format("StartAndroidActivity(%s)", StringUtils::Paramify(URIUtils::GetFileName(item.GetPath())).c_str());
+  }
   else if (item.IsAndroidSetting() && item.GetPath().size() > 34) // androidsetting://sources/settings/<foo>
     execute = StringUtils::Format("StartAndroidActivity(%s,%s)", "", StringUtils::Paramify(item.GetPath().substr(34)).c_str());
   else  // assume a media file

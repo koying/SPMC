@@ -976,6 +976,12 @@ bool CXBMCApp::StartAppActivity(const std::string &package, const std::string &c
 // Note intent, dataType, dataURI all default to ""
 bool CXBMCApp::StartActivity(const string &package, const string &intent, const string &dataType, const string &dataURI)
 {
+  if (package.find('/') != std::string::npos)
+  {
+    std::vector<std::string> split = StringUtils::Split(package, '/');
+    return StartAppActivity(split[0], split[1]);
+  }
+
   CJNIIntent newIntent;
   if (intent.empty())
   {

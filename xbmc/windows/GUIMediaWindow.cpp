@@ -1012,8 +1012,8 @@ bool CGUIMediaWindow::OnClick(int iItem)
   else if (pItem->IsAndroidApp())
   {
     CURL url(pItem->GetPath());
-    CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s - %s", url.GetFileName().c_str(), url.GetOption("class").c_str());
-    return CXBMCApp::StartAppActivity(url.GetFileName(), url.GetOption("class"));
+    CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s - %s", URIUtils::GetFileName(url.GetFileName()).c_str(), url.GetOption("class").c_str());
+    return CXBMCApp::StartAppActivity(URIUtils::GetFileName(url.GetFileName()), url.GetOption("class"));
   }
   else if (pItem->IsAndroidSetting())
   {
