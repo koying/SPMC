@@ -23,6 +23,8 @@
 #include "input/touch/generic/GenericTouchActionHandler.h"
 #include "input/touch/generic/GenericTouchInputHandler.h"
 
+#include "utils/log.h"
+
 CAndroidTouch::CAndroidTouch() : m_dpi(160)
 {
   CGenericTouchInputHandler::GetInstance().RegisterHandler(&CGenericTouchActionHandler::GetInstance());
@@ -79,6 +81,8 @@ bool CAndroidTouch::onTouchEvent(AInputEvent* event)
   float y = AMotionEvent_getY(event, touchPointer);
   float size = m_dpi / 16.0f;
   int64_t time = AMotionEvent_getEventTime(event);
+
+  CLog::Log(LOGDEBUG, "%s - e:%d a:%d p:%d ptr:%d %f,%f", __FUNCTION__, eventAction, touchAction, touchPointer, numPointers, x, y);
 
   // first update all touch pointers
   for (unsigned int pointer = 0; pointer < numPointers; pointer++)
