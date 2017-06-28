@@ -69,7 +69,7 @@ bool CAndroidAppDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       CURL appUrl;
       appUrl.SetProtocol("androidapp");
       appUrl.SetHostName(url.GetHostName());
-      appUrl.SetFileName((*i).packageName);
+      appUrl.SetFileName(dirname + "/" + (*i).packageName);
       appUrl.SetOption("class", (*i).className);
 
       pItem->SetPath(appUrl.Get());
