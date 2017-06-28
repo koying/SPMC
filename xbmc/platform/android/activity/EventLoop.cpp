@@ -73,15 +73,15 @@ void CEventLoop::processActivity(int32_t command)
   switch (command)
   {
     case APP_CMD_CONFIG_CHANGED:
+      // set the proper DPI value
+      m_inputHandler->setDPI(CXBMCApp::GetDPI());
+
       m_activityHandler->onConfigurationChanged();
       break;
 
     case APP_CMD_INIT_WINDOW:
       // The window is being shown, get it ready.
       m_activityHandler->onCreateWindow(m_application->window);
-
-      // set the proper DPI value
-      m_inputHandler->setDPI(CXBMCApp::GetDPI());
       break;
 
     case APP_CMD_WINDOW_RESIZED:
@@ -107,6 +107,9 @@ void CEventLoop::processActivity(int32_t command)
       break;
 
     case APP_CMD_START:
+      // set the proper DPI value
+      m_inputHandler->setDPI(CXBMCApp::GetDPI());
+
       m_activityHandler->onStart();
       break;
 
