@@ -22,8 +22,6 @@
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
 #include "ContextMenuManager.h"
-#include "FileItem.h"
-#include "video/VideoInfoTag.h"
 #include "FileItemListModification.h"
 #include "GUIPassword.h"
 #include "GUIUserMessages.h"
@@ -1381,14 +1379,7 @@ bool CGUIMediaWindow::OnPlayAndQueueMedia(const CFileItemPtr &item, std::string 
     std::string mainDVD; 
     for (int i = 0; i < m_vecItems->Size(); i++) 
     { 
-      CFileItemPtr nItem = m_vecItems->Get(i);
-
-      if (nItem->IsVideoDb())
-      {
-        nItem->SetPath(nItem->GetVideoInfoTag()->m_strFileNameAndPath);
-        nItem->SetProperty("original_listitem_url", nItem->GetPath());
-      }
-      std::string path = URIUtils::GetFileName(nItem->GetPath());
+      std::string path = URIUtils::GetFileName(m_vecItems->Get(i)->GetPath());
       if (StringUtils::EqualsNoCase(path, "VIDEO_TS.IFO")) 
       { 
         mainDVD = path; 
