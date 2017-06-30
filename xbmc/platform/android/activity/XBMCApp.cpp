@@ -1309,9 +1309,6 @@ void CXBMCApp::onMultiWindowModeChanged(bool isInMultiWindowMode)
 {
   CLog::Log(LOGDEBUG, "%s: %s", __PRETTY_FUNCTION__, isInMultiWindowMode ? "true" : "false");
 
-  bool isFullscreen = !isInMultiWindowMode;
-  if (isFullscreen != g_graphicsContext.IsFullScreenRoot())
-    CApplicationMessenger::GetInstance().PostMsg(TMSG_TOGGLEFULLSCREEN);
 }
 
 void CXBMCApp::onPictureInPictureModeChanged(bool isInPictureInPictureMode)
@@ -1548,12 +1545,6 @@ void CXBMCApp::surfaceChanged(CJNISurfaceHolder holder, int format, int width, i
 
   m_surface_rect.x2 = width;
   m_surface_rect.y2 = height;
-
-  XBMC_Event newEvent;
-  newEvent.type = XBMC_VIDEORESIZE;
-  newEvent.resize.w = width;
-  newEvent.resize.h = height;
-  CWinEvents::MessagePush(&newEvent);
 }
 
 void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)

@@ -129,7 +129,7 @@ static void fetchDisplayModes()
 }
 
 CEGLNativeTypeAndroid::CEGLNativeTypeAndroid()
-  : m_width(0), m_height(0), m_isFullscreen(true)
+  : m_width(0), m_height(0)
 {
 }
 
@@ -259,23 +259,23 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
   if (!*nativeWindow)
     return false;
 
-  if (m_isFullscreen && s_hasModeApi)
+  if (s_hasModeApi)
   {
     *res = s_res_cur_displayMode;
     return true;
   }
 
-  if (m_isFullscreen && m_width && m_height)
-  {
-    res->iWidth = m_width;
-    res->iHeight = m_height;
-  }
-  else
+  if (!m_width || !m_height)
   {
     ANativeWindow_acquire(*nativeWindow);
     res->iWidth = ANativeWindow_getWidth(*nativeWindow);
     res->iHeight= ANativeWindow_getHeight(*nativeWindow);
     ANativeWindow_release(*nativeWindow);
+  }
+  else
+  {
+    res->iWidth = m_width;
+    res->iHeight = m_height;
   }
 
   res->strId = "-1";
@@ -287,31 +287,28 @@ bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
   res->fPixelRatio   = 1.0f;
   res->iScreenWidth  = res->iWidth;
   res->iScreenHeight = res->iHeight;
-  res->strMode       = StringUtils::Format("%dx%d @ %.6f%s - %s", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
-                                           res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "", m_isFullscreen ? "Fullscreen" : "Windowed");
+  res->strMode       = StringUtils::Format("%dx%d @ %.6f%s - Full Screen", res->iScreenWidth, res->iScreenHeight, res->fRefreshRate,
+                                           res->dwFlags & D3DPRESENTFLAG_INTERLACED ? "i" : "");
   CLog::Log(LOGNOTICE,"CEGLNativeTypeAndroid: Current resolution: %s\n",res->strMode.c_str());
   return true;
 }
 
 bool CEGLNativeTypeAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
 {
-  CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: SetNativeResolution: %s: %dx%d@%f - %s", res.strId.c_str(), res.iWidth, res.iHeight, res.fRefreshRate, res.bFullScreen ? "Fullscreen" : "Windowed");
+  CLog::Log(LOGDEBUG, "CEGLNativeTypeAndroid: SetNativeResolution: %s: %dx%d@%f", res.strId.c_str(), res.iWidth, res.iHeight, res.fRefreshRate);
 
-  m_isFullscreen = res.bFullScreen;
-  if (m_isFullscreen)
+
+  if (s_hasModeApi && res.strId != s_res_cur_displayMode.strId)
   {
-    if (s_hasModeApi && res.strId != s_res_cur_displayMode.strId)
-    {
-      CXBMCApp::SetDisplayMode(atoi(res.strId.c_str()));
-      s_res_cur_displayMode = res;
-    }
-    else if (abs(currentRefreshRate() - res.fRefreshRate) > 0.0001)
-      CXBMCApp::SetRefreshRate(res.fRefreshRate);
-
-    EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
-    if (nativeWindow)
-      CXBMCApp::SetBuffersGeometry(res.iWidth, res.iHeight);
+    CXBMCApp::SetDisplayMode(atoi(res.strId.c_str()));
+    s_res_cur_displayMode = res;
   }
+  else if (abs(currentRefreshRate() - res.fRefreshRate) > 0.0001)
+    CXBMCApp::SetRefreshRate(res.fRefreshRate);
+
+  EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
+  if (nativeWindow)
+    CXBMCApp::SetBuffersGeometry(res.iWidth, res.iHeight);
 
   return true;
 }

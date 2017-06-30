@@ -32,8 +32,6 @@
 #include "input/InputManager.h"
 #include "GUIWindowManager.h"
 
-#include "utils/log.h"
-
 using namespace KODI::MESSAGING;
 
 extern bool g_fullScreen;
@@ -969,7 +967,6 @@ void CGraphicContext::ToggleFullScreen()
       uiRes = (RESOLUTION) g_Windowing.DesktopResolution(g_Windowing.GetCurrentScreen());
   }
 
-  CLog::Log(LOGDEBUG, "%s - Switching to %d", __FUNCTION__, uiRes);
   CDisplaySettings::GetInstance().SetCurrentResolution(uiRes, true);
 }
 
