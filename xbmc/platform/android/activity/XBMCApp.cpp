@@ -1545,6 +1545,13 @@ void CXBMCApp::surfaceChanged(CJNISurfaceHolder holder, int format, int width, i
 
   m_surface_rect.x2 = width;
   m_surface_rect.y2 = height;
+
+  RESOLUTION_INFO res_info = g_graphicsContext.GetResInfo();
+  float curRatio = (float)g_graphicsContext.GetResInfo().iWidth / g_graphicsContext.GetResInfo().iHeight;
+  float newRatio = (float)width / height;
+
+  res_info.fPixelRatio = newRatio / curRatio;
+  g_graphicsContext.SetResInfo(g_graphicsContext.GetVideoResolution(), res_info);
 }
 
 void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
