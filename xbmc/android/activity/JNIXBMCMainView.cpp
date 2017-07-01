@@ -25,6 +25,7 @@
 
 #include "utils/StringUtils.h"
 #include "utils/log.h"
+#include "XBMCApp.h"
 
 #include <list>
 #include <algorithm>
@@ -48,15 +49,16 @@ void CJNIXBMCMainView::RegisterNatives(JNIEnv* env)
       {"_attach", "()V", (void*)&CJNIXBMCMainView::_attach},
       {"_surfaceChanged", "(Landroid/view/SurfaceHolder;III)V", (void*)&CJNIXBMCMainView::_surfaceChanged},
       {"_surfaceCreated", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCMainView::_surfaceCreated},
-      {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCMainView::_surfaceDestroyed}
+      {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCMainView::_surfaceDestroyed},
+      {"_onLayoutChange", "(IIII)V", (void*)&CJNIXBMCMainView::_onLayoutChange},
     };
 
     env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
   }
 }
 
-CJNIXBMCMainView::CJNIXBMCMainView(CJNISurfaceHolderCallback* callback)
-  : m_callback(callback)
+CJNIXBMCMainView::CJNIXBMCMainView(CXBMCApp* xbmcapp)
+  : m_xbmcapp(xbmcapp)
 {
   m_instance = this;
 }
@@ -97,6 +99,14 @@ void CJNIXBMCMainView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hold
     m_instance->surfaceDestroyed(CJNISurfaceHolder(jhobject(holder)));
 }
 
+void CJNIXBMCMainView::_onLayoutChange(JNIEnv* env, jobject thiz, jint left, jint top, jint width, jint height)
+{
+  (void)env;
+
+  if (m_instance)
+    m_instance->onLayoutChange(left, top, width, height);
+}
+
 void CJNIXBMCMainView::attach(const jobject& thiz)
 {
   if (!m_object)
@@ -108,22 +118,28 @@ void CJNIXBMCMainView::attach(const jobject& thiz)
 
 void CJNIXBMCMainView::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {
-  if (m_callback)
-    m_callback->surfaceChanged(holder, format, width, height);
+  if (m_xbmcapp)
+    m_xbmcapp->surfaceChanged(holder, format, width, height);
 }
 
 void CJNIXBMCMainView::surfaceCreated(CJNISurfaceHolder holder)
 {
-  if (m_callback)
-    m_callback->surfaceCreated(holder);
+  if (m_xbmcapp)
+    m_xbmcapp->surfaceCreated(holder);
   m_surfaceCreated.Set();
 }
 
 void CJNIXBMCMainView::surfaceDestroyed(CJNISurfaceHolder holder)
 {
   m_surfaceCreated.Reset();
-  if (m_callback)
-    m_callback->surfaceDestroyed(holder);
+  if (m_xbmcapp)
+    m_xbmcapp->surfaceDestroyed(holder);
+}
+
+void CJNIXBMCMainView::onLayoutChange(int left, int top, int width, int height)
+{
+  if (m_xbmcapp)
+    m_xbmcapp->onLayoutChange(left, top, width, height);
 }
 
 bool CJNIXBMCMainView::waitForSurface(unsigned int millis)

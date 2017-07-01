@@ -134,6 +134,11 @@ public:
   virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
   virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
 
+  // CJNISurfaceHolderCallback interface
+  virtual void surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height) override;
+  virtual void surfaceCreated(CJNISurfaceHolder holder) override;
+  virtual void surfaceDestroyed(CJNISurfaceHolder holder) override;
+
   bool isValid() { return m_activity != NULL; }
 
   void onStart();
@@ -187,8 +192,9 @@ public:
   static int GetDPI();
   static CPointInt GetMaxDisplayResolution();
 
+  static CRect GetSurfaceRect();
   static CRect MapRenderToDroid(const CRect& srcRect);
-  static CPoint GetDroidToGuiRatio();
+  static CPoint MapDroidToGui(const CPoint& src);
 
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);
   static bool WaitForCapture(jni::CJNIImage& image);
@@ -214,6 +220,8 @@ public:
   static bool WaitVSync(unsigned int milliSeconds);
   static uint64_t GetVsyncTime() { return m_vsynctime; }
 
+  void onLayoutChange(int left, int top, int width, int height);
+
 protected:
   // limit who can access Volume
   friend class CAESinkAUDIOTRACK;
@@ -225,6 +233,8 @@ protected:
 
 private:
   static CXBMCApp* m_xbmcappinstance;
+  static CCriticalSection m_AppMutex;
+
   CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
   static std::unique_ptr<CJNIXBMCMainView> m_mainView;
   std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
@@ -266,13 +276,9 @@ private:
 
   void XBMC_DestroyDisplay();
   void XBMC_SetupDisplay();
+  static void CalculateGUIRatios();
+  static CRect m_droid2guiRatio;
 
   static uint32_t m_playback_state;
   static CRect m_surface_rect;
-
-  // CJNISurfaceHolderCallback interface
-public:
-  void surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height) override;
-  void surfaceCreated(CJNISurfaceHolder holder) override;
-  void surfaceDestroyed(CJNISurfaceHolder holder) override;
 };

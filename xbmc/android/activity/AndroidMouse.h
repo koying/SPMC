@@ -46,6 +46,4 @@ private:
 
 private:
   int32_t m_lastButtonState;
-
-  CPoint m_droid2guiRatio;
 };
