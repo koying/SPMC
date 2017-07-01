@@ -203,6 +203,7 @@ public:
   static void SetDisplayMode(int mode);
   static int GetDPI();
 
+  static CRect GetSurfaceRect();
   static CRect MapRenderToDroid(const CRect& srcRect);
   static CPoint MapDroidToGui(const CPoint& src);
 

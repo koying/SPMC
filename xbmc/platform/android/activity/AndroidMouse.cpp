@@ -46,14 +46,22 @@ bool CAndroidMouse::onMouseEvent(AInputEvent* event)
     return false;
 
   int32_t eventAction = AMotionEvent_getAction(event);
-  int8_t mouseAction = eventAction & AMOTION_EVENT_ACTION_MASK;
   size_t mousePointerIdx = eventAction >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+  float x = AMotionEvent_getX(event, mousePointerIdx);
+  float y = AMotionEvent_getY(event, mousePointerIdx);
+
+  // Ignore event out of main view
+  CRect win_rect = CXBMCApp::GetSurfaceRect();
+  if (x < win_rect.x1 || x > win_rect.x2 || y < win_rect.y1 || y > win_rect.y2)
+    return false;
+
+  int8_t mouseAction = eventAction & AMOTION_EVENT_ACTION_MASK;
   int32_t mousePointerId = AMotionEvent_getPointerId(event, mousePointerIdx);
 
 #ifdef DEBUG_VERBOSE
   CXBMCApp::android_printf("%s idx:%i, id:%i", __PRETTY_FUNCTION__, mousePointerIdx, mousePointerId);
 #endif
-  CPoint in(AMotionEvent_getX(event, mousePointerIdx), AMotionEvent_getY(event, mousePointerIdx));
+  CPoint in(x, y);
   CPoint out = CXBMCApp::MapDroidToGui(in);
 
   switch (mouseAction)

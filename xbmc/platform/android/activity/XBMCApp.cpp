@@ -694,6 +694,11 @@ int CXBMCApp::GetDPI()
   return dpi;
 }
 
+CRect CXBMCApp::GetSurfaceRect()
+{
+  return m_surface_rect;
+}
+
 CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
 {
   return CRect(srcRect.x1 / m_droid2guiRatio.x2, srcRect.y1 / m_droid2guiRatio.y2, srcRect.x2 / m_droid2guiRatio.x2, srcRect.y2 / m_droid2guiRatio.y2);
