@@ -45,6 +45,7 @@
 #include "platform/android/activity/XBMCApp.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
+#include "utils/TimeUtils.h"
 #include "XTimeUtils.h"
 
 #include "platform/android/activity/AndroidFeatures.h"
@@ -244,7 +245,7 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
 
   media_status_t mstat;
   if (render)
-    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, true);
+    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, CurrentHostCounter());
   else
     mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
