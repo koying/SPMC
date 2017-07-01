@@ -39,6 +39,7 @@
 #include "android/activity/XBMCApp.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderFlags.h"
+#include "utils/TimeUtils.h"
 
 #include "androidjni/ByteBuffer.h"
 #include "androidjni/MediaCodecList.h"
@@ -238,7 +239,7 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
 
   media_status_t mstat;
   if (render)
-    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, true);
+    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, CurrentHostCounter());
   else
     mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
