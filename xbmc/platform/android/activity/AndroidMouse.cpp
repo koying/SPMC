@@ -33,8 +33,6 @@ CAndroidMouse::CAndroidMouse()
   : m_lastButtonState(0)
 {
   g_Windowing.Register(this);
-
-  m_droid2guiRatio = CXBMCApp::GetDroidToGuiRatio();
 }
 
 CAndroidMouse::~CAndroidMouse()
@@ -56,7 +54,7 @@ bool CAndroidMouse::onMouseEvent(AInputEvent* event)
   CXBMCApp::android_printf("%s idx:%i, id:%i", __PRETTY_FUNCTION__, mousePointerIdx, mousePointerId);
 #endif
   CPoint in(AMotionEvent_getX(event, mousePointerIdx), AMotionEvent_getY(event, mousePointerIdx));
-  CPoint out = in * m_droid2guiRatio;
+  CPoint out = CXBMCApp::MapDroidToGui(in);
 
   switch (mouseAction)
   {
@@ -76,7 +74,6 @@ bool CAndroidMouse::onMouseEvent(AInputEvent* event)
 
 void CAndroidMouse::OnResetDisplay()
 {
-  m_droid2guiRatio = CXBMCApp::GetDroidToGuiRatio();
 }
 
 void CAndroidMouse::MouseMove(float x, float y)
