@@ -11,4 +11,4 @@ set(HEADERS
 
 )
 
-core_add_library(dvdcodecs)
+core_add_library(droidVcodecs)

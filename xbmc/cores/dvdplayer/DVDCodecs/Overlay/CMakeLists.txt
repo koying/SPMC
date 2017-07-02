@@ -21,4 +21,4 @@ set(HEADERS
 
 )
 
-core_add_library(dvdcodecsoverlay)
+core_add_library(droidVoverlaycodecs)

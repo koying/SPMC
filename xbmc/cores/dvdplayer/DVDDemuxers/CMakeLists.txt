@@ -27,4 +27,4 @@ set(HEADERS
 
 )
 
-core_add_library(dvddemuxers)
+core_add_library(droidVdemuxers)

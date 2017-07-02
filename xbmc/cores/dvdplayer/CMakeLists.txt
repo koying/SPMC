@@ -42,4 +42,4 @@ set(HEADERS
 
 )
 
-core_add_library(dvdplayer)
+core_add_library(droidVplayer)

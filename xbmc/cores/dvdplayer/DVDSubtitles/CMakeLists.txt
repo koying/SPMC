@@ -32,4 +32,4 @@ set(HEADERS
 
 )
 
-core_add_library(dvdsubtitles)
+core_add_library(droidVsubtitles)

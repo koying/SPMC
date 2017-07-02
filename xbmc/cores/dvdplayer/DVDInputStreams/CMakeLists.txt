@@ -35,4 +35,4 @@ if(BLURAY_FOUND)
   list(APPEND HEADERS DVDInputStreamBluray.h)
 endif()
 
-core_add_library(dvdinputstreams)
+core_add_library(droidVinputstreams)

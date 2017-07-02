@@ -11,4 +11,4 @@ set(HEADERS
 
 )
 
-core_add_library(dvdcodecsaudio)
+core_add_library(droidVaudiocodecs)

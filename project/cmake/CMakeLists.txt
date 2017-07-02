@@ -89,6 +89,7 @@ set(INCLUDES ${CORE_SOURCE_DIR}
              ${CORE_SOURCE_DIR}/xbmc
              ${CORE_SOURCE_DIR}/xbmc/${PLATFORM_DIR}
              ${CORE_SOURCE_DIR}/xbmc/cores/VideoPlayer
+             ${CORE_SOURCE_DIR}/xbmc/cores/dvdplayer
              ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR})
 
 find_package(PkgConfig)
@@ -282,6 +283,7 @@ add_custom_target(pack-skins ALL
 set_target_properties(pack-skins PROPERTIES FOLDER "Build Utilities")
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/system/players/VideoPlayer)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/system/players/dvdplayer)
 
 set(LIBCEC_SONAME "${CEC_SONAME}")
 if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL android)
