@@ -4,6 +4,7 @@ xbmc/cores/dvdplayer/DVDCodecs/Audio             cores/dvdplayer/codecs/audio
 xbmc/cores/dvdplayer/DVDCodecs/Overlay           cores/dvdplayer/codecs/overlay
 xbmc/cores/dvdplayer/DVDCodecs/Video             cores/dvdplayer/codecs/video
 xbmc/cores/dvdplayer/DVDDemuxers                 cores/dvdplayer/demuxers
+xbmc/cores/dvdplayer/DVDDemuxers/adaptive        cores/dvdplayer/demuxersadaptive
 xbmc/cores/dvdplayer/DVDInputStreams             cores/dvdplayer/inputstreams
 xbmc/cores/dvdplayer/DVDSubtitles                cores/dvdplayer/subtitles
 xbmc/cores/dvdplayer/VideoRenderers              cores/dvdplayer/videorenderers
