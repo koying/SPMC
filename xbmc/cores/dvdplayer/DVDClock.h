@@ -24,6 +24,10 @@
 #include "threads/SharedSection.h"
 #include "threads/CriticalSection.h"
 
+#include <memory>
+
+class CVideoReferenceClock;
+
 #define DVD_TIME_BASE 1000000
 #define DVD_NOPTS_VALUE    (-1LL<<52) // should be possible to represent in both double and int64_t
 
@@ -78,13 +82,13 @@ public:
 
   void   SetMaxSpeedAdjust(double speed);
 
-  static double GetAbsoluteClock(bool interpolated = true);
+  double GetAbsoluteClock(bool interpolated = true);
   static double GetFrequency() { return (double)m_systemFrequency ; }
-  static double WaitAbsoluteClock(double target);
+  double WaitAbsoluteClock(double target);
 
   static CDVDClock* GetMasterClock();
 protected:
-  static void   CheckSystemClock();
+  void   CheckSystemClock();
   static double SystemToAbsolute(int64_t system);
   static int64_t AbsoluteToSystem(double absolute);
   double        SystemToPlaying(int64_t system);
@@ -96,6 +100,7 @@ protected:
   double m_iDisc;
   bool m_bReset;
   EMasterClock m_master;
+  std::unique_ptr<CVideoReferenceClock> m_videoRefClock;
 
   static int64_t m_systemFrequency;
   static int64_t m_systemOffset;

@@ -37,8 +37,8 @@
 #include "utils/log.h"
 #include "settings/AdvancedSettings.h"
 #include "android/activity/XBMCApp.h"
-#include "cores/VideoRenderers/RenderManager.h"
-#include "cores/VideoRenderers/RenderFlags.h"
+#include "cores/dvdplayer/VideoRenderers/RenderManager.h"
+#include "cores/dvdplayer/VideoRenderers/RenderFlags.h"
 
 #include "androidjni/ByteBuffer.h"
 #include "androidjni/MediaCodecList.h"

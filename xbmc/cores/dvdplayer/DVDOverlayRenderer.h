@@ -24,7 +24,7 @@
 #include "DVDCodecs/Overlay/DVDOverlay.h"
 
 #ifdef HAS_VIDEO_PLAYBACK
-#include "cores/VideoRenderers/RenderManager.h"
+#include "cores/dvdplayer/VideoRenderers/RenderManager.h"
 #endif
 
 class CDVDOverlayImage;

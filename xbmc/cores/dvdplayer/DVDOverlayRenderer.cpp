@@ -24,7 +24,7 @@
 #include "DVDCodecs/Overlay/DVDOverlayText.h"
 #include "DVDCodecs/Overlay/DVDOverlayImage.h"
 #include "DVDCodecs/Overlay/DVDOverlaySSA.h"
-#include "cores/VideoRenderers/OverlayRendererUtil.h"
+#include "cores/dvdplayer/VideoRenderers/OverlayRendererUtil.h"
 
 #define CLAMP(a, min, max) ((a) > (max) ? (max) : ( (a) < (min) ? (min) : a ))
 

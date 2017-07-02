@@ -20,7 +20,7 @@
  *
  */
 
-#include "cores/VideoRenderers/OverlayRenderer.h"
+#include "cores/dvdplayer/VideoRenderers/OverlayRenderer.h"
 #include "threads/Atomics.h"
 #include <assert.h>
 #include <vector>

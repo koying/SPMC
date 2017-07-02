@@ -49,7 +49,7 @@
 
 #include "DVDDemuxers/DVDDemuxCC.h"
 #ifdef HAS_VIDEO_PLAYBACK
-#include "cores/VideoRenderers/RenderManager.h"
+#include "cores/dvdplayer/VideoRenderers/RenderManager.h"
 #endif
 #ifdef HAS_PERFORMANCE_SAMPLE
 #include "xbmc/utils/PerformanceSample.h"
