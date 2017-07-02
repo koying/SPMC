@@ -77,6 +77,9 @@ public:
   virtual std::vector<std::string> GetNameServers() override;
   virtual void SetNameServers(const std::vector<std::string>& nameServers) override;
 
+  // Ping remote host
+  virtual bool PingHost(unsigned long remote_ip, unsigned int timeout_ms = 2000);
+
 protected:
   void RetrieveInterfaces();
   std::vector<CNetworkInterface*> m_interfaces;
