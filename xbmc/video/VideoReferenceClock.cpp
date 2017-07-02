@@ -332,3 +332,59 @@ bool CVideoReferenceClock::GetClockInfo(int& MissedVblanks, double& ClockSpeed, 
   }
   return false;
 }
+
+//this is called from CDVDClock::WaitAbsoluteClock, which is called from CXBMCRenderManager::WaitPresentTime
+//it waits until a certain timestamp has passed, used for displaying videoframes at the correct moment
+int64_t CVideoReferenceClock::Wait(int64_t Target)
+{
+  int64_t       Now;
+  int           SleepTime;
+
+  CSingleLock SingleLock(m_CritSection);
+
+  if (m_UseVblank) //when true the vblank is used as clock source
+  {
+    while (m_CurrTime < Target)
+    {
+      //calculate how long to sleep before we should have gotten a signal that a vblank happened
+      Now = CurrentHostCounter();
+      int64_t NextVblank = TimeOfNextVblank();
+      SleepTime = (int)((NextVblank - Now) * 1000 / m_SystemFrequency);
+
+      int64_t CurrTime = m_CurrTime; //save current value of the clock
+
+      bool Late = false;
+      if (SleepTime <= 0) //if sleeptime is 0 or lower, the vblank clock is already late in updating
+      {
+        Late = true;
+      }
+      else
+      {
+        m_VblankEvent.Reset();
+        SingleLock.Leave();
+        if (!m_VblankEvent.WaitMSec(SleepTime)) //if this returns false, it means the vblank event was not set within
+          Late = true;                          //the required time
+        SingleLock.Enter();
+      }
+
+      //if the vblank clock was late with its update, we update the clock ourselves
+      if (Late && CurrTime == m_CurrTime)
+        UpdateClock(1, false); //update the clock by 1 vblank
+
+    }
+    return m_CurrTime;
+  }
+  else
+  {
+    int64_t ClockOffset = m_ClockOffset;
+    SingleLock.Leave();
+    Now = CurrentHostCounter();
+    //sleep until the timestamp has passed
+    SleepTime = (int)((Target - (Now + ClockOffset)) * 1000 / m_SystemFrequency);
+    if (SleepTime > 0)
+      Sleep(SleepTime);
+
+    Now = CurrentHostCounter();
+    return Now + ClockOffset;
+  }
+}

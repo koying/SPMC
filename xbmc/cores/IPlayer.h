@@ -214,6 +214,7 @@ enum ERENDERFEATURE
   RENDERFEATURE_PIXEL_RATIO,
   RENDERFEATURE_POSTPROCESS
 };
+typedef std::vector<int> Features;
 
 enum ViewMode {
   ViewModeNormal = 0,
