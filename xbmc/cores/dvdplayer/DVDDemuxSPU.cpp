@@ -19,7 +19,7 @@
  */
 
 #include "DVDDemuxSPU.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/log.h"
 
 #undef ALIGN

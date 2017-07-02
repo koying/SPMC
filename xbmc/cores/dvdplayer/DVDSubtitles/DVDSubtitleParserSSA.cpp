@@ -19,8 +19,8 @@
  */
 
 #include "DVDSubtitleParserSSA.h"
-#include "DVDCodecs/Overlay/DVDOverlaySSA.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlaySSA.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/log.h"
 
 CDVDSubtitleParserSSA::CDVDSubtitleParserSSA(CDVDSubtitleStream* pStream, const std::string& strFile)

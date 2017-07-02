@@ -23,6 +23,9 @@
 #include <assert.h>
 #include "threads/Atomics.h"
 
+namespace dvdplayer
+{
+
 template<typename T> struct IDVDResourceCounted
 {
   IDVDResourceCounted() : m_refs(1) {}
@@ -42,3 +45,5 @@ template<typename T> struct IDVDResourceCounted
   }
   long m_refs;
 };
+
+}

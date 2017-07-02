@@ -19,10 +19,10 @@
  */
 
 #include "DVDSubtitleParserSami.h"
-#include "DVDCodecs/Overlay/DVDOverlayText.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlayText.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/RegExp.h"
-#include "DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "DVDSubtitleTagSami.h"

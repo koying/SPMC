@@ -30,7 +30,7 @@
 
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "threads/Atomics.h"
 #include "utils/BitstreamConverter.h"
 #include "utils/CPUInfo.h"

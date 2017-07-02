@@ -19,7 +19,7 @@
  */
 
 #include "DVDDemuxUtils.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "DVDDemuxCC.h"
 #include "cores/dvdplayer/DVDCodecs/Overlay/contrib/cc_decoder708.h"
 

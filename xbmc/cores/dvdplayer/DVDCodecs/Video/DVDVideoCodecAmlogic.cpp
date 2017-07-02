@@ -21,8 +21,8 @@
 #include <math.h>
 
 #include "DVDVideoCodecAmlogic.h"
-#include "DVDClock.h"
-#include "DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDClock.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
 #include "AMLCodec.h"
 #include "utils/AMLUtils.h"
 #include "utils/BitstreamConverter.h"

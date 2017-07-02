@@ -19,8 +19,8 @@
  */
 
 #include "DVDSubtitleParserMPL2.h"
-#include "DVDCodecs/Overlay/DVDOverlayText.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDCodecs/Overlay/DVDOverlayText.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/RegExp.h"
 #include "DVDStreamInfo.h"
 #include "DVDSubtitleTagMicroDVD.h"

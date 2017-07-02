@@ -20,8 +20,8 @@
 
 #include "DVDOverlayCodecFFmpeg.h"
 #include "DVDOverlayImage.h"
-#include "DVDStreamInfo.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/log.h"
 #include "utils/EndianSwap.h"
 #include "guilib/GraphicContext.h"

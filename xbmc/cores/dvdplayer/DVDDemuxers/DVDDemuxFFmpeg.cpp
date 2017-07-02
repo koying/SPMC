@@ -24,10 +24,10 @@
 
 #include "commons/Exception.h"
 #include "cores/FFmpeg.h"
-#include "DVDClock.h" // for DVD_TIME_BASE
+#include "cores/dvdplayer/DVDClock.h" // for DVD_TIME_BASE
 #include "DVDDemuxUtils.h"
-#include "DVDInputStreams/DVDInputStream.h"
-#include "DVDInputStreams/DVDInputStreamFFmpeg.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDInputStream.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDInputStreamFFmpeg.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
@@ -40,7 +40,7 @@
 #include "utils/StringUtils.h"
 
 #ifdef HAVE_LIBBLURAY
-#include "DVDInputStreams/DVDInputStreamBluray.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDInputStreamBluray.h"
 #endif
 #ifndef __STDC_CONSTANT_MACROS
 #define __STDC_CONSTANT_MACROS

@@ -22,7 +22,7 @@
   #include "config.h"
 #endif
 #include "DVDDemuxUtils.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/log.h"
 
 extern "C" {

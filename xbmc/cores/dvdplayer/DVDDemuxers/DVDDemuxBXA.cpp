@@ -18,11 +18,11 @@
  *
  */
 
-#include "DVDInputStreams/DVDInputStream.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDInputStream.h"
 #include "DVDDemuxBXA.h"
 #include "DVDDemuxUtils.h"
 #include "utils/StringUtils.h"
-#include "../DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 
 // AirTunes audio Demuxer.
 

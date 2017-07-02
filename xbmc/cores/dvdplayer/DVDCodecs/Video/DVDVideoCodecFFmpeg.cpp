@@ -23,11 +23,11 @@
   #include "config.h"
 #endif
 #include "DVDVideoCodecFFmpeg.h"
-#include "DVDDemuxers/DVDDemux.h"
-#include "DVDStreamInfo.h"
-#include "DVDClock.h"
-#include "DVDCodecs/DVDCodecs.h"
-#include "DVDCodecs/DVDCodecUtils.h"
+#include "cores/dvdplayer/DVDDemuxers/DVDDemux.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDClock.h"
+#include "cores/dvdplayer/DVDCodecs/DVDCodecs.h"
+#include "cores/dvdplayer/DVDCodecs/DVDCodecUtils.h"
 #if defined(TARGET_POSIX) || defined(TARGET_WINDOWS)
 #include "utils/CPUInfo.h"
 #endif
@@ -80,8 +80,8 @@ enum DecoderState
   STATE_SW_MULTI
 };
 
-enum PixelFormat CDVDVideoCodecFFmpeg::GetFormat( struct AVCodecContext * avctx
-                                                , const PixelFormat * fmt )
+enum AVPixelFormat CDVDVideoCodecFFmpeg::GetFormat( struct AVCodecContext * avctx
+                                                , const AVPixelFormat * fmt )
 {
   CDVDVideoCodecFFmpeg* ctx  = (CDVDVideoCodecFFmpeg*)avctx->opaque;
 
@@ -107,7 +107,7 @@ enum PixelFormat CDVDVideoCodecFFmpeg::GetFormat( struct AVCodecContext * avctx
     avctx->hwaccel_context = 0;
   }
 
-  const PixelFormat * cur = fmt;
+  const AVPixelFormat * cur = fmt;
   while(*cur != PIX_FMT_NONE)
   {
 #ifdef HAVE_LIBVDPAU
@@ -217,7 +217,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
 
   for(std::vector<ERenderFormat>::iterator it = options.m_formats.begin(); it != options.m_formats.end(); ++it)
   {
-    m_formats.push_back((PixelFormat)CDVDCodecUtils::PixfmtFromEFormat(*it));
+    m_formats.push_back((AVPixelFormat)CDVDCodecUtils::PixfmtFromEFormat(*it));
     if(*it == RENDER_FMT_YUV420P)
       m_formats.push_back(PIX_FMT_YUVJ420P);
   }
@@ -745,8 +745,8 @@ bool CDVDVideoCodecFFmpeg::GetPicture(DVDVideoPicture* pDvdVideoPicture)
   pDvdVideoPicture->iFlags |= pDvdVideoPicture->data[0] ? 0 : DVP_FLAG_DROPPED;
   pDvdVideoPicture->extended_format = 0;
 
-  PixelFormat pix_fmt;
-  pix_fmt = (PixelFormat)m_pFrame->format;
+  AVPixelFormat pix_fmt;
+  pix_fmt = (AVPixelFormat)m_pFrame->format;
 
   pDvdVideoPicture->format = CDVDCodecUtils::EFormatFromPixfmt(pix_fmt);
   return true;

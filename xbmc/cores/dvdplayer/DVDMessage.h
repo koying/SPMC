@@ -35,7 +35,7 @@
 
 #include <assert.h>
 
-class CDVDMsg : public IDVDResourceCounted<CDVDMsg>
+class CDVDMsg : public dvdplayer::IDVDResourceCounted<CDVDMsg>
 {
 public:
   enum Message

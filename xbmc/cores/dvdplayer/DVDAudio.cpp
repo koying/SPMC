@@ -22,10 +22,15 @@
 #include "utils/log.h"
 #include "DVDAudio.h"
 #include "DVDClock.h"
-#include "DVDCodecs/Audio/DVDAudioCodec.h"
+#include "cores/dvdplayer/DVDCodecs/Audio/DVDAudioCodec.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Interfaces/AEStream.h"
 #include "settings/MediaSettings.h"
+#ifdef TARGET_POSIX
+#include "linux/XTimeUtils.h"
+#endif
+
+using namespace dvdplayer;
 
 CDVDAudio::CDVDAudio(volatile bool &bStop)
   : m_bStop(bStop)

@@ -39,6 +39,9 @@ class CVideoReferenceClock;
 #define DVD_PLAYSPEED_PAUSE       0       // frame stepping
 #define DVD_PLAYSPEED_NORMAL      1000
 
+namespace dvdplayer
+{
+
 enum EMasterClock
 {
   MASTER_CLOCK_NONE,
@@ -82,13 +85,13 @@ public:
 
   void   SetMaxSpeedAdjust(double speed);
 
-  double GetAbsoluteClock(bool interpolated = true);
+  static double GetAbsoluteClock(bool interpolated = true);
   static double GetFrequency() { return (double)m_systemFrequency ; }
-  double WaitAbsoluteClock(double target);
+  static double WaitAbsoluteClock(double target);
 
   static CDVDClock* GetMasterClock();
 protected:
-  void   CheckSystemClock();
+  static void   CheckSystemClock();
   static double SystemToAbsolute(int64_t system);
   static int64_t AbsoluteToSystem(double absolute);
   double        SystemToPlaying(int64_t system);
@@ -100,7 +103,7 @@ protected:
   double m_iDisc;
   bool m_bReset;
   EMasterClock m_master;
-  std::unique_ptr<CVideoReferenceClock> m_videoRefClock;
+  static std::unique_ptr<CVideoReferenceClock> m_videoRefClock;
 
   static int64_t m_systemFrequency;
   static int64_t m_systemOffset;
@@ -114,3 +117,5 @@ protected:
   CCriticalSection m_speedsection;
   static CDVDClock *m_playerclock;
 };
+
+}

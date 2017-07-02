@@ -19,7 +19,7 @@
  */
 
 #include "DVDCodecUtils.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "cores/dvdplayer/VideoRenderers/RenderManager.h"
 #include "utils/log.h"
 #include "cores/FFmpeg.h"
@@ -404,7 +404,7 @@ double CDVDCodecUtils::NormalizeFrameduration(double frameduration, bool *match)
 }
 
 struct EFormatMap {
-  PixelFormat   pix_fmt;
+  AVPixelFormat pix_fmt;
   ERenderFormat format;
 };
 

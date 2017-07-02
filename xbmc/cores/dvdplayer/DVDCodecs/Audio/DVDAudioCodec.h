@@ -23,7 +23,7 @@
 #include "system.h"
 #include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 
 
 #if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)

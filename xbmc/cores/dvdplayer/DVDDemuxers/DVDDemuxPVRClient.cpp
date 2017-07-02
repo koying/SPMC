@@ -18,14 +18,14 @@
  *
  */
 
-#include "DVDInputStreams/DVDInputStream.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDInputStream.h"
 #include "DVDDemuxPVRClient.h"
 #include "DVDDemuxUtils.h"
 #include "utils/log.h"
 #include "pvr/PVRManager.h"
 #include "pvr/addons/PVRClients.h"
 #include "settings/Settings.h"
-#include "../DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 
 #define FF_MAX_EXTRADATA_SIZE ((1 << 28) - FF_INPUT_BUFFER_PADDING_SIZE)
 

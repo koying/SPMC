@@ -19,8 +19,8 @@
  */
 
 #include "DVDVideoCodecLibMpeg2.h"
-#include "DVDClock.h"
-#include "DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDClock.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
 #include "utils/log.h"
 
 enum MPEGProfile

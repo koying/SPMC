@@ -9,7 +9,6 @@ set(SOURCES
   DVDFactoryDemuxer.cpp
   DVDDemuxBXA.cpp
   DVDDemuxShoutcast.cpp
-
 )
 
 set(HEADERS 

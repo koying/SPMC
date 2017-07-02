@@ -158,7 +158,6 @@ CDVDPlayerVideo::CDVDPlayerVideo( CDVDClock* pClock
 CDVDPlayerVideo::~CDVDPlayerVideo()
 {
   StopThread();
-  g_VideoReferenceClock.Stop();
 }
 
 double CDVDPlayerVideo::GetOutputDelay()
@@ -195,8 +194,6 @@ bool CDVDPlayerVideo::OpenStream( CDVDStreamInfo &hint )
     CLog::Log(LOGERROR, "Unsupported video codec");
     return false;
   }
-
-  g_VideoReferenceClock.Start();
 
   if(m_messageQueue.IsInited())
     m_messageQueue.Put(new CDVDMsgVideoCodecChange(hint, codec), 0);
@@ -548,16 +545,17 @@ void CDVDPlayerVideo::Process()
       m_pVideoCodec->SetDropState(bRequestDrop);
 
       // ask codec to do deinterlacing if possible
-      EDEINTERLACEMODE mDeintMode = CMediaSettings::GetInstance().GetCurrentVideoSettings().m_DeinterlaceMode;
+      //EDEINTERLACEMODE mDeintMode = CMediaSettings::GetInstance().GetCurrentVideoSettings().m_InterlaceMethod;
+      EDEINTERLACEMODE mDeintMode = VS_DEINTERLACEMODE_AUTO;
       EINTERLACEMETHOD mInt       = g_renderManager.AutoInterlaceMethod(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_InterlaceMethod);
 
       unsigned int     mFilters = 0;
 
       if (mDeintMode != VS_DEINTERLACEMODE_OFF)
       {
-        if (mInt == VS_INTERLACEMETHOD_YADIF)
+        if (mInt == VS_INTERLACEMETHOD_DEINTERLACE)
           mFilters = CDVDVideoCodec::FILTER_DEINTERLACE_ANY;
-        else if(mInt == VS_INTERLACEMETHOD_YADIF_HALF)
+        else if(mInt == VS_INTERLACEMETHOD_DEINTERLACE_HALF)
           mFilters = CDVDVideoCodec::FILTER_DEINTERLACE_ANY | CDVDVideoCodec::FILTER_DEINTERLACE_HALFED;
 
         if (mDeintMode == VS_DEINTERLACEMODE_AUTO && mFilters)
@@ -673,20 +671,21 @@ void CDVDPlayerVideo::Process()
             //this video
             if ((mDeintMode == VS_DEINTERLACEMODE_AUTO && (picture.iFlags & DVP_FLAG_INTERLACED)) || mDeintMode == VS_DEINTERLACEMODE_FORCE)
             {
-              if(mInt == VS_INTERLACEMETHOD_SW_BLEND)
+              if(mInt == VS_INTERLACEMETHOD_RENDER_BLEND)
               {
                 if (!sPostProcessType.empty())
                   sPostProcessType += ",";
                 sPostProcessType += g_advancedSettings.m_videoPPFFmpegDeint;
                 bPostProcessDeint = true;
               }
-              else if(mInt == VS_INTERLACEMETHOD_SW_FFMPEG)
-              {
-                if (!sPostProcessType.empty())
-                  sPostProcessType += ",";
-                sPostProcessType += "ffmpegdeint";
-                bPostProcessDeint = true;
-              }
+              // FIXME
+//              else if(mInt == VS_INTERLACEMETHOD_SW_FFMPEG)
+//              {
+//                if (!sPostProcessType.empty())
+//                  sPostProcessType += ",";
+//                sPostProcessType += "ffmpegdeint";
+//                bPostProcessDeint = true;
+//              }
             }
 
             if (CMediaSettings::GetInstance().GetCurrentVideoSettings().m_PostProcess)

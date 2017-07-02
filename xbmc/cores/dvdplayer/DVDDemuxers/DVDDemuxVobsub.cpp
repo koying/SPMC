@@ -19,13 +19,13 @@
  */
 
 #include "DVDDemuxVobsub.h"
-#include "DVDInputStreams/DVDFactoryInputStream.h"
-#include "DVDInputStreams/DVDInputStream.h"
-#include "DVDStreamInfo.h"
-#include "DVDCodecs/DVDCodecs.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDFactoryInputStream.h"
+#include "cores/dvdplayer/DVDInputStreams/DVDInputStream.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDCodecs/DVDCodecs.h"
 #include "DVDDemuxers/DVDDemuxFFmpeg.h"
-#include "DVDClock.h"
-#include "DVDSubtitles/DVDSubtitleStream.h"
+#include "cores/dvdplayer/DVDClock.h"
+#include "cores/dvdplayer/DVDSubtitles/DVDSubtitleStream.h"
 
 #include <string.h>
 

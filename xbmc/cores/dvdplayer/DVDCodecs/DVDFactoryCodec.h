@@ -21,8 +21,8 @@
  */
 
 #include <vector>
-#include "cores/dvdplayer/dvdplayer/VideoRenderers/RenderFormats.h"
-#include "cores/dvdplayer/dvdplayer/VideoRenderers/BaseRenderer.h"
+#include "cores/dvdplayer/VideoRenderers/RenderFormats.h"
+#include "cores/dvdplayer/VideoRenderers/BaseRenderer.h"
 
 class CDVDVideoCodec;
 class CDVDAudioCodec;

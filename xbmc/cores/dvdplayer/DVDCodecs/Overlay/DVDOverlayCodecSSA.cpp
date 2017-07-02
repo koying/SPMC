@@ -22,9 +22,9 @@
 #include <memory>
 
 #include "DVDOverlaySSA.h"
-#include "DVDStreamInfo.h"
-#include "DVDCodecs/DVDCodecs.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDStreamInfo.h"
+#include "cores/dvdplayer/DVDCodecs/DVDCodecs.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "Util.h"
 #include "utils/StringUtils.h"
 

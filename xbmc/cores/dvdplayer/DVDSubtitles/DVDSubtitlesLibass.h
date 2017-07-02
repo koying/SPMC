@@ -21,12 +21,12 @@
  */
 
 #include "DllLibass.h"
-#include "DVDResource.h"
+#include "cores/dvdplayer/DVDResource.h"
 #include "threads/CriticalSection.h"
 
 /** Wrapper for Libass **/
 
-class CDVDSubtitlesLibass : public IDVDResourceCounted<CDVDSubtitlesLibass>
+class CDVDSubtitlesLibass : public dvdplayer::IDVDResourceCounted<CDVDSubtitlesLibass>
 {
 public:
   CDVDSubtitlesLibass();

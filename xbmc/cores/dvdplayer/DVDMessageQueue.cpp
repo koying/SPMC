@@ -21,7 +21,7 @@
 #include "DVDMessageQueue.h"
 #include "utils/log.h"
 #include "threads/SingleLock.h"
-#include "DVDClock.h"
+#include "cores/dvdplayer/DVDClock.h"
 #include "utils/MathUtils.h"
 
 CDVDMessageQueue::CDVDMessageQueue(const std::string &owner) : m_hEvent(true), m_owner(owner)

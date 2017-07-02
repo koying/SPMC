@@ -32,6 +32,8 @@
 #endif
 #include "utils/BitstreamStats.h"
 
+using namespace dvdplayer;
+
 class CDemuxStreamVideo;
 
 #define VIDEO_PICTURE_QUEUE_SIZE 1

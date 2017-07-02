@@ -54,9 +54,9 @@
 #include "RenderCapture.h"
 
 /* to use the same as player */
-#include "../dvdplayer/DVDClock.h"
-#include "../dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
-#include "../dvdplayer/DVDCodecs/DVDCodecUtils.h"
+#include "cores/dvdplayer/DVDClock.h"
+#include "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
+#include "cores/dvdplayer/DVDCodecs/DVDCodecUtils.h"
 
 #ifdef HAVE_LIBVA
   #include "../dvdplayer/DVDCodecs/Video/VAAPI.h"
@@ -674,7 +674,7 @@ void CXBMCRenderManager::SetViewMode(int iViewMode)
   g_dataCacheCore.SignalVideoInfoChange();
 }
 
-void CXBMCRenderManager::FlipPage(volatile bool& bStop, double timestamp /* = 0LL*/, double pts /* = 0 */, int source /*= -1*/, EFIELDSYNC sync /*= FS_NONE*/)
+void CXBMCRenderManager::FlipPage(volatile std::atomic_bool& bStop, double timestamp /* = 0LL*/, double pts /* = 0 */, int source /*= -1*/, EFIELDSYNC sync /*= FS_NONE*/)
 {
   { CSharedLock lock(m_sharedSection);
 
@@ -1082,7 +1082,7 @@ EINTERLACEMETHOD CXBMCRenderManager::AutoInterlaceMethodInternal(EINTERLACEMETHO
   return mInt;
 }
 
-int CXBMCRenderManager::WaitForBuffer(volatile bool& bStop, int timeout)
+int CXBMCRenderManager::WaitForBuffer(volatile std::atomic_bool& bStop, int timeout)
 {
   CSingleLock lock2(m_presentlock);
 

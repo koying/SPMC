@@ -26,10 +26,13 @@
 #include "utils/TimeUtils.h"
 #include "utils/log.h"
 
+using namespace dvdplayer;
+
 int64_t CDVDClock::m_systemOffset;
 int64_t CDVDClock::m_systemFrequency;
 CCriticalSection CDVDClock::m_systemsection;
 CDVDClock *CDVDClock::m_playerclock = NULL;
+std::unique_ptr<CVideoReferenceClock> CDVDClock::m_videoRefClock;
 
 CDVDClock::CDVDClock()
   :  m_master(MASTER_CLOCK_NONE)
