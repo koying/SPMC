@@ -537,6 +537,36 @@ void CNetworkLinux::SetNameServers(const std::vector<std::string>& nameServers)
 #endif
 }
 
+bool CNetworkLinux::PingHost(unsigned long remote_ip, unsigned int timeout_ms)
+{
+  char cmd_line [64];
+
+  struct in_addr host_ip; 
+  host_ip.s_addr = remote_ip;
+
+#if defined (TARGET_DARWIN_IOS) // no timeout option available
+  sprintf(cmd_line, "ping -c 1 %s", inet_ntoa(host_ip));
+#elif defined (TARGET_DARWIN) || defined (TARGET_FREEBSD)
+  sprintf(cmd_line, "ping -c 1 -t %d %s", timeout_ms / 1000 + (timeout_ms % 1000) != 0, inet_ntoa(host_ip));
+#else
+  sprintf(cmd_line, "ping -c 1 -w %d %s", timeout_ms / 1000 + (timeout_ms % 1000) != 0, inet_ntoa(host_ip));
+#endif
+
+  int status = system (cmd_line);
+
+  int result = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+
+  // http://linux.about.com/od/commands/l/blcmdl8_ping.htm ;
+  // 0 reply
+  // 1 no reply
+  // else some error
+
+  if (result < 0 || result > 1)
+    CLog::Log(LOGERROR, "Ping fail : status = %d, errno = %d : '%s'", status, errno, cmd_line);
+
+  return result == 0;
+}
+
 #if defined(TARGET_DARWIN) || defined(TARGET_FREEBSD)
 bool CNetworkInterfaceLinux::GetHostMacAddress(unsigned long host_ip, std::string& mac)
 {
