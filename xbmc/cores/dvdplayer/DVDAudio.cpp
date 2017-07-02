@@ -276,3 +276,19 @@ double CDVDAudio::GetPlayingPts()
     return 0.0;
   return m_playingPts;
 }
+
+double CDVDAudio::GetClock()
+{
+  if (m_pClock)
+    return (m_pClock->GetClock() + m_pClock->GetVsyncAdjust()) / DVD_TIME_BASE * 1000;
+  else
+    return 0.0;
+}
+
+double CDVDAudio::GetClockSpeed()
+{
+  if (m_pClock)
+    return m_pClock->GetClockSpeed();
+  else
+    return 1.0;
+}

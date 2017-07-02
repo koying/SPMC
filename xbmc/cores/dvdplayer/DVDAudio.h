@@ -27,6 +27,8 @@
 #include "PlatformDefs.h"
 
 #include "cores/AudioEngine/Utils/AEChannelInfo.h"
+#include "cores/AudioEngine/Interfaces/AEStream.h"
+
 class IAEStream;
 
 extern "C" {
@@ -37,7 +39,7 @@ typedef struct stDVDAudioFrame DVDAudioFrame;
 
 class CSingleLock;
 
-class CDVDAudio
+class CDVDAudio : IAEClockCallback
 {
 public:
   CDVDAudio(volatile bool& bStop);
@@ -64,7 +66,10 @@ public:
   void SetSpeed(int iSpeed);
   void SetResampleRatio(double ratio);
 
+  double GetClock();
+  double GetClockSpeed();
   IAEStream *m_pAudioStream;
+
 protected:
   double m_playingPts;
   double m_timeOfPts;
