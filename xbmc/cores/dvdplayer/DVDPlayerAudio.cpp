@@ -30,6 +30,7 @@
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/DataCacheCore.h"
+#include "ServiceBroker.h"
 
 #include <sstream>
 #include <iomanip>
@@ -195,7 +196,7 @@ void CDVDPlayerAudio::OpenStream( CDVDStreamInfo &hints, CDVDAudioCodec* codec )
 
   m_maxspeedadjust = 5.0;
 
-  g_dataCacheCore.SignalAudioInfoChange();
+  CServiceBroker::GetDataCacheCore().SignalAudioInfoChange();
 }
 
 void CDVDPlayerAudio::CloseStream(bool bWaitForBuffers)
@@ -568,12 +569,9 @@ void CDVDPlayerAudio::Process()
       if(!m_dvdAudio.Create(audioframe, m_streaminfo.codec, m_setsynctype == SYNC_RESAMPLE))
         CLog::Log(LOGERROR, "%s - failed to create audio renderer", __FUNCTION__);
 
-      if (m_syncState == IDVDStreamPlayer::SYNC_INSYNC)
-        m_dvdAudio.Resume();
-
       m_streaminfo.channels = audioframe.passthrough ? audioframe.encoded_channel_count : audioframe.channel_count;
 
-      g_dataCacheCore.SignalAudioInfoChange();
+      CServiceBroker::GetDataCacheCore().SignalAudioInfoChange();
     }
 
     // Zero out the frame data if we are supposed to silence the audio

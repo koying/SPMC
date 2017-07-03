@@ -225,10 +225,9 @@ bool CDVDAudio::IsValidFormat(const DVDAudioFrame &audioframe)
   if(audioframe.passthrough != m_bPassthrough)
     return false;
 
-  if(m_iBitrate       != audioframe.sample_rate
-  || m_iBitsPerSample != audioframe.bits_per_sample
-  || m_channelLayout  != audioframe.channel_layout
-  || m_DataFormat     != audioframe.data_format)
+  if (m_sampeRate != audioframe.format.m_sampleRate ||
+     m_iBitsPerSample != audioframe.bits_per_sample ||
+     m_channelLayout != audioframe.format.m_channelLayout)
     return false;
 
   return true;
@@ -279,16 +278,10 @@ double CDVDAudio::GetPlayingPts()
 
 double CDVDAudio::GetClock()
 {
-  if (m_pClock)
-    return (m_pClock->GetClock() + m_pClock->GetVsyncAdjust()) / DVD_TIME_BASE * 1000;
-  else
-    return 0.0;
+  return GetPlayingPts();
 }
 
 double CDVDAudio::GetClockSpeed()
 {
-  if (m_pClock)
-    return m_pClock->GetClockSpeed();
-  else
-    return 1.0;
+  return 1.0;
 }

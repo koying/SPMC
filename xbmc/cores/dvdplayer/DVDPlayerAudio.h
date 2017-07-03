@@ -30,6 +30,8 @@
 #include "threads/Thread.h"
 #include "utils/BitstreamStats.h"
 
+using namespace dvdplayer;
+
 class CDVDPlayer;
 class CDVDAudioCodec;
 class CDVDAudioCodec;

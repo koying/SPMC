@@ -66,9 +66,11 @@ public:
   void SetSpeed(int iSpeed);
   void SetResampleRatio(double ratio);
 
+  // IAEClockCallback implemenation
   double GetClock();
   double GetClockSpeed();
-  IAEStream *m_pAudioStream;
+
+IAEStream *m_pAudioStream;
 
 protected:
   double m_playingPts;
