@@ -133,7 +133,7 @@ bool CRendererMediaCodec::RenderHook(int index)
   #endif
 
   YUVPLANE &plane = m_buffers[index].fields[0][0];
-  YUVPLANE &planef = m_buffers[index].fields[index][0];
+  YUVPLANE &planef = m_buffers[index].fields[m_currentField][0];
 
   glDisable(GL_DEPTH_TEST);
 
