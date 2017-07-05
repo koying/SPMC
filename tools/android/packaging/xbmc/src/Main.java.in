@@ -328,6 +328,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onResume();
 
+    if (!isInMultiWindowMode())
+      hideSystemUI();
+
     // New intent ?
     if (mNewIntent != null)
     {
