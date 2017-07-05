@@ -99,6 +99,8 @@ bool CAndroidTouch::onTouchEvent(AInputEvent* event)
   // now send the event
   CPoint in(x, y);
   CPoint out = CXBMCApp::MapDroidToGui(in);
+  CLog::Log(LOGDEBUG, "%s - a:%d (%f,%f) p:%d d:%f", __PRETTY_FUNCTION__, touchAction, out.x, out.y, touchPointer, size);
+
   return CGenericTouchInputHandler::GetInstance().HandleTouchInput(touchEvent, out.x, out.y, time, touchPointer, size);
 }
 
@@ -107,6 +109,7 @@ void CAndroidTouch::setDPI(uint32_t dpi)
   if (dpi != 0)
   {
     m_dpi = dpi;
+    CLog::Log(LOGDEBUG, "%s - %d", __PRETTY_FUNCTION__, m_dpi);
 
     CGenericTouchInputHandler::GetInstance().SetScreenDPI(m_dpi);
   }
