@@ -108,9 +108,6 @@ bool CWinEventsAndroid::MessagePump()
     }
 
     ret |= g_application.OnEvent(pumpEvent);
-
-    if (pumpEvent.type == XBMC_MOUSEBUTTONUP)
-      g_windowManager.SendMessage(GUI_MSG_UNFOCUS_ALL, 0, 0, 0, 0);
   }
 
   return ret;

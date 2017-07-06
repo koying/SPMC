@@ -406,16 +406,13 @@ bool CInputManager::OnEvent(XBMC_Event& newEvent)
 
     if ((actionId >= ACTION_TOUCH_TAP && actionId <= ACTION_GESTURE_END)
         || (actionId >= ACTION_MOUSE_START && actionId <= ACTION_MOUSE_END))
-    {
-      auto action = new CAction(actionId, 0, newEvent.touch.x, newEvent.touch.y, newEvent.touch.x2, newEvent.touch.y2);
-      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(action));
-    }
+      g_application.OnAction(CAction(actionId, 0, newEvent.touch.x, newEvent.touch.y, newEvent.touch.x2, newEvent.touch.y2));
     else
     {
       if (actionId == ACTION_BUILT_IN_FUNCTION && !actionString.empty())
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(actionId, actionString)));
+        g_application.OnAction(CAction(actionId, actionString));
       else
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(actionId)));
+        g_application.OnAction(CAction(actionId));
     }
 
     // Post an unfocus message for touch device after the action.
