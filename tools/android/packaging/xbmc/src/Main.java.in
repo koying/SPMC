@@ -330,7 +330,12 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onResume();
 
-    if (!isInMultiWindowMode())
+    if (android.os.Build.VERSION.SDK_INT >= 24)
+    {
+      if (!isInMultiWindowMode())
+        hideSystemUI();
+    }
+    else
       hideSystemUI();
 
     // New intent ?
