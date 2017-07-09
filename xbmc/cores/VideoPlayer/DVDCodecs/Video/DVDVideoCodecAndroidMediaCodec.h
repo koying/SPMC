@@ -73,6 +73,7 @@ public:
   void                Validate(bool state);
   bool                WaitForFrame(int millis);
   // MediaCodec related
+  void                SetTimestamp(int64_t ts) { m_timestamp = ts; }
   void                ReleaseOutputBuffer(bool render);
   bool                IsReleased() { return m_isReleased; }
   // SurfaceTexture released
