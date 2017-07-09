@@ -23,7 +23,9 @@
 #include "OverlayRenderer.h"
 #include "OverlayRendererUtil.h"
 #include "OverlayRendererGL.h"
-#ifdef HAS_GL
+#if defined(TARGET_ANDROID)
+  #include "AndroidRenderer.h"
+#elif defined(HAS_GL)
   #include "LinuxRendererGL.h"
 #elif HAS_GLES == 2
   #include "LinuxRendererGLES.h"

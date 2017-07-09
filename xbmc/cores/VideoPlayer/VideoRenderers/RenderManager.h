@@ -44,6 +44,7 @@ namespace VAAPI { class CSurfaceHolder; }
 namespace VDPAU { class CVdpauRenderPicture; }
 struct DVDVideoPicture;
 
+class CAndroidRenderer;
 class CWinRenderer;
 class CMMALRenderer;
 class CLinuxRenderer;

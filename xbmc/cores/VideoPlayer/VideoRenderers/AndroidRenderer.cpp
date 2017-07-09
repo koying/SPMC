@@ -21,16 +21,15 @@
 //#define DEBUG_VERBOSE 1
 
 #include "system.h"
-#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
-  #include "config.h"
-#endif
 
-#if HAS_GLES == 2
+#ifdef TARGET_ANDROID
 #include "system_gl.h"
+
+#include "AndroidRenderer.h"
+#include "platform/android/activity/JNIXBMCVideoGLView.h"
 
 #include <locale.h>
 #include "guilib/MatrixGLES.h"
-#include "LinuxRendererGLES.h"
 #include "utils/MathUtils.h"
 #include "utils/GLUtils.h"
 #include "utils/log.h"
@@ -65,7 +64,7 @@ static PFNEGLCLIENTWAITSYNCKHRPROC eglClientWaitSyncKHR;
 
 using namespace Shaders;
 
-CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
+CAndroidRenderer::YUVBUFFER::YUVBUFFER()
 {
   memset(&fields, 0, sizeof(fields));
   memset(&image , 0, sizeof(image));
@@ -73,11 +72,11 @@ CLinuxRendererGLES::YUVBUFFER::YUVBUFFER()
   hwDec = NULL;
 }
 
-CLinuxRendererGLES::YUVBUFFER::~YUVBUFFER()
+CAndroidRenderer::YUVBUFFER::~YUVBUFFER()
 {
 }
 
-CLinuxRendererGLES::CLinuxRendererGLES()
+CAndroidRenderer::CAndroidRenderer()
 {
   m_textureTarget = GL_TEXTURE_2D;
 
@@ -103,6 +102,7 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   m_sw_context = NULL;
   m_NumYV12Buffers = 0;
   m_iLastRenderBuffer = 0;
+  m_GlLView = nullptr;
   m_bConfigured = false;
   m_bValidated = false;
   m_bImageReady = false;
@@ -122,7 +122,7 @@ CLinuxRendererGLES::CLinuxRendererGLES()
 #endif
 }
 
-CLinuxRendererGLES::~CLinuxRendererGLES()
+CAndroidRenderer::~CAndroidRenderer()
 {
   UnInit();
 
@@ -134,7 +134,7 @@ CLinuxRendererGLES::~CLinuxRendererGLES()
   ReleaseShaders();
 }
 
-bool CLinuxRendererGLES::ValidateRenderTarget()
+bool CAndroidRenderer::ValidateRenderTarget()
 {
   if (!m_bValidated)
   {
@@ -160,7 +160,7 @@ bool CLinuxRendererGLES::ValidateRenderTarget()
   return false;
 }
 
-bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format, unsigned int orientation)
+bool CAndroidRenderer::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format, unsigned int orientation)
 {
   m_sourceWidth = width;
   m_sourceHeight = height;
@@ -174,6 +174,10 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
   CalculateFrameAspectRatio(d_width, d_height);
   SetViewMode(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_ViewMode);
   ManageRenderArea();
+
+  m_GlLView = CJNIXBMCVideoGLView::createVideoGLView();
+  if (!m_GlLView->waitForSurface(1000))
+    return false;
 
   m_bConfigured = true;
   m_bImageReady = false;
@@ -191,12 +195,12 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
   return true;
 }
 
-int CLinuxRendererGLES::NextYV12Texture()
+int CAndroidRenderer::NextYV12Texture()
 {
   return (m_iYV12RenderBuffer + 1) % m_NumYV12Buffers;
 }
 
-int CLinuxRendererGLES::GetImage(YV12Image *image, int source, bool readonly)
+int CAndroidRenderer::GetImage(YV12Image *image, int source, bool readonly)
 {
   if (!image)
     return -1;
@@ -243,7 +247,7 @@ int CLinuxRendererGLES::GetImage(YV12Image *image, int source, bool readonly)
   return source;
 }
 
-void CLinuxRendererGLES::ReleaseImage(int source, bool preserve)
+void CAndroidRenderer::ReleaseImage(int source, bool preserve)
 {
   YV12Image &im = m_buffers[source].image;
 
@@ -257,7 +261,7 @@ void CLinuxRendererGLES::ReleaseImage(int source, bool preserve)
   m_bImageReady = true;
 }
 
-void CLinuxRendererGLES::CalculateTextureSourceRects(int source, int num_planes)
+void CAndroidRenderer::CalculateTextureSourceRects(int source, int num_planes)
 {
   YUVBUFFER& buf    =  m_buffers[source];
   YV12Image* im     = &buf.image;
@@ -330,7 +334,7 @@ void CLinuxRendererGLES::CalculateTextureSourceRects(int source, int num_planes)
   }
 }
 
-void CLinuxRendererGLES::LoadPlane( YUVPLANE& plane, int type, unsigned flipindex
+void CAndroidRenderer::LoadPlane( YUVPLANE& plane, int type, unsigned flipindex
                                 , unsigned width, unsigned height
                                 , unsigned int stride, int bpp, void* data )
 {
@@ -377,7 +381,7 @@ void CLinuxRendererGLES::LoadPlane( YUVPLANE& plane, int type, unsigned flipinde
   plane.flipindex = flipindex;
 }
 
-void CLinuxRendererGLES::Reset()
+void CAndroidRenderer::Reset()
 {
   for(int i=0; i<m_NumYV12Buffers; i++)
   {
@@ -386,7 +390,7 @@ void CLinuxRendererGLES::Reset()
   }
 }
 
-void CLinuxRendererGLES::Flush()
+void CAndroidRenderer::Flush()
 {
   if (!m_bValidated)
     return;
@@ -402,15 +406,14 @@ void CLinuxRendererGLES::Flush()
   m_iYV12RenderBuffer = 0;
 }
 
-void CLinuxRendererGLES::Update()
+void CAndroidRenderer::Update()
 {
   if (!m_bConfigured)
     return;
   ManageRenderArea();
-  ValidateRenderTarget();
 }
 
-void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
+void CAndroidRenderer::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 {
   if (!m_bConfigured)
     return;
@@ -477,7 +480,7 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
   glEnable(GL_BLEND);
 }
 
-void CLinuxRendererGLES::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
+void CAndroidRenderer::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
 {
   if (!m_bConfigured)
     return;
@@ -495,7 +498,7 @@ void CLinuxRendererGLES::RenderUpdateVideo(bool clear, DWORD flags, DWORD alpha)
   }
 }
 
-void CLinuxRendererGLES::FlipPage(int source)
+void CAndroidRenderer::FlipPage(int source)
 {
   if( source >= 0 && source < m_NumYV12Buffers )
     m_iYV12RenderBuffer = source;
@@ -507,7 +510,7 @@ void CLinuxRendererGLES::FlipPage(int source)
   return;
 }
 
-void CLinuxRendererGLES::PreInit()
+void CAndroidRenderer::PreInit()
 {
   CSingleLock lock(g_graphicsContext);
   m_bConfigured = false;
@@ -526,7 +529,7 @@ void CLinuxRendererGLES::PreInit()
   m_clearColour = g_Windowing.UseLimitedColor() ? (16.0f / 0xff) : 0.0f;
 }
 
-void CLinuxRendererGLES::UpdateVideoFilter()
+void CAndroidRenderer::UpdateVideoFilter()
 {
   if (m_scalingMethodGui == CMediaSettings::GetInstance().GetCurrentVideoSettings().m_ScalingMethod)
     return;
@@ -535,7 +538,7 @@ void CLinuxRendererGLES::UpdateVideoFilter()
 
   if(!Supports(m_scalingMethod))
   {
-    CLog::Log(LOGWARNING, "CLinuxRendererGLES::UpdateVideoFilter - choosen scaling method %d, is not supported by renderer", (int)m_scalingMethod);
+    CLog::Log(LOGWARNING, "CAndroidRendererES::UpdateVideoFilter - choosen scaling method %d, is not supported by renderer", (int)m_scalingMethod);
     m_scalingMethod = VS_SCALINGMETHOD_LINEAR;
   }
 
@@ -589,7 +592,7 @@ void CLinuxRendererGLES::UpdateVideoFilter()
   m_renderQuality = RQ_SINGLEPASS;
 }
 
-void CLinuxRendererGLES::LoadShaders(int field)
+void CAndroidRenderer::LoadShaders(int field)
 {
   if (!LoadShadersHook())
   {
@@ -652,13 +655,13 @@ void CLinuxRendererGLES::LoadShaders(int field)
 
   if (m_oldRenderMethod != m_renderMethod)
   {
-    CLog::Log(LOGDEBUG, "CLinuxRendererGLES: Reorder drawpoints due to method change from %i to %i", m_oldRenderMethod, m_renderMethod);
+    CLog::Log(LOGDEBUG, "CAndroidRendererES: Reorder drawpoints due to method change from %i to %i", m_oldRenderMethod, m_renderMethod);
     ReorderDrawPoints();
     m_oldRenderMethod = m_renderMethod;
   }
 }
 
-void CLinuxRendererGLES::ReleaseShaders()
+void CAndroidRenderer::ReleaseShaders()
 {
   if (m_pYUVProgShader)
   {
@@ -674,9 +677,9 @@ void CLinuxRendererGLES::ReleaseShaders()
   }
 }
 
-void CLinuxRendererGLES::UnInit()
+void CAndroidRenderer::UnInit()
 {
-  CLog::Log(LOGDEBUG, "LinuxRendererGL: Cleaning up GL resources");
+  CLog::Log(LOGDEBUG, "AndroidRenderer: Cleaning up GL resources");
   CSingleLock lock(g_graphicsContext);
 
   if (m_rgbBuffer != NULL)
@@ -701,14 +704,16 @@ void CLinuxRendererGLES::UnInit()
   m_bValidated = false;
   m_bImageReady = false;
   m_bConfigured = false;
+
+  delete m_GlLView;
 }
 
-inline void CLinuxRendererGLES::ReorderDrawPoints()
+inline void CAndroidRenderer::ReorderDrawPoints()
 {
   CBaseRenderer::ReorderDrawPoints();//call base impl. for rotating the points
 }
 
-bool CLinuxRendererGLES::CreateTexture(int index)
+bool CAndroidRenderer::CreateTexture(int index)
 {
   if (m_format == RENDER_FMT_BYPASS)
   {
@@ -730,7 +735,7 @@ bool CLinuxRendererGLES::CreateTexture(int index)
   return false;
 }
 
-void CLinuxRendererGLES::DeleteTexture(int index)
+void CAndroidRenderer::DeleteTexture(int index)
 {
   if (m_format == RENDER_FMT_BYPASS)
   {
@@ -747,7 +752,7 @@ void CLinuxRendererGLES::DeleteTexture(int index)
   }
 }
 
-bool CLinuxRendererGLES::UploadTexture(int index)
+bool CAndroidRenderer::UploadTexture(int index)
 {
   // Now that we now the render method, setup texture function handlers
   if (m_format == RENDER_FMT_BYPASS)
@@ -769,7 +774,7 @@ bool CLinuxRendererGLES::UploadTexture(int index)
   return false;
 }
 
-void CLinuxRendererGLES::Render(DWORD flags, int index)
+void CAndroidRenderer::Render(DWORD flags, int index)
 {
   // If rendered directly by the hardware
   if (m_renderMethod & RENDER_BYPASS)
@@ -815,7 +820,7 @@ void CLinuxRendererGLES::Render(DWORD flags, int index)
   AfterRenderHook(index);
 }
 
-void CLinuxRendererGLES::RenderSinglePass(int index, int field)
+void CAndroidRenderer::RenderSinglePass(int index, int field)
 {
   YV12Image &im     = m_buffers[index].image;
   YUVFIELDS &fields = m_buffers[index].fields;
@@ -927,7 +932,7 @@ void CLinuxRendererGLES::RenderSinglePass(int index, int field)
   VerifyGLState();
 }
 
-void CLinuxRendererGLES::RenderMultiPass(int index, int field)
+void CAndroidRenderer::RenderMultiPass(int index, int field)
 {
   //! @todo Multipass rendering does not currently work! FIX!
   CLog::Log(LOGERROR, "GLES: MULTIPASS rendering was called! But it doesnt work!!!");
@@ -1111,7 +1116,7 @@ void CLinuxRendererGLES::RenderMultiPass(int index, int field)
   VerifyGLState();
 }
 
-bool CLinuxRendererGLES::RenderCapture(CRenderCapture* capture)
+bool CAndroidRenderer::RenderCapture(CRenderCapture* capture)
 {
   if (!m_bValidated)
     return false;
@@ -1136,15 +1141,9 @@ bool CLinuxRendererGLES::RenderCapture(CRenderCapture* capture)
   glDisable(GL_BLEND);
 
   glMatrixModview.Push();
-  // fixme - we know that cvref  & eglimg are already flipped in y direction
-  // but somehow this also effects the rendercapture here
-  // therefore we have to skip the flip here or we get upside down
-  // images
-  if (m_renderMethod != RENDER_CVREF)
-  {
-    glMatrixModview->Translatef(0.0f, capture->GetHeight(), 0.0f);
-    glMatrixModview->Scalef(1.0f, -1.0f, 1.0f);
-  }
+  glMatrixModview->Translatef(0.0f, capture->GetHeight(), 0.0f);
+  glMatrixModview->Scalef(1.0f, -1.0f, 1.0f);
+
   glMatrixModview.Load();
 
   capture->BeginRender();
@@ -1177,7 +1176,7 @@ bool CLinuxRendererGLES::RenderCapture(CRenderCapture* capture)
 //********************************************************************************************************
 // YV12 Texture creation, deletion, copying + clearing
 //********************************************************************************************************
-void CLinuxRendererGLES::UploadYV12Texture(int source)
+void CAndroidRenderer::UploadYV12Texture(int source)
 {
   YUVBUFFER& buf    =  m_buffers[source];
   YV12Image* im     = &buf.image;
@@ -1216,7 +1215,7 @@ void CLinuxRendererGLES::UploadYV12Texture(int source)
   glDisable(m_textureTarget);
 }
 
-void CLinuxRendererGLES::DeleteYV12Texture(int index)
+void CAndroidRenderer::DeleteYV12Texture(int index)
 {
   YV12Image &im     = m_buffers[index].image;
   YUVFIELDS &fields = m_buffers[index].fields;
@@ -1266,7 +1265,7 @@ static GLint GetInternalFormat(GLint format, int bpp)
     return format;
 }
 
-bool CLinuxRendererGLES::CreateYV12Texture(int index)
+bool CAndroidRenderer::CreateYV12Texture(int index)
 {
   /* since we also want the field textures, pitch must be texture aligned */
   YV12Image &im     = m_buffers[index].image;
@@ -1376,7 +1375,7 @@ bool CLinuxRendererGLES::CreateYV12Texture(int index)
 //********************************************************************************************************
 // NV12 Texture loading, creation and deletion
 //********************************************************************************************************
-void CLinuxRendererGLES::UploadNV12Texture(int source)
+void CAndroidRenderer::UploadNV12Texture(int source)
 {
   YUVBUFFER& buf    =  m_buffers[source];
   YV12Image* im     = &buf.image;
@@ -1439,7 +1438,7 @@ void CLinuxRendererGLES::UploadNV12Texture(int source)
   return;
 }
 
-bool CLinuxRendererGLES::CreateNV12Texture(int index)
+bool CAndroidRenderer::CreateNV12Texture(int index)
 {
   // since we also want the field textures, pitch must be texture aligned
   YV12Image &im     = m_buffers[index].image;
@@ -1539,7 +1538,7 @@ bool CLinuxRendererGLES::CreateNV12Texture(int index)
 
   return true;
 }
-void CLinuxRendererGLES::DeleteNV12Texture(int index)
+void CAndroidRenderer::DeleteNV12Texture(int index)
 {
   YV12Image &im     = m_buffers[index].image;
   YUVFIELDS &fields = m_buffers[index].fields;
@@ -1576,13 +1575,13 @@ void CLinuxRendererGLES::DeleteNV12Texture(int index)
 //********************************************************************************************************
 // BYPASS creation, deletion, copying + clearing
 //********************************************************************************************************
-void CLinuxRendererGLES::UploadBYPASSTexture(int index)
+void CAndroidRenderer::UploadBYPASSTexture(int index)
 {
 }
-void CLinuxRendererGLES::DeleteBYPASSTexture(int index)
+void CAndroidRenderer::DeleteBYPASSTexture(int index)
 {
 }
-bool CLinuxRendererGLES::CreateBYPASSTexture(int index)
+bool CAndroidRenderer::CreateBYPASSTexture(int index)
 {
   return true;
 }
@@ -1590,7 +1589,7 @@ bool CLinuxRendererGLES::CreateBYPASSTexture(int index)
 //********************************************************************************************************
 // SurfaceTexture creation, deletion, copying + clearing
 //********************************************************************************************************
-void CLinuxRendererGLES::SetTextureFilter(GLenum method)
+void CAndroidRenderer::SetTextureFilter(GLenum method)
 {
   for (int i = 0 ; i<m_NumYV12Buffers ; i++)
   {
@@ -1616,7 +1615,7 @@ void CLinuxRendererGLES::SetTextureFilter(GLenum method)
   }
 }
 
-bool CLinuxRendererGLES::Supports(ERENDERFEATURE feature)
+bool CAndroidRenderer::Supports(ERENDERFEATURE feature)
 {
   if(feature == RENDERFEATURE_BRIGHTNESS)
     return true;
@@ -1648,12 +1647,12 @@ bool CLinuxRendererGLES::Supports(ERENDERFEATURE feature)
   return false;
 }
 
-bool CLinuxRendererGLES::SupportsMultiPassRendering()
+bool CAndroidRenderer::SupportsMultiPassRendering()
 {
   return false;
 }
 
-bool CLinuxRendererGLES::Supports(ESCALINGMETHOD method)
+bool CAndroidRenderer::Supports(ESCALINGMETHOD method)
 {
   if(method == VS_SCALINGMETHOD_NEAREST
   || method == VS_SCALINGMETHOD_LINEAR)
@@ -1662,7 +1661,7 @@ bool CLinuxRendererGLES::Supports(ESCALINGMETHOD method)
   return false;
 }
 
-CRenderInfo CLinuxRendererGLES::GetRenderInfo()
+CRenderInfo CAndroidRenderer::GetRenderInfo()
 {
   CRenderInfo info;
   info.formats = m_formats;
@@ -1671,7 +1670,7 @@ CRenderInfo CLinuxRendererGLES::GetRenderInfo()
   return info;
 }
 
-bool CLinuxRendererGLES::IsGuiLayer()
+bool CAndroidRenderer::IsGuiLayer()
 {
   if (m_format == RENDER_FMT_BYPASS)
     return false;

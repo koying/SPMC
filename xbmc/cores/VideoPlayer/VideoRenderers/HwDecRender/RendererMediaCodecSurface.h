@@ -24,9 +24,9 @@
 
 #if defined(TARGET_ANDROID)
 
-#include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
+#include "cores/VideoPlayer/VideoRenderers/AndroidRenderer.h"
 
-class CRendererMediaCodecSurface : public CLinuxRendererGLES
+class CRendererMediaCodecSurface : public CAndroidRenderer
 {
 public:
   CRendererMediaCodecSurface();
@@ -35,6 +35,7 @@ public:
   virtual bool RenderCapture(CRenderCapture* capture);
 
   // Player functions
+  virtual bool Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_formatunsigned, unsigned int orientation) override;
   virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index);
   virtual bool RenderUpdateCheckForEmptyField();
   virtual void ReleaseBuffer(int idx);

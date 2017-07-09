@@ -16,7 +16,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class XBMCVideoGLView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
-  native void _attach();
+  native void _surfaceCreated();
+  native void _surfaceChanged(int width, int height);
   native void _onDrawFrame();
 
   private static final String TAG = "XBMCVideoGLView";
@@ -53,8 +54,6 @@ public class XBMCVideoGLView extends GLSurfaceView implements GLSurfaceView.Rend
     setEGLContextClientVersion(2);
     setRenderer(this);
     setRenderMode(RENDERMODE_WHEN_DIRTY);
-    setZOrderMediaOverlay(true);
-    getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
   }
@@ -84,16 +83,39 @@ public class XBMCVideoGLView extends GLSurfaceView implements GLSurfaceView.Rend
     });
   }
 
-  @Override
-  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
+  public void setSurfaceRect(final int left, final int top, final int right, final int bottom)
   {
-    _attach();
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        try
+        {
+          RelativeLayout.LayoutParams mp = new RelativeLayout.LayoutParams(getLayoutParams());
+          mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
+          setLayoutParams(mp);
+          requestLayout();
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+      }
+    });
   }
 
   @Override
-  public void onSurfaceChanged(GL10 gl10, int i, int i1)
+  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
   {
+    mIsCreated = true;
+    _surfaceCreated();
+  }
 
+  @Override
+  public void onSurfaceChanged(GL10 gl10, int width, int height)
+  {
+    _surfaceChanged(width, height);
   }
 
   @Override

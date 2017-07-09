@@ -26,6 +26,7 @@
 #include "platform/android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #include "utils/log.h"
+#include "settings/MediaSettings.h"
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
 {
@@ -39,6 +40,37 @@ bool CRendererMediaCodecSurface::RenderCapture(CRenderCapture* capture)
 {
   capture->BeginRender();
   capture->EndRender();
+  return true;
+}
+
+bool CRendererMediaCodecSurface::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format, unsigned int orientation)
+{
+  m_sourceWidth = width;
+  m_sourceHeight = height;
+  m_renderOrientation = orientation;
+
+  // Save the flags.
+  m_iFlags = flags;
+  m_format = format;
+
+  // Calculate the input frame aspect ratio.
+  CalculateFrameAspectRatio(d_width, d_height);
+  SetViewMode(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_ViewMode);
+  ManageRenderArea();
+
+  m_bConfigured = true;
+  m_bImageReady = false;
+  m_scalingMethodGui = (ESCALINGMETHOD)-1;
+
+  // Ensure that textures are recreated and rendering starts only after the 1st
+  // frame is loaded after every call to Configure().
+  m_bValidated = false;
+
+  for (int i = 0 ; i<m_NumYV12Buffers ; i++)
+    m_buffers[i].image.flags = 0;
+
+  m_iLastRenderBuffer = -1;
+
   return true;
 }
 

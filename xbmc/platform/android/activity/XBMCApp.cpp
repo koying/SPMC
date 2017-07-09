@@ -127,7 +127,6 @@ CXBMCApp* CXBMCApp::m_xbmcappinstance = NULL;
 CCriticalSection CXBMCApp::m_AppMutex;
 
 std::unique_ptr<CJNIXBMCMainView> CXBMCApp::m_mainView;
-std::unique_ptr<CJNIXBMCVideoGLView> CXBMCApp::m_videoGlView;
 ANativeActivity *CXBMCApp::m_activity = NULL;
 CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
@@ -172,7 +171,6 @@ CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
     return;
   }
   m_mainView.reset(new CJNIXBMCMainView(this));
-  m_videoGlView.reset(new CJNIXBMCVideoGLView());
   m_firstrun = true;
   m_exiting = false;
   android_printf("CXBMCApp: Created");

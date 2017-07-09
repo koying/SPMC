@@ -36,7 +36,8 @@
 using namespace jni;
 
 static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCVideoGLView";
-CJNIXBMCVideoGLView* CJNIXBMCVideoGLView::m_instance = nullptr;
+CJNIXBMCVideoGLView* CJNIXBMCVideoGLView::m_lastInstance = nullptr;
+std::list<std::pair<jni::jhobject, CJNIXBMCVideoGLView*>> CJNIXBMCVideoGLView::m_object_map;
 
 void CJNIXBMCVideoGLView::RegisterNatives(JNIEnv* env)
 {
@@ -45,7 +46,8 @@ void CJNIXBMCVideoGLView::RegisterNatives(JNIEnv* env)
   {
     JNINativeMethod methods[] = 
     {
-      {"_attach", "()V", (void*)&CJNIXBMCVideoGLView::_attach},
+      {"_surfaceCreated", "()V", (void*)&CJNIXBMCVideoGLView::_surfaceCreated},
+      {"_surfaceChanged", "(II)V", (void*)&CJNIXBMCVideoGLView::_surfaceChanged},
       {"_onDrawFrame", "()V", (void*)&CJNIXBMCVideoGLView::_onDrawFrame},
     };
 
@@ -55,42 +57,115 @@ void CJNIXBMCVideoGLView::RegisterNatives(JNIEnv* env)
 
 CJNIXBMCVideoGLView::CJNIXBMCVideoGLView()
 {
-  m_instance = this;
 }
 
 CJNIXBMCVideoGLView::CJNIXBMCVideoGLView(const jni::jhobject &object)
   : CJNIBase(object)
 {
-  m_instance = this;
 }
 
 CJNIXBMCVideoGLView::~CJNIXBMCVideoGLView()
 {
-}
-
-void CJNIXBMCVideoGLView::_attach(JNIEnv* env, jobject thiz)
-{
-  (void)env;
-
-  if (m_instance)
-    m_instance->attach(thiz);
-}
-
-void CJNIXBMCVideoGLView::attach(const jobject& thiz)
-{
+  if (m_lastInstance = this)
+    m_lastInstance = nullptr;
   if (!m_object)
+    return;
+  release();
+}
+
+CJNIXBMCVideoGLView* CJNIXBMCVideoGLView::createVideoGLView()
+{
+  std::string signature = "()L" + s_className + ";";
+
+  CJNIXBMCVideoGLView* pvw = new CJNIXBMCVideoGLView(call_static_method<jhobject>(xbmc_jnienv(), CJNIContext::getClassLoader().loadClass(GetDotClassName(s_className)),
+                                                                              "createVideoGLView", signature.c_str()));
+  if (!*pvw)
   {
-    m_object = jhobject(thiz);
-    m_object.setGlobal();
+    CLog::Log(LOGERROR, "Cannot instantiate VideoGLView!!");
+    delete pvw;
+    return nullptr;
   }
+
+  m_lastInstance = pvw;
+  m_object_map.push_back(std::pair<jni::jhobject, CJNIXBMCVideoGLView*>(pvw->get_raw(), pvw));
+  if (pvw->isCreated())
+    pvw->m_surfaceCreated.Set();
+  pvw->add();
+
+  return pvw;
+}
+
+CJNIXBMCVideoGLView* CJNIXBMCVideoGLView::find_instance(const jni::jhobject& o)
+{
+  for( auto it = m_object_map.begin(); it != m_object_map.end(); ++it )
+  {
+    if (it->first == o)
+      return it->second;
+  }
+  return nullptr;
 }
 
 void CJNIXBMCVideoGLView::_onDrawFrame(JNIEnv *env, jobject thiz)
 {
   (void)env;
 
-  if (m_instance)
-    m_instance->onDrawFrame();
+  CJNIXBMCVideoGLView *inst = find_instance(jhobject(thiz));
+  if (inst)
+    inst->onDrawFrame();
+}
+
+void CJNIXBMCVideoGLView::_surfaceChanged(JNIEnv*, jobject thiz, jint width, jint height )
+{
+  CJNIXBMCVideoGLView *inst = find_instance(jhobject(thiz));
+  if (inst)
+    inst->surfaceChanged(width, height);
+}
+
+void CJNIXBMCVideoGLView::_surfaceCreated(JNIEnv*, jobject thiz)
+{
+  CJNIXBMCVideoGLView *inst = find_instance(jhobject(thiz));
+  if (inst)
+    inst->surfaceCreated();
+}
+
+void CJNIXBMCVideoGLView::surfaceChanged(int width, int height)
+{
+}
+
+void CJNIXBMCVideoGLView::surfaceCreated()
+{
+  m_surfaceCreated.Set();
+}
+
+void CJNIXBMCVideoGLView::add()
+{
+  call_method<void>(m_object,
+                    "add", "()V");
+}
+
+void CJNIXBMCVideoGLView::release()
+{
+  for( auto it = m_object_map.begin(); it != m_object_map.end(); ++it )
+  {
+    if (it->second == this)
+    {
+      m_object_map.erase(it);
+      break;
+    }
+  }
+
+  call_method<void>(m_object,
+                    "release", "()V");
+}
+
+bool CJNIXBMCVideoGLView::isCreated() const
+{
+  return get_field<jboolean>(m_object, "mIsCreated");
+}
+
+bool CJNIXBMCVideoGLView::waitForSurface(unsigned int millis)
+{
+  return m_surfaceCreated.WaitMSec(millis);
 }
 
 void CJNIXBMCVideoGLView::onDrawFrame()

@@ -304,9 +304,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mMainView.setElevation(1);  // Always on Top
     mVideoLayout.addView(mMainView, layoutParams);
 
-    m_videoGlView = new XBMCVideoGLView(this);
-    mVideoLayout.addView(m_videoGlView, layoutParams);
-
     hideSystemUI();
 }
 

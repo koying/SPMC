@@ -42,7 +42,11 @@
 #include "HwDecRender/RendererVTBGL.h"
 #endif
 #elif HAS_GLES == 2
-  #include "LinuxRendererGLES.h"
+#if defined(TARGET_ANDROID)
+#include "AndroidRenderer.h"
+#else
+#include "LinuxRendererGLES.h"
+#endif
 #if defined(HAS_MMAL)
 #include "HwDecRender/MMALRenderer.h"
 #endif
@@ -588,6 +592,8 @@ void CRenderManager::CreateRenderer()
       m_pRenderer = new CMMALRenderer;
 #elif defined(HAS_GL)
       m_pRenderer = new CLinuxRendererGL;
+#elif defined(TARGET_ANDROID)
+      m_pRenderer = new CAndroidRenderer;
 #elif HAS_GLES == 2
       m_pRenderer = new CLinuxRendererGLES;
 #elif defined(HAS_DX)

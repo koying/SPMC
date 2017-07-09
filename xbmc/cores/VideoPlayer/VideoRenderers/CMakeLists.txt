@@ -26,6 +26,15 @@ if(CORE_SYSTEM_NAME STREQUAL windows)
                       OverlayRendererDX.h)
 endif()
 
+if(CORE_SYSTEM_NAME STREQUAL android)
+  list(APPEND SOURCES AndroidRenderer.cpp
+                      OverlayRendererGL.cpp
+                      FrameBufferObject.cpp)
+  list(APPEND HEADERS AndroidRenderer.h
+                      OverlayRendererGL.h
+                      FrameBufferObject.cpp)
+endif()
+
 if(OPENGL_FOUND)
   list(APPEND SOURCES OverlayRendererGL.cpp
                       LinuxRendererGL.cpp
@@ -35,7 +44,7 @@ if(OPENGL_FOUND)
                       FrameBufferObject.h)
 endif()
 
-if(OPENGLES_FOUND)
+if(OPENGLES_FOUND AND NOT CORE_SYSTEM_NAME STREQUAL android)
   list(APPEND SOURCES LinuxRendererGLES.cpp
                       OverlayRendererGL.cpp
                       FrameBufferObject.cpp)

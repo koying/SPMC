@@ -36,25 +36,34 @@ public:
   CJNIXBMCVideoGLView(const jni::jhobject &object);
   ~CJNIXBMCVideoGLView();
 
-  static CJNIXBMCVideoGLView* GetInstance() { return m_instance; }
-
   static void RegisterNatives(JNIEnv* env);
-  
-  static CJNIXBMCVideoGLView* createVideoView(CJNISurfaceHolderCallback* callback);
 
-  void attach(const jobject& thiz);
+  static CJNIXBMCVideoGLView* GetInstance() { return m_lastInstance; }
+  static CJNIXBMCVideoGLView* createVideoGLView();
+
+  void surfaceChanged(int width, int height);
+  void surfaceCreated();
   void onDrawFrame();
 
+  void add();
+  void release();
+  bool isCreated() const;
+  bool waitForSurface(unsigned int millis);
   void requestRender(bool clear, uint32_t alpha, bool gui);
 
 protected:
-  static CJNIXBMCVideoGLView* m_instance;
+  CEvent m_surfaceCreated;
+  static CJNIXBMCVideoGLView *find_instance(const jni::jhobject &o);
 
-  static void _attach(JNIEnv* env, jobject thiz);
+  static void _surfaceChanged(JNIEnv* env, jobject thiz, jint width, jint height);
+  static void _surfaceCreated(JNIEnv* env, jobject thiz);
   static void _onDrawFrame(JNIEnv* env, jobject thiz);
 
 private:
   bool m_lastClear;
   uint32_t m_lastAlpha;
   bool m_lastGui;
+
+  static CJNIXBMCVideoGLView* m_lastInstance;
+  static std::list<std::pair<jni::jhobject, CJNIXBMCVideoGLView*>> m_object_map;
 };

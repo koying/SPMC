@@ -747,14 +747,18 @@ void CApplicationPlayer::FrameMove()
 
 void CApplicationPlayer::Render(bool clear, uint32_t alpha, bool gui)
 {
+  std::shared_ptr<IPlayer> player = GetInternal();
+  if (!player)
+    return;
+
 #ifdef TARGET_ANDROID
-  if (!gui)
+  if (!gui && player->IsRenderingVideo() && CJNIXBMCVideoGLView::GetInstance())
   {
     CJNIXBMCVideoGLView::GetInstance()->requestRender(clear, alpha, gui);
     return;
   }
 #endif
-  RenderInternal(clear, alpha, gui);
+  player->Render(clear, alpha, gui);
 }
 
 void CApplicationPlayer::RenderInternal(bool clear, uint32_t alpha, bool gui)
