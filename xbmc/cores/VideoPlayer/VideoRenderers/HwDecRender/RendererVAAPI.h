@@ -33,7 +33,7 @@ public:
   virtual ~CRendererVAAPI();
 
   // Player functions
-  virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index) override;
+  virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock) override;
   virtual void ReleaseBuffer(int idx) override;
   virtual CRenderInfo GetRenderInfo() override;
 

@@ -33,7 +33,7 @@ public:
   virtual ~CRendererMediaCodec();
   
   // Player functions
-  virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index);
+  virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock);
   virtual bool RenderUpdateCheckForEmptyField();
   virtual void ReleaseBuffer(int idx);
 

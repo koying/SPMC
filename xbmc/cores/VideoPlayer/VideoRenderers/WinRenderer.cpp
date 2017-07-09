@@ -253,7 +253,7 @@ bool CWinRenderer::IsPictureHW(DVDVideoPicture &picture)
   return false;
 }
 
-void CWinRenderer::AddVideoPictureHW(DVDVideoPicture &picture, int index)
+void CWinRenderer::AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock)
 {
   if (m_renderMethod == RENDER_DXVA)
   {

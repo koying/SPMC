@@ -48,7 +48,7 @@ bool CRendererAML::RenderCapture(CRenderCapture* capture)
   return true;
 }
 
-void CRendererAML::AddVideoPictureHW(DVDVideoPicture &picture, int index)
+void CRendererAML::AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock)
 {
   YUVBUFFER &buf = m_buffers[index];
   if (picture.amlcodec)
