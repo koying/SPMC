@@ -10,6 +10,7 @@ set(SOURCES android_main.cpp
             JNIXBMCMainView.cpp
             JNIXBMCMediaSession.cpp
             JNIXBMCVideoView.cpp
+            JNIXBMCVideoGLView.cpp
             JNIXBMCAudioManagerOnAudioFocusChangeListener.cpp
             JNIXBMCSurfaceTextureOnFrameAvailableListener.cpp
             JNIXBMCNsdManagerDiscoveryListener.cpp
@@ -33,6 +34,7 @@ set(HEADERS AndroidExtra.h
             JNIXBMCMainView.h
             JNIXBMCMediaSession.h
             JNIXBMCVideoView.h
+            JNIXBMCVideoGLView.h
             JNIXBMCAudioManagerOnAudioFocusChangeListener.h
             JNIXBMCSurfaceTextureOnFrameAvailableListener.h
             JNIXBMCNsdManagerDiscoveryListener.h

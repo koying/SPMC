@@ -25,6 +25,10 @@
 #include "PlayListPlayer.h"
 #include "settings/MediaSettings.h"
 
+#ifdef TARGET_ANDROID
+#include "platform/android/activity/JNIXBMCVideoGLView.h"
+#endif
+
 CApplicationPlayer::CApplicationPlayer()
 {
   m_iPlayerOPSeq = 0;
@@ -742,6 +746,18 @@ void CApplicationPlayer::FrameMove()
 }
 
 void CApplicationPlayer::Render(bool clear, uint32_t alpha, bool gui)
+{
+#ifdef TARGET_ANDROID
+  if (!gui)
+  {
+    CJNIXBMCVideoGLView::GetInstance()->requestRender(clear, alpha, gui);
+    return;
+  }
+#endif
+  RenderInternal(clear, alpha, gui);
+}
+
+void CApplicationPlayer::RenderInternal(bool clear, uint32_t alpha, bool gui)
 {
   std::shared_ptr<IPlayer> player = GetInternal();
   if (player)

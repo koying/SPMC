@@ -52,6 +52,7 @@
 #include "JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
 #include "JNIXBMCMainView.h"
 #include "JNIXBMCMediaSession.h"
+#include "platform/android/activity/JNIXBMCVideoGLView.h"
 #include "platform/xbmc.h"
 
 // forward delares
@@ -261,6 +262,7 @@ private:
 
   CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
   static std::unique_ptr<CJNIXBMCMainView> m_mainView;
+  static std::unique_ptr<CJNIXBMCVideoGLView> m_videoGlView;
   std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
   static bool HasLaunchIntent(const std::string &package);
   std::string GetFilenameFromIntent(const CJNIIntent &intent);

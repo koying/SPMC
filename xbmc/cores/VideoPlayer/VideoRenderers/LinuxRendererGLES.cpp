@@ -407,7 +407,6 @@ void CLinuxRendererGLES::Update()
   if (!m_bConfigured)
     return;
   ManageRenderArea();
-  ValidateRenderTarget();
 }
 
 void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)

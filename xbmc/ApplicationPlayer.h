@@ -84,6 +84,7 @@ public:
 
   void FrameMove();
   void Render(bool clear, uint32_t alpha = 255, bool gui = true);
+  void RenderInternal(bool clear, uint32_t alpha, bool gui);
   void FlushRenderer();
   void SetRenderViewMode(int mode);
   float GetRenderAspectRatio();

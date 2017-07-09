@@ -1,46 +1,43 @@
 package @APP_PACKAGE@;
 
-import android.graphics.Color;
+import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
+import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-public class XBMCVideoGLView extends GLSurfaceView
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+public class XBMCVideoGLView extends GLSurfaceView implements GLSurfaceView.Renderer
 {
-  native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
-  native void _surfaceCreated(SurfaceHolder holder);
-  native void _surfaceDestroyed(SurfaceHolder holder);
+  native void _attach();
+  native void _onDrawFrame();
 
   private static final String TAG = "XBMCVideoGLView";
 
   public boolean mIsCreated = false;
   private RelativeLayout mVideoLayout = null;
 
-  public static XBMCVideoView createVideoView()
+  public static XBMCVideoGLView createVideoGLView()
   {
-    FutureTask<XBMCVideoView> futureResult = new FutureTask<XBMCVideoView>(new Callable<XBMCVideoView>() {
+    FutureTask<XBMCVideoGLView> futureResult = new FutureTask<XBMCVideoGLView>(new Callable<XBMCVideoGLView>() {
       @Override
-      public XBMCVideoView call() throws Exception
+      public XBMCVideoGLView call() throws Exception
       {
-        return new XBMCVideoView(Main.MainActivity);
+        return new XBMCVideoGLView(Main.MainActivity);
       }
     });
 
     try
     {
       Main.MainActivity.runOnUiThread(futureResult);
-      XBMCVideoView vw = futureResult.get();
+      XBMCVideoGLView vw = futureResult.get();
       return vw;
     }
     catch (Exception e)
@@ -53,8 +50,10 @@ public class XBMCVideoGLView extends GLSurfaceView
   public XBMCVideoGLView(Context context)
   {
     super(context);
+    setEGLContextClientVersion(2);
+    setRenderer(this);
+    setRenderMode(RENDERMODE_WHEN_DIRTY);
     setZOrderMediaOverlay(true);
-    getHolder().addCallback(this);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
@@ -68,7 +67,7 @@ public class XBMCVideoGLView extends GLSurfaceView
       public void run()
       {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        mVideoLayout.addView(XBMCVideoView.this, layoutParams);
+        mVideoLayout.addView(XBMCVideoGLView.this, layoutParams);
       }
     });
   }
@@ -80,72 +79,26 @@ public class XBMCVideoGLView extends GLSurfaceView
       @Override
       public void run()
       {
-        mVideoLayout.removeView(XBMCVideoView.this);
+        mVideoLayout.removeView(XBMCVideoGLView.this);
       }
     });
   }
 
-  public Surface getSurface()
-  {
-    if (!mIsCreated)
-    {
-      return null;
-    } else
-    {
-      Log.d(TAG, "getSurface() = " + getHolder().getSurface());
-      return getHolder().getSurface();
-    }
-  }
-
-  public void setSurfaceRect(final int left, final int top, final int right, final int bottom)
-  {
-    Main.MainActivity.runOnUiThread(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        try
-        {
-          RelativeLayout.LayoutParams mp = new RelativeLayout.LayoutParams(getLayoutParams());
-          mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
-          setLayoutParams(mp);
-          requestLayout();
-        }
-        catch (Exception e)
-        {
-          e.printStackTrace();
-        }
-      }
-    });
-  }
-
-
   @Override
-  public void surfaceCreated(SurfaceHolder holder)
+  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
   {
-    Log.d(TAG, "Created");
-    mIsCreated = true;
-    _surfaceCreated(holder);
+    _attach();
   }
 
   @Override
-  public void surfaceChanged(SurfaceHolder holder, int format, int width,
-      int height)
+  public void onSurfaceChanged(GL10 gl10, int i, int i1)
   {
-    if (holder != getHolder())
-      return;
 
-    _surfaceChanged(holder, format, width, height);
-
-    Log.d(TAG, "Changed, format:" + format + ", width:" + width
-        + ", height:" + height);
   }
 
   @Override
-  public void surfaceDestroyed(SurfaceHolder holder)
+  public void onDrawFrame(GL10 gl10)
   {
-    Log.d(TAG, "Destroyed");
-    mIsCreated = false;
-    _surfaceDestroyed(holder);
+    _onDrawFrame();
   }
 }
