@@ -38,7 +38,6 @@ public:
 
   static void RegisterNatives(JNIEnv* env);
 
-  static CJNIXBMCVideoGLView* GetInstance() { return m_lastInstance; }
   static CJNIXBMCVideoGLView* createVideoGLView();
 
   void surfaceChanged(int width, int height);
@@ -53,7 +52,7 @@ public:
 
 protected:
   CEvent m_surfaceCreated;
-  static CJNIXBMCVideoGLView *find_instance(const jni::jhobject &o);
+  static CJNIXBMCVideoGLView *find_instance(const jobject& o);
 
   static void _surfaceChanged(JNIEnv* env, jobject thiz, jint width, jint height);
   static void _surfaceCreated(JNIEnv* env, jobject thiz);
@@ -63,6 +62,5 @@ private:
   bool m_lastClear;
   uint8_t m_lastAlpha;
 
-  static CJNIXBMCVideoGLView* m_lastInstance;
   static std::list<std::pair<jni::jhobject, CJNIXBMCVideoGLView*>> m_object_map;
 };
