@@ -34,7 +34,6 @@
 #include "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodec.h"
 
 class CRenderCapture;
-class CJNIXBMCVideoGLView;
 class CBaseTexture;
 
 namespace Shaders { class BaseYUV2RGBShader; }
@@ -194,7 +193,6 @@ protected:
   int m_NumYV12Buffers;
   int m_iLastRenderBuffer;
 
-  CJNIXBMCVideoGLView* m_GlLView;
   bool m_bConfigured;
   bool m_bValidated;
   std::vector<ERenderFormat> m_formats;

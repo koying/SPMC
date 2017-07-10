@@ -102,7 +102,6 @@ CAndroidRenderer::CAndroidRenderer()
   m_sw_context = NULL;
   m_NumYV12Buffers = 0;
   m_iLastRenderBuffer = 0;
-  m_GlLView = nullptr;
   m_bConfigured = false;
   m_bValidated = false;
   m_bImageReady = false;
@@ -174,10 +173,6 @@ bool CAndroidRenderer::Configure(unsigned int width, unsigned int height, unsign
   CalculateFrameAspectRatio(d_width, d_height);
   SetViewMode(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_ViewMode);
   ManageRenderArea();
-
-  m_GlLView = CJNIXBMCVideoGLView::createVideoGLView();
-  if (!m_GlLView->waitForSurface(1000))
-    return false;
 
   m_bConfigured = true;
   m_bImageReady = false;
@@ -704,8 +699,6 @@ void CAndroidRenderer::UnInit()
   m_bValidated = false;
   m_bImageReady = false;
   m_bConfigured = false;
-
-  delete m_GlLView;
 }
 
 inline void CAndroidRenderer::ReorderDrawPoints()

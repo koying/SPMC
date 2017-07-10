@@ -9932,3 +9932,7 @@ xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures/RenderCaptureIMX.h
 xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures/RenderCaptureRPI.cpp
 xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures/RenderCaptureRPI.h
 xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures/CMakeLists.txt
+xbmc/platform/android/activity/JNIXBMCVideoGLView.cpp
+xbmc/platform/android/activity/JNIXBMCVideoGLView.h
+xbmc/cores/VideoPlayer/VideoRenderers/AndroidRenderer.cpp
+xbmc/cores/VideoPlayer/VideoRenderers/AndroidRenderer.h

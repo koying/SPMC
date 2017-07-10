@@ -35,9 +35,13 @@
 #include <atomic>
 #include "PlatformDefs.h"
 #include "threads/Event.h"
-#include "DVDClock.h"
+#include "threads/Thread.h"
+#include "cores/VideoPlayer/DVDClock.h"
 
 class CRenderCapture;
+#ifdef TARGET_ANDROID
+class CJNIXBMCVideoGLView;
+#endif
 
 namespace DXVA { class CProcessor; }
 namespace VAAPI { class CSurfaceHolder; }
@@ -54,7 +58,7 @@ class CRenderManager;
 
 class IRenderMsg
 {
-  friend CRenderManager;
+  friend class CRenderManager;
 protected:
   virtual void VideoParamsChange() = 0;
   virtual void GetDebugInfo(std::string &acodec, std::string &audio, std::string &vcodec, std::string &video, std::string &general) = 0;
@@ -63,7 +67,7 @@ protected:
   virtual void UpdateRenderBuffers(int queued, int discard, int free) = 0;
 };
 
-class CRenderManager
+class CRenderManager : public IRunnable
 {
 public:
   CRenderManager(CDVDClock &clock, IRenderMsg *player);
@@ -74,7 +78,9 @@ public:
   float GetAspectRatio();
   void FrameMove();
   void FrameWait(int ms);
-  void Render(bool clear, DWORD flags = 0, DWORD alpha = 255, bool gui = true);
+  void Render();
+  void RequestRender(bool clear, DWORD alpha = 255);
+  void DoRender(bool clear, DWORD alpha);
   bool IsGuiLayer();
   bool IsVideoLayer();
   RESOLUTION GetResolution();
@@ -188,6 +194,11 @@ protected:
   bool m_renderDebug;
   XbmcThreads::EndTime m_debugTimer;
 
+  std::unique_ptr<CThread> m_renderThread;
+#ifdef TARGET_ANDROID
+  std::unique_ptr<CJNIXBMCVideoGLView> m_GLView;
+#endif
+
 
   enum EPRESENTSTEP
   {
@@ -270,4 +281,8 @@ protected:
   //set to true when adding something to m_captures, set to false when m_captures is made empty
   //std::list::empty() isn't thread safe, using an extra bool will save a lock per render when no captures are requested
   bool m_hasCaptures;
+
+  // IRunnable interface
+public:
+  virtual void Run() override;
 };

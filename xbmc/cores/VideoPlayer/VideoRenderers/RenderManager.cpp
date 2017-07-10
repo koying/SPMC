@@ -44,6 +44,7 @@
 #elif HAS_GLES == 2
 #if defined(TARGET_ANDROID)
 #include "AndroidRenderer.h"
+#include "platform/android/activity/JNIXBMCVideoGLView.h"
 #else
 #include "LinuxRendererGLES.h"
 #endif
@@ -526,6 +527,33 @@ void CRenderManager::CreateRenderer()
 {
   if (!m_pRenderer)
   {
+#if defined(TARGET_ANDROID)
+    if (m_format == RENDER_FMT_MEDIACODEC)
+    {
+      m_pRenderer = new CRendererMediaCodec;
+    }
+    else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
+    {
+      m_pRenderer = new CRendererMediaCodecSurface;
+    }
+    else if (m_format == RENDER_FMT_AML)
+    {
+#if defined(HAS_LIBAMCODEC)
+      m_pRenderer = new CRendererAML;
+#endif
+    }
+    else if (m_format != RENDER_FMT_NONE)
+    {
+      m_GLView.reset(CJNIXBMCVideoGLView::createVideoGLView());
+      if (!m_GLView->waitForSurface(1000))
+      {
+        m_GLView.reset();
+        CLog::Log(LOGERROR, "RenderManager::CreateRenderer: failed to create GLView");
+        return;
+      }
+      m_pRenderer = new CAndroidRenderer;
+    }
+#else
     if (m_format == RENDER_FMT_VAAPI || m_format == RENDER_FMT_VAAPINV12)
     {
 #if defined(HAVE_LIBVA)
@@ -542,18 +570,6 @@ void CRenderManager::CreateRenderer()
     {
 #if defined(TARGET_DARWIN)
       m_pRenderer = new CRendererVTB;
-#endif
-    }
-    else if (m_format == RENDER_FMT_MEDIACODEC)
-    {
-#if defined(TARGET_ANDROID)
-      m_pRenderer = new CRendererMediaCodec;
-#endif
-    }
-    else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
-    {
-#if defined(TARGET_ANDROID)
-      m_pRenderer = new CRendererMediaCodecSurface;
 #endif
     }
     else if (m_format == RENDER_FMT_MMAL)
@@ -592,8 +608,6 @@ void CRenderManager::CreateRenderer()
       m_pRenderer = new CMMALRenderer;
 #elif defined(HAS_GL)
       m_pRenderer = new CLinuxRendererGL;
-#elif defined(TARGET_ANDROID)
-      m_pRenderer = new CAndroidRenderer;
 #elif HAS_GLES == 2
       m_pRenderer = new CLinuxRendererGLES;
 #elif defined(HAS_DX)
@@ -603,6 +617,7 @@ void CRenderManager::CreateRenderer()
 #if defined(HAS_MMAL)
     if (!m_pRenderer)
       m_pRenderer = new CMMALRenderer;
+#endif
 #endif
     if (m_pRenderer)
       m_pRenderer->PreInit();
@@ -616,9 +631,11 @@ void CRenderManager::DeleteRenderer()
   if (m_pRenderer)
   {
     CLog::Log(LOGDEBUG, "%s - deleting renderer", __FUNCTION__);
-
-    delete m_pRenderer;
-    m_pRenderer = NULL;
+#ifdef TARGET_ANDROID
+    if (m_GLView)
+      m_GLView.reset(nullptr);
+#endif
+    SAFE_DELETE(m_pRenderer);
   }
 }
 
@@ -894,7 +911,71 @@ RESOLUTION CRenderManager::GetResolution()
   return res;
 }
 
-void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
+void CRenderManager::Render()
+{
+  CSingleExit exitLock(g_graphicsContext);
+
+  if (m_renderDebug)
+  {
+    std::string acodec, audio, vcodec, video, player, vsync;
+
+    m_playerPort->GetDebugInfo(acodec, audio, vcodec, video, player);
+
+    double refreshrate, clockspeed;
+    int missedvblanks;
+    vsync = StringUtils::Format("VSyncOff: %.1f  ", m_clockSync.m_syncOffset / 1000);
+    if (m_dvdClock.GetClockInfo(missedvblanks, clockspeed, refreshrate))
+    {
+      vsync += StringUtils::Format("VSync: refresh:%.3f missed:%i speed:%.3f%%",
+                                   refreshrate,
+                                   missedvblanks,
+                                   clockspeed * 100);
+    }
+
+    CRect src, dst, view;
+    m_pRenderer->GetVideoRect(src, dst, view);
+    m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
+    m_debugRenderer.Render(src, dst, view);
+
+    m_debugTimer.Set(1000);
+    m_renderedOverlay = true;
+  }
+}
+
+void CRenderManager::RequestRender(bool clear, DWORD alpha)
+{
+  {
+    CSingleLock lock(m_statelock);
+    if (m_renderState != STATE_CONFIGURED)
+      return;
+  }
+
+#ifdef TARGET_ANDROID
+  if (m_format == RENDER_FMT_MEDIACODEC)
+  {
+    DoRender(clear, alpha);
+  }
+  else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
+  {
+    DoRender(clear, alpha);
+  }
+  else if (m_format == RENDER_FMT_AML)
+  {
+#if defined(HAS_LIBAMCODEC)
+    DoRender(clear, alpha);
+#endif
+  }
+  else if (m_format != RENDER_FMT_NONE)
+  {
+    m_GLView->requestRender(clear, alpha);
+  }
+
+#else
+  DoRender(clear, alpha);
+#endif
+}
+
+void CRenderManager::DoRender(bool clear, DWORD alpha)
 {
   CSingleExit exitLock(g_graphicsContext);
 
@@ -904,61 +985,25 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
       return;
   }
 
-  if (!gui && m_pRenderer->IsGuiLayer())
-    return;
-
-  if (!gui || m_pRenderer->IsGuiLayer())
-  {
-    SPresent& m = m_Queue[m_presentsource];
-
-    if( m.presentmethod == PRESENT_METHOD_BOB )
-      PresentFields(clear, flags, alpha);
-    else if( m.presentmethod == PRESENT_METHOD_WEAVE )
-      PresentFields(clear, flags | RENDER_FLAG_WEAVE, alpha);
-    else if( m.presentmethod == PRESENT_METHOD_BLEND )
-      PresentBlend(clear, flags, alpha);
-    else
-      PresentSingle(clear, flags, alpha);
-  }
-
-  if (gui)
-  {
-    if (!m_pRenderer->IsGuiLayer())
-      m_pRenderer->Update();
-
-    m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
-    CRect src, dst, view;
-    m_pRenderer->GetVideoRect(src, dst, view);
-    m_overlays.SetVideoRect(src, dst, view);
-    m_overlays.Render(m_presentsource);
-
-    if (m_renderDebug)
-    {
-      std::string acodec, audio, vcodec, video, player, vsync;
-
-      m_playerPort->GetDebugInfo(acodec, audio, vcodec, video, player);
-
-      double refreshrate, clockspeed;
-      int missedvblanks;
-      vsync = StringUtils::Format("VSyncOff: %.1f  ", m_clockSync.m_syncOffset / 1000);
-      if (m_dvdClock.GetClockInfo(missedvblanks, clockspeed, refreshrate))
-      {
-        vsync += StringUtils::Format("VSync: refresh:%.3f missed:%i speed:%.3f%%",
-                                     refreshrate,
-                                     missedvblanks,
-                                     clockspeed * 100);
-      }
-
-      m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
-      m_debugRenderer.Render(src, dst, view);
-
-      m_debugTimer.Set(1000);
-      m_renderedOverlay = true;
-    }
-  }
-
-
   SPresent& m = m_Queue[m_presentsource];
+
+  if( m.presentmethod == PRESENT_METHOD_BOB )
+    PresentFields(clear, 0, alpha);
+  else if( m.presentmethod == PRESENT_METHOD_WEAVE )
+    PresentFields(clear, 0 | RENDER_FLAG_WEAVE, alpha);
+  else if( m.presentmethod == PRESENT_METHOD_BLEND )
+    PresentBlend(clear, 0, alpha);
+  else
+    PresentSingle(clear, 0, alpha);
+
+  if (!m_pRenderer->IsGuiLayer())
+    m_pRenderer->Update();
+
+  m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
+  CRect src, dst, view;
+  m_pRenderer->GetVideoRect(src, dst, view);
+  m_overlays.SetVideoRect(src, dst, view);
+  m_overlays.Render(m_presentsource);
 
   { CSingleLock lock(m_presentlock);
 
@@ -1406,4 +1451,9 @@ void CRenderManager::CheckEnableClockSync()
   }
 
   m_playerPort->UpdateClockSync(m_clockSync.m_enabled);
+}
+
+
+void CRenderManager::Run()
+{
 }

@@ -366,7 +366,9 @@ public:
    */
   virtual void FrameMove() {};
 
-  virtual void Render(bool clear, uint32_t alpha = 255, bool gui = true) {};
+  virtual void Render() {};
+  virtual void RequestRender(bool clear, uint32_t alpha = 255) {};
+  virtual void DoRender(bool clear, uint32_t alpha) {};
 
   virtual void FlushRenderer() {};
 

@@ -5120,9 +5120,19 @@ void CVideoPlayer::FrameMove()
   m_renderManager.FrameMove();
 }
 
-void CVideoPlayer::Render(bool clear, uint32_t alpha, bool gui)
+void CVideoPlayer::Render()
 {
-  m_renderManager.Render(clear, 0, alpha, gui);
+  m_renderManager.Render();
+}
+
+void CVideoPlayer::RequestRender(bool clear, uint32_t alpha)
+{
+  m_renderManager.RequestRender(clear, alpha);
+}
+
+void CVideoPlayer::DoRender(bool clear, uint32_t alpha)
+{
+  m_renderManager.DoRender(clear, alpha);
 }
 
 void CVideoPlayer::FlushRenderer()

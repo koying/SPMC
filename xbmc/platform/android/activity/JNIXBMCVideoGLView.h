@@ -49,7 +49,7 @@ public:
   void release();
   bool isCreated() const;
   bool waitForSurface(unsigned int millis);
-  void requestRender(bool clear, uint32_t alpha, bool gui);
+  void requestRender(bool clear, uint8_t alpha);
 
 protected:
   CEvent m_surfaceCreated;
@@ -61,8 +61,7 @@ protected:
 
 private:
   bool m_lastClear;
-  uint32_t m_lastAlpha;
-  bool m_lastGui;
+  uint8_t m_lastAlpha;
 
   static CJNIXBMCVideoGLView* m_lastInstance;
   static std::list<std::pair<jni::jhobject, CJNIXBMCVideoGLView*>> m_object_map;

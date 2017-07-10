@@ -64,7 +64,7 @@ void CGUIVideoControl::Render()
     g_graphicsContext.Clear(0);
 #endif
     g_graphicsContext.SetScissors(old);
-    g_application.m_pPlayer->Render(false, alpha);
+    g_application.m_pPlayer->Render();
 
     g_graphicsContext.RemoveTransform();
   }
@@ -76,7 +76,7 @@ void CGUIVideoControl::Render()
 void CGUIVideoControl::RenderEx()
 {
   if (g_application.m_pPlayer->IsRenderingVideo())
-    g_application.m_pPlayer->Render(false, 255, false);
+    g_application.m_pPlayer->RequestRender(false, 255);
   
   CGUIControl::RenderEx();
 }
