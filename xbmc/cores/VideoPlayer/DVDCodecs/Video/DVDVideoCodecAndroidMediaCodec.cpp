@@ -244,10 +244,10 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
       m_frameready->Reset();
 
   media_status_t mstat;
-  if (!render)
-    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
+  if (render)
+    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, CurrentHostCounter());
   else
-    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, m_timestamp);
+    mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
 
   if (mstat != AMEDIA_OK)
@@ -303,6 +303,14 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   if (xbmc_jnienv()->ExceptionCheck())
   {
     CLog::Log(LOGERROR, "CDVDMediaCodecInfo::UpdateTexImage updateTexImage:ExceptionCheck");
+    xbmc_jnienv()->ExceptionDescribe();
+    xbmc_jnienv()->ExceptionClear();
+  }
+
+  m_timestamp = m_surfacetexture->getTimestamp();
+  if (xbmc_jnienv()->ExceptionCheck())
+  {
+    CLog::Log(LOGERROR, "CDVDMediaCodecInfo::UpdateTexImage getTimestamp:ExceptionCheck");
     xbmc_jnienv()->ExceptionDescribe();
     xbmc_jnienv()->ExceptionClear();
   }

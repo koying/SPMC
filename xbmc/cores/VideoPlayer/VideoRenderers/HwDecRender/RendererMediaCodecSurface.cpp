@@ -26,7 +26,6 @@
 #include "platform/android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #include "utils/log.h"
-#include "utils/TimeUtils.h"
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
 {
@@ -53,9 +52,6 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
   YUVBUFFER &buf = m_buffers[index];
   if (picture.mediacodec)
   {
-    int64_t nanodiff(static_cast<int64_t>((picture.pts - currentClock) * 1000));
-    picture.mediacodec->SetTimestamp(CurrentHostCounter() + nanodiff);
-
     buf.hwDec = picture.mediacodec->Retain();
 #ifdef DEBUG_VERBOSE
     mindex = ((CDVDMediaCodecInfo *)buf.hwDec)->GetIndex();
