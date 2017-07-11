@@ -170,14 +170,11 @@ bool CJNIXBMCVideoGLView::waitForSurface(unsigned int millis)
 
 void CJNIXBMCVideoGLView::onDrawFrame()
 {
-  g_application.m_pPlayer->DoRender(m_lastClear, m_lastAlpha);
+  g_application.m_pPlayer->RenderVideo();
 }
 
-void CJNIXBMCVideoGLView::requestRender(bool clear, uint8_t alpha)
+void CJNIXBMCVideoGLView::requestRender()
 {
-  m_lastClear = clear;
-  m_lastAlpha = alpha;
-
   call_method<void>(m_object,
                     "requestRender", "()V");
 }

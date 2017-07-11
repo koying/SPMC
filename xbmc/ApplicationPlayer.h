@@ -83,9 +83,8 @@ public:
   void SetPlaySpeed(float speed);
 
   void FrameMove();
-  void Render();
-  void RequestRender(bool clear, uint32_t alpha = 255);
-  void DoRender(bool clear, uint32_t alpha);
+  void RenderGUI();
+  void RenderVideo();
   void FlushRenderer();
   void SetRenderViewMode(int mode);
   float GetRenderAspectRatio();

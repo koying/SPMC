@@ -414,7 +414,7 @@ void CGUIWindowFullScreen::Render()
 {
   g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
   g_graphicsContext.Clear(0);
-  g_application.m_pPlayer->Render();
+  g_application.m_pPlayer->RenderGUI();
   g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
   CGUIWindow::Render();
 }
@@ -422,9 +422,11 @@ void CGUIWindowFullScreen::Render()
 void CGUIWindowFullScreen::RenderEx()
 {
   CGUIWindow::RenderEx();
+#ifndef TARGET_ANDROID
   g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
-  g_application.m_pPlayer->RequestRender(false, 255);
+  g_application.m_pPlayer->RenderVideo();
   g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
+#endif
 }
 
 void CGUIWindowFullScreen::SeekChapter(int iChapter)

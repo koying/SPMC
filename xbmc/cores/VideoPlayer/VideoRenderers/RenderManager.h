@@ -67,7 +67,7 @@ protected:
   virtual void UpdateRenderBuffers(int queued, int discard, int free) = 0;
 };
 
-class CRenderManager : public IRunnable
+class CRenderManager : public CThread
 {
 public:
   CRenderManager(CDVDClock &clock, IRenderMsg *player);
@@ -78,9 +78,8 @@ public:
   float GetAspectRatio();
   void FrameMove();
   void FrameWait(int ms);
-  void Render();
-  void RequestRender(bool clear, DWORD alpha = 255);
-  void DoRender(bool clear, DWORD alpha);
+  void RenderGUI();
+  void RenderVideo();
   bool IsGuiLayer();
   bool IsVideoLayer();
   RESOLUTION GetResolution();
@@ -194,7 +193,6 @@ protected:
   bool m_renderDebug;
   XbmcThreads::EndTime m_debugTimer;
 
-  std::unique_ptr<CThread> m_renderThread;
 #ifdef TARGET_ANDROID
   std::unique_ptr<CJNIXBMCVideoGLView> m_GLView;
 #endif
@@ -284,5 +282,5 @@ protected:
 
   // IRunnable interface
 public:
-  virtual void Run() override;
+  virtual void Process() override;
 };

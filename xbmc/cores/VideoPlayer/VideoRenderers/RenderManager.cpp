@@ -43,6 +43,7 @@
 #endif
 #elif HAS_GLES == 2
 #if defined(TARGET_ANDROID)
+#include "platform/android/activity/XBMCApp.h"
 #include "AndroidRenderer.h"
 #include "platform/android/activity/JNIXBMCVideoGLView.h"
 #else
@@ -132,6 +133,7 @@ void CRenderManager::CClockSync::Reset()
 unsigned int CRenderManager::m_nextCaptureId = 0;
 
 CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *player) :
+  CThread("RenderManagerRender"),
   m_pRenderer(nullptr),
   m_bTriggerUpdateResolution(false),
   m_bRenderGUI(true),
@@ -530,11 +532,20 @@ void CRenderManager::CreateRenderer()
 #if defined(TARGET_ANDROID)
     if (m_format == RENDER_FMT_MEDIACODEC)
     {
+      m_GLView.reset(CJNIXBMCVideoGLView::createVideoGLView());
+      if (!m_GLView->waitForSurface(1000))
+      {
+        m_GLView.reset();
+        CLog::Log(LOGERROR, "RenderManager::CreateRenderer: failed to create GLView");
+        return;
+      }
       m_pRenderer = new CRendererMediaCodec;
     }
     else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
     {
       m_pRenderer = new CRendererMediaCodecSurface;
+      // Start Render thread
+      Create();
     }
     else if (m_format == RENDER_FMT_AML)
     {
@@ -634,6 +645,8 @@ void CRenderManager::DeleteRenderer()
 #ifdef TARGET_ANDROID
     if (m_GLView)
       m_GLView.reset(nullptr);
+    if (IsRunning())
+      StopThread();
 #endif
     SAFE_DELETE(m_pRenderer);
   }
@@ -911,9 +924,18 @@ RESOLUTION CRenderManager::GetResolution()
   return res;
 }
 
-void CRenderManager::Render()
+void CRenderManager::RenderGUI()
 {
   CSingleExit exitLock(g_graphicsContext);
+
+  if (!m_pRenderer->IsGuiLayer())
+    m_pRenderer->Update();
+
+  m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
+  CRect src, dst, view;
+  m_pRenderer->GetVideoRect(src, dst, view);
+  m_overlays.SetVideoRect(src, dst, view);
+  m_overlays.Render(m_presentsource);
 
   if (m_renderDebug)
   {
@@ -942,40 +964,7 @@ void CRenderManager::Render()
   }
 }
 
-void CRenderManager::RequestRender(bool clear, DWORD alpha)
-{
-  {
-    CSingleLock lock(m_statelock);
-    if (m_renderState != STATE_CONFIGURED)
-      return;
-  }
-
-#ifdef TARGET_ANDROID
-  if (m_format == RENDER_FMT_MEDIACODEC)
-  {
-    DoRender(clear, alpha);
-  }
-  else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
-  {
-    DoRender(clear, alpha);
-  }
-  else if (m_format == RENDER_FMT_AML)
-  {
-#if defined(HAS_LIBAMCODEC)
-    DoRender(clear, alpha);
-#endif
-  }
-  else if (m_format != RENDER_FMT_NONE)
-  {
-    m_GLView->requestRender(clear, alpha);
-  }
-
-#else
-  DoRender(clear, alpha);
-#endif
-}
-
-void CRenderManager::DoRender(bool clear, DWORD alpha)
+void CRenderManager::RenderVideo()
 {
   CSingleExit exitLock(g_graphicsContext);
 
@@ -988,22 +977,13 @@ void CRenderManager::DoRender(bool clear, DWORD alpha)
   SPresent& m = m_Queue[m_presentsource];
 
   if( m.presentmethod == PRESENT_METHOD_BOB )
-    PresentFields(clear, 0, alpha);
+    PresentFields(false, 0, 255);
   else if( m.presentmethod == PRESENT_METHOD_WEAVE )
-    PresentFields(clear, 0 | RENDER_FLAG_WEAVE, alpha);
+    PresentFields(false, RENDER_FLAG_WEAVE, 255);
   else if( m.presentmethod == PRESENT_METHOD_BLEND )
-    PresentBlend(clear, 0, alpha);
+    PresentBlend(false, 0, 255);
   else
-    PresentSingle(clear, 0, alpha);
-
-  if (!m_pRenderer->IsGuiLayer())
-    m_pRenderer->Update();
-
-  m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
-  CRect src, dst, view;
-  m_pRenderer->GetVideoRect(src, dst, view);
-  m_overlays.SetVideoRect(src, dst, view);
-  m_overlays.Render(m_presentsource);
+    PresentSingle(false, 0, 255);
 
   { CSingleLock lock(m_presentlock);
 
@@ -1454,6 +1434,16 @@ void CRenderManager::CheckEnableClockSync()
 }
 
 
-void CRenderManager::Run()
+void CRenderManager::Process()
 {
+#ifdef TARGET_ANDROID
+  CLog::Log(LOGDEBUG, "%s - starting", __PRETTY_FUNCTION__);
+  while(!m_bStop)
+  {
+    if (CXBMCApp::WaitVSync(1000))
+      RenderVideo();
+  }
+  CLog::Log(LOGDEBUG, "%s - stopping", __PRETTY_FUNCTION__);
+
+#endif
 }

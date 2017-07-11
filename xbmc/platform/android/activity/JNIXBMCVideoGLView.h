@@ -48,7 +48,7 @@ public:
   void release();
   bool isCreated() const;
   bool waitForSurface(unsigned int millis);
-  void requestRender(bool clear, uint8_t alpha);
+  void requestRender();
 
 protected:
   CEvent m_surfaceCreated;
@@ -59,8 +59,5 @@ protected:
   static void _onDrawFrame(JNIEnv* env, jobject thiz);
 
 private:
-  bool m_lastClear;
-  uint8_t m_lastAlpha;
-
   static std::list<std::pair<jni::jhobject, CJNIXBMCVideoGLView*>> m_object_map;
 };
