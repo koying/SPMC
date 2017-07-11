@@ -53,7 +53,6 @@ public class XBMCVideoGLView extends GLSurfaceView implements GLSurfaceView.Rend
     super(context);
     setEGLContextClientVersion(2);
     setRenderer(this);
-    setRenderMode(RENDERMODE_WHEN_DIRTY);
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
   }

@@ -545,7 +545,7 @@ void CRenderManager::CreateRenderer()
     {
       m_pRenderer = new CRendererMediaCodecSurface;
       // Start Render thread
-      Create();
+      Create(true);
     }
     else if (m_format == RENDER_FMT_AML)
     {
@@ -646,7 +646,7 @@ void CRenderManager::DeleteRenderer()
     if (m_GLView)
       m_GLView.reset(nullptr);
     if (IsRunning())
-      StopThread();
+      m_bStop = true;
 #endif
     SAFE_DELETE(m_pRenderer);
   }
