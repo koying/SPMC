@@ -1,0 +1,164 @@
+package @APP_PACKAGE@;
+
+import android.content.Context;
+import android.graphics.PixelFormat;
+import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.widget.RelativeLayout;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+public class XBMCVideoGLView extends GLSurfaceView implements GLSurfaceView.Renderer
+{
+  native void _surfaceCreated();
+  native void _surfaceChanged(int width, int height);
+  native void _onDrawFrame();
+  native void _onSetupRenderer();
+  native void _onCleanupRenderer();
+  native void _onFlushRenderer();
+
+  private static final String TAG = "XBMCVideoGLView";
+
+  public boolean mIsCreated = false;
+  private RelativeLayout mVideoLayout = null;
+
+  public static XBMCVideoGLView createVideoGLView()
+  {
+    FutureTask<XBMCVideoGLView> futureResult = new FutureTask<XBMCVideoGLView>(new Callable<XBMCVideoGLView>() {
+      @Override
+      public XBMCVideoGLView call() throws Exception
+      {
+        return new XBMCVideoGLView(Main.MainActivity);
+      }
+    });
+
+    try
+    {
+      Main.MainActivity.runOnUiThread(futureResult);
+      XBMCVideoGLView vw = futureResult.get();
+      return vw;
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public XBMCVideoGLView(Context context)
+  {
+    super(context);
+    setEGLContextClientVersion(2);
+    setRenderer(this);
+
+    mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
+  }
+
+  public void add()
+  {
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        mVideoLayout.addView(XBMCVideoGLView.this, layoutParams);
+      }
+    });
+  }
+
+  public void release()
+  {
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        mVideoLayout.removeView(XBMCVideoGLView.this);
+      }
+    });
+  }
+
+  public void setupRenderer()
+  {
+    queueEvent(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _onSetupRenderer();
+      }
+    });
+  }
+
+  public void cleanupRenderer()
+  {
+    queueEvent(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _onCleanupRenderer();
+      }
+    });
+  }
+
+  public void flushRenderer()
+  {
+    queueEvent(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        _onFlushRenderer();
+      }
+    });
+  }
+
+  public void setSurfaceRect(final int left, final int top, final int right, final int bottom)
+  {
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        try
+        {
+          RelativeLayout.LayoutParams mp = new RelativeLayout.LayoutParams(getLayoutParams());
+          mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
+          setLayoutParams(mp);
+          requestLayout();
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
+
+  @Override
+  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
+  {
+    mIsCreated = true;
+    _surfaceCreated();
+  }
+
+  @Override
+  public void onSurfaceChanged(GL10 gl10, int width, int height)
+  {
+    _surfaceChanged(width, height);
+  }
+
+  @Override
+  public void onDrawFrame(GL10 gl10)
+  {
+    _onDrawFrame();
+  }
+}

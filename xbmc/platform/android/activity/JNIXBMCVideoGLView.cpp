@@ -1,0 +1,250 @@
+/*
+ *      Copyright (C) 2016 Christian Browet
+ *      http://xbmc.org
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with XBMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include "JNIXBMCVideoGLView.h"
+
+#include <androidjni/jutils-details.hpp>
+#include <androidjni/Context.h>
+
+#include "Application.h"
+#include "utils/StringUtils.h"
+#include "utils/log.h"
+
+#include <list>
+#include <algorithm>
+#include <cassert>
+
+#include "CompileInfo.h"
+
+using namespace jni;
+
+static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCVideoGLView";
+std::list<std::pair<jni::jhobject, CJNIXBMCVideoGLView*>> CJNIXBMCVideoGLView::m_object_map;
+
+void CJNIXBMCVideoGLView::RegisterNatives(JNIEnv* env)
+{
+  jclass cClass = env->FindClass(s_className.c_str());
+  if(cClass)
+  {
+    JNINativeMethod methods[] = 
+    {
+      {"_surfaceCreated", "()V", (void*)&CJNIXBMCVideoGLView::_surfaceCreated},
+      {"_surfaceChanged", "(II)V", (void*)&CJNIXBMCVideoGLView::_surfaceChanged},
+      {"_onDrawFrame", "()V", (void*)&CJNIXBMCVideoGLView::_onDrawFrame},
+      {"_onSetupRenderer", "()V", (void*)&CJNIXBMCVideoGLView::_onSetupRenderer},
+      {"_onCleanupRenderer", "()V", (void*)&CJNIXBMCVideoGLView::_onCleanupRenderer},
+      {"_onFlushRenderer", "()V", (void*)&CJNIXBMCVideoGLView::_onFlushRenderer},
+    };
+
+    env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
+  }
+}
+
+CJNIXBMCVideoGLView::CJNIXBMCVideoGLView()
+{
+}
+
+CJNIXBMCVideoGLView::CJNIXBMCVideoGLView(const jni::jhobject &object)
+  : CJNIBase(object)
+{
+}
+
+CJNIXBMCVideoGLView::~CJNIXBMCVideoGLView()
+{
+  if (!m_object)
+    return;
+  release();
+}
+
+CJNIXBMCVideoGLView* CJNIXBMCVideoGLView::createVideoGLView()
+{
+  std::string signature = "()L" + s_className + ";";
+
+  CJNIXBMCVideoGLView* pvw = new CJNIXBMCVideoGLView(call_static_method<jhobject>(xbmc_jnienv(), CJNIContext::getClassLoader().loadClass(GetDotClassName(s_className)),
+                                                                              "createVideoGLView", signature.c_str()));
+  if (!*pvw)
+  {
+    CLog::Log(LOGERROR, "Cannot instantiate VideoGLView!!");
+    delete pvw;
+    return nullptr;
+  }
+
+  m_object_map.push_back(std::pair<jni::jhobject, CJNIXBMCVideoGLView*>(pvw->get_raw(), pvw));
+  if (pvw->isCreated())
+    pvw->m_surfaceCreated.Set();
+  pvw->add();
+
+  return pvw;
+}
+
+CJNIXBMCVideoGLView* CJNIXBMCVideoGLView::find_instance(const jobject& o)
+{
+  for( auto it = m_object_map.begin(); it != m_object_map.end(); ++it )
+  {
+    if (it->first == o)
+      return it->second;
+  }
+  return nullptr;
+}
+
+void CJNIXBMCVideoGLView::_onDrawFrame(JNIEnv *env, jobject thiz)
+{
+  (void)env;
+
+  CJNIXBMCVideoGLView *inst = find_instance(thiz);
+  if (inst)
+    inst->onDrawFrame();
+}
+
+void CJNIXBMCVideoGLView::_onSetupRenderer(JNIEnv *env, jobject thiz)
+{
+  (void)env;
+
+  CJNIXBMCVideoGLView *inst = find_instance(thiz);
+  if (inst)
+    inst->onSetupRenderer();
+}
+
+void CJNIXBMCVideoGLView::_onCleanupRenderer(JNIEnv *env, jobject thiz)
+{
+  (void)env;
+
+  CJNIXBMCVideoGLView *inst = find_instance(thiz);
+  if (inst)
+    inst->onCleanupRenderer();
+}
+
+void CJNIXBMCVideoGLView::_onFlushRenderer(JNIEnv *env, jobject thiz)
+{
+  (void)env;
+
+  CJNIXBMCVideoGLView *inst = find_instance(thiz);
+  if (inst)
+    inst->onFlushRenderer();
+}
+
+void CJNIXBMCVideoGLView::_surfaceChanged(JNIEnv* env, jobject thiz, jint width, jint height )
+{
+  (void)env;
+
+  CJNIXBMCVideoGLView *inst = find_instance(thiz);
+  if (inst)
+    inst->surfaceChanged(width, height);
+}
+
+void CJNIXBMCVideoGLView::_surfaceCreated(JNIEnv* env, jobject thiz)
+{
+  (void)env;
+
+  CJNIXBMCVideoGLView *inst = find_instance(thiz);
+  if (inst)
+    inst->surfaceCreated();
+}
+
+void CJNIXBMCVideoGLView::surfaceChanged(int width, int height)
+{
+}
+
+void CJNIXBMCVideoGLView::surfaceCreated()
+{
+  m_surfaceCreated.Set();
+}
+
+void CJNIXBMCVideoGLView::add()
+{
+  call_method<void>(m_object,
+                    "add", "()V");
+}
+
+void CJNIXBMCVideoGLView::release()
+{
+  for( auto it = m_object_map.begin(); it != m_object_map.end(); ++it )
+  {
+    if (it->second == this)
+    {
+      m_object_map.erase(it);
+      break;
+    }
+  }
+
+  call_method<void>(m_object,
+                    "release", "()V");
+}
+
+bool CJNIXBMCVideoGLView::isCreated() const
+{
+  return get_field<jboolean>(m_object, "mIsCreated");
+}
+
+bool CJNIXBMCVideoGLView::waitForSurface(unsigned int millis)
+{
+  return m_surfaceCreated.WaitMSec(millis);
+}
+
+void CJNIXBMCVideoGLView::onDrawFrame()
+{
+  g_application.m_pPlayer->RenderVideo();
+}
+
+void CJNIXBMCVideoGLView::onSetupRenderer()
+{
+  g_application.m_pPlayer->SetupRenderer();
+}
+
+void CJNIXBMCVideoGLView::onCleanupRenderer()
+{
+  g_application.m_pPlayer->CleanupRenderer();
+  m_cleanupPerformed.Set();
+}
+
+void CJNIXBMCVideoGLView::onFlushRenderer()
+{
+  g_application.m_pPlayer->FlushRenderer();
+}
+
+void CJNIXBMCVideoGLView::requestRender()
+{
+  call_method<void>(m_object,
+                    "requestRender", "()V");
+}
+
+void CJNIXBMCVideoGLView::setupRenderer()
+{
+  call_method<void>(m_object,
+                    "setupRenderer", "()V");
+}
+
+void CJNIXBMCVideoGLView::cleanupRenderer()
+{
+  m_cleanupPerformed.Reset();
+  call_method<void>(m_object,
+                    "cleanupRenderer", "()V");
+}
+
+bool CJNIXBMCVideoGLView::waitForCleanedRenderer(unsigned int millis)
+{
+  return m_cleanupPerformed.WaitMSec(millis);
+}
+
+void CJNIXBMCVideoGLView::flushRenderer()
+{
+  call_method<void>(m_object,
+                    "flushRenderer", "()V");
+}
