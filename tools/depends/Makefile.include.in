@@ -10,6 +10,7 @@ HOST=@use_host@
 CPU=@use_cpu@
 NATIVEPLATFORM=@build_cpu@-@build_os@-native
 SDK_PLATFORM=@use_sdk@
+NDK_LEVEL=@use_ndk@
 RETRIEVE_TOOL=@CURL@
 ARCHIVE_TOOL=@TAR@
 PREFIX=@prefix@/@deps_dir@
