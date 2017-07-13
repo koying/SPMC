@@ -181,7 +181,8 @@ protected:
   void CalculateTextureSourceRects(int source, int num_planes);
 
   // renderers
-  void RenderMultiPass(int index, int field);     // multi pass glsl renderer
+  void RenderToFBO(int index, int field, bool weave = false);
+  void RenderFromFBO();
   void RenderSinglePass(int index, int field);    // single pass glsl renderer
   
   // hooks for HwDec Renderered
@@ -192,7 +193,12 @@ protected:
   virtual int  GetImageHook(YV12Image *image, int source = AUTOSOURCE, bool readonly = false) { return NOSOURCE; }
   virtual bool RenderUpdateCheckForEmptyField() { return true; }
 
-  CFrameBufferObject m_fbo;
+  struct
+  {
+    CFrameBufferObject fbo;
+    float width, height;
+  } m_fbo;
+  bool  m_nonLinStretch;
 
   int m_iYV12RenderBuffer;
   int m_NumYV12Buffers;
