@@ -56,6 +56,7 @@ BaseVideoFilterShader::BaseVideoFilterShader()
 
   m_stretch = 0.0f;
 
+#if defined (HAS_GL)
   std::string shaderv =
     "varying vec2 cord;"
     "void main()"
@@ -75,12 +76,70 @@ BaseVideoFilterShader::BaseVideoFilterShader()
     "gl_FragColor.a = gl_Color.a;"
     "}";
   PixelShader()->SetSource(shaderp);
+#elif HAS_GLES >= 2
+  m_hVertex = -1;
+  m_hcoord = -1;
+  m_hProj   = -1;
+  m_hModel  = -1;
+  m_hAlpha  = -1;
+
+  m_proj = nullptr;
+  m_model = nullptr;
+  m_alpha = -1;
+
+  std::string shaderv =
+      " attribute vec4 m_attrpos;"
+      " attribute vec2 m_attrcord;"
+      " varying vec2 cord;"
+      " uniform mat4 m_proj;"
+      " uniform mat4 m_model;"
+
+      " void main ()"
+      " {"
+      "   mat4 mvp    = m_proj * m_model;"
+      "   gl_Position = mvp * m_attrpos;"
+      "   cord        = m_attrcord.xy;"
+      " }";
+  VertexShader()->SetSource(shaderv);
+
+  std::string shaderp =
+    "precision mediump float;"
+    "uniform sampler2D img;"
+    "varying vec2 cord;"
+    "void main()"
+    "{"
+    "  gl_FragColor = texture2D(img, cord);"
+    "}";
+  PixelShader()->SetSource(shaderp);
+#endif
+}
+
+void BaseVideoFilterShader::OnCompiledAndLinked()
+{
+#if HAS_GLES >= 2
+  m_hVertex = glGetAttribLocation(ProgramHandle(),  "m_attrpos");
+  m_hcoord = glGetAttribLocation(ProgramHandle(),  "m_attrcord");
+  m_hAlpha  = glGetUniformLocation(ProgramHandle(), "m_alpha");
+  m_hProj  = glGetUniformLocation(ProgramHandle(), "m_proj");
+  m_hModel = glGetUniformLocation(ProgramHandle(), "m_model");
+#endif
+}
+
+bool BaseVideoFilterShader::OnEnabled()
+{
+#if HAS_GLES >= 2
+  glUniformMatrix4fv(m_hProj,  1, GL_FALSE, m_proj);
+  glUniformMatrix4fv(m_hModel, 1, GL_FALSE, m_model);
+  glUniform1f(m_hAlpha, m_alpha);
+#endif
+  return true;
 }
 
 ConvolutionFilterShader::ConvolutionFilterShader(ESCALINGMETHOD method, bool stretch, GLSLOutput *output)
 {
   m_method = method;
   m_kernelTex1 = 0;
+  m_hKernTex = -1;
 
   std::string shadername;
   std::string defines;
@@ -101,10 +160,13 @@ ConvolutionFilterShader::ConvolutionFilterShader(ESCALINGMETHOD method, bool str
     if (m_floattex)
       m_internalformat = GL_RGBA16F_ARB;
     else
-#endif
       m_internalformat = GL_RGBA;
+#elif HAS_GLES >= 2
+    shadername = "convolution-4x4_gles.glsl";
+    m_internalformat = GL_RGBA;
+#endif
   }
-  else if (m_method == VS_SCALINGMETHOD_SPLINE36 || 
+  else if (m_method == VS_SCALINGMETHOD_SPLINE36 ||
            m_method == VS_SCALINGMETHOD_LANCZOS3)
   {
     shadername = "convolution-6x6.glsl";
@@ -112,8 +174,11 @@ ConvolutionFilterShader::ConvolutionFilterShader(ESCALINGMETHOD method, bool str
     if (m_floattex)
       m_internalformat = GL_RGB16F_ARB;
     else
-#endif
       m_internalformat = GL_RGB;
+#elif HAS_GLES >= 2
+    shadername = "convolution-6x6_gles.glsl";
+    m_internalformat = GL_RGB;
+#endif
   }
 
   if (m_floattex)
@@ -152,7 +217,9 @@ ConvolutionFilterShader::~ConvolutionFilterShader()
 
 void ConvolutionFilterShader::OnCompiledAndLinked()
 {
-  // obtain shader attribute handles on successfull compilation
+  BaseVideoFilterShader::OnCompiledAndLinked();
+
+  // obtain shader attribute handles on successful compilation
   m_hSourceTex = glGetUniformLocation(ProgramHandle(), "img");
   m_hStepXY    = glGetUniformLocation(ProgramHandle(), "stepxy");
   m_hKernTex   = glGetUniformLocation(ProgramHandle(), "kernelTex");
@@ -214,6 +281,8 @@ void ConvolutionFilterShader::OnCompiledAndLinked()
 
 bool ConvolutionFilterShader::OnEnabled()
 {
+  BaseVideoFilterShader::OnEnabled();
+
   // set shader attributes once enabled
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(TEXTARGET, m_kernelTex1);
@@ -249,12 +318,16 @@ StretchFilterShader::StretchFilterShader()
 
 void StretchFilterShader::OnCompiledAndLinked()
 {
+  BaseVideoFilterShader::OnCompiledAndLinked();
+
   m_hSourceTex = glGetUniformLocation(ProgramHandle(), "img");
   m_hStretch   = glGetUniformLocation(ProgramHandle(), "m_stretch");
 }
 
 bool StretchFilterShader::OnEnabled()
 {
+  BaseVideoFilterShader::OnEnabled();
+
   glUniform1i(m_hSourceTex, m_sourceTexUnit);
   glUniform1f(m_hStretch, m_stretch);
   VerifyGLState();
@@ -263,11 +336,15 @@ bool StretchFilterShader::OnEnabled()
 
 void DefaultFilterShader::OnCompiledAndLinked()
 {
+  BaseVideoFilterShader::OnCompiledAndLinked();
+
   m_hSourceTex = glGetUniformLocation(ProgramHandle(), "img");
 }
 
 bool DefaultFilterShader::OnEnabled()
 {
+  BaseVideoFilterShader::OnEnabled();
+
   glUniform1i(m_hSourceTex, m_sourceTexUnit);
   VerifyGLState();
   return true;
