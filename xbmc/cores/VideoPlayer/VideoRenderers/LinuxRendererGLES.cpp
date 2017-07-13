@@ -97,10 +97,6 @@ CLinuxRendererGLES::CLinuxRendererGLES()
   m_scalingMethod = VS_SCALINGMETHOD_LINEAR;
   m_scalingMethodGui = (ESCALINGMETHOD)-1;
 
-  m_rgbBuffer = NULL;
-  m_rgbBufferSize = 0;
-
-  m_sw_context = NULL;
   m_NumYV12Buffers = 0;
   m_iLastRenderBuffer = 0;
   m_bConfigured = false;
@@ -125,12 +121,6 @@ CLinuxRendererGLES::CLinuxRendererGLES()
 CLinuxRendererGLES::~CLinuxRendererGLES()
 {
   UnInit();
-
-  if (m_rgbBuffer != NULL) {
-    av_free(m_rgbBuffer);
-    m_rgbBuffer = NULL;
-  }
-
   ReleaseShaders();
 }
 
@@ -679,22 +669,9 @@ void CLinuxRendererGLES::UnInit()
   CLog::Log(LOGDEBUG, "LinuxRendererGL: Cleaning up GL resources");
   CSingleLock lock(g_graphicsContext);
 
-  if (m_rgbBuffer != NULL)
-  {
-    av_free(m_rgbBuffer);
-    m_rgbBuffer = NULL;
-  }
-  m_rgbBufferSize = 0;
-
   // YV12 textures
   for (int i = 0; i < NUM_BUFFERS; ++i)
     DeleteTexture(i);
-
-  if (m_sw_context)
-  {
-    sws_freeContext(m_sw_context);
-    m_sw_context = NULL;
-  }
 
   // cleanup framebuffer object if it was in use
   m_fbo.Cleanup();
