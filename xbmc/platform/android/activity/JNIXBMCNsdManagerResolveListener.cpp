@@ -68,14 +68,18 @@ void CJNIXBMCNsdManagerResolveListener::RegisterNatives(JNIEnv* env)
 
 void CJNIXBMCNsdManagerResolveListener::_onResolveFailed(JNIEnv* env, jobject thiz, jobject serviceInfo, jint errorCode)
 {
-  CJNIXBMCNsdManagerResolveListener *inst = find_instance(jhobject(thiz));
+  (void)env;
+
+  CJNIXBMCNsdManagerResolveListener *inst = find_instance(thiz);
   if (inst)
     inst->onResolveFailed(CJNINsdServiceInfo(jhobject(serviceInfo)), errorCode);
 }
 
 void CJNIXBMCNsdManagerResolveListener::_onServiceResolved(JNIEnv* env, jobject thiz, jobject serviceInfo)
 {
-  CJNIXBMCNsdManagerResolveListener *inst = find_instance(jhobject(thiz));
+  (void)env;
+
+  CJNIXBMCNsdManagerResolveListener *inst = find_instance(thiz);
   if (inst)
     inst->onServiceResolved(CJNINsdServiceInfo(jhobject(serviceInfo)));
 }

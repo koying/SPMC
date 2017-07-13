@@ -24,9 +24,9 @@
 
 #if defined(TARGET_ANDROID)
 
-#include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
+#include "cores/VideoPlayer/VideoRenderers/AndroidRenderer.h"
 
-class CRendererMediaCodec : public CLinuxRendererGLES
+class CRendererMediaCodec : public CAndroidRenderer
 {
 public:
   CRendererMediaCodec();

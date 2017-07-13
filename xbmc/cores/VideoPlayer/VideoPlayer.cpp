@@ -5120,9 +5120,24 @@ void CVideoPlayer::FrameMove()
   m_renderManager.FrameMove();
 }
 
-void CVideoPlayer::Render(bool clear, uint32_t alpha, bool gui)
+void CVideoPlayer::RenderGUI()
 {
-  m_renderManager.Render(clear, 0, alpha, gui);
+  m_renderManager.RenderGUI();
+}
+
+void CVideoPlayer::RenderVideo()
+{
+  m_renderManager.RenderVideo();
+}
+
+void CVideoPlayer::SetupRenderer()
+{
+  m_renderManager.SetupRenderer();
+}
+
+void CVideoPlayer::CleanupRenderer()
+{
+  m_renderManager.CleanupRenderer();
 }
 
 void CVideoPlayer::FlushRenderer()

@@ -38,6 +38,7 @@
 #include "platform/android/activity/JNIMainActivity.h"
 #include "platform/android/activity/JNIXBMCMainView.h"
 #include "platform/android/activity/JNIXBMCVideoView.h"
+#include "platform/android/activity/JNIXBMCVideoGLView.h"
 #include "platform/android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
 #include "platform/android/activity/JNIXBMCSurfaceTextureOnFrameAvailableListener.h"
 #include "platform/android/activity/JNIXBMCNsdManagerDiscoveryListener.h"
@@ -186,6 +187,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   CJNIXBMCSurfaceTextureOnFrameAvailableListener::RegisterNatives(env);
   CJNIXBMCMainView::RegisterNatives(env);
   CJNIXBMCVideoView::RegisterNatives(env);
+  CJNIXBMCVideoGLView::RegisterNatives(env);
   jni::CJNIXBMCNsdManagerDiscoveryListener::RegisterNatives(env);
   jni::CJNIXBMCNsdManagerRegistrationListener::RegisterNatives(env);
   jni::CJNIXBMCNsdManagerResolveListener::RegisterNatives(env);

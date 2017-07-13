@@ -42,7 +42,13 @@
 #include "HwDecRender/RendererVTBGL.h"
 #endif
 #elif HAS_GLES == 2
-  #include "LinuxRendererGLES.h"
+#if defined(TARGET_ANDROID)
+#include "platform/android/activity/XBMCApp.h"
+#include "AndroidRenderer.h"
+#include "platform/android/activity/JNIXBMCVideoGLView.h"
+#else
+#include "LinuxRendererGLES.h"
+#endif
 #if defined(HAS_MMAL)
 #include "HwDecRender/MMALRenderer.h"
 #endif
@@ -127,6 +133,7 @@ void CRenderManager::CClockSync::Reset()
 unsigned int CRenderManager::m_nextCaptureId = 0;
 
 CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *player) :
+  CThread("RenderManagerRender"),
   m_pRenderer(nullptr),
   m_bTriggerUpdateResolution(false),
   m_bRenderGUI(true),
@@ -262,6 +269,8 @@ bool CRenderManager::Configure(DVDVideoPicture& picture, float fps, unsigned fla
 
 bool CRenderManager::Configure()
 {
+  CLog::Log(LOGDEBUG, "%s - %d", __PRETTY_FUNCTION__, m_format);
+
   // lock all interfaces
   CSingleLock lock(m_statelock);
   CSingleLock lock2(m_presentlock);
@@ -438,12 +447,6 @@ void CRenderManager::PreInit()
 
   CSingleLock lock(m_statelock);
 
-  if (!m_pRenderer)
-  {
-    m_format = RENDER_FMT_YUV420P;
-    CreateRenderer();
-  }
-
   UpdateDisplayLatency();
 
   m_QueueSize   = 2;
@@ -454,6 +457,8 @@ void CRenderManager::PreInit()
 
 void CRenderManager::UnInit()
 {
+  CLog::Log(LOGDEBUG, "%s - %d", __PRETTY_FUNCTION__, m_format);
+
   if (!g_application.IsCurrentThread())
   {
     CLog::Log(LOGERROR, "CRenderManager::UnInit - not called from render thread");
@@ -471,8 +476,28 @@ void CRenderManager::UnInit()
   RemoveCaptures();
 }
 
+void CRenderManager::SetupRenderer()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  if (!m_pRenderer)
+    return;
+}
+
+void CRenderManager::CleanupRenderer()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  if (!m_pRenderer)
+    return;
+  m_pRenderer->UnInit();
+  SAFE_DELETE(m_pRenderer);
+}
+
 bool CRenderManager::Flush()
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
   if (!m_pRenderer)
     return true;
 
@@ -520,8 +545,46 @@ bool CRenderManager::Flush()
 
 void CRenderManager::CreateRenderer()
 {
+  CLog::Log(LOGDEBUG, "%s - %d", __PRETTY_FUNCTION__, m_format);
+
   if (!m_pRenderer)
   {
+#if defined(TARGET_ANDROID)
+    if (m_format == RENDER_FMT_MEDIACODEC)
+    {
+      m_GLView.reset(CJNIXBMCVideoGLView::createVideoGLView());
+      if (!m_GLView->waitForSurface(1000))
+      {
+        m_GLView.reset();
+        CLog::Log(LOGERROR, "RenderManager::CreateRenderer: failed to create GLView");
+        return;
+      }
+      m_pRenderer = new CRendererMediaCodec;
+    }
+    else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
+    {
+      m_pRenderer = new CRendererMediaCodecSurface;
+      // Start Render thread
+      Create(true);
+    }
+    else if (m_format == RENDER_FMT_AML)
+    {
+#if defined(HAS_LIBAMCODEC)
+      m_pRenderer = new CRendererAML;
+#endif
+    }
+    else if (m_format != RENDER_FMT_NONE)
+    {
+      m_GLView.reset(CJNIXBMCVideoGLView::createVideoGLView());
+      if (!m_GLView->waitForSurface(1000))
+      {
+        m_GLView.reset();
+        CLog::Log(LOGERROR, "RenderManager::CreateRenderer: failed to create GLView");
+        return;
+      }
+      m_pRenderer = new CAndroidRenderer;
+    }
+#else
     if (m_format == RENDER_FMT_VAAPI || m_format == RENDER_FMT_VAAPINV12)
     {
 #if defined(HAVE_LIBVA)
@@ -538,18 +601,6 @@ void CRenderManager::CreateRenderer()
     {
 #if defined(TARGET_DARWIN)
       m_pRenderer = new CRendererVTB;
-#endif
-    }
-    else if (m_format == RENDER_FMT_MEDIACODEC)
-    {
-#if defined(TARGET_ANDROID)
-      m_pRenderer = new CRendererMediaCodec;
-#endif
-    }
-    else if (m_format == RENDER_FMT_MEDIACODECSURFACE)
-    {
-#if defined(TARGET_ANDROID)
-      m_pRenderer = new CRendererMediaCodecSurface;
 #endif
     }
     else if (m_format == RENDER_FMT_MMAL)
@@ -598,6 +649,7 @@ void CRenderManager::CreateRenderer()
     if (!m_pRenderer)
       m_pRenderer = new CMMALRenderer;
 #endif
+#endif
     if (m_pRenderer)
       m_pRenderer->PreInit();
     else
@@ -610,9 +662,19 @@ void CRenderManager::DeleteRenderer()
   if (m_pRenderer)
   {
     CLog::Log(LOGDEBUG, "%s - deleting renderer", __FUNCTION__);
-
-    delete m_pRenderer;
-    m_pRenderer = NULL;
+#ifdef TARGET_ANDROID
+    if (m_GLView)
+    {
+      m_GLView->cleanupRenderer();
+      m_GLView->waitForCleanedRenderer(1000);
+      m_GLView.reset();
+    }
+    if (IsRunning())
+      StopThread(true);
+#else
+    SAFE_DELETE(m_pRenderer);
+#endif
+    CLog::Log(LOGDEBUG, "%s - renderer deleted", __FUNCTION__);
   }
 }
 
@@ -888,7 +950,47 @@ RESOLUTION CRenderManager::GetResolution()
   return res;
 }
 
-void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
+void CRenderManager::RenderGUI()
+{
+  CSingleExit exitLock(g_graphicsContext);
+
+  if (!m_pRenderer->IsGuiLayer())
+    m_pRenderer->Update();
+
+  m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
+  CRect src, dst, view;
+  m_pRenderer->GetVideoRect(src, dst, view);
+  m_overlays.SetVideoRect(src, dst, view);
+  m_overlays.Render(m_presentsource);
+
+  if (m_renderDebug)
+  {
+    std::string acodec, audio, vcodec, video, player, vsync;
+
+    m_playerPort->GetDebugInfo(acodec, audio, vcodec, video, player);
+
+    double refreshrate, clockspeed;
+    int missedvblanks;
+    vsync = StringUtils::Format("VSyncOff: %.1f  ", m_clockSync.m_syncOffset / 1000);
+    if (m_dvdClock.GetClockInfo(missedvblanks, clockspeed, refreshrate))
+    {
+      vsync += StringUtils::Format("VSync: refresh:%.3f missed:%i speed:%.3f%%",
+                                   refreshrate,
+                                   missedvblanks,
+                                   clockspeed * 100);
+    }
+
+    CRect src, dst, view;
+    m_pRenderer->GetVideoRect(src, dst, view);
+    m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
+    m_debugRenderer.Render(src, dst, view);
+
+    m_debugTimer.Set(1000);
+    m_renderedOverlay = true;
+  }
+}
+
+void CRenderManager::RenderVideo()
 {
   CSingleExit exitLock(g_graphicsContext);
 
@@ -898,61 +1000,16 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
       return;
   }
 
-  if (!gui && m_pRenderer->IsGuiLayer())
-    return;
-
-  if (!gui || m_pRenderer->IsGuiLayer())
-  {
-    SPresent& m = m_Queue[m_presentsource];
-
-    if( m.presentmethod == PRESENT_METHOD_BOB )
-      PresentFields(clear, flags, alpha);
-    else if( m.presentmethod == PRESENT_METHOD_WEAVE )
-      PresentFields(clear, flags | RENDER_FLAG_WEAVE, alpha);
-    else if( m.presentmethod == PRESENT_METHOD_BLEND )
-      PresentBlend(clear, flags, alpha);
-    else
-      PresentSingle(clear, flags, alpha);
-  }
-
-  if (gui)
-  {
-    if (!m_pRenderer->IsGuiLayer())
-      m_pRenderer->Update();
-
-    m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
-    CRect src, dst, view;
-    m_pRenderer->GetVideoRect(src, dst, view);
-    m_overlays.SetVideoRect(src, dst, view);
-    m_overlays.Render(m_presentsource);
-
-    if (m_renderDebug)
-    {
-      std::string acodec, audio, vcodec, video, player, vsync;
-
-      m_playerPort->GetDebugInfo(acodec, audio, vcodec, video, player);
-
-      double refreshrate, clockspeed;
-      int missedvblanks;
-      vsync = StringUtils::Format("VSyncOff: %.1f  ", m_clockSync.m_syncOffset / 1000);
-      if (m_dvdClock.GetClockInfo(missedvblanks, clockspeed, refreshrate))
-      {
-        vsync += StringUtils::Format("VSync: refresh:%.3f missed:%i speed:%.3f%%",
-                                     refreshrate,
-                                     missedvblanks,
-                                     clockspeed * 100);
-      }
-
-      m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
-      m_debugRenderer.Render(src, dst, view);
-
-      m_debugTimer.Set(1000);
-      m_renderedOverlay = true;
-    }
-  }
-
-
   SPresent& m = m_Queue[m_presentsource];
+
+  if( m.presentmethod == PRESENT_METHOD_BOB )
+    PresentFields(false, 0, 255);
+  else if( m.presentmethod == PRESENT_METHOD_WEAVE )
+    PresentFields(false, RENDER_FLAG_WEAVE, 255);
+  else if( m.presentmethod == PRESENT_METHOD_BLEND )
+    PresentBlend(false, 0, 255);
+  else
+    PresentSingle(false, 0, 255);
 
   { CSingleLock lock(m_presentlock);
 
@@ -1400,4 +1457,20 @@ void CRenderManager::CheckEnableClockSync()
   }
 
   m_playerPort->UpdateClockSync(m_clockSync.m_enabled);
+}
+
+
+void CRenderManager::Process()
+{
+#ifdef TARGET_ANDROID
+  CLog::Log(LOGDEBUG, "%s - starting", __PRETTY_FUNCTION__);
+  while(!m_bStop)
+  {
+    if (CXBMCApp::WaitVSync(1000))
+      RenderVideo();
+  }
+  CleanupRenderer();
+  CLog::Log(LOGDEBUG, "%s - stopping", __PRETTY_FUNCTION__);
+
+#endif
 }

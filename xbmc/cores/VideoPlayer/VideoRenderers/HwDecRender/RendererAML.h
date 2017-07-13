@@ -24,9 +24,13 @@
 
 #if defined(HAS_LIBAMCODEC)
 
+#if defined(TARGET_ANDROID)
+#include "cores/VideoPlayer/VideoRenderers/AndroidRenderer.h"
+class CRendererAML : public CAndroidRenderer
+#else
 #include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
-
 class CRendererAML : public CLinuxRendererGLES
+#endif
 {
 public:
   CRendererAML();

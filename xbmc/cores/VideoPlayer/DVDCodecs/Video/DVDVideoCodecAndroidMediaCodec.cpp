@@ -98,8 +98,6 @@ static bool CanSurfaceRenderBlackList(const std::string &name)
 static bool IsBlacklisted(const std::string &name)
 {
   static const char *blacklisted_decoders[] = {
-    // No software decoders
-    "OMX.google",
     // For Rockchip non-standard components
     "AVCDecoder",
     "AVCDecoder_FLASH",

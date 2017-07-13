@@ -413,7 +413,8 @@ void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &d
 void CGUIWindowFullScreen::Render()
 {
   g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
-  g_application.m_pPlayer->Render(true, 255);
+  g_graphicsContext.Clear(0);
+  g_application.m_pPlayer->RenderGUI();
   g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
   CGUIWindow::Render();
 }
@@ -421,9 +422,11 @@ void CGUIWindowFullScreen::Render()
 void CGUIWindowFullScreen::RenderEx()
 {
   CGUIWindow::RenderEx();
+#ifndef TARGET_ANDROID
   g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
-  g_application.m_pPlayer->Render(false, 255, false);
+  g_application.m_pPlayer->RenderVideo();
   g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
+#endif
 }
 
 void CGUIWindowFullScreen::SeekChapter(int iChapter)

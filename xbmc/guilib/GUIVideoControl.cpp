@@ -64,7 +64,7 @@ void CGUIVideoControl::Render()
     g_graphicsContext.Clear(0);
 #endif
     g_graphicsContext.SetScissors(old);
-    g_application.m_pPlayer->Render(false, alpha);
+    g_application.m_pPlayer->RenderGUI();
 
     g_graphicsContext.RemoveTransform();
   }
@@ -75,9 +75,11 @@ void CGUIVideoControl::Render()
 
 void CGUIVideoControl::RenderEx()
 {
+#ifndef TARGET_ANDROID
   if (g_application.m_pPlayer->IsRenderingVideo())
-    g_application.m_pPlayer->Render(false, 255, false);
-  
+    g_application.m_pPlayer->RenderVideo();
+#endif
+
   CGUIControl::RenderEx();
 }
 

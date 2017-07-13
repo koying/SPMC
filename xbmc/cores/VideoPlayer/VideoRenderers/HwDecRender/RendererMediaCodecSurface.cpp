@@ -26,6 +26,7 @@
 #include "platform/android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #include "utils/log.h"
+#include "settings/MediaSettings.h"
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
 {
@@ -39,6 +40,35 @@ bool CRendererMediaCodecSurface::RenderCapture(CRenderCapture* capture)
 {
   capture->BeginRender();
   capture->EndRender();
+  return true;
+}
+
+bool CRendererMediaCodecSurface::Configure(unsigned int width, unsigned int height, unsigned int d_width, unsigned int d_height, float fps, unsigned flags, ERenderFormat format, unsigned extended_format, unsigned int orientation)
+{
+  m_sourceWidth = width;
+  m_sourceHeight = height;
+  m_renderOrientation = orientation;
+
+  // Save the flags.
+  m_iFlags = flags;
+  m_format = format;
+
+  // Calculate the input frame aspect ratio.
+  CalculateFrameAspectRatio(d_width, d_height);
+  SetViewMode(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_ViewMode);
+  ManageRenderArea();
+
+  m_bConfigured = true;
+  m_bImageReady = false;
+  m_scalingMethodGui = (ESCALINGMETHOD)-1;
+
+  m_bValidated = true;
+
+  for (int i = 0 ; i<m_NumYV12Buffers ; i++)
+    m_buffers[i].image.flags = 0;
+
+  m_iLastRenderBuffer = -1;
+
   return true;
 }
 
@@ -63,9 +93,22 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
 #endif
 }
 
-bool CRendererMediaCodecSurface::RenderUpdateCheckForEmptyField()
+void CRendererMediaCodecSurface::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 {
-  return false;
+  if (!m_bConfigured)
+    return;
+
+  if (!m_bImageReady) return;
+
+  int index = m_iYV12RenderBuffer;
+  YUVBUFFER& buf =  m_buffers[index];
+
+  if (buf.image.flags==0)
+    return;
+
+  ManageRenderArea();
+
+  m_iLastRenderBuffer = index;
 }
 
 void CRendererMediaCodecSurface::ReleaseBuffer(int idx)
@@ -225,4 +268,14 @@ bool CRendererMediaCodecSurface::UploadTexture(int index)
 {
   return true; // nothing todo
 }
+
+void CRendererMediaCodecSurface::UnInit()
+{
+  CLog::Log(LOGDEBUG, "RendererMediaCodecSurface: Cleaning up resources");
+  m_bValidated = false;
+  m_bImageReady = false;
+  m_bConfigured = false;
+}
+
+
 #endif

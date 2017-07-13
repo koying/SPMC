@@ -741,11 +741,32 @@ void CApplicationPlayer::FrameMove()
     player->FrameMove();
 }
 
-void CApplicationPlayer::Render(bool clear, uint32_t alpha, bool gui)
+void CApplicationPlayer::RenderGUI()
 {
   std::shared_ptr<IPlayer> player = GetInternal();
   if (player)
-    player->Render(clear, alpha, gui);
+    player->RenderGUI();
+}
+
+void CApplicationPlayer::RenderVideo()
+{
+  std::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    player->RenderVideo();
+}
+
+void CApplicationPlayer::SetupRenderer()
+{
+  std::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    player->SetupRenderer();
+}
+
+void CApplicationPlayer::CleanupRenderer()
+{
+  std::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    player->CleanupRenderer();
 }
 
 void CApplicationPlayer::FlushRenderer()

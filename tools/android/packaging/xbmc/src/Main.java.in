@@ -43,6 +43,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
   public static Main MainActivity = null;
   public XBMCMainView mMainView = null;
+  public XBMCVideoGLView m_videoGlView = null;
 
   private XBMCSettingsContentObserver mSettingsContentObserver;
   private XBMCInputDeviceListener mInputDeviceListener;
@@ -298,8 +299,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     setContentView(R.layout.activity_main);
     mVideoLayout = (RelativeLayout)findViewById(R.id.VideoLayout);
 
-    mMainView = new XBMCMainView(this);
     RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+    mMainView = new XBMCMainView(this);
     mMainView.setElevation(1);  // Always on Top
     mVideoLayout.addView(mMainView, layoutParams);
 

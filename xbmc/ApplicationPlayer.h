@@ -83,7 +83,10 @@ public:
   void SetPlaySpeed(float speed);
 
   void FrameMove();
-  void Render(bool clear, uint32_t alpha = 255, bool gui = true);
+  void RenderGUI();
+  void RenderVideo();
+  void SetupRenderer();
+  void CleanupRenderer();
   void FlushRenderer();
   void SetRenderViewMode(int mode);
   float GetRenderAspectRatio();
@@ -176,6 +179,6 @@ public:
   void  SetSpeed(float speed);
   bool SupportsTempo();
 
-  protected:
+protected:
     std::shared_ptr<IPlayer> GetInternal() const;
 };
