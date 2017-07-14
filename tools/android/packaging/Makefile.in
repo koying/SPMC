@@ -4,6 +4,8 @@ OBJS = libcurl.so \
   libplist.so libshairplay.so \
   libnfs.so libass.so \
   libbluray.so libsmbclient.so
+SMB_OBJS = libtevent-util.so libdcerpc-binding.so libsamba-errors.so libsamba-util.so libsamba-credentials.so libsamba-hostconfig.so libsmbconf.so \
+           libwbclient.so libsamdb.so libndr.so libndr-standard.so libndr-nbt.so libndr-krb5pac.so
 
 PLATFORM_OBJS =
 EXCLUDED_ADDONS = 
@@ -64,8 +66,8 @@ ifeq ($(JAVA8),yes)
   JAVAC_EXTRA_ARGS = -source 1.7 -target 1.7
 endif
 
-SRCLIBS = $(addprefix $(PREFIX)/lib/,$(OBJS)) $(addprefix $(PREFIX)/lib/$(SDK_PLATFORM)/,$(PLATFORM_OBJS))
-DSTLIBS = $(CPU)/lib/lib@APP_NAME_LC@.so $(addprefix $(CPU)/lib/,$(OBJS)) $(addprefix $(CPU)/lib/,$(PLATFORM_OBJS))
+SRCLIBS = $(addprefix $(PREFIX)/lib/,$(OBJS)) $(addprefix $(DEPENDS_PATH)/lib/,$(SMB_OBJS)) $(addprefix $(PREFIX)/lib/$(SDK_PLATFORM)/,$(PLATFORM_OBJS))
+DSTLIBS = $(CPU)/lib/lib@APP_NAME_LC@.so $(addprefix $(CPU)/lib/,$(OBJS)) $(addprefix $(CPU)/lib/,$(SMB_OBJS)) $(addprefix $(CPU)/lib/,$(PLATFORM_OBJS))
 libs= $(DSTLIBS)
 
 all: apk
