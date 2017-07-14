@@ -69,7 +69,7 @@ static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
 // https://codelab.wordpress.com/2014/11/03/how-to-use-standard-output-streams-for-logging-in-android-apps/
 static int pfd[2];
 static pthread_t thr;
-static const char *tag = "myapp";
+static char tag[20];
 
 static void *thread_logger(void*)
 {
@@ -87,7 +87,8 @@ static void *thread_logger(void*)
 
 int start_logger(const char *app_name)
 {
-  tag = app_name;
+  strncpy(tag, app_name, 20);
+  strcat(tag, "_STD");
 
   /* make stdout line-buffered and stderr unbuffered */
   setvbuf(stdout, 0, _IOLBF, 0);
@@ -149,7 +150,7 @@ extern void android_main(struct android_app* state)
                                         true,
                                         -1);
 #endif
-      start_logger("SPMC_STD");
+      start_logger(CCompileInfo::GetAppName());
 
       IInputHandler inputHandler;
       eventLoop.run(xbmcApp, inputHandler);
