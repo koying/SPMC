@@ -1,6 +1,8 @@
 include ../../Makefile.include
 DEPS= ../../Makefile.include Makefile samba_android_google.patch
 
+PYTHON=python
+
 # lib name, version
 LIBNAME=samba
 VERSION=4.5.1
@@ -19,8 +21,9 @@ CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
           --cross-compile --cross-answers=build_answers
 
 ifeq ($(OS),android)
-export CC
-export CFLAGS+=-O2 -D_FORTIFY_SOURCE=2 -D__ANDROID_API__=$(NDK_LEVEL) -D__USE_FILE_OFFSET64=1 -fstack-protector-all -fPIE -Wa,--noexecstack -Wformat -Wformat-security
+CWD=$(shell pwd)/$(PLATFORM)
+export CC:="$(PYTHON) $(CWD)/cc_shim.py $(CC)"
+export DROIDCFLAGS:=$(CFLAGS) -O2 -D_FORTIFY_SOURCE=2 -D__ANDROID_API__=$(NDK_LEVEL) -D__USE_FILE_OFFSET64=1 -fstack-protector-all -fPIE -Wa,--noexecstack -Wformat -Wformat-security
 export LDFLAGS+=-Wl,-z,relro,-z,now
 endif
 
@@ -39,13 +42,14 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 ifeq ($(OS),android)
 	cd $(PLATFORM); patch -p1 < ../samba_android_google.patch
 endif
+	@echo '$(CC)'
 	cd $(PLATFORM); $(CONFIGURE)
 
-$(LIBDYLIB): $(PLATFORM)
-	$(MAKE) -C $(PLATFORM) smbclient
+$(LIBDYLIB): $(PLATFORM) 
+	cd $(PLATFORM); WAF_MAKE=1 $(PYTHON) $(CWD)/buildtools/bin/waf build --targets=smbclient
 
 .installed-$(PLATFORM): $(LIBDYLIB)
-	$(MAKE) -C $(PLATFORM)/source3 installlibsmbclient
+	cd $(PLATFORM); WAF_MAKE=1 $(PYTHON) $(CWD)/buildtools/bin/waf install --targets=smbclient
 	touch $@
 
 clean:
