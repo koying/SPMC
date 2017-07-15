@@ -32,22 +32,17 @@
 #endif
 
 #define MAX_EMULATED_FILES    50
-#define FILE_WRAPPER_OFFSET   0x00000200
+#define FILE_WRAPPER_OFFSET   0x0200
 
 namespace XFILE
 {
   class CFile;
 }
 
-#if defined(TARGET_WINDOWS) && _MSC_VER >= 1900
-struct kodi_iobuf {
-  int   _file;
-};
-#endif
-
 typedef struct stEmuFileObject
 {
   FILE    file_emu;
+  int     fd;
   XFILE::CFile*  file_xbmc;
   CCriticalSection *file_lock;
   int mode;
@@ -68,12 +63,10 @@ public:
 
   EmuFileObject* RegisterFileObject(XFILE::CFile* pFile);
   void UnRegisterFileObjectByDescriptor(int fd);
-  void UnRegisterFileObjectByStream(FILE* stream);
   void LockFileObjectByDescriptor(int fd);
   bool TryLockFileObjectByDescriptor(int fd);
   void UnlockFileObjectByDescriptor(int fd);
   EmuFileObject* GetFileObjectByDescriptor(int fd);
-  EmuFileObject* GetFileObjectByStream(FILE* stream);
   XFILE::CFile* GetFileXbmcByDescriptor(int fd);
   XFILE::CFile* GetFileXbmcByStream(FILE* stream);
   static int GetDescriptorByStream(FILE* stream);
@@ -84,7 +77,7 @@ public:
   }
   static bool StreamIsEmulatedFile(FILE* stream);
 private:
-  EmuFileObject m_files[MAX_EMULATED_FILES];
+  static EmuFileObject m_files[MAX_EMULATED_FILES];
   CCriticalSection m_criticalSection;
 };
 
