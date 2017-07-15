@@ -32,7 +32,7 @@
 #endif
 
 #define MAX_EMULATED_FILES    50
-#define FILE_WRAPPER_OFFSET   0x00000200
+#define FILE_WRAPPER_OFFSET   0x80
 
 namespace XFILE
 {
