@@ -23,7 +23,7 @@ CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
 ifeq ($(OS),android)
 CWD=$(shell pwd)/$(PLATFORM)
 export CC:="$(PYTHON) $(CWD)/cc_shim.py $(CC)"
-export DROIDCFLAGS:=$(CFLAGS) -O2 -D_FORTIFY_SOURCE=2 -D__ANDROID_API__=$(NDK_LEVEL) -D__USE_FILE_OFFSET64=1 -fstack-protector-all -fPIE -Wa,--noexecstack -Wformat -Wformat-security
+export DROIDCFLAGS:=$(CFLAGS) -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-all -fPIE -Wa,--noexecstack -Wformat -Wformat-security
 export LDFLAGS+=-Wl,-z,relro,-z,now
 endif
 
