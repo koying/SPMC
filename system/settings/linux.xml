@@ -9,13 +9,4 @@
       </group>
     </category>
   </section>
-  <section id="services">
-    <category id="smb">
-      <group id="1">
-        <setting id="smb.overwriteconf">
-          <visible>true</visible>
-        </setting>
-      </group>
-    </category>
-  </section>
 </settings>
