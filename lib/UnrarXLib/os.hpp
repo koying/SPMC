@@ -5,6 +5,8 @@
 #include <windows.h>
 #endif
 
+#include <endian.h>
+
 #define FALSE 0
 #define TRUE  1
 
