@@ -4116,10 +4116,6 @@ msgctxt "#1223"
 msgid "Disabled"
 msgstr ""
 
-msgctxt "#1224"
-msgid "Overwrite existing configuration"
-msgstr ""
-
 #empty strings from id 1224 to 1225
 
 msgctxt "#1226"
@@ -18554,12 +18550,6 @@ msgid "Notification event describe regular processes and actions performed by th
 msgstr ""
 
 #empty strings from id 36462 to 36499
-#. Description of settings category "Services -> SMB Client" with label #1224
-#: system/settings/settings.xml
-msgctxt "#36463"
-msgid "Overwrite the SMB client configuration (smb.conf) on restart"
-msgstr ""
-
 #end reservation
 
 #. label of a setting for the stereoscopic 3D mode of the GUI that is/should be applied
