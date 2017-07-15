@@ -2123,11 +2123,6 @@
           <default>WORKGROUP</default>
           <control type="edit" format="string" />
         </setting>
-        <setting id="smb.forcev1" type="boolean" label="1209" help="36462">
-          <level>2</level>
-          <default>false</default>
-          <control type="toggle" />
-        </setting>
         <setting id="smb.overwriteconf" type="boolean" label="1224" help="36463">
           <level>2</level>
           <default>true</default>

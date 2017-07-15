@@ -4056,9 +4056,7 @@ msgctxt "#1208"
 msgid "Mount SMB shares"
 msgstr ""
 
-msgctxt "#1209"
-msgid "Force SMB v1"
-msgstr ""
+#empty string with id 1209
 
 #: xbmc/event/windows/GUIWindowEventLog.cpp
 msgctxt "#1210"
@@ -18555,19 +18553,13 @@ msgctxt "#36461"
 msgid "Notification event describe regular processes and actions performed by the system or the user."
 msgstr ""
 
-#. Description of settings category "Services -> SMB Client" with label #1209
-#: system/settings/settings.xml
-msgctxt "#36462"
-msgid "Force ver 1 of the SMB protocol. Might solve connection issues."
-msgstr ""
-
+#empty strings from id 36462 to 36499
 #. Description of settings category "Services -> SMB Client" with label #1224
 #: system/settings/settings.xml
 msgctxt "#36463"
 msgid "Overwrite the SMB client configuration (smb.conf) on restart"
 msgstr ""
 
-#empty strings from id 36464 to 36499
 #end reservation
 
 #. label of a setting for the stereoscopic 3D mode of the GUI that is/should be applied
