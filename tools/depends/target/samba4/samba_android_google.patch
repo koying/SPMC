@@ -130,7 +130,7 @@ index 0000000..1551fe4
 +
 +armv7_flags=["-march=armv7-a", "-mfloat-abi=softfp", "-mfpu=vfpv3-d16", "-Wl,--fix-cortex-a8"]
 +
-+match_pattern=[r'.*asn1/gen_template.*\.o', r'.*compile_et.*\.o', r'.*print_version.*\.o', r'.*version_128\.o']
++match_pattern=[r'.*asn1/gen_template.*\.o', r'.*compile_et.*\.o', r'.*print_version.*\.o', r'.*version_1..\.o']
 +
 +match_pattern=[re.compile(pattern) for pattern in match_pattern]
 +
