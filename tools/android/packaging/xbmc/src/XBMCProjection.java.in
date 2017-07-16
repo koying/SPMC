@@ -63,19 +63,9 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
     mActivity.getWindowManager().getDefaultDisplay().getSize(size);
     if (size.x != width || size.y != height)
     {
-      float dratio = (float)size.x / size.y;
-      float cratio = (float)width / height;
-
-      if (dratio >= cratio)
-      {
-        mWidth = width;
-        mHeight = (int) (height / dratio);
-      }
-      else
-      {
-        mHeight = height;
-        mWidth = (int) (width * dratio);
-      }
+      float dratio = (float)size.x / size.y;  // 1.7
+      mWidth = width;
+      mHeight = (int) (mWidth / dratio);
     }
     else
     {
