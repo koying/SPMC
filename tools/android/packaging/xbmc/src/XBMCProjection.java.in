@@ -1,5 +1,6 @@
 package @APP_PACKAGE@;
 
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
@@ -9,6 +10,9 @@ import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.Looper;
+
+import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Created by cbro on 9/27/16.
@@ -25,11 +29,15 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
   private int mWidth;
   private int mHeight;
   private boolean mScreenshotMode;
+  private boolean mSaveCaptures;
+
+  private static final String STORE_DIRECTORY = "/sdcard";
 
   public XBMCProjection(Main act, MediaProjection proj)
   {
     mActivity = act;
     mMediaProjection = proj;
+    mSaveCaptures = XBMCProperties.getBoolProperty("xbmc.savecaptures");
 
         // start capture handling thread
         new Thread() {
@@ -96,15 +104,39 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
   {
     try
     {
-      final Image image = mImageReader.acquireNextImage();
+      final Image img = mImageReader.acquireNextImage();
+      if (img == null)
+        return;
 
       if (mScreenshotMode)
       {
-        mActivity._onScreenshotAvailable(image);
+        mActivity._onScreenshotAvailable(img);
         stopCapture();
       }
       else
-        mActivity._onCaptureAvailable(image);
+      {
+        if (mSaveCaptures)
+        {
+          Long tsLong = System.currentTimeMillis();
+          String ts = tsLong.toString();
+          String fn = "cap_" + ts;
+
+          Image.Plane[] planes = img.getPlanes();
+          ByteBuffer buffer = planes[0].getBuffer();
+          int pixelStride = planes[0].getPixelStride();
+          int rowStride = planes[0].getRowStride();
+          int rowPadding = rowStride - pixelStride * mWidth;
+
+          // create bitmap
+          Bitmap bitmap = Bitmap.createBitmap(mWidth + rowPadding / pixelStride, mHeight, Bitmap.Config.ARGB_8888);
+          bitmap.copyPixelsFromBuffer(buffer);
+
+          // write bitmap to a file
+          FileOutputStream fos = new FileOutputStream(STORE_DIRECTORY + "/" + fn + ".png");
+          bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        }
+        mActivity._onCaptureAvailable(img);
+      }
     }
     catch (Exception e)
     {}
