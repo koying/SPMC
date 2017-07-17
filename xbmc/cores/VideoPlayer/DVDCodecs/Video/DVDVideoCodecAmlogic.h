@@ -32,19 +32,22 @@ class CBitstreamParser;
 class CBitstreamConverter;
 
 class CDVDVideoCodecAmlogic;
+class IVPClockCallback;
 
 class CDVDAmlogicInfo
 {
 public:
-  CDVDAmlogicInfo(CDVDVideoCodecAmlogic *codec, CAMLCodec *amlcodec, int omxPts);
+  CDVDAmlogicInfo(CDVDVideoCodecAmlogic *codec, CAMLCodec *amlcodec);
 
   // reference counting
   CDVDAmlogicInfo* Retain();
   long             Release();
 
   CAMLCodec *getAmlCodec() const;
-  int GetOmxPts() const { return m_omxPts; }
   void invalidate();
+
+  double m_pts_video;
+  double m_clock;
 
 protected:
   long m_refs;
@@ -52,7 +55,6 @@ protected:
 
   CDVDVideoCodecAmlogic* m_codec;
   CAMLCodec* m_amlCodec;
-  int m_omxPts;
 };
 
 class CDVDVideoCodecAmlogic : public CDVDVideoCodec
