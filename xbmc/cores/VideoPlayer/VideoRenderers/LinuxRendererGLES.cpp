@@ -1024,6 +1024,7 @@ void CLinuxRendererGLES::RenderToFBO(int index, int field, bool weave /*= false*
     pYUVShader->SetField(1);
   else if(field == FIELD_BOT)
     pYUVShader->SetField(0);
+  pYUVShader->SetConvertFullColorRange(!g_Windowing.UseLimitedColor());
 
   VerifyGLState();
 
