@@ -36,10 +36,6 @@
 #include "threads/SingleLock.h"
 #include "guilib/Geometry.h"
 
-#include <media/NdkMediaCodec.h>
-#include <android/native_window.h>
-#include <android/native_window_jni.h>
-
 class CJNISurface;
 class CJNISurfaceTexture;
 class CJNIMediaCodec;
@@ -47,6 +43,11 @@ class CJNIMediaFormat;
 class CDVDMediaCodecOnFrameAvailable;
 class CJNIByteBuffer;
 class CBitstreamConverter;
+
+struct AMediaCodec;
+struct AMediaFormat;
+struct ANativeWindow;
+struct AMediaCodecBufferInfo;
 
 typedef struct amc_demux {
   uint8_t  *pData;
@@ -159,7 +160,7 @@ protected:
   std::vector<CDVDMediaCodecInfo*> m_inflight;
   std::set<int64_t> m_ptsList;
   ssize_t m_savIndex;
-  AMediaCodecBufferInfo m_savBufferInfo;
+  std::unique_ptr<AMediaCodecBufferInfo> m_savBufferInfo;
 
   CBitstreamConverter *m_bitstream;
   DVDVideoPicture m_videobuffer;
