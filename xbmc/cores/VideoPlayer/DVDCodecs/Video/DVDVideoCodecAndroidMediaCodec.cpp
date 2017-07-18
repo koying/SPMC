@@ -27,6 +27,12 @@
 
 #include "DVDVideoCodecAndroidMediaCodec.h"
 
+#define off_t size_t    // NDK unified headers support large offsets, but some func
+                        // signature must be 32bits on 32bit ABI
+#include <media/NdkMediaCodec.h>
+#include <android/native_window.h>
+#include <android/native_window_jni.h>
+
 #include <androidjni/Build.h>
 #include <androidjni/ByteBuffer.h>
 #include <androidjni/MediaCodecList.h>
@@ -362,6 +368,7 @@ CDVDVideoCodecAndroidMediaCodec::CDVDVideoCodecAndroidMediaCodec(CProcessInfo &p
 {
   memset(&m_videobuffer, 0x00, sizeof(DVDVideoPicture));
   memset(&m_demux_pkt, 0x00, sizeof(m_demux_pkt));
+  m_savBufferInfo.reset(new AMediaCodecBufferInfo);
 }
 
 CDVDVideoCodecAndroidMediaCodec::~CDVDVideoCodecAndroidMediaCodec()
@@ -1132,7 +1139,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
   {
     // Saved Buffer
     index = m_savIndex;
-    bufferInfo = m_savBufferInfo;
+    bufferInfo = *m_savBufferInfo;
     m_savIndex = -99;
   }
   else
@@ -1151,7 +1158,7 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
         CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec pts dropped by decoder(%lld)", inPts);
 
         m_savIndex = index;
-        m_savBufferInfo = bufferInfo;
+        *m_savBufferInfo = bufferInfo;
         // Decoder dropped a frame
         m_videobuffer.pts = inPts;
         m_videobuffer.iFlags |= DVP_FLAG_DROPPED;
