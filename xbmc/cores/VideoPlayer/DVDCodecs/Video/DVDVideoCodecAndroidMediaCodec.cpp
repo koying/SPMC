@@ -235,7 +235,7 @@ bool CDVDMediaCodecInfo::WaitForFrame(int millis)
   return m_frameready->WaitMSec(millis);
 }
 
-void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
+void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render, int64_t rendertime)
 {
   CSingleLock lock(m_section);
 
@@ -251,7 +251,11 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
 
   media_status_t mstat;
   if (render)
-    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, CurrentHostCounter());
+  {
+    if (rendertime == 0)
+      rendertime = CurrentHostCounter();
+    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, rendertime);
+  }
   else
     mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
@@ -322,7 +326,7 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   }
 }
 
-void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRect)
+void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect, int64_t renderTime)
 {
   CSingleLock lock(m_section);
 
@@ -343,10 +347,10 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
       ReleaseOutputBuffer(false);
     }
     else
-      ReleaseOutputBuffer(true);
+      ReleaseOutputBuffer(true, renderTime);
   }
   else
-    ReleaseOutputBuffer(true);
+    ReleaseOutputBuffer(true, renderTime);
 }
 
 

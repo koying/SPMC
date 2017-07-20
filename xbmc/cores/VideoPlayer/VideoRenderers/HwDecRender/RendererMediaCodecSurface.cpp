@@ -26,8 +26,10 @@
 #include "platform/android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #include "utils/log.h"
+#include "utils/TimeUtils.h"
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
+  : m_prevTime(0)
 {
 }
 
@@ -111,9 +113,9 @@ bool CRendererMediaCodecSurface::LoadShadersHook()
   return true;
 }
 
-bool CRendererMediaCodecSurface::RenderHook(int index)
+bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, DWORD alpha)
 {
-  CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(m_buffers[index].hwDec);
+  CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(m_buffers[m_iYV12RenderBuffer].hwDec);
   if (mci && !mci->IsReleased())
   {
     // this hack is needed to get the 2D mode of a 3D movie going
@@ -206,8 +208,20 @@ bool CRendererMediaCodecSurface::RenderHook(int index)
         break;
     }
 
-    mci->RenderUpdate(srcRect, dstRect);
+    CXBMCApp::WaitVSync(50);
+    mci->RenderUpdate(dstRect);
   }
+  else
+  {
+    double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
+    m_prevTime = CurrentHostCounter();
+    if (sleep_time_ms < 20.0)
+    {
+      sleep_time_ms = 20.0 - sleep_time_ms;
+      usleep(sleep_time_ms * 1000);
+    }
+  }
+
   return true;
 }
 
