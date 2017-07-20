@@ -70,7 +70,6 @@ public:
   long                Release();
 
   // meat and potatos
-  void                Validate(bool state);
   bool                WaitForFrame(int millis);
   // MediaCodec related
   void                ReleaseOutputBuffer(bool render);
@@ -80,14 +79,13 @@ public:
   int                 GetTextureID() const;
   void                GetTransformMatrix(float *textureMatrix);
   void                UpdateTexImage();
-  void                RenderUpdate(const CRect &SrcRect, const CRect &DestRect);
+  void                RenderUpdate(const CRect &DestRect, int64_t renderTime);
 
 private:
   // private because we are reference counted
   virtual            ~CDVDMediaCodecInfo();
 
   long                m_refs;
-  bool                m_valid;
   bool                m_isReleased;
   ssize_t             m_index;
   unsigned int        m_texture;

@@ -26,8 +26,10 @@
 #include "platform/android/activity/XBMCApp.h"
 #include "DVDCodecs/Video/DVDVideoCodecAndroidMediaCodec.h"
 #include "utils/log.h"
+#include "utils/TimeUtils.h"
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
+  : m_prevTime(0)
 {
 }
 
@@ -52,6 +54,9 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
   YUVBUFFER &buf = m_buffers[index];
   if (picture.mediacodec)
   {
+    int64_t nanoDiff = (picture.pts - currentClock) * 1000;
+    picture.mediacodec->ReleaseOutputBuffer(true, CurrentHostCounter() + nanoDiff);
+
     buf.hwDec = picture.mediacodec->Retain();
 #ifdef DEBUG_VERBOSE
     mindex = ((CDVDMediaCodecInfo *)buf.hwDec)->GetIndex();
@@ -111,10 +116,10 @@ bool CRendererMediaCodecSurface::LoadShadersHook()
   return true;
 }
 
-bool CRendererMediaCodecSurface::RenderHook(int index)
+bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, DWORD alpha)
 {
-  CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(m_buffers[index].hwDec);
-  if (mci && !mci->IsReleased())
+  CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(m_buffers[m_iYV12RenderBuffer].hwDec);
+  if (mci)
   {
     // this hack is needed to get the 2D mode of a 3D movie going
     RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
@@ -206,8 +211,16 @@ bool CRendererMediaCodecSurface::RenderHook(int index)
         break;
     }
 
-    mci->RenderUpdate(srcRect, dstRect);
+    mci->RenderUpdate(dstRect);
   }
+
+  double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
+  if (sleep_time_ms > 10)
+    sleep_time_ms = 10;
+  else
+    sleep_time_ms = 10 - sleep_time_ms;
+  usleep(sleep_time_ms * 1000);
+
   return true;
 }
 

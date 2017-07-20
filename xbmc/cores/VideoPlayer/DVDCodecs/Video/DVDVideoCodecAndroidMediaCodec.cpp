@@ -178,7 +178,6 @@ CDVDMediaCodecInfo::CDVDMediaCodecInfo(
   , std::shared_ptr<CJNIXBMCVideoView> &videoview
 )
 : m_refs(1)
-, m_valid(true)
 , m_isReleased(true)
 , m_index(index)
 , m_texture(texture)
@@ -217,23 +216,16 @@ long CDVDMediaCodecInfo::Release()
   return count;
 }
 
-void CDVDMediaCodecInfo::Validate(bool state)
-{
-  CSingleLock lock(m_section);
-
-  m_valid = state;
-}
-
 bool CDVDMediaCodecInfo::WaitForFrame(int millis)
 {
   return m_frameready->WaitMSec(millis);
 }
 
-void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
+void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render, int64_t rendertime)
 {
   CSingleLock lock(m_section);
 
-  if (!m_valid || m_isReleased)
+  if (m_isReleased)
     return;
 
   // release OutputBuffer and render if indicated
@@ -245,7 +237,11 @@ void CDVDMediaCodecInfo::ReleaseOutputBuffer(bool render)
 
   media_status_t mstat;
   if (render)
-    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, CurrentHostCounter());
+  {
+    if (rendertime == 0)
+      rendertime = CurrentHostCounter();
+    mstat = AMediaCodec_releaseOutputBufferAtTime(m_codec, m_index, rendertime);
+  }
   else
     mstat = AMediaCodec_releaseOutputBuffer(m_codec, m_index, false);
   m_isReleased = true;
@@ -273,18 +269,12 @@ void CDVDMediaCodecInfo::GetTransformMatrix(float *textureMatrix)
 {
   CSingleLock lock(m_section);
 
-  if (!m_valid)
-    return;
-
   m_surfacetexture->getTransformMatrix(textureMatrix);
 }
 
 void CDVDMediaCodecInfo::UpdateTexImage()
 {
   CSingleLock lock(m_section);
-
-  if (!m_valid)
-    return;
 
   // updateTexImage will check and spew any prior gl errors,
   // clear them before we call updateTexImage.
@@ -316,12 +306,9 @@ void CDVDMediaCodecInfo::UpdateTexImage()
   }
 }
 
-void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRect)
+void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect)
 {
   CSingleLock lock(m_section);
-
-  if (!m_valid)
-    return;
 
   CRect surfRect = m_videoview->getSurfaceRect();
   if (DestRect != surfRect)
@@ -332,15 +319,8 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &SrcRect, const CRect &DestRec
       m_videoview->setSurfaceRect(adjRect);
       CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height());
       CLog::Log(LOGDEBUG, "RenderUpdate: Adj  - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
-
-      // setVideoViewSurfaceRect is async, so skip rendering this frame
-      ReleaseOutputBuffer(false);
     }
-    else
-      ReleaseOutputBuffer(true);
   }
-  else
-    ReleaseOutputBuffer(true);
 }
 
 
@@ -1199,7 +1179,6 @@ int CDVDVideoCodecAndroidMediaCodec::GetOutputPicture(void)
           new CDVDMediaCodecInfo(index, m_textureId, m_codec, m_surfaceTexture, m_frameAvailable, m_jnivideoview)
         );
       m_videobuffer.mediacodec = m_inflight[i]->Retain();
-      m_videobuffer.mediacodec->Validate(true);
     }
     else
     {

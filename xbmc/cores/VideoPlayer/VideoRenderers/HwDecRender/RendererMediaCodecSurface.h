@@ -38,6 +38,7 @@ public:
   virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock);
   virtual bool RenderUpdateCheckForEmptyField();
   virtual void ReleaseBuffer(int idx);
+  virtual bool IsGuiLayer() override { return false; }
 
   // Feature support
   virtual bool Supports(EINTERLACEMETHOD method);
@@ -56,6 +57,8 @@ protected:
   virtual bool LoadShadersHook();
   virtual bool RenderHook(int index);  
   virtual int  GetImageHook(YV12Image *image, int source = AUTOSOURCE, bool readonly = false);
+
+  uint64_t m_prevTime;
 };
 
 #endif
