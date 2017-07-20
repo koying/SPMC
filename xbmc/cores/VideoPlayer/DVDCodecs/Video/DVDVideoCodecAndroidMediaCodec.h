@@ -74,14 +74,14 @@ public:
   void                Validate(bool state);
   bool                WaitForFrame(int millis);
   // MediaCodec related
-  void                ReleaseOutputBuffer(bool render);
+  void                ReleaseOutputBuffer(bool render, int64_t rendertime = 0);
   bool                IsReleased() { return m_isReleased; }
   // SurfaceTexture released
   ssize_t             GetIndex() const;
   int                 GetTextureID() const;
   void                GetTransformMatrix(float *textureMatrix);
   void                UpdateTexImage();
-  void                RenderUpdate(const CRect &SrcRect, const CRect &DestRect);
+  void                RenderUpdate(const CRect &DestRect, int64_t renderTime = 0);
 
 private:
   // private because we are reference counted
