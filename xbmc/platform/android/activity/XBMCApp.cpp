@@ -566,6 +566,9 @@ void CXBMCApp::run()
     android_printf("ERROR: Exception caught on main loop. Exiting");
   }
 
+  // Pass the return code to Java
+  set_field(m_context, "mExitCode", status);
+
   // If we are have not been force by Android to exit, notify its finish routine.
   // This will cause android to run through its teardown events, it calls:
   // onPause(), onLostFocus(), onDestroyWindow(), onStop(), onDestroy().
