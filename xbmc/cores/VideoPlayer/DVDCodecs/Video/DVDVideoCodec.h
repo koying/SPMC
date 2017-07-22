@@ -58,6 +58,7 @@ struct DVDVideoPicture
 {
   double pts; // timestamp in seconds, used in the CVideoPlayer class to keep track of pts
   double dts;
+  double clock;
 
   union
   {

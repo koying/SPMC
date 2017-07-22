@@ -301,6 +301,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     manager.registerInputDeviceListener(mInputDeviceListener, handler);
 
     mDecorView = getWindow().getDecorView();
+    mDecorView.setBackground(null);
     getWindow().takeSurface(null);
     setContentView(R.layout.activity_main);
     mVideoLayout = (RelativeLayout)findViewById(R.id.VideoLayout);

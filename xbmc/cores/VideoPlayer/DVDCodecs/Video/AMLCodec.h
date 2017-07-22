@@ -25,17 +25,18 @@
 #include "guilib/Geometry.h"
 #include "rendering/RenderSystem.h"
 #include "threads/Thread.h"
-#include <deque>
+
+#define AML_PTS_FREQ        90000
 
 typedef struct am_private_t am_private_t;
 
 class DllLibAmCodec;
 
-class PosixFile;
-typedef std::shared_ptr<PosixFile> PosixFilePtr;
+class IVPClockCallback;
 
 class CAMLCodec : public CThread
 {
+  friend class CDVDVideoCodecAmlogic;
 public:
   CAMLCodec();
   virtual ~CAMLCodec();
@@ -51,13 +52,15 @@ public:
   int           GetDataSize();
   double        GetTimeSize();
   void          SetVideoRect(const CRect &SrcRect, const CRect &DestRect);
-  int64_t       GetCurPts() const { return m_cur_pts; }
-  int       	GetOMXPts() const { return static_cast<int>(m_cur_pts - m_start_pts); }
 
 protected:
   virtual void  Process();
+  int64_t          m_start_dts;
+  int64_t          m_start_pts;
+  volatile int64_t m_cur_pts;
 
 private:
+  void          SetVideoPtsSeconds(double pts);
   void          ShowMainVideo(const bool show);
   void          SetVideoZoom(const float zoom);
   void          SetVideoContrast(const int contrast);
@@ -65,11 +68,6 @@ private:
   void          SetVideoSaturation(const int saturation);
   void          SetVideo3dMode(const int mode3d);
   std::string   GetStereoMode();
-  bool          OpenAmlVideo(const CDVDStreamInfo &hints);
-  void          CloseAmlVideo();
-  std::string   GetVfmMap(const std::string &name);
-  void          SetVfmMap(const std::string &name, const std::string &map);
-  int           DequeueBuffer(int64_t &pts);
 
   DllLibAmCodec   *m_dll;
   bool             m_opened;
@@ -77,11 +75,10 @@ private:
   CDVDStreamInfo   m_hints;
   volatile int     m_speed;
   volatile int64_t m_1st_pts;
-  volatile int64_t m_cur_pts;
+  volatile int64_t m_cur_pictcnt;
+  volatile int64_t m_old_pictcnt;
   volatile double  m_timesize;
   volatile int64_t m_vbufsize;
-  int64_t          m_start_dts;
-  int64_t          m_start_pts;
   CEvent           m_ready_event;
 
   CRect            m_dst_rect;
@@ -93,9 +90,4 @@ private:
   float            m_zoom;
   int              m_contrast;
   int              m_brightness;
-
-  PosixFilePtr     m_amlVideoFile;
-  std::string      m_defaultVfmMap;
-  std::deque<int64_t>  m_ptsQueue;
-  CCriticalSection m_ptsQueueMutex;
 };

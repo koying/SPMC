@@ -559,6 +559,8 @@ bool CVideoPlayerVideo::ProcessDecoderOutput(int &decoderState, double &frametim
   {
     // try to retrieve the picture (should never fail!), unless there is a demuxer bug ofcours
     m_pVideoCodec->ClearPicture(&m_picture);
+
+    m_picture.clock = m_pClock->GetClock(); // snapshot current clock
     if (m_pVideoCodec->GetPicture(&m_picture))
     {
       bool hasTimestamp = true;
