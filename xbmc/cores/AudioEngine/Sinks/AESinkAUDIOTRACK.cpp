@@ -28,6 +28,7 @@
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "platform/android/activity/XBMCApp.h"
 #include "settings/Settings.h"
+#include "settings/AdvancedSettings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/TimeUtils.h"
@@ -924,7 +925,8 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   {
     CJNIAudioManager audioManager(CJNIContext::getSystemService("audio"));
     CJNIAudioDeviceInfos audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
-    LogAudoDevices("EnumerateDevicesEx", audiodevices);
+    if (g_advancedSettings.CanLogComponent(LOGAUDIO))
+      LogAudoDevices("EnumerateDevicesEx", audiodevices);
   }
 
   m_sink_sampleRates.clear();
@@ -938,10 +940,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   for (int i=0; i<test_sample_sz; ++i)
   {
     if (IsSupported(test_sample[i], CJNIAudioFormat::CHANNEL_OUT_STEREO, encoding))
-    {
       m_sink_sampleRates.insert(test_sample[i]);
-      CLog::Log(LOGDEBUG, "AESinkAUDIOTRACK - %d supported", test_sample[i]);
-    }
   }
 
   CAEDeviceInfo pcminfo;
