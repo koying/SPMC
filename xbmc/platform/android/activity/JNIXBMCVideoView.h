@@ -44,13 +44,18 @@ public:
   void surfaceCreated(CJNISurfaceHolder holder);
   void surfaceDestroyed(CJNISurfaceHolder holder);
 
+  void onLayoutChange(int left, int top, int width, int height);
+
   static void _surfaceChanged(JNIEnv* env, jobject thiz, jobject holder, jint format, jint width, jint height);
   static void _surfaceCreated(JNIEnv* env, jobject thiz, jobject holder);
   static void _surfaceDestroyed(JNIEnv* env, jobject thiz, jobject holder);
+  static void _onLayoutChange(JNIEnv* env, jobject thiz, jint left, jint top, jint width, jint height);
 
   bool waitForSurface(unsigned int millis);
   bool isActive() { return m_surfaceCreated.Signaled(); }
   CJNISurface getSurface();
+
+  CRect MapRenderToDroid(const CRect& srcRect);
   const CRect& getSurfaceRect();
   void setSurfaceRect(const CRect& rect);
   void add();
@@ -59,9 +64,12 @@ public:
   bool isCreated() const;
 
 protected:
-  CJNISurfaceHolderCallback* m_callback;
+  CJNISurfaceHolderCallback* m_surfholdercallback;
   CEvent m_surfaceCreated;
   CRect m_surfaceRect;
+
+  CCriticalSection m_LayoutMutex;
+  CRect m_droid2guiRatio;
 
 private:
   CJNIXBMCVideoView();

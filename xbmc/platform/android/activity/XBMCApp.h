@@ -204,7 +204,6 @@ public:
   static int GetDPI();
 
   static CRect GetSurfaceRect();
-  static CRect MapRenderToDroid(const CRect& srcRect);
   static CPoint MapDroidToGui(const CPoint& src);
 
   static int WaitForActivityResult(const CJNIIntent &intent, int requestCode, CJNIIntent& result);

@@ -23,6 +23,7 @@
 #include <androidjni/jutils-details.hpp>
 #include <androidjni/Context.h>
 
+#include "guilib/GraphicContext.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
@@ -45,7 +46,8 @@ void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
     {
       {"_surfaceChanged", "(Landroid/view/SurfaceHolder;III)V", (void*)&CJNIXBMCVideoView::_surfaceChanged},
       {"_surfaceCreated", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceCreated},
-      {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceDestroyed}
+      {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceDestroyed},
+      {"_onLayoutChange", "(IIII)V", (void*)&CJNIXBMCVideoView::_onLayoutChange},
     };
 
     env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
@@ -53,13 +55,13 @@ void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
 }
 
 CJNIXBMCVideoView::CJNIXBMCVideoView()
-  : m_callback(nullptr)
+  : m_surfholdercallback(nullptr)
 {
 }
 
 CJNIXBMCVideoView::CJNIXBMCVideoView(const jni::jhobject &object)
   : CJNIBase(object)
-  , m_callback(nullptr)
+  , m_surfholdercallback(nullptr)
 {
 }
 
@@ -81,7 +83,7 @@ CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(CJNISurfaceHolderCallback*
   }
 
   add_instance(pvw->get_raw(), pvw);
-  pvw->m_callback = callback;
+  pvw->m_surfholdercallback = callback;
   if (pvw->isCreated())
     pvw->m_surfaceCreated.Set();
   pvw->add();
@@ -116,27 +118,63 @@ void CJNIXBMCVideoView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hol
     inst->surfaceDestroyed(CJNISurfaceHolder(jhobject::fromJNI(holder)));
 }
 
+void CJNIXBMCVideoView::_onLayoutChange(JNIEnv* env, jobject thiz, jint left, jint top, jint width, jint height)
+{
+  (void)env;
+
+  CJNIXBMCVideoView *inst = find_instance(thiz);
+  if (inst)
+    inst->onLayoutChange(left, top, width, height);
+}
+
+/****/
+
 void CJNIXBMCVideoView::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {
   // Reset Surface Rect
   m_surfaceRect = CRect();
 
-  if (m_callback)
-    m_callback->surfaceChanged(holder, format, width, height);
+  if (m_surfholdercallback)
+    m_surfholdercallback->surfaceChanged(holder, format, width, height);
 }
 
 void CJNIXBMCVideoView::surfaceCreated(CJNISurfaceHolder holder)
 {
-  if (m_callback)
-    m_callback->surfaceCreated(holder);
+  if (m_surfholdercallback)
+    m_surfholdercallback->surfaceCreated(holder);
   m_surfaceCreated.Set();
 }
 
 void CJNIXBMCVideoView::surfaceDestroyed(CJNISurfaceHolder holder)
 {
   m_surfaceCreated.Reset();
-  if (m_callback)
-    m_callback->surfaceDestroyed(holder);
+  if (m_surfholdercallback)
+    m_surfholdercallback->surfaceDestroyed(holder);
+}
+
+void CJNIXBMCVideoView::onLayoutChange(int left, int top, int width, int height)
+{
+  if(!width || !height)
+    return;
+
+  CSingleLock lock(m_LayoutMutex);
+
+  m_droid2guiRatio = CRect(0.0, 0.0, 1.0, 1.0);
+
+  RESOLUTION_INFO res_info = g_graphicsContext.GetResInfo();
+  float curRatio = (float)res_info.iWidth / res_info.iHeight;
+  float newRatio = (float)width / height;
+
+  res_info.fPixelRatio = newRatio / curRatio;
+  g_graphicsContext.SetResInfo(g_graphicsContext.GetVideoResolution(), res_info);
+
+  CRect gui = CRect(0, 0, res_info.iWidth, res_info.iHeight);
+  m_droid2guiRatio.x1 = left;
+  m_droid2guiRatio.y1 = top;
+  m_droid2guiRatio.x2 = gui.Width() / (double)width;
+  m_droid2guiRatio.y2 = gui.Height() / (double)height;
+
+  CLog::Log(LOGDEBUG, "%s(video scaling) - %f, %f pr(%f)", __PRETTY_FUNCTION__, m_droid2guiRatio.x2, m_droid2guiRatio.y2, res_info.fPixelRatio);
 }
 
 bool CJNIXBMCVideoView::waitForSurface(unsigned int millis)
@@ -161,6 +199,12 @@ CJNISurface CJNIXBMCVideoView::getSurface()
 {
   return call_method<jhobject>(m_object,
                                "getSurface", "()Landroid/view/Surface;");
+}
+
+CRect CJNIXBMCVideoView::MapRenderToDroid(const CRect& srcRect)
+{
+  CSingleLock lock(m_LayoutMutex);
+  return CRect(srcRect.x1 / m_droid2guiRatio.x2, srcRect.y1 / m_droid2guiRatio.y2, srcRect.x2 / m_droid2guiRatio.x2, srcRect.y2 / m_droid2guiRatio.y2);
 }
 
 const CRect& CJNIXBMCVideoView::getSurfaceRect()

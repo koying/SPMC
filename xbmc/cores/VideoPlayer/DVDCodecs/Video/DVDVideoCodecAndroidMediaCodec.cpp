@@ -336,7 +336,7 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect, int64_t renderTime)
   CRect surfRect = m_videoview->getSurfaceRect();
   if (DestRect != surfRect)
   {
-    CRect adjRect = CXBMCApp::MapRenderToDroid(DestRect);
+    CRect adjRect = m_videoview->MapRenderToDroid(DestRect);
     if (adjRect != surfRect)
     {
       m_videoview->setSurfaceRect(adjRect);
