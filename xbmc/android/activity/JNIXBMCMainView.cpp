@@ -80,7 +80,7 @@ void CJNIXBMCMainView::_surfaceChanged(JNIEnv *env, jobject thiz, jobject holder
   (void)env;
 
   if (m_instance)
-    m_instance->surfaceChanged(CJNISurfaceHolder(jhobject(holder)), format, width, height);
+    m_instance->surfaceChanged(CJNISurfaceHolder(jhobject::fromJNI(holder)), format, width, height);
 }
 
 void CJNIXBMCMainView::_surfaceCreated(JNIEnv* env, jobject thiz, jobject holder)
@@ -88,7 +88,7 @@ void CJNIXBMCMainView::_surfaceCreated(JNIEnv* env, jobject thiz, jobject holder
   (void)env;
 
   if (m_instance)
-    m_instance->surfaceCreated(CJNISurfaceHolder(jhobject(holder)));
+    m_instance->surfaceCreated(CJNISurfaceHolder(jhobject::fromJNI(holder)));
 }
 
 void CJNIXBMCMainView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject holder)
@@ -96,7 +96,7 @@ void CJNIXBMCMainView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hold
   (void)env;
 
   if (m_instance)
-    m_instance->surfaceDestroyed(CJNISurfaceHolder(jhobject(holder)));
+    m_instance->surfaceDestroyed(CJNISurfaceHolder(jhobject::fromJNI(holder)));
 }
 
 void CJNIXBMCMainView::_onLayoutChange(JNIEnv* env, jobject thiz, jint left, jint top, jint width, jint height)
@@ -111,7 +111,7 @@ void CJNIXBMCMainView::attach(const jobject& thiz)
 {
   if (!m_object)
   {
-    m_object = jhobject(thiz);
+    m_object.reset(thiz);
     m_object.setGlobal();
   }
 }
