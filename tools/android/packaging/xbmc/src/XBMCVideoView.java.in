@@ -70,6 +70,7 @@ public class XBMCVideoView extends SurfaceView implements
       {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         mVideoLayout.addView(XBMCVideoView.this, layoutParams);
+        mVideoLayout.setBackgroundColor(Color.BLACK);
       }
     });
   }
@@ -82,6 +83,7 @@ public class XBMCVideoView extends SurfaceView implements
       public void run()
       {
         mVideoLayout.removeView(XBMCVideoView.this);
+        mVideoLayout.setBackgroundColor(Color.TRANSPARENT);
       }
     });
   }
