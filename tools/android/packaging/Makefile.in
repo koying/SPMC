@@ -4,7 +4,7 @@ OBJS = libcurl.so \
   libplist.so libshairplay.so \
   libnfs.so libass.so \
   libbluray.so libsmbclient.so
-SMB_OBJS = libtevent-util.so libdcerpc-binding.so libsamba-errors.so libsamba-util.so libsamba-credentials.so libsamba-hostconfig.so libsmbconf.so \
+SMB_OBJS = libtevent-util.so libdcerpc-binding.so libsamba-errors.so libsamba-util.so libsamba-credentials.so libsamba-hostconfig.so \
            libwbclient.so libsamdb.so libndr.so libndr-standard.so libndr-nbt.so libndr-krb5pac.so
 
 PLATFORM_OBJS =
