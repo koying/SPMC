@@ -18,7 +18,10 @@ CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
           --without-dnsupdate \
           --with-libiconv=$(PREFIX) \
           --without-acl-support --without-ad-dc \
-          --cross-compile --cross-answers=build_answers
+          --cross-compile --cross-answers=build_answers \
+          --with-static-modules=ALL \
+          --builtin-libraries=replace,ccan,samba-cluster-support,smbconf,smbregistry,secrets3 \
+          --bundled-libraries=talloc,tdb,pytdb,ldb,pyldb,tevent,pytevent
 
 ifeq ($(OS),android)
 CWD=$(shell pwd)/$(PLATFORM)
@@ -53,7 +56,7 @@ $(LIBDYLIB): $(PLATFORM)
 	touch $@
 
 clean:
-	$(MAKE) -C $(PLATFORM)/source3 clean
+	$(MAKE) -C $(PLATFORM) clean
 	rm -f .installed-$(PLATFORM)
 
 distclean::
