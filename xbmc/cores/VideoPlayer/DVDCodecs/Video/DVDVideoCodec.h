@@ -51,6 +51,7 @@ class CDVDMediaCodecInfo;
 class CDVDVideoCodecIMXBuffer;
 class CMMALBuffer;
 class CDVDAmlogicInfo;
+class CDVDClock;
 
 
 // should be entirely filled by all codecs
@@ -58,7 +59,7 @@ struct DVDVideoPicture
 {
   double pts; // timestamp in seconds, used in the CVideoPlayer class to keep track of pts
   double dts;
-  double clock;
+  CDVDClock* clock;
 
   union
   {
