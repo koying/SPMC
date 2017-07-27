@@ -51,9 +51,12 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
   int mindex = -1;
 #endif
 
+  CLog::Log(LOGDEBUG, "addpic: cc(%f), ch(%f), diff(%f), pts(%f), ptsdiff(%f)", currentClock/1000.0, CurrentHostCounter()/1000000.0, (currentClock/1000.0) - (CurrentHostCounter()/1000000.0), picture.pts / 1000.0, (picture.pts - currentClock) / 1000.0);
   YUVBUFFER &buf = m_buffers[index];
   if (picture.mediacodec)
   {
+    int64_t nanodiff(static_cast<int64_t>((picture.pts - currentClock) * 1000));
+    picture.mediacodec->ReleaseOutputBuffer(true, CurrentHostCounter() + nanodiff);
     buf.hwDec = picture.mediacodec->Retain();
 #ifdef DEBUG_VERBOSE
     mindex = ((CDVDMediaCodecInfo *)buf.hwDec)->GetIndex();
@@ -116,7 +119,7 @@ bool CRendererMediaCodecSurface::LoadShadersHook()
 bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, DWORD alpha)
 {
   CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(m_buffers[m_iYV12RenderBuffer].hwDec);
-  if (mci && !mci->IsReleased())
+  if (mci)
   {
     // this hack is needed to get the 2D mode of a 3D movie going
     RENDER_STEREO_MODE stereo_mode = g_graphicsContext.GetStereoMode();
@@ -208,18 +211,15 @@ bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, 
         break;
     }
 
-    CXBMCApp::WaitVSync(50);
     mci->RenderUpdate(dstRect);
   }
-  else
+
+  double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
+  m_prevTime = CurrentHostCounter();
+  if (sleep_time_ms < 15.0)
   {
-    double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
-    m_prevTime = CurrentHostCounter();
-    if (sleep_time_ms < 20.0)
-    {
-      sleep_time_ms = 20.0 - sleep_time_ms;
-      usleep(sleep_time_ms * 1000);
-    }
+    sleep_time_ms = 15.0 - sleep_time_ms;
+    usleep(sleep_time_ms * 1000);
   }
 
   return true;
