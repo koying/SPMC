@@ -1858,8 +1858,8 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   else if (m_start_dts != 0)
     pts_video += m_start_dts;
 
-  double curclock = pDvdVideoPicture->clock->GetClock(); // DVD_TIME_BASE;
-  double app_pts = curclock + (AML_NUM_BUFFERS * pDvdVideoPicture->iDuration);  // Adjust for buffers
+  double curclock = (pDvdVideoPicture->clock->GetClock() + (AML_NUM_BUFFERS * pDvdVideoPicture->iDuration)) / DVD_TIME_BASE;  // Adjust for buffers
+  double app_pts = curclock;
   // add in audio delay/display latency contribution
   double offset  = 0 - CMediaSettings::GetInstance().GetCurrentVideoSettings().m_AudioDelay;
   // correct video pts by user set delay and rendering delay
