@@ -26,6 +26,7 @@
 #include "rendering/RenderSystem.h"
 #include "threads/Thread.h"
 
+#define AML_NUM_BUFFERS 3
 #define AML_PTS_FREQ        90000
 
 typedef struct am_private_t am_private_t;

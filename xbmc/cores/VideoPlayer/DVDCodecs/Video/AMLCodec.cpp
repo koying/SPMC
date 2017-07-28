@@ -1846,6 +1846,11 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
   if (!m_opened)
     return false;
 
+  pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
+  pDvdVideoPicture->format = RENDER_FMT_AML;
+  pDvdVideoPicture->iDuration = (double)(am_private->video_rate * DVD_TIME_BASE) / UNIT_FREQ;
+  strncpy(pDvdVideoPicture->stereo_mode, m_hints.stereo_mode.c_str(), sizeof(pDvdVideoPicture->stereo_mode)-1);
+
   int64_t pts_video = m_cur_pts;
   // correct video pts by starting pts.
   if (m_start_pts != 0)
@@ -1854,7 +1859,7 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
     pts_video += m_start_dts;
 
   double curclock = pDvdVideoPicture->clock->GetClock(); // DVD_TIME_BASE;
-  double app_pts = curclock;
+  double app_pts = curclock + (AML_NUM_BUFFERS * pDvdVideoPicture->iDuration);  // Adjust for buffers
   // add in audio delay/display latency contribution
   double offset  = 0 - CMediaSettings::GetInstance().GetCurrentVideoSettings().m_AudioDelay;
   // correct video pts by user set delay and rendering delay
@@ -1880,19 +1885,9 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
     }
   }
 
-  pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
-  pDvdVideoPicture->format = RENDER_FMT_AML;
-  pDvdVideoPicture->iDuration = (double)(am_private->video_rate * DVD_TIME_BASE) / UNIT_FREQ;
-  strncpy(pDvdVideoPicture->stereo_mode, m_hints.stereo_mode.c_str(), sizeof(pDvdVideoPicture->stereo_mode)-1);
-
   pDvdVideoPicture->dts = DVD_NOPTS_VALUE;
   if (m_speed == DVD_PLAYSPEED_NORMAL)
-  {
     pDvdVideoPicture->pts = curclock;
-    // video pts cannot be late or dvdplayer goes nuts,
-    // so run it one frame ahead
-    pDvdVideoPicture->pts += 1 * pDvdVideoPicture->iDuration;
-  }
   else
   {
     // We are FF/RW; Do not use the Player clock or it just doesn't work
@@ -1901,6 +1896,7 @@ bool CAMLCodec::GetPicture(DVDVideoPicture *pDvdVideoPicture)
     else
       pDvdVideoPicture->pts = (double)m_cur_pts / AML_PTS_FREQ * DVD_TIME_BASE;
   }
+  pDvdVideoPicture->pts += (AML_NUM_BUFFERS * pDvdVideoPicture->iDuration); // Adjust for buffers
 
   return true;
 }
