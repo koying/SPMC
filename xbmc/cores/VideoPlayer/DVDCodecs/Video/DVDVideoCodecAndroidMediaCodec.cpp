@@ -104,8 +104,6 @@ static bool CanSurfaceRenderBlackList(const std::string &name)
 static bool IsBlacklisted(const std::string &name)
 {
   static const char *blacklisted_decoders[] = {
-    // No software decoders
-    "OMX.google",
     // For Rockchip non-standard components
     "AVCDecoder",
     "AVCDecoder_FLASH",
@@ -329,9 +327,6 @@ void CDVDMediaCodecInfo::UpdateTexImage()
 void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect, int64_t renderTime)
 {
   CSingleLock lock(m_section);
-
-  if (!m_valid)
-    return;
 
   CRect surfRect = m_videoview->getSurfaceRect();
   if (DestRect != surfRect)
@@ -967,6 +962,13 @@ bool CDVDVideoCodecAndroidMediaCodec::GetPicture(DVDVideoPicture* pDvdVideoPictu
 {
   if (!m_opened)
     return false;
+
+  if (m_videobuffer.mediacodec)
+  {
+    // CLog::Log(LOGDEBUG, "addpic: cc(%f), ch(%f), diff(%f), pts(%f), ptsdiff(%f)", currentClock/1000.0, CurrentHostCounter()/1000000.0, (currentClock/1000.0) - (CurrentHostCounter()/1000000.0), picture.pts / 1000.0, (picture.pts - currentClock) / 1000.0);
+    int64_t nanodiff(static_cast<int64_t>((m_videobuffer.pts - pDvdVideoPicture->clock->GetClock()) * 1000));
+    m_videobuffer.mediacodec->ReleaseOutputBuffer(true, CurrentHostCounter() + nanodiff);
+  }
 
   *pDvdVideoPicture = m_videobuffer;
   if (m_drop)
