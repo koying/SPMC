@@ -337,15 +337,8 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect, int64_t renderTime)
       m_videoview->setSurfaceRect(adjRect);
       CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height());
       CLog::Log(LOGDEBUG, "RenderUpdate: Adj  - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
-
-      // setVideoViewSurfaceRect is async, so skip rendering this frame
-      ReleaseOutputBuffer(false);
     }
-    else
-      ReleaseOutputBuffer(true, renderTime);
   }
-  else
-    ReleaseOutputBuffer(true, renderTime);
 }
 
 
