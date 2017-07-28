@@ -311,6 +311,11 @@ void CDVDVideoCodecAmlogic::Reset(void)
   m_mpeg2_sequence_pts = 0;
 }
 
+unsigned CDVDVideoCodecAmlogic::GetAllowedReferences()
+{
+  return AML_NUM_BUFFERS;
+}
+
 bool CDVDVideoCodecAmlogic::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   if (m_Codec)

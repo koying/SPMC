@@ -73,6 +73,7 @@ public:
   virtual int  GetDataSize(void);
   virtual double GetTimeSize(void);
   virtual const char* GetName(void) { return (const char*)m_pFormatName; }
+  virtual unsigned GetAllowedReferences();
 
 protected:
   void            Dispose(void);
