@@ -861,7 +861,7 @@ void CXBMCApp::OnPlayBackStarted()
   m_mediaSession->updateIntent(intent);
 
   m_xbmcappinstance->AcquireAudioFocus();
-  CAndroidKey::SetHandleMediaKeys(true);
+  CAndroidKey::SetHandleMediaKeys(false);
 
   if (m_isResumed)
     RequestVisibleBehind(true);
@@ -886,7 +886,7 @@ void CXBMCApp::OnPlayBackStopped()
   m_mediaSession->activate(false);
 
   RequestVisibleBehind(false);
-  CAndroidKey::SetHandleMediaKeys(false);
+  CAndroidKey::SetHandleMediaKeys(true);
   m_xbmcappinstance->ReleaseAudioFocus();
 }
 
