@@ -142,7 +142,7 @@ void CJNIXBMCMediaSession::OnForwardRequested()
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (!g_application.m_pPlayer->IsPaused())
-      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_FORWARD)));
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_FORWARD)));
   }
 }
 
@@ -151,7 +151,7 @@ void CJNIXBMCMediaSession::OnRewindRequested()
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (!g_application.m_pPlayer->IsPaused())
-      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_REWIND)));
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_REWIND)));
   }
 }
 
