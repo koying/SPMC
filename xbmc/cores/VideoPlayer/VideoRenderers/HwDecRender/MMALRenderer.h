@@ -105,7 +105,7 @@ public:
   virtual void         Reset(); /* resets renderer after seek for example */
   virtual void         Flush();
   virtual bool         IsConfigured() { return m_bConfigured; }
-  virtual void         AddVideoPictureHW(DVDVideoPicture& pic, int index, double currentClock);
+  virtual void         AddVideoPictureHW(DVDVideoPicture& pic, int index);
   virtual CRenderInfo GetRenderInfo();
 
   virtual bool         SupportsMultiPassRendering() { return false; };

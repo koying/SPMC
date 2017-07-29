@@ -42,7 +42,7 @@ CRendererVAAPI::~CRendererVAAPI()
   }
 }
 
-void CRendererVAAPI::AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock)
+void CRendererVAAPI::AddVideoPictureHW(DVDVideoPicture &picture, int index)
 {
   VAAPI::CVaapiRenderPicture *vaapi = picture.vaapi;
   YUVBUFFER &buf = m_buffers[index];

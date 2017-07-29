@@ -58,7 +58,7 @@ CRendererMediaCodec::~CRendererMediaCodec()
 {
 }
 
-void CRendererMediaCodec::AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock)
+void CRendererMediaCodec::AddVideoPictureHW(DVDVideoPicture &picture, int index)
 {
 #ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();

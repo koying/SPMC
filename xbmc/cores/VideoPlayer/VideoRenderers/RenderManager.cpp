@@ -1150,7 +1150,7 @@ int CRenderManager::AddVideoPicture(DVDVideoPicture& pic)
   || pic.format == RENDER_FMT_MMAL
   || m_pRenderer->IsPictureHW(pic))
   {
-    m_pRenderer->AddVideoPictureHW(pic, index, m_dvdClock.GetClock());
+    m_pRenderer->AddVideoPictureHW(pic, index);
   }
   else if(pic.format == RENDER_FMT_YUV420P
        || pic.format == RENDER_FMT_YUV420P10

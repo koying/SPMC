@@ -44,7 +44,7 @@ bool CRendererMediaCodecSurface::RenderCapture(CRenderCapture* capture)
   return true;
 }
 
-void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock)
+void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int index)
 {
 #ifdef DEBUG_VERBOSE
   unsigned int time = XbmcThreads::SystemClockMillis();
