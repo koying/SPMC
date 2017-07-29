@@ -18,6 +18,7 @@ CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
           --without-dnsupdate \
           --with-libiconv=$(PREFIX) \
           --without-acl-support --without-ad-dc \
+          --disable-tdb-mutex-locking \
           --cross-compile --cross-answers=build_answers \
           --with-static-modules=ALL \
           --builtin-libraries=replace,ccan,samba-cluster-support,smbconf,smbregistry,secrets3 \
