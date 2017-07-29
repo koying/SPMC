@@ -37,7 +37,7 @@ public:
   virtual bool RenderCapture(CRenderCapture* capture) override;
 
   // Player functions
-  virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index, double currentClock);
+  virtual void AddVideoPictureHW(DVDVideoPicture &picture, int index);
   virtual void ReleaseBuffer(int idx);
   virtual bool IsGuiLayer();
 
