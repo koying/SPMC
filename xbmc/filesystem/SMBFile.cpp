@@ -121,7 +121,12 @@ void CSMB::Init()
 
         // set maximum smbclient protocol version
         if (CSettings::GetInstance().GetInt(CSettings::SETTING_SMB_MAXPROTOCOL) == 1)
+        {
           fprintf(f, "\tclient max protocol = NT1\n");
+          // use the weaker LANMAN password hash in order to be compatible with older servers
+          fprintf(f, "\tclient lanman auth = yes\n");
+          fprintf(f, "\tlanman auth = yes\n");
+        }
         else
           fprintf(f, "\tclient max protocol = SMB%d\n", CSettings::GetInstance().GetInt(CSettings::SETTING_SMB_MAXPROTOCOL));
 
