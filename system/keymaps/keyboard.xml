@@ -128,8 +128,8 @@
       <stop>Stop</stop>
       <play_pause>PlayPause</play_pause>
       <play_pause mod="longpress">Info</play_pause>
-      <fastforward>FastForward</fastforward>
-      <rewind>Rewind</rewind>
+      <fastforward>PageDown</fastforward>
+      <rewind>PageUp</rewind>
       <record/>
       <launch_mail></launch_mail>
       <launch_media_select>ActivateWindow(Music)</launch_media_select>
@@ -328,6 +328,8 @@
   </Music>
   <FullscreenVideo>
     <keyboard>
+      <fastforward>FastForward</fastforward>
+      <rewind>Rewind</rewind>
       <f>FastForward</f>
       <r>Rewind</r>
       <period>StepForward</period>
@@ -387,6 +389,8 @@
   </VideoTimeSeek>
   <FullscreenInfo>
     <keyboard>
+      <fastforward>FastForward</fastforward>
+      <rewind>Rewind</rewind>
       <f>FastForward</f>
       <r>Rewind</r>
       <period>StepForward</period>
@@ -404,6 +408,8 @@
   </PlayerControls>
   <Visualisation>
     <keyboard>
+      <fastforward>FastForward</fastforward>
+      <rewind>Rewind</rewind>
       <f>FastForward</f>
       <r>Rewind</r>
       <period>SkipNext</period>
@@ -440,6 +446,8 @@
   </Visualisation>
   <MusicOSD>
     <keyboard>
+      <fastforward>FastForward</fastforward>
+      <rewind>Rewind</rewind>
       <f>FastForward</f>
       <r>Rewind</r>
       <period>SkipNext</period>
@@ -456,6 +464,8 @@
   </MusicOSD>
   <VisualisationPresetList>
     <keyboard>
+      <fastforward>FastForward</fastforward>
+      <rewind>Rewind</rewind>
       <f>FastForward</f>
       <r>Rewind</r>
       <period>SkipNext</period>
