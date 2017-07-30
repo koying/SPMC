@@ -31,6 +31,7 @@
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
   : m_prevTime(0)
+  , m_readyToRender(false)
 {
 }
 
@@ -55,10 +56,16 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
   YUVBUFFER &buf = m_buffers[index];
   if (picture.mediacodec)
   {
+    buf.hwDec = picture.mediacodec->Retain();
+    if (m_readyToRender)
+    {
 //    CLog::Log(LOGDEBUG, "addpic: cc(%f), ch(%f), diff(%f), pts(%f), ptsdiff(%f)", currentClock/1000.0, CurrentHostCounter()/1000000.0, (currentClock/1000.0) - (CurrentHostCounter()/1000000.0), picture.pts / 1000.0, (picture.pts - currentClock) / 1000.0);
     int64_t nanodiff(static_cast<int64_t>((picture.pts - picture.clock->GetClock()) * 1000));
     picture.mediacodec->ReleaseOutputBuffer(true, CurrentHostCounter() + nanodiff);
-    buf.hwDec = picture.mediacodec->Retain();
+    }
+    else
+      picture.mediacodec->ReleaseOutputBuffer(false);
+
 #ifdef DEBUG_VERBOSE
     mindex = ((CDVDMediaCodecInfo *)buf.hwDec)->GetIndex();
 #endif
@@ -213,6 +220,7 @@ bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, 
     }
 
     mci->RenderUpdate(dstRect);
+    m_readyToRender = true;
   }
 
   double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
