@@ -2,7 +2,7 @@ title: SPMC
 description: Semper Media Center (SPMC in short) is a android-minded fork of Kodi, by the former Kodi android maintainer, Koying
 google_analytics: UA-52714050-1
 show_downloads: true
-theme: jekyll-theme-architect
+theme: jekyll-theme-tactile
 
 gems:
   - jekyll-mentions
