@@ -210,6 +210,8 @@ private:
 
   void ProcessRenderLoop(bool renderOnly = false);
 
+  bool HandleAction(const CAction &action) const;
+
   typedef std::map<int, CGUIWindow *> WindowMap;
   WindowMap m_mapWindows;
   std::vector <CGUIWindow*> m_vecCustomWindows;
@@ -229,6 +231,8 @@ private:
 
   int  m_iNested;
   bool m_initialized;
+  mutable bool m_touchGestureActive{false};
+  mutable bool m_inhibitTouchGestureEvents{false};
 
   CDirtyRegionTracker m_tracker;
 
