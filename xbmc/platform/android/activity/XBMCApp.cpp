@@ -1365,9 +1365,11 @@ void CXBMCApp::onVolumeChanged(int volume)
 
 void CXBMCApp::onAudioFocusChange(int focusChange)
 {
-  CXBMCApp::android_printf("Audio Focus changed: %d", focusChange);
+  CLog::Log(LOGDEBUG, "Audio Focus changed: %d", focusChange);
   if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS ||
-      focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT)
+      focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT ||
+      focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+      )
   {
     m_hasAudioFocus = false;
 
