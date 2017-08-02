@@ -393,7 +393,7 @@ bool CInputManager::OnEvent(XBMC_Event& newEvent)
     }
     int actionId = 0;
     std::string actionString;
-    if (newEvent.touch.action == ACTION_GESTURE_BEGIN || newEvent.touch.action == ACTION_GESTURE_END)
+    if (newEvent.touch.action == ACTION_GESTURE_BEGIN || newEvent.touch.action == ACTION_GESTURE_END || newEvent.touch.action == ACTION_GESTURE_ABORT)
       actionId = newEvent.touch.action;
     else
     {
