@@ -51,6 +51,7 @@ public:
   void OnRewindRequested();
   void OnStopRequested();
   void OnSeekRequested(int64_t pos);
+  void OnSetRating(float rating);
 
   bool isActive() const;
 
@@ -63,6 +64,7 @@ protected:
   static void _onRewindRequested(JNIEnv* env, jobject thiz);
   static void _onStopRequested(JNIEnv* env, jobject thiz);
   static void _onSeekRequested(JNIEnv* env, jobject thiz, jlong pos);
+  static void _onSetRating(JNIEnv* env, jobject thiz, jfloat rating);
 
   bool m_isActive;
 };
