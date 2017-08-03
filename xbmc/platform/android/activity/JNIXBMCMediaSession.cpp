@@ -163,7 +163,14 @@ void CJNIXBMCMediaSession::OnStopRequested()
 
 void CJNIXBMCMediaSession::OnSeekRequested(int64_t pos)
 {
-  g_application.SeekTime(pos / 1000.0);
+  if (g_application.m_pPlayer->IsPlaying())
+    g_application.SeekTime(pos / 1000.0);
+}
+
+void CJNIXBMCMediaSession::OnSetRating(float rating)
+{
+  if (g_application.m_pPlayer->IsPlaying())
+    KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SET_RATING_VALUE, rating)));
 }
 
 bool CJNIXBMCMediaSession::isActive() const
@@ -243,4 +250,13 @@ void CJNIXBMCMediaSession::_onSeekRequested(JNIEnv* env, jobject thiz, jlong pos
   CJNIXBMCMediaSession *inst = find_instance(thiz);
   if (inst)
     inst->OnSeekRequested(pos);
+}
+
+void CJNIXBMCMediaSession::_onSetRating(JNIEnv* env, jobject thiz, jfloat rating)
+{
+  (void)env;
+
+  CJNIXBMCMediaSession *inst = find_instance(thiz);
+  if (inst)
+    inst->OnSetRating(rating);
 }

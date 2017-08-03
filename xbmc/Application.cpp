@@ -2132,7 +2132,7 @@ bool CApplication::OnAction(const CAction &action)
     return true;
   }
 
-  if ((action.GetID() == ACTION_INCREASE_RATING || action.GetID() == ACTION_DECREASE_RATING) && m_pPlayer->IsPlayingAudio())
+  if ((action.GetID() == ACTION_SET_RATING_VALUE || action.GetID() == ACTION_INCREASE_RATING || action.GetID() == ACTION_DECREASE_RATING) && m_pPlayer->IsPlayingAudio())
   {
     const CMusicInfoTag *tag = g_infoManager.GetCurrentSongTag();
     if (tag)
@@ -2150,6 +2150,11 @@ bool CApplication::OnAction(const CAction &action)
         m_itemCurrentFile->GetMusicInfoTag()->SetUserrating(userrating + 1);
         needsUpdate = true;
       }
+      else if (action.GetID() == ACTION_SET_RATING_VALUE && userrating != action.GetAmount(0))
+      {
+        m_itemCurrentFile->GetMusicInfoTag()->SetUserrating(action.GetAmount(0));
+        needsUpdate = true;
+      }
       if (needsUpdate)
       {
         CMusicDatabase db;
@@ -2165,7 +2170,7 @@ bool CApplication::OnAction(const CAction &action)
     }
     return true;
   }
-  else if ((action.GetID() == ACTION_INCREASE_RATING || action.GetID() == ACTION_DECREASE_RATING) && m_pPlayer->IsPlayingVideo())
+  else if ((action.GetID() == ACTION_SET_RATING_VALUE || action.GetID() == ACTION_INCREASE_RATING || action.GetID() == ACTION_DECREASE_RATING) && m_pPlayer->IsPlayingVideo())
   {
     const CVideoInfoTag *tag = g_infoManager.GetCurrentMovieTag();
     if (tag)
@@ -2181,6 +2186,11 @@ bool CApplication::OnAction(const CAction &action)
       else if (rating < 10 && action.GetID() == ACTION_INCREASE_RATING)
       {
         m_itemCurrentFile->GetVideoInfoTag()->m_iUserRating = rating + 1;
+        needsUpdate = true;
+      }
+      else if (action.GetID() == ACTION_SET_RATING_VALUE && rating != action.GetAmount(0))
+      {
+        m_itemCurrentFile->GetVideoInfoTag()->m_iUserRating = action.GetAmount(0);
         needsUpdate = true;
       }
       if (needsUpdate)

@@ -329,6 +329,7 @@
 #define ACTION_MENU                   163
 
 #define ACTION_SET_RATING             164
+#define ACTION_SET_RATING_VALUE       165
 
 #define ACTION_RECORD                 170
 
