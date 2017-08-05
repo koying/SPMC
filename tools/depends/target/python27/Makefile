@@ -47,6 +47,9 @@ ifeq ($(OS),ios)
 	cd $(PLATFORM); patch -p0 < ../Python-2.6.5-urllib.diff
 	cd $(PLATFORM); sed -ie 's|MACHDEP="unknown"|MACHDEP="darwin"|' configure.ac
 endif
+ifeq ($(OS),android)
+	cd $(PLATFORM); patch -p1 < ../Python-2.7.12-nolfs.patch
+endif
 	cp modules.setup $(PLATFORM)/Modules/Setup.dist
 
 #Add -liconv as needed, and add the _scproxy module for darwin
