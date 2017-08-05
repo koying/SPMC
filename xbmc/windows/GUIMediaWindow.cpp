@@ -1413,9 +1413,10 @@ void CGUIMediaWindow::UpdateFileList()
   {
     int iPlaylist=m_guiState->GetPlaylist();
     int nSong = g_playlistPlayer.GetCurrentSong();
+
     CFileItem playlistItem;
-    if (nSong > -1 && iPlaylist > -1)
-      playlistItem=*g_playlistPlayer.GetPlaylist(iPlaylist)[nSong];
+    if (iPlaylist > -1 && nSong > -1 && nSong < g_playlistPlayer.GetPlaylist(iPlaylist).size())
+      playlistItem = *g_playlistPlayer.GetPlaylist(iPlaylist)[nSong];
 
     g_playlistPlayer.ClearPlaylist(iPlaylist);
     g_playlistPlayer.Reset();
