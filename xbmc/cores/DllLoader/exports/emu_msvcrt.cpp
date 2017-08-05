@@ -1390,16 +1390,18 @@ extern "C"
     {
        return (off64_t)pFile->GetPosition();
     }
+#if !defined(TARGET_ANDROID) || defined(__LP64__)
     else if (!IS_STD_STREAM(stream))
     {
       // it might be something else than a file, or the file is not emulated
       // let the operating system handle it
-#if defined(TARGET_DARWIN) || defined(TARGET_FREEBSD) || defined(TARGET_ANDROID)
+#if defined(TARGET_DARWIN) || defined(TARGET_FREEBSD)
       return ftello(stream);
 #else
       return ftello64(stream);
 #endif
     }
+#endif
     CLog::Log(LOGERROR, "%s emulated function failed",  __FUNCTION__);
     return -1;
   }
@@ -1638,12 +1640,14 @@ extern "C"
 #endif
       return 0;
     }
+#if !defined(TARGET_ANDROID) || defined(__LP64__)
     else if (!IS_STD_STREAM(stream))
     {
       // it might be something else than a file, or the file is not emulated
       // let the operating system handle it
       return fgetpos(stream, pos);
     }
+#endif
     CLog::Log(LOGERROR, "%s emulated function failed",  __FUNCTION__);
     return EINVAL;
   }
@@ -1666,6 +1670,7 @@ extern "C"
         return EINVAL;
       }
     }
+#if !defined(TARGET_ANDROID) || defined(__LP64__)
     else if (!IS_STD_STREAM(stream))
     {
       // it might be something else than a file, or the file is not emulated
@@ -1676,6 +1681,7 @@ extern "C"
       return fsetpos64(stream, pos);
 #endif
     }
+#endif
     CLog::Log(LOGERROR, "%s emulated function failed",  __FUNCTION__);
     return EINVAL;
   }
@@ -1693,12 +1699,14 @@ extern "C"
 #endif
       return dll_fsetpos64(stream, &tmpPos);
     }
+#if !defined(TARGET_ANDROID) || defined(__LP64__)
     else if (!IS_STD_STREAM(stream))
     {
       // it might be something else than a file, or the file is not emulated
       // let the operating system handle it
       return fsetpos(stream, (fpos_t*)pos);
     }
+#endif
     CLog::Log(LOGERROR, "%s emulated function failed",  __FUNCTION__);
     return EINVAL;
   }

@@ -20,8 +20,8 @@
 
 #include "AndroidStorageProvider.h"
 
-#include <cstdlib>
-#include <cstdio>
+#include <stdlib.h>
+#include <stdio.h>
 #include <cstring>
 #include <map>
 
