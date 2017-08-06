@@ -120,17 +120,17 @@ public:
   static CXBMCApp* get() { return m_xbmcappinstance; }
 
   // IAnnouncer IF
-  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
-  virtual void onReceive(CJNIIntent intent);
-  virtual void onNewIntent(CJNIIntent intent);
-  virtual void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData);
+  virtual void onReceive(CJNIIntent intent) override;
+  virtual void onNewIntent(CJNIIntent intent) override;
+  virtual void onActivityResult(int requestCode, int resultCode, CJNIIntent resultData) override;
   virtual void onCaptureAvailable(jni::CJNIImage image);
   virtual void onScreenshotAvailable(jni::CJNIImage image);
-  virtual void onVolumeChanged(int volume);
+  virtual void onVolumeChanged(int volume) override;
   virtual void onAudioFocusChange(int focusChange);
-  virtual void doFrame(int64_t frameTimeNanos);
-  virtual void onVisibleBehindCanceled();
+  virtual void doFrame(int64_t frameTimeNanos) override;
+  virtual void onVisibleBehindCanceled() override;
   virtual void onMultiWindowModeChanged(bool isInMultiWindowMode);
   virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode);
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices);
@@ -148,21 +148,21 @@ public:
 
   bool isValid() { return m_activity != NULL; }
 
-  void onStart();
-  void onResume();
-  void onPause();
-  void onStop();
-  void onDestroy();
+  void onStart() override;
+  void onResume() override;
+  void onPause() override;
+  void onStop() override;
+  void onDestroy() override;
 
-  void onSaveState(void **data, size_t *size);
-  void onConfigurationChanged();
-  void onLowMemory();
+  void onSaveState(void **data, size_t *size) override;
+  void onConfigurationChanged() override;
+  void onLowMemory() override;
 
-  void onCreateWindow(ANativeWindow* window);
-  void onResizeWindow();
-  void onDestroyWindow();
-  void onGainFocus();
-  void onLostFocus();
+  void onCreateWindow(ANativeWindow* window) override;
+  void onResizeWindow() override;
+  void onDestroyWindow() override;
+  void onGainFocus() override;
+  void onLostFocus() override;
 
   void Initialize();
   void Deinitialize();
