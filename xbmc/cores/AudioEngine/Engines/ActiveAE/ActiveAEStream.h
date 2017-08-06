@@ -93,7 +93,7 @@ class CActiveAEStreamBuffers
 {
 public:
   CActiveAEStreamBuffers(AEAudioFormat inputFormat, AEAudioFormat outputFormat, AEQuality quality);
-  virtual ~CActiveAEStreamBuffers();
+  ~CActiveAEStreamBuffers();
   bool Create(unsigned int totaltime, bool remap, bool upmix, bool normalize = true, bool useDSP = false);
   void SetExtraData(int profile, enum AVMatrixEncoding matrix_encoding, enum AVAudioServiceType audio_service_type);
   bool ProcessBuffers();
@@ -128,7 +128,7 @@ protected:
   friend class CActiveAE;
   friend class CEngineStats;
   CActiveAEStream(AEAudioFormat *format, unsigned int streamid);
-  virtual ~CActiveAEStream();
+  ~CActiveAEStream();
   void FadingFinished();
   void IncFreeBuffers();
   void DecFreeBuffers();
@@ -138,44 +138,44 @@ protected:
   double CalcResampleRatio(double error);
 
 public:
-  virtual unsigned int GetSpace();
-  virtual unsigned int AddData(const uint8_t* const *data, unsigned int offset, unsigned int frames, double pts = 0.0);
-  virtual double GetDelay();
-  virtual CAESyncInfo GetSyncInfo();
-  virtual bool IsBuffering();
-  virtual double GetCacheTime();
-  virtual double GetCacheTotal();
+  unsigned int GetSpace();
+  unsigned int AddData(const uint8_t* const *data, unsigned int offset, unsigned int frames, double pts = 0.0);
+  double GetDelay();
+  CAESyncInfo GetSyncInfo();
+  bool IsBuffering();
+  double GetCacheTime();
+  double GetCacheTotal();
 
-  virtual void Pause();
-  virtual void Resume();
-  virtual void Drain(bool wait);
-  virtual bool IsDraining();
-  virtual bool IsDrained();
-  virtual void Flush();
+  void Pause();
+  void Resume();
+  void Drain(bool wait);
+  bool IsDraining();
+  bool IsDrained();
+  void Flush();
 
-  virtual float GetVolume();
-  virtual float GetReplayGain();
-  virtual float GetAmplification();
-  virtual void SetVolume(float volume);
-  virtual void SetReplayGain(float factor);
-  virtual void SetAmplification(float amplify);
-  virtual void SetFFmpegInfo(int profile, enum AVMatrixEncoding matrix_encoding, enum AVAudioServiceType audio_service_type);
+  float GetVolume();
+  float GetReplayGain();
+  float GetAmplification();
+  void SetVolume(float volume);
+  void SetReplayGain(float factor);
+  void SetAmplification(float amplify);
+  void SetFFmpegInfo(int profile, enum AVMatrixEncoding matrix_encoding, enum AVAudioServiceType audio_service_type);
 
-  virtual const unsigned int GetFrameSize() const;
-  virtual const unsigned int GetChannelCount() const;
+  unsigned int GetFrameSize() const override;
+  unsigned int GetChannelCount() const override;
   
-  virtual const unsigned int GetSampleRate() const ;
-  virtual const enum AEDataFormat GetDataFormat() const;
+  unsigned int GetSampleRate() const override;
+  enum AEDataFormat GetDataFormat() const override;
   
-  virtual double GetResampleRatio();
-  virtual void SetResampleRatio(double ratio);
-  virtual void SetResampleMode(int mode);
-  virtual void RegisterAudioCallback(IAudioCallback* pCallback);
-  virtual void UnRegisterAudioCallback();
-  virtual void FadeVolume(float from, float to, unsigned int time);
-  virtual bool IsFading();
-  virtual void RegisterSlave(IAEStream *stream);
-  virtual bool HasDSP();
+  double GetResampleRatio();
+  void SetResampleRatio(double ratio);
+  void SetResampleMode(int mode);
+  void RegisterAudioCallback(IAudioCallback* pCallback);
+  void UnRegisterAudioCallback();
+  void FadeVolume(float from, float to, unsigned int time);
+  bool IsFading();
+  void RegisterSlave(IAEStream *stream);
+  bool HasDSP();
 
 protected:
 

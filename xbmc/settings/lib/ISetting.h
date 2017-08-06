@@ -78,7 +78,7 @@ public:
 
    \return Localizeable label ID of the setting group
    */
-  const int GetLabel() const { return m_label; }
+  int GetLabel() const { return m_label; }
   /*!
    \brief Sets the localizeable label ID of the setting group.
 
@@ -90,7 +90,7 @@ public:
 
    \return Localizeable help ID of the setting group
    */
-  const int GetHelp() const { return m_help; }
+  int GetHelp() const { return m_help; }
   /*!
    \brief Sets the localizeable help ID of the setting group.
 

@@ -965,7 +965,7 @@ void CBitstreamConverter::BitstreamAllocAndCopy( uint8_t **poutbuf, int *poutbuf
   }
 }
 
-const int CBitstreamConverter::avc_parse_nal_units(AVIOContext *pb, const uint8_t *buf_in, int size)
+int CBitstreamConverter::avc_parse_nal_units(AVIOContext *pb, const uint8_t *buf_in, int size)
 {
   const uint8_t *p = buf_in;
   const uint8_t *end = p + size;
@@ -988,7 +988,7 @@ const int CBitstreamConverter::avc_parse_nal_units(AVIOContext *pb, const uint8_
   return size;
 }
 
-const int CBitstreamConverter::avc_parse_nal_units_buf(const uint8_t *buf_in, uint8_t **buf, int *size)
+int CBitstreamConverter::avc_parse_nal_units_buf(const uint8_t *buf_in, uint8_t **buf, int *size)
 {
   AVIOContext *pb;
   int ret = avio_open_dyn_buf(&pb);
@@ -1002,7 +1002,7 @@ const int CBitstreamConverter::avc_parse_nal_units_buf(const uint8_t *buf_in, ui
   return 0;
 }
 
-const int CBitstreamConverter::isom_write_avcc(AVIOContext *pb, const uint8_t *data, int len)
+int CBitstreamConverter::isom_write_avcc(AVIOContext *pb, const uint8_t *data, int len)
 {
   // extradata from bytestream h264, convert to avcC atom data for bitstream
   if (len > 6)
