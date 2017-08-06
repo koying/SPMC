@@ -1224,8 +1224,6 @@ void CVideoPlayer::CheckBetterStream(CCurrentStream& current, CDemuxStream* stre
 
 void CVideoPlayer::Process()
 {
-  CFFmpegLog::SetLogLevel(1);
-
   if (!OpenInputStream())
   {
     m_bAbortRequest = true;
@@ -2482,8 +2480,6 @@ void CVideoPlayer::OnExit()
 
   // set event to inform openfile something went wrong in case openfile is still waiting for this event
   m_ready.Set();
-
-  CFFmpegLog::ClearLogLevel();
 }
 
 void CVideoPlayer::HandleMessages()
