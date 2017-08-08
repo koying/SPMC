@@ -129,10 +129,6 @@ void CSMB::Init()
         else
           fprintf(f, "\tname resolve order = bcast host\n");
 
-        // Force V1 ?
-        if (CSettings::GetInstance().GetBool(CSettings::SETTING_SMB_FORCEV1))
-          fprintf(f, "\tclient max protocol = NT1\n");
-
         // use user-configured charset. if no charset is specified,
         // samba tries to use charset 850 but falls back to ASCII in case it is not available
         if (g_advancedSettings.m_sambadoscodepage.length() > 0)
