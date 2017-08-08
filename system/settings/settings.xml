@@ -2415,7 +2415,7 @@
         </setting>
         <setting id="smb.maxprotocol" type="integer" label="36621" help="36622">
           <level>2</level>
-          <default>3</default>
+          <default>1</default>
           <constraints>
             <options>
               <option label="36623">1</option>
