@@ -98,8 +98,7 @@ void CSMB::Init()
     // http://us1.samba.org/samba/docs/man/manpages-3/smb.conf.5.html
     char smb_conf[MAX_PATH];
     snprintf(smb_conf, sizeof(smb_conf), "%s/.smb", getenv("HOME"));
-    int ret = mkdir(smb_conf, 0755);
-    if (ret == 0 || CSettings::GetInstance().GetBool(CSettings::SETTING_SMB_OVERWRITECONF))
+    if (mkdir(smb_conf, 0755) == 0)
     {
       snprintf(smb_conf, sizeof(smb_conf), "%s/.smb/smb.conf", getenv("HOME"));
       FILE* f = fopen(smb_conf, "w");
