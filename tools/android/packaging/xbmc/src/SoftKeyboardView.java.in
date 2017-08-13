@@ -1,5 +1,4 @@
 package @APP_PACKAGE@;
-package com.semperpax.spmc17;
 
 import android.content.Context;
 import android.util.Log;

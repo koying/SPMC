@@ -25,13 +25,14 @@ file(WRITE ${CMAKE_BINARY_DIR}/tools/depends/Makefile.include
 
 set(package_files strings.xml
                   activity_main.xml
-                  activity_soft_keyboard.xml
+                  view_soft_keyboard.xml
                   colors.xml
                   searchable.xml
                   AndroidManifest.xml
                   build.gradle
                   src/Main.java
                   src/Splash.java
+                  src/SoftKeyboardView.java
                   src/XBMCBroadcastReceiver.java
                   src/XBMCCrashHandler.java
                   src/XBMCImageContentProvider.java
