@@ -2810,8 +2810,13 @@ void CApplication::FrameMove(bool processEvents, bool processGUI)
       m_frameMoveGuard.lock();
       m_ProcessedExternalDecay = 5;
     }
-    if (m_ProcessedExternalDecay && --m_ProcessedExternalDecay == 0)
-      m_ProcessedExternalCalls = 0;
+    else if (m_ProcessedExternalDecay)
+    {
+      if (--m_ProcessedExternalDecay == 0)
+        m_ProcessedExternalCalls = 0;
+      else
+        m_ProcessedExternalCalls >> 1;
+    }
   }
 
   if (processGUI && m_renderGUI)
