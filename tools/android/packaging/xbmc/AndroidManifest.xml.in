@@ -134,6 +134,9 @@
                    android:resource="@xml/searchable"/>
         </activity>
 
+        <activity android:name=".SoftKeyboard">
+        </activity>
+
     </application>
 
 </manifest><!-- END_INCLUDE(manifest) -->

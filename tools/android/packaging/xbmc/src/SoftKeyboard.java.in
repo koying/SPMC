@@ -1,0 +1,65 @@
+package @APP_PACKAGE@;
+package com.semperpax.spmc17;
+
+import android.content.Context;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+
+public class SoftKeyboardView extends FrameLayout
+{
+  private static final String TAG = "XBMCKeyboardView";
+
+  public EditText editText;
+
+  class DoneOnEditorActionListener implements TextView.OnEditorActionListener
+  {
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+    {
+      if (actionId == EditorInfo.IME_ACTION_DONE)
+      {
+        close();
+        return true;
+      }
+      return false;
+    }
+  }
+
+  private void close()
+  {
+    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+  }
+
+  private void inflateLayout()
+  {
+    LayoutInflater inflater = LayoutInflater.from(getContext());
+    inflater.inflate(R.layout.view_soft_keyboard, this);
+
+    this.editText = (EditText) findViewById(R.id.editText);
+    this.editText.setOnEditorActionListener(new DoneOnEditorActionListener());
+  }
+
+  public SoftKeyboardView(Context context)
+  {
+    super(context);
+    Log.d(TAG, "Created");
+    inflateLayout();
+  }
+
+  void SetText(String text)
+  {
+    this.editText.setText(text);
+  }
+
+  String GetText()
+  {
+    return this.editText.getText().toString();
+  }
+}

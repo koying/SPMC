@@ -1,6 +1,7 @@
 set(SOURCES android_main.cpp
             AndroidFeatures.cpp
             AndroidJoyStick.cpp
+            AndroidKeyboard.cpp
             AndroidKey.cpp
             AndroidMouse.cpp
             AndroidTouch.cpp
@@ -22,6 +23,7 @@ set(SOURCES android_main.cpp
 set(HEADERS AndroidExtra.h
             AndroidFeatures.h
             AndroidJoyStick.h
+            AndroidKeyboard.h
             AndroidKey.h
             AndroidMouse.h
             AndroidTouch.h
