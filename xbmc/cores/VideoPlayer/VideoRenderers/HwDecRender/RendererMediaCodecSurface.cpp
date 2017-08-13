@@ -59,9 +59,10 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
     buf.hwDec = picture.mediacodec->Retain();
     if (m_readyToRender)
     {
-//    CLog::Log(LOGDEBUG, "addpic: cc(%f), ch(%f), diff(%f), pts(%f), ptsdiff(%f)", currentClock/1000.0, CurrentHostCounter()/1000000.0, (currentClock/1000.0) - (CurrentHostCounter()/1000000.0), picture.pts / 1000.0, (picture.pts - currentClock) / 1000.0);
-    int64_t nanodiff(static_cast<int64_t>((picture.pts - picture.clock->GetClock()) * 1000));
-    picture.mediacodec->ReleaseOutputBuffer(true, CurrentHostCounter() + nanodiff);
+      double currentClock = picture.clock->GetClock();
+//      CLog::Log(LOGDEBUG, "addpic: cc(%f), ch(%f), diff(%f), pts(%f), ptsdiff(%f)", currentClock/1000.0, CurrentHostCounter()/1000000.0, (currentClock/1000.0) - (CurrentHostCounter()/1000000.0), picture.pts / 1000.0, (picture.pts - currentClock) / 1000.0);
+      int64_t nanodiff(static_cast<int64_t>((picture.pts - currentClock) * 1000));
+      picture.mediacodec->ReleaseOutputBuffer(true, CurrentHostCounter() + nanodiff);
     }
     else
       picture.mediacodec->ReleaseOutputBuffer(false);
