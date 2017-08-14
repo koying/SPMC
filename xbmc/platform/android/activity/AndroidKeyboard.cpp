@@ -20,17 +20,37 @@
 
 #include "AndroidKeyboard.h"
 
+#include "utils/log.h"
+#include "platform/android/activity/XBMCApp.h"
+
+CAndroidKeyboard::CAndroidKeyboard()
+  : m_isCanceled(false)
+{
+}
+
 bool CAndroidKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::string& initialString, std::string& typedString, const std::string& heading, bool bHiddenInput)
 {
+  bool ret = CXBMCApp::get()->ShowKeyboard(heading, initialString);
+  if (!ret)
+    return false;
 
+  std::string res = CXBMCApp::get()->WaitForKeyboard();
+  CLog::Log(LOGDEBUG, "%s - %s", __PRETTY_FUNCTION__, res.c_str());
+  pCallback(this, res);
+  typedString = res;
+
+  return !m_isCanceled;
 }
 
 void CAndroidKeyboard::Cancel()
 {
-
+  m_isCanceled = true;
+  CXBMCApp::get()->CancelKeyboard();
 }
 
 bool CAndroidKeyboard::SetTextToKeyboard(const std::string& text, bool closeKeyboard)
 {
-
+  CXBMCApp::get()->SetKeyboardText(text);
+  if (closeKeyboard)
+    CXBMCApp::get()->CancelKeyboard();
 }

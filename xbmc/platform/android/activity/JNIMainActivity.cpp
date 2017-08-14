@@ -173,6 +173,15 @@ void CJNIMainActivity::_onAudioDeviceRemoved(JNIEnv *env, jobject context, jobje
     m_appInstance->onAudioDeviceRemoved(jcast<CJNIAudioDeviceInfos>(jhobjectArray(devices)));
 }
 
+void CJNIMainActivity::_onKeyboardDone(JNIEnv *env, jobject context, jstring text)
+{
+  static_cast<void>(env);
+  static_cast<void>(context);
+
+  if (m_appInstance != nullptr)
+    m_appInstance->onKeyboardDone(jcast<std::string>(jhstring(text)));
+}
+
 void CJNIMainActivity::_doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos)
 {
   (void)env;

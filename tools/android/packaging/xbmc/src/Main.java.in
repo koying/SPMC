@@ -55,6 +55,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private XBMCJsonRPC mJsonRPC = null;
   private View mDecorView = null;
   private RelativeLayout mVideoLayout = null;
+  private SoftKeyboardView mKbdVviev = null;
   private Handler handler = new Handler();
   private Intent mNewIntent = null;
   private XBMCProjection mCaptureProjection = null;
@@ -73,6 +74,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
+  native void _onKeyboardDone(String text);
 
   private class MyAudioDeviceCallback extends AudioDeviceCallback 
   {
@@ -265,6 +267,35 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
         View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
   }
 
+  public boolean showKeyboard(final String label, final String txt)
+  {
+    if (mKbdVviev != null)
+      return false;
+    
+    runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        mKbdVviev = new SoftKeyboardView(Main.this);
+        mKbdVviev.setElevation(2);
+        mKbdVviev.SetLabel(label);
+        mKbdVviev.SetText(txt);
+        mVideoLayout.addView(mKbdVviev);
+      }
+    });
+    return true;
+  }
+
+  public void finishKeyboard()
+  {
+    String txt = mKbdVviev.GetText();
+    mVideoLayout.removeView(mKbdVviev);
+    mKbdVviev = null;
+
+    _onKeyboardDone(txt);
+  }
+  
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
@@ -310,6 +341,12 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
     mMainView.setElevation(1);  // Always on Top
     mVideoLayout.addView(mMainView, layoutParams);
+
+/*
+SoftKeyboardView kbview = new SoftKeyboardView(this);
+kbview.setElevation(2);
+mVideoLayout.addView(kbview);
+*/
 
     hideSystemUI();
 }

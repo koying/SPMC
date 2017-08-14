@@ -14,6 +14,7 @@ public class SoftKeyboardView extends FrameLayout
 {
   private static final String TAG = "XBMCKeyboardView";
 
+  private Main mMain;
   public EditText editText;
 
   class DoneOnEditorActionListener implements TextView.OnEditorActionListener
@@ -33,7 +34,8 @@ public class SoftKeyboardView extends FrameLayout
   private void close()
   {
     InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    imm.hideSoftInputFromWindow(getWindowToken(), 0);
+    imm.hideSoftInputFromWindow(mMain.getWindow().getDecorView().getWindowToken(), 0);
+    mMain.finishKeyboard();
   }
 
   private void inflateLayout()
@@ -43,13 +45,23 @@ public class SoftKeyboardView extends FrameLayout
 
     this.editText = (EditText) findViewById(R.id.editText);
     this.editText.setOnEditorActionListener(new DoneOnEditorActionListener());
+    this.editText.requestFocus();
+    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.showSoftInput(mMain.getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
   }
 
-  public SoftKeyboardView(Context context)
+  public SoftKeyboardView(Main context)
   {
     super(context);
     Log.d(TAG, "Created");
+    this.mMain = context;
     inflateLayout();
+  }
+
+  void SetLabel(String txt)
+  {
+    TextView label = (TextView) findViewById(R.id.label);
+    label.setText(txt);
   }
 
   void SetText(String text)

@@ -1566,6 +1566,46 @@ void CXBMCApp::CalculateGUIRatios()
   CLog::Log(LOGDEBUG, "%s(gui scaling) - %f, %f", __PRETTY_FUNCTION__, m_droid2guiRatio.x2, m_droid2guiRatio.y2);
 }
 
+bool CXBMCApp::ShowKeyboard(const std::string& label, const std::string &text)
+{
+  m_kbdEvent.Reset();
+  CAndroidKey::SetHandleKeys(false);
+
+  return call_method<jboolean>(m_context
+                               , "showKeyboard", "(Ljava/lang/String;Ljava/lang/String;)Z"
+                               , jcast<jhstring>(label), jcast<jhstring>(text));
+}
+
+void CXBMCApp::CancelKeyboard()
+{
+  m_kbdEvent.Set();
+  m_kbdText = "";
+}
+
+std::string CXBMCApp::WaitForKeyboard()
+{
+  m_kbdEvent.Wait();
+  CAndroidKey::SetHandleKeys(true);
+  return m_kbdText;
+
+}
+
+void CXBMCApp::SetKeyboardText(const std::string &text)
+{
+  m_kbdText = text;
+  call_method<void>(m_context
+              , "setKeyboardText", "(Ljava/lang/String;)V"
+              , jcast<jhstring>(text));
+}
+
+void CXBMCApp::onKeyboardDone(const std::string &text)
+{
+  CLog::Log(LOGDEBUG, "%s - %s", __PRETTY_FUNCTION__, text.c_str());
+
+  m_kbdEvent.Set();
+  m_kbdText = text;
+}
+
 
 void CXBMCApp::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {

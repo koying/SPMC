@@ -208,6 +208,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
       {"_onPictureInPictureModeChanged", "(Z)V", (void*)&CJNIMainActivity::_onPictureInPictureModeChanged},
       {"_onAudioDeviceAdded", "([Landroid/media/AudioDeviceInfo;)V", (void*)&CJNIMainActivity::_onAudioDeviceAdded},
       {"_onAudioDeviceRemoved", "([Landroid/media/AudioDeviceInfo;)V", (void*)&CJNIMainActivity::_onAudioDeviceRemoved},
+      {"_onKeyboardDone", "(Ljava/lang/String;)V", (void*)&CJNIMainActivity::_onKeyboardDone},
     };
     env->RegisterNatives(cMain, methods, sizeof(methods)/sizeof(methods[0]));
   }

@@ -85,6 +85,7 @@
             android:theme="@android:style/Theme.NoTitleBar"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
+            android:windowSoftInputMode="adjustResize"
             >
 
             <!-- Tell NativeActivity the name of or .so -->

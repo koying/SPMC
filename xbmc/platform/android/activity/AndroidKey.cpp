@@ -33,6 +33,10 @@ typedef struct {
   int16_t xbmcKey;
 } KeyMap;
 
+bool CAndroidKey::m_handleKeys = true;
+bool CAndroidKey::m_handleMediaKeys = true;
+bool CAndroidKey::m_handleSearchKeys = false;
+
 static KeyMap keyMap[] = {
   { AKEYCODE_UNKNOWN         , XBMCK_LAST },
   { AKEYCODE_SOFT_LEFT       , XBMCK_LEFT },
@@ -187,12 +191,12 @@ static KeyMap SearchkeyMap[] = {
   { AKEYCODE_SEARCH          , XBMCK_BROWSER_SEARCH },
 };
 
-bool CAndroidKey::m_handleMediaKeys = true;
-bool CAndroidKey::m_handleSearchKeys = false;
-
 bool CAndroidKey::onKeyboardEvent(AInputEvent *event)
 {
   if (event == NULL)
+    return false;
+
+  if (!m_handleKeys)
     return false;
 
   bool ret = true;

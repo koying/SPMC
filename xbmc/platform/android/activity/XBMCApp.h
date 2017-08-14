@@ -246,6 +246,12 @@ public:
 
   void onLayoutChange(int left, int top, int width, int height);
 
+  bool ShowKeyboard(const std::string& label, const std::string& text);
+  void CancelKeyboard();
+  std::string WaitForKeyboard();
+  void SetKeyboardText(const std::string& text);
+  virtual void onKeyboardDone(const std::string& text);
+
 protected:
   // limit who can access Volume
   friend class CAESinkAUDIOTRACK;
@@ -306,4 +312,7 @@ private:
 
   static uint32_t m_playback_state;
   static CRect m_surface_rect;
+
+  CEvent m_kbdEvent;
+  std::string m_kbdText;
 };

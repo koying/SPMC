@@ -47,6 +47,7 @@ public:
   static void _onPictureInPictureModeChanged(JNIEnv *env, jobject context, jboolean isInPictureInPictureMode);
   static void _onAudioDeviceAdded(JNIEnv *env, jobject context, jobjectArray devices);
   static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
+  static void _onKeyboardDone(JNIEnv *env, jobject context, jstring text);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
   static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
@@ -75,4 +76,5 @@ protected:
   virtual void onPictureInPictureModeChanged(bool isInPictureInPictureMode) = 0;
   virtual void onAudioDeviceAdded(CJNIAudioDeviceInfos devices)=0;
   virtual void onAudioDeviceRemoved(CJNIAudioDeviceInfos devices)=0;
+  virtual void onKeyboardDone(const std::string& text)=0;
 };

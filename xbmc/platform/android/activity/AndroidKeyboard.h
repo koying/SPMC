@@ -23,9 +23,12 @@
 
 class CAndroidKeyboard : public CGUIKeyboard
 {
-  public:
-    CAndroidKeyboard();
-    virtual bool ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput);
-    virtual void Cancel();
-    virtual bool SetTextToKeyboard(const std::string &text, bool closeKeyboard = false);
+public:
+  CAndroidKeyboard();
+  virtual bool ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput);
+  virtual void Cancel();
+  virtual bool SetTextToKeyboard(const std::string &text, bool closeKeyboard = false);
+
+protected:
+  bool m_isCanceled;
 };
