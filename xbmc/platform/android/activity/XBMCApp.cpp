@@ -1595,7 +1595,15 @@ void CXBMCApp::SetKeyboardText(const std::string &text)
   m_kbdText = text;
   call_method<void>(m_context
               , "setKeyboardText", "(Ljava/lang/String;)V"
-              , jcast<jhstring>(text));
+                    , jcast<jhstring>(text));
+}
+
+void CXBMCApp::onKeyboardCancelled()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  m_kbdEvent.Set();
+  m_kbdText = "@@-1@@";
 }
 
 void CXBMCApp::onKeyboardDone(const std::string &text)

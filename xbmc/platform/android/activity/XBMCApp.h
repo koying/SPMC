@@ -250,6 +250,7 @@ public:
   void CancelKeyboard();
   std::string WaitForKeyboard();
   void SetKeyboardText(const std::string& text);
+  virtual void onKeyboardCancelled();
   virtual void onKeyboardDone(const std::string& text);
 
 protected:

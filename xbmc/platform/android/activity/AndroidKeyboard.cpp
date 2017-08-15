@@ -36,6 +36,12 @@ bool CAndroidKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::str
 
   std::string res = CXBMCApp::get()->WaitForKeyboard();
   CLog::Log(LOGDEBUG, "%s - %s", __PRETTY_FUNCTION__, res.c_str());
+
+  if (res == "@@-1@@")
+  {
+    res = "";
+    m_isCanceled = true;
+  }
   pCallback(this, res);
   typedString = res;
 

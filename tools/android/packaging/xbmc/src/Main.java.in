@@ -74,6 +74,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   native void _onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
+  native void _onKeyboardCancelled();
   native void _onKeyboardDone(String text);
 
   private class MyAudioDeviceCallback extends AudioDeviceCallback 
@@ -285,6 +286,14 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       }
     });
     return true;
+  }
+
+  public void cancelKeyboard()
+  {
+    mVideoLayout.removeView(mKbdVviev);
+    mKbdVviev = null;
+
+    _onKeyboardCancelled();
   }
 
   public void finishKeyboard()

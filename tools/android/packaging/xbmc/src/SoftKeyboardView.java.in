@@ -24,14 +24,14 @@ public class SoftKeyboardView extends FrameLayout
     {
       if (actionId == EditorInfo.IME_ACTION_DONE)
       {
-        close();
+        close(false);
         return true;
       }
       return false;
     }
   }
 
-  private void close()
+  private void close(boolean isCanceled)
   {
     InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     imm.hideSoftInputFromWindow(mMain.getWindow().getDecorView().getWindowToken(), 0);
@@ -56,6 +56,17 @@ public class SoftKeyboardView extends FrameLayout
     Log.d(TAG, "Created");
     this.mMain = context;
     inflateLayout();
+  }
+
+  @Override
+  public boolean dispatchKeyEventPreIme(KeyEvent event)
+  {
+    if (event.getKeyCode() == KeyEvent.KEYCODE_BACK)
+    {
+        close(true);
+        return true;
+    }
+    return super.dispatchKeyEventPreIme(event);
   }
 
   void SetLabel(String txt)
