@@ -794,6 +794,7 @@ void CXBMCApp::OnPlayBackStarted()
     m_playback_state |= PLAYBACK_STATE_AUDIO;
 
   m_mediaSession->activate(true);
+  UpdateSessionState();
 
   CJNIIntent intent(ACTION_XBMC_RESUME, CJNIURI::EMPTY, *this, get_class(CJNIContext::get_raw()));
   m_mediaSession->updateIntent(intent);
@@ -810,6 +811,7 @@ void CXBMCApp::OnPlayBackPaused()
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
   m_playback_state &= ~PLAYBACK_STATE_PLAYING;
+  UpdateSessionState();
 
   RequestVisibleBehind(false);
   m_xbmcappinstance->ReleaseAudioFocus();
@@ -842,7 +844,7 @@ std::vector<int> CXBMCApp::GetInputDeviceIds()
 
 void CXBMCApp::ProcessSlow()
 {
-  if (m_mediaSession->isActive())
+  if (m_mediaSession->isActive() && (m_playback_state & PLAYBACK_STATE_PLAYING))
     UpdateSessionState();
 }
 
@@ -1366,9 +1368,9 @@ void CXBMCApp::onVolumeChanged(int volume)
 void CXBMCApp::onAudioFocusChange(int focusChange)
 {
   CLog::Log(LOGDEBUG, "Audio Focus changed: %d", focusChange);
-  if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS ||
-      focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT ||
-      focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
+  if (focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS
+      || focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT
+//      || focusChange == CJNIAudioManager::AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK
       )
   {
     m_hasAudioFocus = false;
@@ -1570,6 +1572,7 @@ bool CXBMCApp::ShowKeyboard(const std::string& label, const std::string &text)
 {
   m_kbdEvent.Reset();
   CAndroidKey::SetHandleKeys(false);
+  CAndroidJoyStick::SetHandleKeys(false);
 
   return call_method<jboolean>(m_context
                                , "showKeyboard", "(Ljava/lang/String;Ljava/lang/String;)Z"
@@ -1586,6 +1589,8 @@ std::string CXBMCApp::WaitForKeyboard()
 {
   m_kbdEvent.Wait();
   CAndroidKey::SetHandleKeys(true);
+  CAndroidJoyStick::SetHandleKeys(true);
+
   return m_kbdText;
 
 }

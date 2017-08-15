@@ -34,20 +34,30 @@ public class SoftKeyboardView extends FrameLayout
   private void close(boolean isCanceled)
   {
     InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    imm.hideSoftInputFromWindow(mMain.getWindow().getDecorView().getWindowToken(), 0);
-    mMain.finishKeyboard();
+    imm.hideSoftInputFromWindow(this.editText.getWindowToken(), 0);
+    if (isCanceled)
+      mMain.cancelKeyboard();
+    else
+      mMain.finishKeyboard();
   }
 
   private void inflateLayout()
   {
+    final InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     LayoutInflater inflater = LayoutInflater.from(getContext());
     inflater.inflate(R.layout.view_soft_keyboard, this);
 
     this.editText = (EditText) findViewById(R.id.editText);
     this.editText.setOnEditorActionListener(new DoneOnEditorActionListener());
-    this.editText.requestFocus();
-    InputMethodManager imm = (InputMethodManager)getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-    imm.showSoftInput(mMain.getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
+    this.editText.postDelayed(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        editText.requestFocus();
+        imm.showSoftInput(editText, 0);
+      }
+    }, 1);
   }
 
   public SoftKeyboardView(Main context)

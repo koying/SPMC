@@ -30,5 +30,9 @@ public:
   CAndroidJoyStick() { }
   ~CAndroidJoyStick() { }
 
+  static void SetHandleKeys(bool enable) { m_handleKeys = enable; }
   bool onJoyStickEvent(AInputEvent* event);
+
+protected:
+  static bool m_handleKeys;
 };

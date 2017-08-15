@@ -42,7 +42,7 @@ bool CAndroidKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::str
     res = "";
     m_isCanceled = true;
   }
-  pCallback(this, res);
+//  pCallback(this, res);
   typedString = res;
 
   return !m_isCanceled;

@@ -23,8 +23,13 @@
 #include "AndroidJoyStick.h"
 #include "platform/android/activity/XBMCApp.h"
 
+bool CAndroidJoyStick::m_handleKeys = true;
+
 bool CAndroidJoyStick::onJoyStickEvent(AInputEvent* event)
 {
+  if (!m_handleKeys)
+    return false;
+
   int32_t source = AInputEvent_getSource(event);
 
   // only handle input events from a gamepad or joystick
