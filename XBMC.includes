@@ -492,3 +492,5 @@ tools/android/packaging/xbmc/src/interfaces
 xbmc/cores/VideoPlayer/VideoRenderers
 xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures
 tools/buildsteps/android
+tools/android/packaging/xbmc/src
+xbmc/peripherals/bus/android

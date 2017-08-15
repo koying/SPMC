@@ -5960,9 +5960,11 @@ system/playercorefactory.xml
 system/X10-Lola-IRSSmap.xml
 tools/android/packaging/xbmc/AndroidManifest.xml.in
 tools/android/packaging/xbmc/build.gradle.in
+tools/android/packaging/xbmc/src/SoftKeyboardView.java.in
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
+tools/android/packaging/xbmc/view_soft_keyboard.xml.in
 tools/buildsteps/android/configure-depends
 tools/buildsteps/android/configure-xbmc
 tools/buildsteps/android/make-binary-addons
@@ -6161,6 +6163,12 @@ xbmc/network/android/ZeroconfAndroid.cpp
 xbmc/network/android/ZeroconfAndroid.h
 xbmc/network/android/ZeroconfBrowserAndroid.cpp
 xbmc/network/android/ZeroconfBrowserAndroid.h
+xbmc/peripherals/bus/android/AndroidJoystickState.cpp
+xbmc/peripherals/bus/android/AndroidJoystickState.h
+xbmc/peripherals/bus/android/PeripheralBusAndroid.cpp
+xbmc/peripherals/bus/android/PeripheralBusAndroid.h
+xbmc/platform/android/activity/AndroidKeyboard.cpp
+xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
