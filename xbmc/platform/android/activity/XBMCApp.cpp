@@ -1130,7 +1130,7 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.SCREEN_OFF")
   {
-    if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
+    if (m_playback_state & PLAYBACK_STATE_VIDEO)
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
   }
   else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
