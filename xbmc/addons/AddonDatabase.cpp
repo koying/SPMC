@@ -790,6 +790,7 @@ bool CAddonDatabase::UpdateRepositoryContent(const std::string& repository, cons
     CLog::Log(LOGDEBUG, "CAddonDatabase::UpdateRepositoryContent: id(%lld), addon(%s), version(%s)", idRepo, repository.c_str(), version.asString().c_str());
     if (idRepo < 0)
       return false;
+    assert(idRepo > 0);
 
     m_pDB->start_transaction();
     m_pDS->exec(PrepareSQL("UPDATE repo SET checksum='%s' WHERE id='%d'", checksum.c_str(), idRepo));
