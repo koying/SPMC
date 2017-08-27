@@ -75,6 +75,7 @@ public:
    \param season number of season that we want thumbs for, -1 indicates no season (the default)
    */
   void GetThumbURLs(std::vector<std::string> &thumbs, const std::string &type = "", int season = -1) const;
+  bool IsEmpty() const;
   void Clear();
   static bool Get(const SUrlEntry&, std::string&, XFILE::CCurlFile& http,
                  const std::string& cacheContext);
