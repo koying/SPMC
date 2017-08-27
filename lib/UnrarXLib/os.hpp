@@ -1,11 +1,11 @@
 #ifndef _RAR_OS_
 #define _RAR_OS_
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS)
 #include <windows.h>
-#endif
-
+#elif defined(TARGET_ANDROID)
 #include <endian.h>
+#endif
 
 #define FALSE 0
 #define TRUE  1
