@@ -30,7 +30,6 @@ addons/repository.xbmc.org/*
 addons/webinterface.default/*
 addons/screensaver.xbmc.builtin.dim/*
 addons/screensaver.xbmc.builtin.black/*
-addons/screensaver.xbmc.builtin.system/*
 addons/script.module.pil/*
 addons/script.module.pysqlite/*
 addons/resource.language.en_gb/*

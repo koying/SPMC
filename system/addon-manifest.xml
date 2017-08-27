@@ -27,7 +27,7 @@
   <addon>resource.uisounds.kodi</addon>
   <addon>screensaver.xbmc.builtin.black</addon>
   <addon>screensaver.xbmc.builtin.dim</addon>
-  <addon>screensaver.xbmc.builtin.system</addon>
+  <addon optional="true">screensaver.xbmc.builtin.system</addon>
   <addon>script.module.pil</addon>
   <addon>skin.estuary</addon>
   <addon>skin.estouchy</addon>
