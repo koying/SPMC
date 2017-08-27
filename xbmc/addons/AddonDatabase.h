@@ -73,7 +73,7 @@ public:
    \param id id of the repository
    \returns id of the repository, or -1 on error.
    */
-  int64_t SetLastChecked(const std::string& id, const ADDON::AddonVersion& version, const std::string& timestamp);
+  int SetLastChecked(const std::string& id, const ADDON::AddonVersion& version, const std::string& timestamp);
 
   /*!
    \brief Retrieve the time a repository was last checked and the version it was for

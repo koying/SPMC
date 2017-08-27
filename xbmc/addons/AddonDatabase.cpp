@@ -786,7 +786,7 @@ bool CAddonDatabase::UpdateRepositoryContent(const std::string& repository, cons
 
     DeleteRepository(repository);
 
-    int64_t idRepo = SetLastChecked(repository, version, CDateTime::GetCurrentDateTime().GetAsDBDateTime());
+    int idRepo = SetLastChecked(repository, version, CDateTime::GetCurrentDateTime().GetAsDBDateTime());
     CLog::Log(LOGDEBUG, "CAddonDatabase::UpdateRepositoryContent: id(%lld), addon(%s), version(%s)", idRepo, repository.c_str(), version.asString().c_str());
     if (idRepo < 0)
       return false;
@@ -807,7 +807,7 @@ bool CAddonDatabase::UpdateRepositoryContent(const std::string& repository, cons
           addon->Description().c_str(),
           addon->ChangeLog().c_str()));
 
-      auto idAddon = m_pDS->lastinsertid();
+      int idAddon = static_cast<int>(m_pDS->lastinsertid());
       if (idAddon <= 0)
       {
         CLog::Log(LOGERROR, "%s insert failed on addon '%s'", __FUNCTION__, addon->ID().c_str());
@@ -876,7 +876,7 @@ std::pair<CDateTime, ADDON::AddonVersion> CAddonDatabase::LastChecked(const std:
   return std::make_pair(date, version);
 }
 
-int64_t CAddonDatabase::SetLastChecked(const std::string& id,
+int CAddonDatabase::SetLastChecked(const std::string& id,
     const ADDON::AddonVersion& version, const std::string& time)
 {
   try
@@ -884,7 +884,7 @@ int64_t CAddonDatabase::SetLastChecked(const std::string& id,
     if (NULL == m_pDB.get()) return false;
     if (NULL == m_pDS.get()) return false;
 
-    int64_t retId = -1;
+    int retId = -1;
     std::string sql = PrepareSQL("SELECT * FROM repo WHERE addonID='%s'", id.c_str());
     m_pDS->query(sql);
 
@@ -893,11 +893,11 @@ int64_t CAddonDatabase::SetLastChecked(const std::string& id,
       sql = PrepareSQL("INSERT INTO repo (id, addonID, lastcheck, version) "
           "VALUES (NULL, '%s', '%s', '%s')", id.c_str(), time.c_str(), version.asString().c_str());
       m_pDS->exec(sql);
-      retId = m_pDS->lastinsertid();
+      retId = static_cast<int>(m_pDS->lastinsertid());
     }
     else
     {
-      retId = m_pDS->fv(0).get_asInt64();
+      retId = m_pDS->fv(0).get_asInt();
       sql = PrepareSQL("UPDATE repo SET lastcheck='%s', version='%s' WHERE addonID='%s'",
           time.c_str(), version.asString().c_str(), id.c_str());
       m_pDS->exec(sql);
