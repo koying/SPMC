@@ -143,7 +143,7 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 	rm -rf xbmc/lib/$(CPU) xbmc/obj/local/$(CPU)
 	mkdir -p xbmc/lib/$(CPU) xbmc/assets/python2.7/lib/ xbmc/obj/local/$(CPU)
 	cp -fpL $(SRCLIBS) xbmc/obj/local/$(CPU)/
-	cp -fpL $(SRCSMBLIBS) xbmc/obj/local/$(CPU)/ || true
+	cp -fpL $(SRCSMBLIBS) xbmc/obj/local/$(CPU)/ 2>/dev/null || true
 	cp -fp $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so xbmc/obj/local/$(CPU)/
 	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \; || true
 	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(CPU)/ \; || true
