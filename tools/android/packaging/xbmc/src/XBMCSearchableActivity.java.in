@@ -29,6 +29,12 @@ public class XBMCSearchableActivity extends Activity
 
   public void onNewIntent(Intent intent)
   {
+    Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
+    if (appData != null)
+    {
+      Log.d(TAG, "onNewIntent: We have extra search data: ");
+      Log.d(TAG, "-- " + appData.toString());
+    }
     setIntent(intent);
     handleIntent(getIntent());
   }
