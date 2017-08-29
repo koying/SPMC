@@ -196,7 +196,7 @@ CAction::CAction(int actionID, unsigned int state, float posX, float posY, float
   m_amount[3] = offsetY;
   m_amount[4] = velocityX;
   m_amount[5] = velocityY;
-  for (unsigned int i = 4; i < max_amounts; i++)
+  for (unsigned int i = 6; i < max_amounts; i++)
     m_amount[i] = 0;
   m_repeat = 0;
   m_buttonCode = 0;
