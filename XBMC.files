@@ -5960,6 +5960,7 @@ system/playercorefactory.xml
 system/X10-Lola-IRSSmap.xml
 tools/android/packaging/xbmc/AndroidManifest.xml.in
 tools/android/packaging/xbmc/build.gradle.in
+tools/android/packaging/xbmc/res/drawable/progresscolor.xml
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
@@ -6154,6 +6155,8 @@ xbmc/addons/Skin.cpp
 xbmc/addons/Skin.h
 xbmc/addons/Visualisation.cpp
 xbmc/addons/Visualisation.h
+xbmc/interfaces/python/AddonPythonInvoker.cpp
+xbmc/interfaces/python/AddonPythonInvoker.h
 xbmc/network/android/CMakeLists.txt
 xbmc/network/android/NetworkAndroid.cpp
 xbmc/network/android/NetworkAndroid.h
