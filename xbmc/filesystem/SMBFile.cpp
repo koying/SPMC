@@ -99,7 +99,7 @@ void CSMB::Init()
     std::string truehome(getenv("HOME"));
     setenv("HOME", CSpecialProtocol::TranslatePath("special://home").c_str(), 1);
 
-    // Create ~/.smb/smb.conf. This file is used by libsmbclient.
+    // Create ~/.kodi/.smb/smb.conf. This file is used by libsmbclient.
     // http://us1.samba.org/samba/docs/man/manpages-3/libsmbclient.7.html
     // http://us1.samba.org/samba/docs/man/manpages-3/smb.conf.5.html
     std::string smb_conf;
