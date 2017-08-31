@@ -1,2 +1,0 @@
-include 'xbmc'
-project(':xbmc').projectDir = new File('build/tools/android/packaging/xbmc')
