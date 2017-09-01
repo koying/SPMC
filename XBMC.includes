@@ -1,6 +1,6 @@
 /home/cbro/android-toolchains/android-14/sysroot/usr/include
-/opt/android-dev/android-toolchain-arm-21-r15c/sysroot/usr/include
-/opt/android-dev/android-toolchain-arm-21-r15c/include/c++/4.9.x
+/opt/android-dev/android-toolchain-x86-21-r15b/sysroot/usr/include
+/opt/android-dev/android-toolchain-x86-21-r15b/include/c++/4.9.x
 /home/cbro/kodi-leia-build/arm-linux-androideabi-android-23-debug/include
 
 addons/library.xbmc.addon
@@ -493,3 +493,7 @@ xbmc/cores/VideoPlayer/VideoRenderers
 xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures
 tools/buildsteps/android
 tools/android/packaging/xbmc/res/drawable
+xbmc/platform/darwin/ios
+tools/android/packaging/xbmc/src
+tools/android/packaging
+tools/android/packaging/gradle/wrapper
