@@ -5960,6 +5960,7 @@ system/playercorefactory.xml
 system/X10-Lola-IRSSmap.xml
 tools/android/packaging/xbmc/AndroidManifest.xml.in
 tools/android/packaging/xbmc/build.gradle.in
+tools/android/packaging/xbmc/src/SoftKeyboard.java.in
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
@@ -6154,6 +6155,8 @@ xbmc/addons/Skin.cpp
 xbmc/addons/Skin.h
 xbmc/addons/Visualisation.cpp
 xbmc/addons/Visualisation.h
+xbmc/dialogs/GUIDialogKeyboardTouch.cpp
+xbmc/dialogs/GUIDialogKeyboardTouch.h
 xbmc/network/android/CMakeLists.txt
 xbmc/network/android/NetworkAndroid.cpp
 xbmc/network/android/NetworkAndroid.h
@@ -6161,7 +6164,11 @@ xbmc/network/android/ZeroconfAndroid.cpp
 xbmc/network/android/ZeroconfAndroid.h
 xbmc/network/android/ZeroconfBrowserAndroid.cpp
 xbmc/network/android/ZeroconfBrowserAndroid.h
+xbmc/platform/android/activity/AndroidKeyboard.cpp
+xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt
+xbmc/platform/android/activity/JNISoftKeyboardView.cpp
+xbmc/platform/android/activity/JNISoftKeyboardView.h
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
 xbmc/platform/android/activity/android_main.cpp
@@ -7644,6 +7651,10 @@ xbmc/pictures/PictureThumbLoader.cpp
 xbmc/pictures/PictureThumbLoader.h
 xbmc/pictures/SlideShowPicture.cpp
 xbmc/pictures/SlideShowPicture.h
+xbmc/platform/darwin/ios/IOSKeyboard.h
+xbmc/platform/darwin/ios/IOSKeyboard.mm
+xbmc/platform/darwin/ios/IOSKeyboardView.h
+xbmc/platform/darwin/ios/IOSKeyboardView.mm
 xbmc/playlists/PlayList.cpp
 xbmc/playlists/PlayList.h
 xbmc/playlists/PlayListB4S.cpp
