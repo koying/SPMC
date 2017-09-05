@@ -100,6 +100,7 @@ void CVideoInfoTag::Reset()
   m_type.clear();
   m_relevance = -1;
   m_parsedDetails = 0;
+  m_strEpisodeGuide.clear();
 }
 
 bool CVideoInfoTag::Save(TiXmlNode *node, const std::string &tag, bool savePathInfo, const TiXmlElement *additionalNode)
@@ -1319,6 +1320,8 @@ void CVideoInfoTag::Enrich(const CVideoInfoTag &other)
     m_relevance = other.m_relevance;
   if (other.m_parsedDetails)
     m_parsedDetails = other.m_parsedDetails;
+  if (!other.m_strEpisodeGuide.empty())
+    m_strEpisodeGuide = other.m_strEpisodeGuide;
 }
 
 unsigned int CVideoInfoTag::GetDuration() const
