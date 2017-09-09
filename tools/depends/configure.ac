@@ -147,6 +147,8 @@ case $host in
     if test "x$use_cpu" = "xauto"; then
       use_cpu="armeabi-v7a"
     fi
+    platform_cc=clang
+    platform_cxx=clang++
     use_sdk="${use_sdk:-android-24}"
     use_ndk="${use_ndk:-21}"
     deps_dir="$use_host-$use_ndk"
@@ -165,6 +167,8 @@ case $host in
     if test "x$use_cpu" = "xauto"; then
       use_cpu="arm64-v8a"
     fi
+    platform_cc=clang
+    platform_cxx=clang++
     use_sdk="${use_sdk:-android-24}"
     use_ndk="${use_ndk:-21}"
     deps_dir="$use_host-$use_ndk"
@@ -183,6 +187,8 @@ case $host in
     if test "x$use_cpu" = "xauto"; then
       use_cpu=$host_cpu
     fi
+    platform_cc=clang
+    platform_cxx=clang++
     use_sdk="${use_sdk:-android-24}"
     use_ndk="${use_ndk:-21}"
     deps_dir="$use_host-$use_ndk"
