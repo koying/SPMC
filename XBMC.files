@@ -5855,6 +5855,7 @@ project/cmake/scripts/android/Install.cmake
 project/cmake/scripts/android/Macros.cmake
 project/cmake/scripts/android/PathSetup.cmake
 project/cmake/treedata/android/subdirs.txt
+system/keymaps/joystick.xml
 system/keymaps/nyxboard/keyboard.xml
 system/keymaps/appcommand.xml
 system/keymaps/gamepad.xml
