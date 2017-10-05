@@ -751,6 +751,18 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
 
 int CDVDVideoCodecAndroidMediaCodec::Decode(uint8_t *pData, int iSize, double dts, double pts)
 {
+  if (!m_codec)
+  {
+    m_codec = AMediaCodec_createCodecByName(m_codecname.c_str());
+    if (!m_codec)
+    {
+      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec::Decode cannot create codec");
+      m_codec = nullptr;
+      return VC_ERROR;
+    }
+    ConfigureMediaCodec();
+  }
+
   // Are we stopped? If so, wait and loop
   if (m_state == MEDIACODEC_STATE_STOPPED)
   {
@@ -1526,10 +1538,6 @@ void CDVDVideoCodecAndroidMediaCodec::surfaceChanged(CJNISurfaceHolder holder, i
 
 void CDVDVideoCodecAndroidMediaCodec::surfaceCreated(CJNISurfaceHolder holder)
 {
-  if (m_state == MEDIACODEC_STATE_STOPPED)
-  {
-    ConfigureMediaCodec();
-  }
 }
 
 void CDVDVideoCodecAndroidMediaCodec::surfaceDestroyed(CJNISurfaceHolder holder)
@@ -1537,8 +1545,11 @@ void CDVDVideoCodecAndroidMediaCodec::surfaceDestroyed(CJNISurfaceHolder holder)
   if (m_state != MEDIACODEC_STATE_STOPPED && m_state != MEDIACODEC_STATE_UNINITIALIZED)
   {
     m_state = MEDIACODEC_STATE_STOPPED;
+    FlushInternal();
     if(m_surface)
       ANativeWindow_release(m_surface);
     AMediaCodec_stop(m_codec);
+    AMediaCodec_delete(m_codec);
+    m_codec = nullptr;
   }
 }
