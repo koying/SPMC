@@ -1306,10 +1306,6 @@ void CDVDVideoCodecAndroidMediaCodec::ConfigureOutputFormat(AMediaFormat* mediaf
   if (!crop_bottom)
     crop_bottom = height-1;
 
-  // clear any jni exceptions
-  if (xbmc_jnienv()->ExceptionCheck())
-    xbmc_jnienv()->ExceptionClear();
-
   CLog::Log(LOGDEBUG, "CDVDVideoCodecAndroidMediaCodec:: "
     "width(%d), height(%d), stride(%d), slice-height(%d), color-format(%d)",
     width, height, stride, slice_height, color_format);
