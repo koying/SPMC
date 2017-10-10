@@ -104,6 +104,7 @@ public class XBMCVideoView extends SurfaceView implements
     }
   }
 
+/*
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
   {
@@ -119,6 +120,7 @@ public class XBMCVideoView extends SurfaceView implements
     else
       setMeasuredDimension(widthSize, heightSize);
   }
+  */
 
   public void setSurfaceRect(final int left, final int top, final int right, final int bottom)
   {
@@ -130,7 +132,17 @@ public class XBMCVideoView extends SurfaceView implements
       @Override
       public void run()
       {
-        requestLayout();
+        try
+        {
+          RelativeLayout.LayoutParams mp = new RelativeLayout.LayoutParams(mWidth, mHeight);
+          mp.setMargins(left, top, mVideoLayout.getWidth() - right, mVideoLayout.getHeight() - bottom);
+          setLayoutParams(mp);
+          requestLayout();
+        }
+        catch (Exception e)
+        {
+          e.printStackTrace();
+        }
       }
     });
   }
