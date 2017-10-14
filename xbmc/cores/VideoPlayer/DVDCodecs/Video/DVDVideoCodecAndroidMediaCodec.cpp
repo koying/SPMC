@@ -330,6 +330,9 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect, int64_t renderTime)
 {
   CSingleLock lock(m_section);
 
+  if (!m_valid)
+    return;
+
   CRect surfRect = m_videoview->getSurfaceRect();
   if (DestRect != surfRect)
   {
@@ -339,8 +342,15 @@ void CDVDMediaCodecInfo::RenderUpdate(const CRect &DestRect, int64_t renderTime)
       m_videoview->setSurfaceRect(adjRect);
       CLog::Log(LOGDEBUG, "RenderUpdate: Dest - %f+%f-%fx%f", DestRect.x1, DestRect.y1, DestRect.Width(), DestRect.Height());
       CLog::Log(LOGDEBUG, "RenderUpdate: Adj  - %f+%f-%fx%f", adjRect.x1, adjRect.y1, adjRect.Width(), adjRect.Height());
+
+      // setVideoViewSurfaceRect is async, so skip rendering this frame
+      ReleaseOutputBuffer(false);
     }
+    else
+      ReleaseOutputBuffer(true, renderTime);
   }
+  else
+    ReleaseOutputBuffer(true, renderTime);
 }
 
 
@@ -958,7 +968,6 @@ bool CDVDVideoCodecAndroidMediaCodec::GetPicture(DVDVideoPicture* pDvdVideoPictu
   if (!m_opened)
     return false;
 
-  m_videobuffer.clock = pDvdVideoPicture->clock;
   *pDvdVideoPicture = m_videobuffer;
   if (m_drop)
     pDvdVideoPicture->iFlags |= DVP_FLAG_DROPPED;
