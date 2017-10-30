@@ -19905,3 +19905,9 @@ msgstr ""
 msgctxt "#39107"
 msgid "Upload the current debug log"
 msgstr ""
+
+#: system/settings/android.xml
+msgctxt "#39108"
+msgid "1080"
+msgstr ""
+
