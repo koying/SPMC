@@ -5,10 +5,10 @@ WEBSITE http://spmc.semperpax.com/
 APP_EMAIL spmc.support@semperpax.com
 APP_STICKYURL http://paste.semperpax.com
 VERSION_MAJOR 17
-VERSION_MINOR 4
-VERSION_TAG alpha11
-VERSION_CODE 174000
-ADDON_API 17.4.0
+VERSION_MINOR 6
+VERSION_TAG alpha1
+VERSION_CODE 176000
+ADDON_API 17.6.0
 
 # Notes:
 # Change AC_INIT in configure.ac
