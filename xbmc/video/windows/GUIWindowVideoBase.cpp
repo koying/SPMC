@@ -397,7 +397,7 @@ bool CGUIWindowVideoBase::ShowIMDB(CFileItemPtr item, const ScraperPtr &info2, b
     CGUIDialogOK::ShowAndGetInput(CVariant{13346}, CVariant{14057});
     return false;
   }
-  
+
   bool listNeedsUpdating = false;
   // 3. Run a loop so that if we Refresh we re-run this block
   do
