@@ -208,8 +208,8 @@ bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, 
         break;
     }
 
-    CXBMCApp::WaitVSync(50);
     mci->RenderUpdate(dstRect);
+    CXBMCApp::WaitVSync(50);
   }
   else
   {
