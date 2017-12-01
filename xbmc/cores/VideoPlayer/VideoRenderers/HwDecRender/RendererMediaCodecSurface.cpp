@@ -30,6 +30,7 @@
 
 CRendererMediaCodecSurface::CRendererMediaCodecSurface()
   : m_prevTime(0)
+  , m_readyToRender(false)
 {
 }
 
@@ -55,6 +56,8 @@ void CRendererMediaCodecSurface::AddVideoPictureHW(DVDVideoPicture &picture, int
   if (picture.mediacodec)
   {
     buf.hwDec = picture.mediacodec->Retain();
+    if (!m_readyToRender)
+      picture.mediacodec->ReleaseOutputBuffer(false);
 #ifdef DEBUG_VERBOSE
     mindex = ((CDVDMediaCodecInfo *)buf.hwDec)->GetIndex();
 #endif
@@ -209,6 +212,7 @@ bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, 
     }
 
     mci->RenderUpdate(dstRect);
+    m_readyToRender = true;
     CXBMCApp::WaitVSync(50);
   }
   else

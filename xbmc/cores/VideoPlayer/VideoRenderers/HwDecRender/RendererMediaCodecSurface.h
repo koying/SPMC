@@ -59,6 +59,7 @@ protected:
   virtual int  GetImageHook(YV12Image *image, int source = AUTOSOURCE, bool readonly = false);
 
   uint64_t m_prevTime;
+  bool m_readyToRender;
 };
 
 #endif
