@@ -203,9 +203,8 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
 
   float fRefreshRate = fps;
 
-  float last_diff = fRefreshRate;
-
   int curr_diff = std::abs(width - curr.iScreenWidth);
+  int c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
   int loop_diff = 0;
 
   // Find closest refresh rate
@@ -239,43 +238,21 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
     // if it has a matching fps mode, which is evaluated below
 
     loop_diff = std::abs(width - info.iScreenWidth);
-    curr_diff = std::abs(width - curr.iScreenWidth);
-
-    int c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
     int i_weight = MathUtils::round_int(RefreshWeight(info.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
-
-    RESOLUTION current_bak = current;
-    RESOLUTION_INFO curr_bak = curr;
 
     // Closer the better, prefer higher refresh rate if the same
     if ((i_weight < c_weight) ||
-        (i_weight == c_weight && info.fRefreshRate > curr.fRefreshRate))
+        (i_weight == c_weight && info.fRefreshRate > curr.fRefreshRate) ||
+        (i_weight == c_weight && info.fRefreshRate == curr.fRefreshRate && loop_diff < curr_diff))
     {
       current = (RESOLUTION)i;
       curr = info;
-    }
-    // use case 1080p50 vs 3840x2160@25 for 3840@25 content
-    // prefer the higher resolution of 3840
-    if (i_weight == c_weight && (loop_diff < curr_diff))
-    {
-      current = (RESOLUTION)i;
-      curr = info;
-    }
-    // same as above but iterating with 3840@25 set and overwritten
-    // by e.g. 1080@50 - restore backup in that case
-    // to give priority to the better matching width
-    if (i_weight == c_weight && (loop_diff > curr_diff))
-    {
-      current = current_bak;
-      curr = curr_bak;
+      curr_diff = std::abs(width - curr.iScreenWidth);
+      c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
     }
   }
 
-  // For 3D overwrite weight
-  if (is3D)
-    weight = 0;
-  else
-    weight = RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier);
+  weight = c_weight;
 
   return current;
 }
