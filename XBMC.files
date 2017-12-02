@@ -6160,6 +6160,7 @@ xbmc/addons/Skin.cpp
 xbmc/addons/Skin.h
 xbmc/addons/Visualisation.cpp
 xbmc/addons/Visualisation.h
+xbmc/guilib/Resolution.cpp
 xbmc/interfaces/python/AddonPythonInvoker.cpp
 xbmc/interfaces/python/AddonPythonInvoker.h
 xbmc/dialogs/GUIDialogKeyboardTouch.cpp
