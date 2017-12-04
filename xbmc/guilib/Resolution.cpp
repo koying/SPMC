@@ -242,7 +242,7 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
 
     // Closer the better, prefer higher refresh rate if the same
     if ((i_weight < c_weight) ||
-        (i_weight == c_weight && info.fRefreshRate > curr.fRefreshRate) ||
+        (i_weight == c_weight && info.fRefreshRate > curr.fRefreshRate && loop_diff <= curr_diff) ||
         (i_weight == c_weight && info.fRefreshRate == curr.fRefreshRate && loop_diff < curr_diff))
     {
       current = (RESOLUTION)i;
