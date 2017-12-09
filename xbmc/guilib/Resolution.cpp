@@ -194,16 +194,13 @@ void CResolutionUtils::FindResolutionFromFpsMatch(float fps, int width, bool is3
 RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is3D, float multiplier, RESOLUTION current, float& weight)
 {
   RESOLUTION_INFO curr = g_graphicsContext.GetResInfo(current);
-  RESOLUTION orig_res  = CDisplaySettings::GetInstance().GetCurrentResolution();
-
-  if (orig_res <= RES_DESKTOP)
-    orig_res = RES_DESKTOP;
-
-  RESOLUTION_INFO orig = g_graphicsContext.GetResInfo(orig_res);
 
   float fRefreshRate = fps;
 
-  int curr_diff = std::abs(width - curr.iScreenWidth);
+  int curr_diff = curr.iScreenWidth - width;
+  if (curr_diff < 0)
+    curr_diff = INT_MAX;
+
   int c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
   int loop_diff = 0;
 
@@ -237,7 +234,13 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
     // e.g. if m_sourceWidth == 3840 and we have a 3840 mode - use this one
     // if it has a matching fps mode, which is evaluated below
 
-    loop_diff = std::abs(width - info.iScreenWidth);
+    loop_diff = info.iScreenWidth - width;
+    if (loop_diff < 0)
+    {
+      // Do not allow downscaling
+      continue;
+    }
+
     int i_weight = MathUtils::round_int(RefreshWeight(info.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
 
     // Closer the better, prefer higher refresh rate if the same
@@ -247,7 +250,7 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
     {
       current = (RESOLUTION)i;
       curr = info;
-      curr_diff = std::abs(width - curr.iScreenWidth);
+      curr_diff = loop_diff;
       c_weight = MathUtils::round_int(RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier) * 10000.0);
     }
   }
