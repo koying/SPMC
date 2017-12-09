@@ -168,7 +168,7 @@ java: res
 
 package: libs python java
 	@echo "Gradle build..."
-	ANDROID_HOME=$(SDKROOT) ./gradlew --no-daemon assemble$(BUILD_TYPE)Unsigned
+	ANDROID_HOME=$(SDKROOT) ./gradlew assemble$(BUILD_TYPE)Unsigned
 
 apk-sign:
 	@echo "Signing..."
