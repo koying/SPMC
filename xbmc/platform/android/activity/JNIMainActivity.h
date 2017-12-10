@@ -60,6 +60,8 @@ public:
   static void startCapture(int width, int height);
   static void stopCapture();
 
+  static void addChannel(const std::string& path);
+
 private:
   static CJNIMainActivity *m_appInstance;
 

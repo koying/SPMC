@@ -72,6 +72,10 @@
 #include "linux/XTimeUtils.h"
 #endif
 
+#ifdef TARGET_ANDROID
+#include "platform/android/activity/XBMCApp.h"
+#endif
+
 using namespace XFILE;
 using namespace MUSICDATABASEDIRECTORY;
 using namespace PLAYLIST;
@@ -808,7 +812,12 @@ void CGUIWindowMusicBase::GetContextButtons(int itemNumber, CContextButtons &but
         }
 
         if (item->IsSmartPlayList() || m_vecItems->IsSmartPlayList())
+        {
           buttons.Add(CONTEXT_BUTTON_EDIT_SMART_PLAYLIST, 586);
+#ifdef TARGET_ANDROID
+          buttons.Add(CONTEXT_BUTTON_DROID_ADD_CHANNEL, 39109);
+#endif
+        }
         else if (item->IsPlayList() || m_vecItems->IsPlayList())
           buttons.Add(CONTEXT_BUTTON_EDIT, 586);
       }
@@ -935,6 +944,15 @@ bool CGUIWindowMusicBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     if (m_musicdatabase.LookupCDDBInfo(true))
       Refresh();
     return true;
+
+#ifdef TARGET_ANDROID
+  case CONTEXT_BUTTON_DROID_ADD_CHANNEL:
+    {
+      std::string playlist = item->IsSmartPlayList() ? item->GetPath() : m_vecItems->GetPath();
+      CXBMCApp::addChannel(playlist);
+      return true;
+    }
+#endif
 
   default:
     break;
