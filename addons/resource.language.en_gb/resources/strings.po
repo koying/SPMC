@@ -19918,3 +19918,8 @@ msgstr ""
 msgctxt "#39111"
 msgid "Allow also the resolution to be adjusted to closely match the source material"
 msgstr ""
+
+msgctxt "#39109"
+msgid "Add to Channels"
+msgstr ""
+

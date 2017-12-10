@@ -216,3 +216,9 @@ void CJNIMainActivity::stopCapture()
   call_method<void>(m_context,
                     "stopCapture", "()V");
 }
+
+void CJNIMainActivity::addChannel(const std::string& path)
+{
+  call_method<void>(m_context,
+                    "addChannel", "(ILjava/lang/String;)V", jcast<jhstring>(path));
+}

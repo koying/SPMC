@@ -67,6 +67,10 @@
 #include "utils/GroupUtils.h"
 #include "TextureDatabase.h"
 
+#ifdef TARGET_ANDROID
+#include "platform/android/activity/XBMCApp.h"
+#endif
+
 using namespace XFILE;
 using namespace PLAYLIST;
 using namespace VIDEODATABASEDIRECTORY;
@@ -878,7 +882,12 @@ void CGUIWindowVideoBase::GetContextButtons(int itemNumber, CContextButtons &but
           buttons.Add(CONTEXT_BUTTON_PLAY_ONLY_THIS, 13434);
       }
       if (item->IsSmartPlayList() || m_vecItems->IsSmartPlayList())
+      {
         buttons.Add(CONTEXT_BUTTON_EDIT_SMART_PLAYLIST, 586);
+#ifdef TARGET_ANDROID
+        buttons.Add(CONTEXT_BUTTON_DROID_ADD_CHANNEL, 39109);
+#endif
+      }
     }
   }
   CGUIMediaWindow::GetContextButtons(itemNumber, buttons);
@@ -1058,6 +1067,16 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     return OnPlayAndQueueMedia(item);
   case CONTEXT_BUTTON_PLAY_ONLY_THIS:
     return OnPlayMedia(itemNumber);
+
+#ifdef TARGET_ANDROID
+  case CONTEXT_BUTTON_DROID_ADD_CHANNEL:
+    {
+      std::string playlist = m_vecItems->Get(itemNumber)->IsSmartPlayList() ? m_vecItems->Get(itemNumber)->GetPath() : m_vecItems->GetPath();
+      CXBMCApp::addChannel(playlist);
+      return true;
+    }
+#endif
+
   default:
     break;
   }
