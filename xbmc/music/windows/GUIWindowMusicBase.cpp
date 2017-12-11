@@ -949,7 +949,7 @@ bool CGUIWindowMusicBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_DROID_ADD_CHANNEL:
     {
       std::string playlist = item->IsSmartPlayList() ? item->GetPath() : m_vecItems->GetPath();
-      CXBMCApp::addChannel(playlist);
+      CXBMCApp::addChannel(item->GetLabel(), playlist);
       return true;
     }
 #endif

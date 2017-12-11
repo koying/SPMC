@@ -1072,7 +1072,7 @@ bool CGUIWindowVideoBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_DROID_ADD_CHANNEL:
     {
       std::string playlist = m_vecItems->Get(itemNumber)->IsSmartPlayList() ? m_vecItems->Get(itemNumber)->GetPath() : m_vecItems->GetPath();
-      CXBMCApp::addChannel(playlist);
+      CXBMCApp::addChannel(item->GetLabel(), playlist);
       return true;
     }
 #endif
