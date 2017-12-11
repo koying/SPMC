@@ -3,6 +3,7 @@ package @APP_PACKAGE@;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.os.Build.VERSION_CODES;
 import android.os.Build;
@@ -26,6 +27,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.media.tv.TvContractCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.Choreographer;
@@ -36,13 +38,22 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.semperpax.spmc17.channels.model.Subscription;
+import com.semperpax.spmc17.channels.model.XBMCDatabase;
+import com.semperpax.spmc17.channels.util.TvUtil;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main extends NativeActivity implements Choreographer.FrameCallback
 {
-  private static final String TAG = "@APP_NAME_UC@";
+  private static final String TAG = "SPMC";
   private static final int INTENT_RESULT_PROJECT_CODE = 4658;
+  private static final int INTENT_MAKE_BROWSABLE_REQUEST_CODE = 9001;
+
   private static final int XBMC_EXITCODE_POWERDOWN = 64;
   private static final int XBMC_EXITCODE_RESTARTAPP = 65;
   private static final int XBMC_EXITCODE_REBOOT = 66;
@@ -281,7 +292,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
-    System.loadLibrary("@APP_NAME_LC@");
+    System.loadLibrary("spmc");
 
     super.onCreate(savedInstanceState);
 
@@ -302,10 +313,15 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
     if (getPackageManager().hasSystemFeature("android.software.leanback"))
     {
-      // Leanback
-      mJsonRPC = new XBMCJsonRPC();
-      handler.removeCallbacks(leanbackUpdateRunnable);
-      handler.postDelayed(leanbackUpdateRunnable, 30 * 1000);
+      if (Build.VERSION.SDK_INT >= VERSION_CODES.O)
+        TvUtil.scheduleSyncingChannel(this);
+      else
+      {
+        // Leanback
+        mJsonRPC = new XBMCJsonRPC();
+        handler.removeCallbacks(leanbackUpdateRunnable);
+        handler.postDelayed(leanbackUpdateRunnable, 30 * 1000);
+      }
     }
 
     // register the InputDeviceListener implementation
@@ -393,11 +409,21 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onActivityResult(int requestCode, int resultCode,
                                Intent resultData)
   {
+    super.onActivityResult(requestCode, resultCode, resultData);
+
     if (requestCode == mProjectionIntentId)
     {
       if (resultCode == RESULT_OK)
         Initialize(resultCode, resultData);
       return;
+    }
+    else if (requestCode == INTENT_MAKE_BROWSABLE_REQUEST_CODE)
+    {
+      if (resultCode == RESULT_OK) {
+        Toast.makeText(this, R.string.channel_added, Toast.LENGTH_LONG).show();
+      } else {
+        Toast.makeText(this, R.string.channel_not_added, Toast.LENGTH_LONG).show();
+      }
     }
 
     _onActivityResult(requestCode, resultCode, resultData);
@@ -476,4 +502,65 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       }
     });
   }
+
+  // Oreo
+
+  public void addChannel(String title, String url)
+  {
+    Log.d(TAG, "addChannel: title = " + title + "; url = " + url);
+    Subscription subscription = XBMCDatabase.getSubscription(getApplicationContext(), title, url);
+    new AddChannelTask(getApplicationContext()).execute(subscription);
+  }
+
+  private class AddChannelTask extends AsyncTask<Subscription, Void, Long>
+  {
+
+    private final Context mContext;
+
+    AddChannelTask(Context context)
+    {
+      this.mContext = context;
+    }
+
+    @Override
+    protected Long doInBackground(Subscription... varArgs)
+    {
+      List<Subscription> subscriptions = Arrays.asList(varArgs);
+      if (subscriptions.size() != 1)
+      {
+        return -1L;
+      }
+      Subscription subscription = subscriptions.get(0);
+      long channelId = TvUtil.createChannel(mContext, subscription);
+      subscription.setChannelId(channelId);
+      TvContractCompat.requestChannelBrowsable(mContext, channelId);
+
+      XBMCDatabase.saveSubscription(mContext, subscription);
+      // Scheduler listen on channel's uri. Updates after the user interacts with the system
+      // dialog.
+      TvUtil.scheduleSyncingProgramsForChannel(getApplicationContext(), channelId);
+      return channelId;
+    }
+
+    @Override
+    protected void onPostExecute(Long channelId) {
+      super.onPostExecute(channelId);
+      promptUserToDisplayChannel(channelId);
+    }
+  }
+
+  private void promptUserToDisplayChannel(long channelId)
+  {
+    Intent intent = new Intent(TvContractCompat.ACTION_REQUEST_CHANNEL_BROWSABLE);
+    intent.putExtra(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
+    try
+    {
+      this.startActivityForResult(intent, INTENT_MAKE_BROWSABLE_REQUEST_CODE);
+    }
+    catch (ActivityNotFoundException e)
+    {
+      Log.e(TAG, "Could not start activity: " + intent.getAction(), e);
+    }
+  }
+
 }

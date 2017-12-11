@@ -52,6 +52,14 @@ set(package_files strings.xml
                   src/interfaces/XBMCNsdManagerDiscoveryListener.java
                   src/interfaces/XBMCNsdManagerRegistrationListener.java
                   src/interfaces/XBMCNsdManagerResolveListener.java
+                  channels/model/Media.java
+                  channels/model/Subscription.java
+                  channels/model/XBMCDatabase.java
+                  channels/SyncChannelJobService.java
+                  channels/SyncProgramsJobService.java
+                  channels/util/AppLinkHelper.java
+                  channels/util/SharedPreferencesHelper.java
+                  channels/util/TvUtil.java
                   )
 foreach(file IN LISTS package_files)
   configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/xbmc/${file}.in
