@@ -7,6 +7,8 @@ import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +26,9 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import @APP_PACKAGE@.channels.model.Media;
+import @APP_PACKAGE@.channels.model.Subscription;
 
 public class XBMCJsonRPC
 {
@@ -84,6 +89,15 @@ public class XBMCJsonRPC
 
   private String SEARCH_ARTISTS_JSON =
           "{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetArtists\", \"params\": {\"filter\":{%s},\"limits\": { \"start\" : 0, \"end\": 10}, \"properties\" : [\"description\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"%s\"}";
+
+  private String RETRIEVE_VIDEO_SMARTPLAYLISTS =
+          "{ \"jsonrpc\": \"2.0\", \"method\": \"Files.GetDirectory\", \"params\": { \"directory\" : \"special://profile/playlists/video/\" }, \"id\": \"%s\" }";
+
+  private String RETRIEVE_VIDEO_SMARTPLAYLIST_ITEMS =
+          "{ \"jsonrpc\": \"2.0\", \"method\": \"Files.GetDirectory\", \"params\": { \"directory\" : \"%s\", \"limits\": { \"start\" : 0, \"end\": 10} }, \"id\": \"%s\" }";
+
+  private String RETRIEVE_MOVIE_DETAILS =
+          "{ \"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovieDetails\", \"params\": { \"movieid\" : %s, \"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\", \"year\", \"runtime\"] }, \"id\": 1 }";
 
   private NotificationManager mNotificationManager;
 
@@ -780,5 +794,80 @@ public class XBMCJsonRPC
       e.printStackTrace();
       return null;
     }
+  }
+
+  // Oreo
+
+  public List<Subscription> getSubscriptions()
+  {
+    List<Subscription> subscriptions = new ArrayList<Subscription>();
+
+    try
+    {
+      JSONObject req = request_object(String.format(RETRIEVE_VIDEO_SMARTPLAYLISTS, "1"));
+
+      if (req == null || req.isNull("result"))
+        return subscriptions;
+
+      JSONObject results = req.getJSONObject("result");
+      JSONArray files = results.getJSONArray("files");
+
+      for (int i = 0; i < files.length(); ++i)
+      {
+        JSONObject file = files.getJSONObject(i);
+        Subscription sub = Subscription.createSubscription(file.getString("label"), file.getString("label"), file.getString("file"), R.drawable.ic_video_80dp);
+        subscriptions.add(sub);
+      }
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+
+    return subscriptions;
+  }
+
+  public List<Media> getMedias(String plUrl)
+  {
+    List<Media> medias = new ArrayList<Media>();
+
+    try
+    {
+      JSONObject req = request_object(String.format(RETRIEVE_VIDEO_SMARTPLAYLIST_ITEMS, plUrl, "1"));
+
+      if (req == null || req.isNull("result"))
+        return medias;
+
+      JSONObject results = req.getJSONObject("result");
+      JSONArray files = results.getJSONArray("files");
+
+      for (int i = 0; i < files.length(); ++i)
+      {
+        Media med = new Media();
+        JSONObject file = files.getJSONObject(i);
+        String mediaType = file.getString("type");
+        int mediaId = file.getInt("id");
+        if (mediaType.equals("movie"))
+        {
+          JSONObject reqMovie = request_object(String.format(RETRIEVE_MOVIE_DETAILS, mediaId));
+          if (reqMovie == null || reqMovie.isNull("result"))
+            continue;
+          JSONObject details = reqMovie.getJSONObject("result").getJSONObject("moviedetails");
+
+          med.setId(mediaId);
+          med.setTitle(details.getString("title"));
+          med.setDescription(details.getString("tagline"));
+          med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(getBitmapUrl(details.getString("fanart"))).toString());
+          med.setCardImageUrl(XBMCImageContentProvider.GetImageUri(getBitmapUrl(details.getString("thumbnail"))).toString());
+          med.setVideoUrl("videodb://movies/titles/" + details.getString("movieid") + "?showinfo=true");
+          med.setCategory("movie");
+        }
+        medias.add(med);
+      }
+    } catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+
+    return medias;
   }
 }
