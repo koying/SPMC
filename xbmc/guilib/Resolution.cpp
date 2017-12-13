@@ -255,7 +255,7 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
     }
   }
 
-  weight = c_weight;
+  weight = RefreshWeight(curr.fRefreshRate, fRefreshRate * multiplier);
 
   return current;
 }
