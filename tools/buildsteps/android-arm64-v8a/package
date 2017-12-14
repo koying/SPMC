@@ -8,7 +8,7 @@ else
   TARGET=apk-unsigned
 fi
 
-cd $WORKSPACE/build-arm64;make -j$BUILDTHREADS $TARGET
+cd $WORKSPACE/build-arm64-v8a;make -j$BUILDTHREADS $TARGET
 $RUN_SIGNSTEP
 
 cd $WORKSPACE
