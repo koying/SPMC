@@ -171,8 +171,8 @@ package: libs python java
 
 apk-sign:
 	@echo "Signing..."
-	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) xbmc/build/outputs/apk/xbmc-$(BUILD_TYPE_LC)Unsigned-unsigned.apk $(SIGN_KEY)
-	@$(ZIPALIGN) -f 4 xbmc/build/outputs/apk/xbmc-$(BUILD_TYPE_LC)Unsigned-unsigned.apk $(CORE_SOURCE_DIR)/@APP_NAME@app-$(CPU)-$(BUILD_TYPE_LC).apk
+	@jarsigner -sigalg MD5withRSA -digestalg SHA1 -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) xbmc/build/outputs/apk/$(BUILD_TYPE_LC)Unsigned/xbmc-$(BUILD_TYPE_LC)Unsigned-unsigned.apk $(SIGN_KEY)
+	@$(ZIPALIGN) -f 4 xbmc/build/outputs/apk/$(BUILD_TYPE_LC)Unsigned/xbmc-$(BUILD_TYPE_LC)Unsigned-unsigned.apk $(CORE_SOURCE_DIR)/@APP_NAME@app-$(CPU)-$(BUILD_TYPE_LC).apk
 	@echo "$(CORE_SOURCE_DIR)/@APP_NAME@app-$(CPU)-$(BUILD_TYPE_LC).apk created"
 
 $(PREFIX)/lib/xbmc/lib@APP_NAME_LC@.so: $(SRCLIBS)
