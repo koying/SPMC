@@ -23,6 +23,7 @@
 #include "utils/log.h"
 #include "utils/MathUtils.h"
 #include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
 #include "settings/DisplaySettings.h"
 #include <cstdlib>
 
@@ -194,7 +195,7 @@ void CResolutionUtils::FindResolutionFromFpsMatch(float fps, int width, bool is3
 RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is3D, float multiplier, RESOLUTION current, float& weight)
 {
   RESOLUTION_INFO curr = g_graphicsContext.GetResInfo(current);
-
+  bool adjustReso = CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_ADJUSTRESOLUTION);
   float fRefreshRate = fps;
 
   int curr_diff = curr.iScreenWidth - width;
@@ -217,6 +218,11 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
         (info.dwFlags & D3DPRESENTFLAG_MODEMASK) != (curr.dwFlags & D3DPRESENTFLAG_MODEMASK) ||
         info.fRefreshRate < (fRefreshRate * multiplier / 1.001) - 0.001)
     {
+      // If not allowed to switch reso, ignore the ones
+      // not equal to the current one
+      if (!adjustReso && (info.iScreenWidth != curr.iScreenWidth || info.iScreenHeight != curr.iScreenHeight))
+        continue;
+
       // evaluate all higher modes and evalute them
       // concerning dimension and refreshrate weight
       // skip lower resolutions
@@ -225,9 +231,7 @@ RESOLUTION CResolutionUtils::FindClosestResolution(float fps, int width, bool is
          (info.iScreenHeight < 720) || // ignore < 720p
          (info.dwFlags & D3DPRESENTFLAG_MODEMASK) != (curr.dwFlags & D3DPRESENTFLAG_MODEMASK) || // don't switch to interlaced modes
          (info.iScreen != curr.iScreen)) // skip not current displays
-      {
         continue;
-      }
     }
 
     // Allow switching to a matching resolution:
