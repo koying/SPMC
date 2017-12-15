@@ -186,7 +186,7 @@ public:
     CBitstreamConverter::write_bits(&bs, 32, p_in->extra);         // am_sysinfo, unsigned int extra
     CBitstreamConverter::write_bits(&bs, 32, p_in->status);        // am_sysinfo, unsigned int status
     CBitstreamConverter::write_bits(&bs, 32, p_in->ratio);         // am_sysinfo, unsigned int ratio
-    CBitstreamConverter::write_bits(&bs, 32, (unsigned int)p_in->param); // am_sysinfo, unsigned int param
+    CBitstreamConverter::write_bits(&bs, sizeof(void*), (unsigned long)p_in->param); // am_sysinfo, unsigned int param
     unsigned int lo = 0x00000000ffffffff & p_in->ratio64;
     unsigned int hi = p_in->ratio64 >> 32;
     CBitstreamConverter::write_bits(&bs, 32, lo);                  // am_sysinfo, unsigned long long ratio64
