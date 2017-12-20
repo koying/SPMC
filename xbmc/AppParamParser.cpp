@@ -26,6 +26,8 @@
 #include "utils/SystemInfo.h"
 #include "utils/StringUtils.h"
 #include "input/InputManager.h"
+#include "messaging/ApplicationMessenger.h"
+
 #ifdef TARGET_WINDOWS
 #include "WIN32Util.h"
 #endif
@@ -142,10 +144,24 @@ void CAppParamParser::ParseArg(const std::string &arg)
     if (m_testmode)
       g_application.SetEnableTestMode(true);
 
-    CFileItemPtr pItem(new CFileItem(arg));
-    pItem->SetPath(arg);
+    std::string targetFile = arg;
+    CURL targeturl(targetFile);
+    std::string value;
 
-    m_playlist.Add(pItem);
+    if (targeturl.IsProtocol("videodb") || (targeturl.IsProtocol("special") && targetFile.find("playlists/video") != std::string::npos))
+    {
+      std::vector<std::string> params;
+      params.push_back(targeturl.Get());
+      params.push_back("return");
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
+    }
+    else if (targeturl.IsProtocol("musicdb"))
+    {
+      std::vector<std::string> params;
+      params.push_back(targeturl.Get());
+      params.push_back("return");
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_MUSIC_NAV, 0, nullptr, "", params);
+    }
   }
 }
 
