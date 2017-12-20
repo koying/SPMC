@@ -57,7 +57,6 @@ set(package_files strings.xml
                   src/channels/model/XBMCDatabase.java
                   src/channels/SyncChannelJobService.java
                   src/channels/SyncProgramsJobService.java
-                  src/channels/util/AppLinkHelper.java
                   src/channels/util/SharedPreferencesHelper.java
                   src/channels/util/TvUtil.java
                   )

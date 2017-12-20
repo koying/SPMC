@@ -1218,7 +1218,7 @@ void CXBMCApp::onNewIntent(CJNIIntent intent)
     std::string value;
     if (action == "android.intent.action.GET_CONTENT" || (targeturl.GetOption("showinfo", value) && value == "true"))
     {
-      if (targeturl.IsProtocol("videodb"))
+      if (targeturl.IsProtocol("videodb") || (targeturl.IsProtocol("special") && targetFile.find("playlists/video") != std::string::npos))
       {
         std::vector<std::string> params;
         params.push_back(targeturl.Get());
