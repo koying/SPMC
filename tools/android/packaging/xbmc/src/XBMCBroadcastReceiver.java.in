@@ -30,12 +30,9 @@ public class XBMCBroadcastReceiver extends BroadcastReceiver
     }
     else
     {
-      try
-      {
+      try {
         _onReceive(intent);
-      }
-      catch (UnsatisfiedLinkError e)
-      {
+      } catch (UnsatisfiedLinkError e) {
         Log.e(TAG, "Native not registered");
       }
     }

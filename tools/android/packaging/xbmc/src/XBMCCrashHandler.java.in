@@ -39,19 +39,14 @@ public class XBMCCrashHandler extends Activity
 
   static String getVersion(Context c)
   {
-    try
-    {
-      return c.getPackageManager().getPackageInfo(c.getPackageName(), 0).versionName;
-    }
-    catch (Exception e)
-    {
-      return c.getString(R.string.unknown_version);
-    }
+    try {
+      return c.getPackageManager().getPackageInfo(c.getPackageName(),0).versionName;
+    } catch(Exception e) { return c.getString(R.string.unknown_version); }
   }
 
   static String readAllOf(InputStream s) throws IOException
   {
-    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(s), 8096);
+    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(s),8096);
     String line;
     StringBuilder log = new StringBuilder();
     while ((line = bufferedReader.readLine()) != null)
@@ -67,8 +62,8 @@ public class XBMCCrashHandler extends Activity
     super.onCreate(state);
     setTitle(R.string.crashtitle);
     setContentView(R.layout.crash_handler);
-    final Button b = (Button) findViewById(R.id.report);
-    final Button c = (Button) findViewById(R.id.close);
+    final Button b = (Button)findViewById(R.id.report);
+    final Button c = (Button)findViewById(R.id.close);
 
     b.setOnClickListener(new View.OnClickListener()
     {
@@ -79,7 +74,7 @@ public class XBMCCrashHandler extends Activity
         progress.setIndeterminate(true);
         progress.setCancelable(false);
         progress.show();
-        final AsyncTask task = new AsyncTask<Void, String, String>()
+        final AsyncTask task = new AsyncTask<Void,String,String>()
         {
           String log = "";
           Process process;
@@ -93,13 +88,10 @@ public class XBMCCrashHandler extends Activity
             log += "========= end Debug log ===========\n";
 
             log += "============ logcat ===============\n";
-            try
-            {
-              process = Runtime.getRuntime().exec(new String[]{"logcat", "-d", "-v", "threadtime"});
+            try {
+              process = Runtime.getRuntime().exec(new String[]{"logcat","-d","-v","threadtime"});
               log += readAllOf(process.getInputStream());
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
               e.printStackTrace();
               Toast.makeText(XBMCCrashHandler.this, e.toString(), Toast.LENGTH_LONG).show();
             }
@@ -108,14 +100,11 @@ public class XBMCCrashHandler extends Activity
             String sCrashLog = getTempDir(XBMCCrashHandler.this) + "/crash.log";
             File fl = new File(sCrashLog);
             FileOutputStream fout = null;
-            try
-            {
+            try {
               fout = new FileOutputStream(fl);
               fout.write(log.getBytes());
               fout.close();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
               e.printStackTrace();
               return "";
             }
@@ -159,7 +148,7 @@ public class XBMCCrashHandler extends Activity
 
               AlertDialog dialog = builder.show();
 
-              TextView messageView = (TextView) dialog.findViewById(android.R.id.message);
+              TextView messageView = (TextView)dialog.findViewById(android.R.id.message);
               messageView.setGravity(Gravity.CENTER);
             }
             else
@@ -191,10 +180,10 @@ public class XBMCCrashHandler extends Activity
             progress.dismiss();
             task.cancel(true);
             new AlertDialog.Builder(XBMCCrashHandler.this)
-                    .setMessage(MessageFormat.format(getString(R.string.get_log_failed), getString(R.string.crash_email)))
-                    .setCancelable(true)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+              .setMessage(MessageFormat.format(getString(R.string.get_log_failed), getString(R.string.crash_email)))
+              .setCancelable(true)
+              .setIcon(android.R.drawable.ic_dialog_alert)
+              .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
                     {
                       @Override
                       public void onClick(DialogInterface dialog, int which)
@@ -203,7 +192,7 @@ public class XBMCCrashHandler extends Activity
                         finish();
                       }
                     })
-                    .show();
+              .show();
           }
         }, 30000);
       }
@@ -236,14 +225,11 @@ public class XBMCCrashHandler extends Activity
     String log = "";
     File fl = new File(sXbmcLog);
     FileInputStream fin = null;
-    try
-    {
+    try {
       fin = new FileInputStream(fl);
       log += readAllOf(fin);
       fin.close();
-    }
-    catch (Exception e)
-    {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return log;
@@ -274,14 +260,11 @@ public class XBMCCrashHandler extends Activity
       String body = "";
       File fl = new File(sXbmcSource);
       FileInputStream fin = null;
-      try
-      {
+      try {
         fin = new FileInputStream(fl);
         body += readAllOf(fin);
         fin.close();
-      }
-      catch (Exception e)
-      {
+      } catch (Exception e) {
         e.printStackTrace();
       }
       jreq.put("data", body);
@@ -319,8 +302,7 @@ public class XBMCCrashHandler extends Activity
           JSONObject jresp = new JSONObject(resp);
           id = jresp.getJSONObject("result").getString("id");
 
-        }
-        else
+        } else
         {
           Log.e(TAG, "Failed to read JSON");
         }
@@ -333,8 +315,7 @@ public class XBMCCrashHandler extends Activity
       {
         connection.disconnect();
       }
-    }
-    catch (Exception e)
+    } catch (Exception e)
     {
       Log.e(TAG, "Failed to publish log");
       e.printStackTrace();
@@ -347,14 +328,10 @@ public class XBMCCrashHandler extends Activity
     String addr = c.getString(R.string.crash_email);
     Intent i = new Intent(Intent.ACTION_SEND);
     String modVer = "";
-    try
-    {
-      Process p = Runtime.getRuntime().exec(new String[]{"getprop", "ro.modversion"});
+    try {
+      Process p = Runtime.getRuntime().exec(new String[]{"getprop","ro.modversion"});
       modVer = readAllOf(p.getInputStream()).trim();
-    }
-    catch (Exception e)
-    {
-    }
+    } catch (Exception e) {}
 
     if (modVer.length() == 0)
       modVer = "original";
@@ -362,24 +339,18 @@ public class XBMCCrashHandler extends Activity
     // second empty address because of http://code.google.com/p/k9mail/issues/detail?id=589
     i.putExtra(Intent.EXTRA_EMAIL, new String[]{addr, ""});
     i.putExtra(Intent.EXTRA_SUBJECT, MessageFormat.format(c.getString(
-            isCrash ? R.string.crash_subject : R.string.email_subject),
-            getVersion(c), Build.MODEL, modVer, Build.FINGERPRINT));
+          isCrash ? R.string.crash_subject : R.string.email_subject),
+          getVersion(c), Build.MODEL, modVer, Build.FINGERPRINT));
     i.setType("message/rfc822");
-    i.putExtra(Intent.EXTRA_TEXT, body != null ? body : "");
-    try
-    {
+    i.putExtra(Intent.EXTRA_TEXT, body!=null ? body : "");
+    try {
       c.startActivity(i);
       return true;
-    }
-    catch (ActivityNotFoundException e)
-    {
-      try
-      {
+    } catch (ActivityNotFoundException e) {
+      try {
         // Get the OS to present a nicely formatted, translated error
-        c.startActivity(Intent.createChooser(i, null));
-      }
-      catch (Exception e2)
-      {
+        c.startActivity(Intent.createChooser(i,null));
+      } catch (Exception e2) {
         e2.printStackTrace();
         Toast.makeText(c, e2.toString(), Toast.LENGTH_LONG).show();
       }

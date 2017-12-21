@@ -39,17 +39,15 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
     mMediaProjection = proj;
     mSaveCaptures = XBMCProperties.getBoolProperty("xbmc.savecaptures");
 
-    // start capture handling thread
-    new Thread()
-    {
-      @Override
-      public void run()
-      {
-        Looper.prepare();
-        mHandler = new Handler();
-        Looper.loop();
-      }
-    }.start();
+        // start capture handling thread
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                mHandler = new Handler();
+                Looper.loop();
+            }
+        }.start();
   }
 
   private VirtualDisplay createVirtualDisplay()
@@ -65,7 +63,7 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
     mActivity.getWindowManager().getDefaultDisplay().getSize(size);
     if (size.x != width || size.y != height)
     {
-      float dratio = (float) size.x / size.y;  // 1.7
+      float dratio = (float)size.x / size.y;  // 1.7
       mWidth = width;
       mHeight = (int) (mWidth / dratio);
     }
@@ -131,8 +129,7 @@ public class XBMCProjection implements ImageReader.OnImageAvailableListener
       }
     }
     catch (Exception e)
-    {
-    }
+    {}
   }
 
   /***************/

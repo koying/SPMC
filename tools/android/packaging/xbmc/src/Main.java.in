@@ -380,12 +380,10 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
           {
             if (mNewIntent != null)  // Still valid?
               _onNewIntent(mNewIntent);
-          }
-          catch (UnsatisfiedLinkError e)
+          } catch (UnsatisfiedLinkError e)
           {
             Log.e("Main", "Native not registered");
-          }
-          finally
+          } finally
           {
             mNewIntent = null;
           }

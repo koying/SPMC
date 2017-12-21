@@ -16,22 +16,23 @@ import @APP_PACKAGE@.XBMCProperties;
 
 /**
  * Provides a background image for Recommendations for a RecommendationCardView.
- * <p>
+ * 
  * The card view changed to require a content provider be created. It requests
  * items via the openFile(Uri uri) method. This is an example of how to retrieve
  * an image from a web site and provide a ParcelFileDescriptor back that
  * contains the contents.
- * <p>
+ * 
  * This is based on code from the following stackoverflow description on how to
  * populate a ParcelFileDescriptor from any input stream.
- * <p>
+ * 
  * http://stackoverflow.com/a/14734310/1950264
- * <p>
+ * 
  * You still need to setup a ContentProvider entry and Authority in the
  * AndroidManifest.xml
- * <p>
+ * 
  * See
  * http://developer.android.com/reference/android/content/ContentProvider.html
+ * 
  */
 public class XBMCImageContentProvider extends XBMCContentProvider
 {
@@ -59,15 +60,15 @@ public class XBMCImageContentProvider extends XBMCContentProvider
     
     Uri out = builder.build();
     // Log.d(TAG, "GetImageUri: in:" + surl + " out:" + out.toString());
-    return out;
+    return out;    
   }
-
+  
   @Override
   public ParcelFileDescriptor openFile(Uri uri, String mode)
-          throws FileNotFoundException
+      throws FileNotFoundException
   {
     // Log.d(TAG, "openFile: " + uri.toString());
-
+    
     ParcelFileDescriptor[] pipe = null;
 
     try
@@ -89,13 +90,13 @@ public class XBMCImageContentProvider extends XBMCContentProvider
       connection.connect();
 
       new TransferThread(connection.getInputStream(),
-              new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1])).start();
-    }
+          new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1])).start();
+    } 
     catch (IOException e)
     {
       Log.e(getClass().getSimpleName(), "Exception opening pipe", e);
       throw new FileNotFoundException("Could not open pipe for: "
-              + uri.toString());
+          + uri.toString());
     }
 
     return (pipe[0]);
@@ -103,7 +104,7 @@ public class XBMCImageContentProvider extends XBMCContentProvider
 
   @Override
   public Cursor query(Uri uri, String[] projection, String selection,
-                      String[] selectionArgs, String sortOrder)
+      String[] selectionArgs, String sortOrder)
   {
     return null;
   }
@@ -128,7 +129,7 @@ public class XBMCImageContentProvider extends XBMCContentProvider
 
   @Override
   public int update(Uri uri, ContentValues values, String selection,
-                    String[] selectionArgs)
+      String[] selectionArgs)
   {
     return 0;
   }
@@ -160,7 +161,7 @@ public class XBMCImageContentProvider extends XBMCContentProvider
         in.close();
         out.flush();
         out.close();
-      }
+      } 
       catch (IOException e)
       {
         Log.e(getClass().getSimpleName(), "Exception transferring file", e);
