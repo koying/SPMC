@@ -15,9 +15,13 @@ import android.view.View;
 public class XBMCMainView extends SurfaceView implements SurfaceHolder.Callback, View.OnLayoutChangeListener
 {
   native void _attach();
+
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
+
   native void _surfaceCreated(SurfaceHolder holder);
+
   native void _surfaceDestroyed(SurfaceHolder holder);
+
   native void _onLayoutChange(int left, int top, int width, int height);
 
   private static final String TAG = "XBMCMainView";
@@ -33,7 +37,7 @@ public class XBMCMainView extends SurfaceView implements SurfaceHolder.Callback,
     getHolder().setFormat(PixelFormat.TRANSPARENT);
 
     Log.d(TAG, "Created");
-}
+  }
 
   public XBMCMainView(Context context, AttributeSet attrs, int defStyle)
   {
@@ -85,7 +89,7 @@ public class XBMCMainView extends SurfaceView implements SurfaceHolder.Callback,
     int[] outLocation = new int[2];
     getLocationInWindow(outLocation);
 
-    Log.d(TAG, "Layout changed: " + outLocation[0] + "+" + outLocation[1] + "-" + (right-left) + "x" + (bottom-top));
-    _onLayoutChange(outLocation[0], outLocation[1], (right-left), (bottom-top));
+    Log.d(TAG, "Layout changed: " + outLocation[0] + "+" + outLocation[1] + "-" + (right - left) + "x" + (bottom - top));
+    _onLayoutChange(outLocation[0], outLocation[1], (right - left), (bottom - top));
   }
 }
