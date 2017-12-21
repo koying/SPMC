@@ -12,32 +12,25 @@
  * the License.
  */
 
-package com.semperpax.spmc17.channels;
+package @APP_PACKAGE@.channels;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.tv.TvContract;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
-import android.support.media.tv.Channel;
-import android.support.media.tv.ChannelLogoUtils;
 import android.support.media.tv.TvContractCompat;
 import android.util.Log;
 
-import com.semperpax.spmc17.XBMCJsonRPC;
-import com.semperpax.spmc17.channels.model.Subscription;
-import com.semperpax.spmc17.channels.model.XBMCDatabase;
-import com.semperpax.spmc17.channels.util.SharedPreferencesHelper;
-import com.semperpax.spmc17.channels.util.TvUtil;
-
-import java.util.List;
+import @APP_PACKAGE@.R;
+import @APP_PACKAGE@.channels.model.Subscription;
+import @APP_PACKAGE@.channels.model.XBMCDatabase;
+import @APP_PACKAGE@.channels.util.TvUtil;
+import @APP_PACKAGE@.content.XBMCFileContentProvider;
+import @APP_PACKAGE@.model.File;
 
 /**
  * A service that will populate the TV provider with channels that every user should have. Once a
@@ -93,11 +86,59 @@ public class SyncChannelJobService extends JobService
     protected Boolean doInBackground(Void... voids)
     {
       List<Subscription> subscriptions = XBMCDatabase.getSubscriptions(mContext);
+      List<Subscription> freshsubscriptions = new ArrayList<>();
+      try (Cursor cursor =
+                   mContext.getContentResolver()
+                           .query(
+                                   XBMCFileContentProvider.buildUri("/playlists/video"),
+                                   null,
+                                   null,
+                                   null,
+                                   null))
+      {
+        if (cursor == null)
+          return false;
+
+        while (cursor.moveToNext())
+        {
+          File file = File.fromCursor(cursor);
+          Subscription sub = Subscription.createSubscription(file.getName(), file.getUri(), R.drawable.ic_recommendation_80dp);
+          freshsubscriptions.add(sub);
+
+          int subidx = subscriptions.indexOf(sub);
+          if (subidx != -1)
+            continue;
+
+          long channelId = TvUtil.createChannel(mContext, sub);
+          sub.setChannelId(channelId);
+          subscriptions.add(sub);
+        }
+      }
 
       // Kick off a job to update default programs.
       // The program job should verify if the channel is visible before updating programs.
       for (Subscription channel : subscriptions)
       {
+        if (freshsubscriptions.indexOf(channel) == -1)
+        {
+          // Channel is gone
+          subscriptions.remove(channel);
+          mContext.getContentResolver()
+                  .delete(
+                          TvContractCompat.buildPreviewProgramsUriForChannel(channel.getChannelId()),
+                          null,
+                          null);
+          mContext.getContentResolver()
+                  .delete(
+                          TvContractCompat.buildChannelUri(channel.getChannelId()),
+                          null,
+                          null);
+          XBMCDatabase.removeMedias(mContext, channel.getChannelId());
+          continue;
+        }
+        XBMCDatabase.saveSubscriptions(mContext, subscriptions);
+        TvUtil.scheduleTriggeredSyncingProgramsForChannel(mContext, channel.getChannelId());
+        TvUtil.scheduleTimedSyncingProgramsForChannel(mContext, channel.getChannelId());
         TvUtil.scheduleSyncingProgramsForChannel(mContext, channel.getChannelId());
       }
 

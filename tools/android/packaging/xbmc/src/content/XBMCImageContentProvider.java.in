@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.content;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -6,13 +6,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+
+import @APP_PACKAGE@.XBMCProperties;
 
 /**
  * Provides a background image for Recommendations for a RecommendationCardView.
@@ -33,13 +33,12 @@ import android.util.Log;
  * See
  * http://developer.android.com/reference/android/content/ContentProvider.html
  */
-public class XBMCImageContentProvider extends ContentProvider
+public class XBMCImageContentProvider extends XBMCContentProvider
 {
-  private static String TAG = "@APP_NAME@";
-
-  public static String AUTHORITY = "@APP_PACKAGE@";
-  public static String AUTHORITY_IMAGE = AUTHORITY + ".image";
-
+  private static String TAG = "@APP_NAME@_Image_Provider";
+  
+  public static String AUTHORITY = AUTHORITY_ROOT + ".image";
+ 
   @Override
   public boolean onCreate()
   {
@@ -48,11 +47,16 @@ public class XBMCImageContentProvider extends ContentProvider
 
   public static Uri GetImageUri(String surl)
   {
+    if (surl == null)
+      return null;
+    if (surl.isEmpty())
+      return null;
+
     Uri.Builder builder = new Uri.Builder();
     builder.scheme("content")
-            .authority(AUTHORITY_IMAGE)
-            .fragment(surl);
-
+    .authority(AUTHORITY)
+    .fragment(surl);
+    
     Uri out = builder.build();
     // Log.d(TAG, "GetImageUri: in:" + surl + " out:" + out.toString());
     return out;
@@ -72,7 +76,7 @@ public class XBMCImageContentProvider extends ContentProvider
       // Log.d(TAG, "  decodedUrl: " + decodedUrl);
       if (decodedUrl == null)
       {
-        throw new FileNotFoundException("Uri is null");
+        return null;
       }
       pipe = ParcelFileDescriptor.createPipe();
 

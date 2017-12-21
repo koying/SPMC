@@ -13,13 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.semperpax.spmc17.channels.util;
+package @APP_PACKAGE@.channels.util;
 
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,9 +37,10 @@ import android.support.media.tv.ChannelLogoUtils;
 import android.support.media.tv.TvContractCompat;
 import android.util.Log;
 
-import com.semperpax.spmc17.channels.SyncChannelJobService;
-import com.semperpax.spmc17.channels.SyncProgramsJobService;
-import com.semperpax.spmc17.channels.model.Subscription;
+import @APP_PACKAGE@.Splash;
+import @APP_PACKAGE@.channels.SyncChannelJobService;
+import @APP_PACKAGE@.channels.SyncProgramsJobService;
+import @APP_PACKAGE@.channels.model.Subscription;
 
 /**
  * Manages interactions with the TV Provider.
@@ -47,7 +49,10 @@ public class TvUtil
 {
 
   private static final String TAG = "TvUtil";
-  private static final long CHANNEL_JOB_ID_OFFSET = 1000;
+  private static final int CHANNEL_JOB_ID = 500;
+  private static final int CHANNEL_TRIGGERED_JOB_ID_OFFSET = 1000;
+  private static final int CHANNEL_TIMED_JOB_ID_OFFSET = 2000;
+  private static final int CHANNEL_IMMEDIATE_JOB_ID_OFFSET = 2000;
 
   private static final String[] CHANNELS_PROJECTION = {
           TvContractCompat.Channels._ID,
@@ -91,14 +96,14 @@ public class TvUtil
       } while (cursor.moveToNext());
     }
 
-    // Create the channel since it has not been added to the TV Provider.
-    Uri appLinkIntentUri = Uri.parse(subscription.getAppLinkIntentUri());
+    Intent playlistIntent = new Intent(context, Splash.class);
+    playlistIntent.setAction(Intent.ACTION_GET_CONTENT);
+    playlistIntent.setData(Uri.parse("special://profile" + Uri.parse(subscription.getUri()).getPath()));
 
     Channel.Builder builder = new Channel.Builder();
     builder.setType(TvContractCompat.Channels.TYPE_PREVIEW)
             .setDisplayName(subscription.getName())
-            .setInternalProviderData(subscription.getUrl())
-            .setAppLinkIntentUri(appLinkIntentUri);
+            .setAppLinkIntent(playlistIntent);
 
     Log.d(TAG, "Creating channel: " + subscription.getName());
     Uri channelUrl =
@@ -166,13 +171,15 @@ public class TvUtil
   public static void scheduleSyncingChannel(Context context)
   {
     ComponentName componentName = new ComponentName(context, SyncChannelJobService.class);
-    JobInfo.Builder builder = new JobInfo.Builder(1, componentName);
+    JobInfo.Builder builder = new JobInfo.Builder(CHANNEL_JOB_ID, componentName);
     builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+    builder.setMinimumLatency(10000);
 
     JobScheduler scheduler =
             (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
     Log.d(TAG, "Scheduled channel creation.");
+    scheduler.cancel(CHANNEL_JOB_ID);
     scheduler.schedule(builder.build());
   }
 
@@ -183,12 +190,12 @@ public class TvUtil
    * @param context   for accessing the {@link JobScheduler}.
    * @param channelId for the channel to listen for changes.
    */
-  public static void scheduleSyncingProgramsForChannel(Context context, long channelId)
+  public static void scheduleTriggeredSyncingProgramsForChannel(Context context, long channelId)
   {
     ComponentName componentName = new ComponentName(context, SyncProgramsJobService.class);
 
     JobInfo.Builder builder =
-            new JobInfo.Builder(getJobIdForChannelId(channelId), componentName);
+            new JobInfo.Builder(getTriggeredJobIdForChannelId(channelId), componentName);
 
     JobInfo.TriggerContentUri triggerContentUri =
             new JobInfo.TriggerContentUri(
@@ -204,12 +211,74 @@ public class TvUtil
 
     JobScheduler scheduler =
             (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    scheduler.cancel(getJobIdForChannelId(channelId));
+    scheduler.cancel(getTriggeredJobIdForChannelId(channelId));
     scheduler.schedule(builder.build());
   }
 
-  private static int getJobIdForChannelId(long channelId)
+  /**
+   * Schedulers syncing programs for a channel on a time base. The scheduler will listen to a {@link Uri} for a
+   * particular channel.
+   *
+   * @param context   for accessing the {@link JobScheduler}.
+   * @param channelId for the channel to listen for changes.
+   */
+  public static void scheduleTimedSyncingProgramsForChannel(Context context, long channelId)
   {
-    return (int) (CHANNEL_JOB_ID_OFFSET + channelId);
+    ComponentName componentName = new ComponentName(context, SyncProgramsJobService.class);
+
+    JobInfo.Builder builder =
+            new JobInfo.Builder(getTimedJobIdForChannelId(channelId), componentName);
+    builder.setPeriodic(10000);
+
+    PersistableBundle bundle = new PersistableBundle();
+    bundle.putLong(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
+    builder.setExtras(bundle);
+
+    JobInfo job = builder.build();
+    Log.d(TAG, "scheduleTimedSyncingProgramsForChannel: minperiod=" + job.getMinPeriodMillis());
+
+    JobScheduler scheduler =
+            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    scheduler.cancel(getTimedJobIdForChannelId(channelId));
+    scheduler.schedule(job);
+  }
+
+  /**
+   * Schedulers syncing programs for a channel on a time base. The scheduler will listen to a {@link Uri} for a
+   * particular channel.
+   *
+   * @param context   for accessing the {@link JobScheduler}.
+   * @param channelId for the channel to listen for changes.
+   */
+  public static void scheduleSyncingProgramsForChannel(Context context, long channelId)
+  {
+    ComponentName componentName = new ComponentName(context, SyncProgramsJobService.class);
+
+    JobInfo.Builder builder =
+            new JobInfo.Builder(getImmediateJobIdForChannelId(channelId), componentName);
+    builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+
+    PersistableBundle bundle = new PersistableBundle();
+    bundle.putLong(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
+    builder.setExtras(bundle);
+
+    JobScheduler scheduler =
+            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    scheduler.cancel(getImmediateJobIdForChannelId(channelId));
+    scheduler.schedule(builder.build());
+  }
+
+  private static int getTriggeredJobIdForChannelId(long channelId)
+  {
+    return (int) (CHANNEL_TRIGGERED_JOB_ID_OFFSET + channelId);
+  }
+
+  private static int getTimedJobIdForChannelId(long channelId)
+  {
+    return (int) (CHANNEL_TIMED_JOB_ID_OFFSET + channelId);
+  }
+  private static int getImmediateJobIdForChannelId(long channelId)
+  {
+    return (int) (CHANNEL_IMMEDIATE_JOB_ID_OFFSET + channelId);
   }
 }

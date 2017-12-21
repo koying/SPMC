@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Build;
 import android.app.NativeActivity;
@@ -13,10 +14,7 @@ import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.hardware.input.InputManager;
-import android.graphics.Rect;
-import android.graphics.PixelFormat;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -24,7 +22,6 @@ import android.media.Image;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.media.tv.TvContractCompat;
@@ -32,10 +29,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.Gravity;
-import android.view.Surface;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +37,7 @@ import android.widget.Toast;
 import @APP_PACKAGE@.channels.model.Subscription;
 import @APP_PACKAGE@.channels.model.XBMCDatabase;
 import @APP_PACKAGE@.channels.util.TvUtil;
+import @APP_PACKAGE@.content.XBMCFileContentProvider;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -50,7 +45,7 @@ import java.util.List;
 
 public class Main extends NativeActivity implements Choreographer.FrameCallback
 {
-  private static final String TAG = "@APP_NAME_UC@";
+  private static final String TAG = "@APP_NAME@";
   private static final int INTENT_RESULT_PROJECT_CODE = 4658;
   private static final int INTENT_MAKE_BROWSABLE_REQUEST_CODE = 9001;
 
@@ -315,7 +310,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     {
       if (Build.VERSION.SDK_INT >= VERSION_CODES.O)
         TvUtil.scheduleSyncingChannel(this);
-      else
+
       {
         // Leanback
         mJsonRPC = new XBMCJsonRPC();
@@ -403,6 +398,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onPause()
   {
     super.onPause();
+
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.O)
+      TvUtil.scheduleSyncingChannel(this);
   }
 
   @Override
@@ -419,9 +417,12 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     }
     else if (requestCode == INTENT_MAKE_BROWSABLE_REQUEST_CODE)
     {
-      if (resultCode == RESULT_OK) {
+      if (resultCode == RESULT_OK)
+      {
         Toast.makeText(this, R.string.channel_added, Toast.LENGTH_LONG).show();
-      } else {
+      }
+      else
+      {
         Toast.makeText(this, R.string.channel_not_added, Toast.LENGTH_LONG).show();
       }
     }
@@ -508,7 +509,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void addChannel(String title, String url)
   {
     Log.d(TAG, "addChannel: title = " + title + "; url = " + url);
-    Subscription subscription = XBMCDatabase.getSubscription(getApplicationContext(), title, url);
+    Uri uri = Uri.parse(url);
+    Subscription subscription = XBMCDatabase.getSubscription(getApplicationContext(), title, XBMCFileContentProvider.buildUri(uri.getPath()).toString());
     new AddChannelTask(getApplicationContext()).execute(subscription);
   }
 
@@ -538,12 +540,13 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       XBMCDatabase.saveSubscription(mContext, subscription);
       // Scheduler listen on channel's uri. Updates after the user interacts with the system
       // dialog.
-      TvUtil.scheduleSyncingProgramsForChannel(getApplicationContext(), channelId);
+      TvUtil.scheduleTriggeredSyncingProgramsForChannel(getApplicationContext(), channelId);
       return channelId;
     }
 
     @Override
-    protected void onPostExecute(Long channelId) {
+    protected void onPostExecute(Long channelId)
+    {
       super.onPostExecute(channelId);
       promptUserToDisplayChannel(channelId);
     }
@@ -556,8 +559,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     try
     {
       this.startActivityForResult(intent, INTENT_MAKE_BROWSABLE_REQUEST_CODE);
-    }
-    catch (ActivityNotFoundException e)
+    } catch (ActivityNotFoundException e)
     {
       Log.e(TAG, "Could not start activity: " + intent.getAction(), e);
     }

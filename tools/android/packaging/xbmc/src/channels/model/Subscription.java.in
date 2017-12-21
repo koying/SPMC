@@ -11,70 +11,95 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.semperpax.spmc17.channels.model;
+package @APP_PACKAGE@.channels.model;
 
-/** Contains the data about a channel that will be displayed on the launcher. */
-public class Subscription {
+import android.net.Uri;
 
+/**
+ * Contains the data about a channel that will be displayed on the launcher.
+ */
+public class Subscription
+{
   private long channelId;
   private String name;
-  private String url;
-  private String appLinkIntentUri;
+  private String uri;
   private int channelLogo;
 
-  /** Constructor for Gson to use. */
-  public Subscription() {}
+  /**
+   * Constructor for Gson to use.
+   */
+  public Subscription()
+  {
+  }
 
   private Subscription(
-          String name, String url, String appLinkIntentUri, int channelLogo) {
+          String name, String uri, int channelLogo)
+  {
     this.name = name;
-    this.url = url;
-    this.appLinkIntentUri = appLinkIntentUri;
+    this.uri = uri;
     this.channelLogo = channelLogo;
   }
 
   public static Subscription createSubscription(
-          String name, String url, String appLinkIntentUri, int channelLogo) {
-    return new Subscription(name, url, appLinkIntentUri, channelLogo);
+          String name, String uri, int channelLogo)
+  {
+    return new Subscription(name, uri, channelLogo);
   }
 
-  public long getChannelId() {
+  public long getChannelId()
+  {
     return channelId;
   }
 
-  public void setChannelId(long channelId) {
+  public void setChannelId(long channelId)
+  {
     this.channelId = channelId;
   }
 
-  public String getName() {
+  public String getName()
+  {
     return name;
   }
 
-  public void setName(String name) {
+  public void setName(String name)
+  {
     this.name = name;
   }
 
-  public String getAppLinkIntentUri() {
-    return appLinkIntentUri;
+  public String getUri()
+  {
+    return uri;
   }
 
-  public void setAppLinkIntentUri(String appLinkIntentUri) {
-    this.appLinkIntentUri = appLinkIntentUri;
+  public void setUri(String uri)
+  {
+    this.uri = uri;
   }
 
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public int getChannelLogo() {
+  public int getChannelLogo()
+  {
     return channelLogo;
   }
 
-  public void setChannelLogo(int channelLogo) {
+  public void setChannelLogo(int channelLogo)
+  {
     this.channelLogo = channelLogo;
+  }
+
+  @Override
+  public boolean equals(Object o)
+  {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Subscription that = (Subscription) o;
+
+    return name != null ? name.equals(that.name) : that.name == null;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return name != null ? name.hashCode() : 0;
   }
 }

@@ -11,17 +11,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.semperpax.spmc17.channels.model;
+package @APP_PACKAGE@.channels.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 
-import com.semperpax.spmc17.R;
-import com.semperpax.spmc17.channels.util.AppLinkHelper;
-import com.semperpax.spmc17.channels.util.SharedPreferencesHelper;
+import @APP_PACKAGE@.R;
+import @APP_PACKAGE@.channels.util.SharedPreferencesHelper;
+import @APP_PACKAGE@.model.Media;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,19 +37,19 @@ public final class XBMCDatabase
     // Do nothing.
   }
 
-  public static Subscription getSubscription(Context context, String title, String url)
+  public static Subscription getSubscription(Context context, String title, String uri)
   {
     return findOrCreateSubscription(
             context,
             title,
-            url,
-            R.drawable.ic_video_80dp);
+            uri,
+            R.drawable.ic_recommendation_80dp);
   }
 
   private static Subscription findOrCreateSubscription(
           Context context,
           String title,
-          String url,
+          String uri,
           @DrawableRes int logoResource)
   {
     // See if we have already created the channel in the TV Provider.
@@ -61,8 +61,7 @@ public final class XBMCDatabase
 
     return Subscription.createSubscription(
             title,
-            url,
-            AppLinkHelper.buildBrowseUri(title).toString(),
+            uri,
             logoResource);
   }
 
@@ -100,7 +99,7 @@ public final class XBMCDatabase
   public static void saveSubscription(Context context, Subscription subscription)
   {
     List<Subscription> subscriptions = getSubscriptions(context);
-    int index = findSubscription(subscriptions, subscription);
+    int index = subscriptions.indexOf(subscription);
     if (index == -1)
     {
       subscriptions.add(subscription);
@@ -109,20 +108,6 @@ public final class XBMCDatabase
       subscriptions.set(index, subscription);
     }
     saveSubscriptions(context, subscriptions);
-  }
-
-  private static int findSubscription(
-          List<Subscription> subscriptions, Subscription subscription)
-  {
-    for (int index = 0; index < subscriptions.size(); ++index)
-    {
-      Subscription current = subscriptions.get(index);
-      if (current.getName().equals(subscription.getName()))
-      {
-        return index;
-      }
-    }
-    return -1;
   }
 
   /**

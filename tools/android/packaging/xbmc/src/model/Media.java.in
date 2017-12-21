@@ -1,4 +1,4 @@
-package com.semperpax.spmc17.channels.model;
+package @APP_PACKAGE@.model;
 
 /*
  * Copyright (C) 2017 The Android Open Source Project
@@ -25,14 +25,13 @@ public class Media implements Serializable
 
   private static final String TAG = "Media";
 
-  static final long serialVersionUID = 727566175075960653L;
   private long id;
   private String title;
   private String description;
-  private String bgImageUrl;
-  private String cardImageUrl;
-  private String videoUrl;
-  private String studio;
+  private String bgImageUrl = null;
+  private String cardImageUrl = null;
+  private String videoUrl = null;
+  private String xbmcUrl = null;
   private String category;
   // Program id / Watch Next id returned from the TV Provider.
   private long programId;
@@ -92,16 +91,6 @@ public class Media implements Serializable
     this.description = description;
   }
 
-  public String getStudio()
-  {
-    return studio;
-  }
-
-  public void setStudio(String studio)
-  {
-    this.studio = studio;
-  }
-
   public String getVideoUrl()
   {
     return videoUrl;
@@ -110,6 +99,16 @@ public class Media implements Serializable
   public void setVideoUrl(String videoUrl)
   {
     this.videoUrl = videoUrl;
+  }
+
+  public String getXbmcUrl()
+  {
+    return xbmcUrl;
+  }
+
+  public void setXbmcUrl(String xbmcUrl)
+  {
+    this.xbmcUrl = xbmcUrl;
   }
 
   public String getBackgroundImageUrl()

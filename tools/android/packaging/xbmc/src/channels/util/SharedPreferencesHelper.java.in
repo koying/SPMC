@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.semperpax.spmc17.channels.util;
+package @APP_PACKAGE@.channels.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-import com.semperpax.spmc17.channels.model.Media;
-import com.semperpax.spmc17.channels.model.Subscription;
+import @APP_PACKAGE@.model.Media;
+import @APP_PACKAGE@.channels.model.Subscription;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
@@ -41,11 +41,11 @@ public final class SharedPreferencesHelper {
 
   private static final String TAG = "SharedPreferencesHelper";
 
-  private static final String PREFS_NAME = "com.semperpax.spmc17";
+  private static final String PREFS_NAME = "@APP_PACKAGE@";
   private static final String PREFS_SUBSCRIPTIONS_KEY =
-          "com.semperpax.spmc17.prefs.SUBSCRIPTIONS";
+          "@APP_PACKAGE@.prefs.SUBSCRIPTIONS";
   private static final String PREFS_SUBSCRIBED_MediaS_PREFIX =
-          "com.semperpax.spmc17.prefs.SUBSCRIBED_MediaS_";
+          "@APP_PACKAGE@.prefs.SUBSCRIBED_MediaS_";
 
   private static final Gson mGson = new Gson();
 
