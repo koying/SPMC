@@ -44,8 +44,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private static final String TAG = "@APP_NAME_UC@";
   private static final int INTENT_RESULT_PROJECT_CODE = 4658;
   private static final int XBMC_EXITCODE_POWERDOWN = 64;
-  private static final int XBMC_EXITCODE_RESTARTAPP= 65;
-  private static final int XBMC_EXITCODE_REBOOT    = 66;
+  private static final int XBMC_EXITCODE_RESTARTAPP = 65;
+  private static final int XBMC_EXITCODE_REBOOT = 66;
 
   public static Main MainActivity = null;
   public XBMCMainView mMainView = null;
@@ -63,28 +63,38 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private int mProjectionIntentId = 0;
 
   public int mExitCode = 0;
+
   native void _onNewIntent(Intent intent);
+
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
+
   native void _doFrame(long frameTimeNanos);
+
   native void _onCaptureAvailable(Image img);
+
   native void _onScreenshotAvailable(Image img);
+
   native void _onVisibleBehindCanceled();
+
   native void _onMultiWindowModeChanged(boolean isInMultiWindowMode);
+
   native void _onPictureInPictureModeChanged(boolean isInPictureInPictureMode);
+
   native void _onAudioDeviceAdded(AudioDeviceInfo[] addedDevices);
+
   native void _onAudioDeviceRemoved(AudioDeviceInfo[] removedDevices);
 
-  private class MyAudioDeviceCallback extends AudioDeviceCallback 
+  private class MyAudioDeviceCallback extends AudioDeviceCallback
   {
-    public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) 
+    public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices)
     {
-      if (addedDevices.length != 0) 
+      if (addedDevices.length != 0)
         _onAudioDeviceAdded(addedDevices);
     }
 
-    public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) 
+    public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices)
     {
-      if (removedDevices.length != 0) 
+      if (removedDevices.length != 0)
         _onAudioDeviceRemoved(removedDevices);
     }
   }
@@ -102,13 +112,15 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
           mJsonRPC.updateLeanback(Main.this);
         }
       }.start();
-      handler.postDelayed(this, XBMCProperties.getIntProperty("xbmc.leanbackrefresh", 60*60) * 1000);
+      handler.postDelayed(this, XBMCProperties.getIntProperty("xbmc.leanbackrefresh", 60 * 60) * 1000);
     }
   };
 
-  /** A signal handler in native code has been triggered. As our last gasp,
+  /**
+   * A signal handler in native code has been triggered. As our last gasp,
    * launch the crash handler (in its own process), because when we return
-   * from this function the process will soon exit. */
+   * from this function the process will soon exit.
+   */
   void startCrashHandler()
   {
     Log.i("Main", "Launching crash handler");
@@ -150,37 +162,38 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
             if (!id.isEmpty())
             {
               AlertDialog.Builder builder = new AlertDialog.Builder(Main.this)
-                  .setMessage(Html.fromHtml(MessageFormat.format(getString(R.string.push_log_success), id, getString(R.string.sticky_url) + "/" + id)))
-                  .setCancelable(true)
-                  .setIcon(android.R.drawable.ic_dialog_info)
-                  .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
-                  {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                      dialog.dismiss();
-                    }
-                  });
+                      .setMessage(Html.fromHtml(MessageFormat.format(getString(R.string.push_log_success), id, getString(R.string.sticky_url) + "/" + id)))
+                      .setCancelable(true)
+                      .setIcon(android.R.drawable.ic_dialog_info)
+                      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                      {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                          dialog.dismiss();
+                        }
+                      });
 
               AlertDialog dialog = builder.show();
 
               TextView messageView = (TextView) dialog.findViewById(android.R.id.message);
               messageView.setGravity(Gravity.CENTER);
-            } else
+            }
+            else
             {
               new AlertDialog.Builder(Main.this)
-                  .setMessage(MessageFormat.format(getString(R.string.get_log_failed), getString(R.string.crash_email)))
-                  .setCancelable(true)
-                  .setIcon(android.R.drawable.ic_dialog_alert)
-                  .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
-                  {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                      dialog.dismiss();
-                    }
-                  })
-                  .show();
+                      .setMessage(MessageFormat.format(getString(R.string.get_log_failed), getString(R.string.crash_email)))
+                      .setCancelable(true)
+                      .setIcon(android.R.drawable.ic_dialog_alert)
+                      .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                      {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                          dialog.dismiss();
+                        }
+                      })
+                      .show();
             }
           }
         }.execute();
@@ -248,12 +261,12 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     // Set the content to appear under the system bars so that the content
     // doesn't resize when the system bars hide and show.
     mDecorView.setSystemUiVisibility(
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
   }
 
   private void showSystemUI()
@@ -262,7 +275,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mVideoLayout.setFitsSystemWindows(true);
 
     mDecorView.setSystemUiVisibility(
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
   }
 
   @Override
@@ -275,15 +288,15 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
     mSettingsContentObserver = new XBMCSettingsContentObserver(this, handler);
-    getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
+    getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver);
 
     // Cancel all exising notif
     NotificationManager nMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     nMgr.cancelAll();
-    
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) 
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
     {
-      AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
+      AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
       audioManager.registerAudioDeviceCallback(new MyAudioDeviceCallback(), null);
     }
 
@@ -292,7 +305,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       // Leanback
       mJsonRPC = new XBMCJsonRPC();
       handler.removeCallbacks(leanbackUpdateRunnable);
-      handler.postDelayed(leanbackUpdateRunnable, 30*1000);
+      handler.postDelayed(leanbackUpdateRunnable, 30 * 1000);
     }
 
     // register the InputDeviceListener implementation
@@ -304,7 +317,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mDecorView.setBackground(null);
     getWindow().takeSurface(null);
     setContentView(R.layout.activity_main);
-    mVideoLayout = (RelativeLayout)findViewById(R.id.VideoLayout);
+    mVideoLayout = (RelativeLayout) findViewById(R.id.VideoLayout);
 
     mMainView = new XBMCMainView(this);
     RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
@@ -312,7 +325,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     mVideoLayout.addView(mMainView, layoutParams);
 
     hideSystemUI();
-}
+  }
 
   @Override
   protected void onNewIntent(Intent intent)
@@ -352,12 +365,17 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
         @Override
         public void run()
         {
-          try {
+          try
+          {
             if (mNewIntent != null)  // Still valid?
               _onNewIntent(mNewIntent);
-          } catch (UnsatisfiedLinkError e) {
+          }
+          catch (UnsatisfiedLinkError e)
+          {
             Log.e("Main", "Native not registered");
-          } finally {
+          }
+          finally
+          {
             mNewIntent = null;
           }
         }
@@ -370,10 +388,10 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onPause();
   }
-  
+
   @Override
   public void onActivityResult(int requestCode, int resultCode,
-      Intent resultData)
+                               Intent resultData)
   {
     if (requestCode == mProjectionIntentId)
     {
@@ -400,20 +418,20 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       Intent mStartActivity = new Intent(this, Main.class);
       int mPendingIntentId = 123456;
       PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
-      AlarmManager mgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+      AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
       mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
     }
 
     super.onDestroy();
   }
-  
+
   @Override
   public void onVisibleBehindCanceled()
   {
     _onVisibleBehindCanceled();
     super.onVisibleBehindCanceled();
   }
-  
+
   @Override
   public void onMultiWindowModeChanged(boolean isInMultiWindowMode)
   {
