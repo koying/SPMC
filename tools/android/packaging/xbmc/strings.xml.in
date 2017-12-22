@@ -15,9 +15,10 @@
     <!-- Oreo -->
     <string name="channel_added">Channel added</string>
     <string name="channel_not_added">Channel not added</string>
+    <string name="suggestion_channel">Suggestions</string>
 
     <!-- Crash report dialog -->
-    <string name="crash_email">@APP_EMAIL@</string>
+    <string name="crash_email"></string>
     <string name="crash_subject">Crash: @APP_NAME@ v{0} on {1} / {2} / {3}</string>
     <string name="crash_preamble">Please describe what you were doing just before the crash if possible, and then press Send:</string>
     <string name="crashtitle">Well, this is embarrassing...</string>

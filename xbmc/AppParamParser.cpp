@@ -27,6 +27,7 @@
 #include "utils/StringUtils.h"
 #include "input/InputManager.h"
 #include "messaging/ApplicationMessenger.h"
+#include "URL.h"
 
 #ifdef TARGET_WINDOWS
 #include "WIN32Util.h"
@@ -146,7 +147,6 @@ void CAppParamParser::ParseArg(const std::string &arg)
 
     std::string targetFile = arg;
     CURL targeturl(targetFile);
-    std::string value;
 
     if (targeturl.IsProtocol("videodb") || (targeturl.IsProtocol("special") && targetFile.find("playlists/video") != std::string::npos))
     {

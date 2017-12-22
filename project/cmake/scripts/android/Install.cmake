@@ -26,39 +26,45 @@ file(WRITE ${CMAKE_BINARY_DIR}/tools/depends/Makefile.include
      "$(PREFIX)/lib/${APP_NAME_LC}/lib${APP_NAME_LC}.so: ;\n")
 
 set(package_files strings.xml
-                  activity_main.xml
                   colors.xml
                   searchable.xml
                   AndroidManifest.xml
                   build.gradle
-                  src/Main.java
-                  src/Splash.java
-                  src/XBMCBroadcastReceiver.java
-                  src/XBMCCrashHandler.java
-                  src/XBMCImageContentProvider.java
-                  src/XBMCInputDeviceListener.java
-                  src/XBMCJsonRPC.java
-                  src/XBMCMainView.java
-                  src/XBMCMediaContentProvider.java
-                  src/XBMCMediaSession.java
-                  src/XBMCProjection.java
-                  src/XBMCRecommendationBuilder.java
-                  src/XBMCSearchableActivity.java
-                  src/XBMCSettingsContentObserver.java
-                  src/XBMCProperties.java
-                  src/XBMCVideoView.java
-                  src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
-                  src/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java
-                  src/interfaces/XBMCNsdManagerDiscoveryListener.java
-                  src/interfaces/XBMCNsdManagerRegistrationListener.java
-                  src/interfaces/XBMCNsdManagerResolveListener.java
-                  src/channels/model/Media.java
-                  src/channels/model/Subscription.java
-                  src/channels/model/XBMCDatabase.java
-                  src/channels/SyncChannelJobService.java
-                  src/channels/SyncProgramsJobService.java
-                  src/channels/util/SharedPreferencesHelper.java
-                  src/channels/util/TvUtil.java
+                  Splash.java.in
+                  XBMCVideoView.java.in
+                  XBMCJsonRPC.java.in
+                  channels/SyncChannelJobService.java.in
+                  channels/SyncProgramsJobService.java.in
+                  channels/model/XBMCDatabase.java.in
+                  channels/model/Subscription.java.in
+                  channels/util/SharedPreferencesHelper.java.in
+                  channels/util/TvUtil.java.in
+                  XBMCCrashHandler.java.in
+                  Main.java.in
+                  XBMCProjection.java.in
+                  XBMCMediaSession.java.in
+                  interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java.in
+                  interfaces/XBMCNsdManagerResolveListener.java.in
+                  interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java.in
+                  interfaces/XBMCNsdManagerRegistrationListener.java.in
+                  interfaces/XBMCNsdManagerDiscoveryListener.java.in
+                  XBMCBroadcastReceiver.java.in
+                  model/TVEpisode.java.in
+                  model/Movie.java.in
+                  model/TVShow.java.in
+                  model/File.java.in
+                  model/Album.java.in
+                  model/Media.java.in
+                  XBMCSearchableActivity.java.in
+                  XBMCRecommendationBuilder.java.in
+                  XBMCInputDeviceListener.java.in
+                  XBMCProperties.java.in
+                  content/XBMCFileContentProvider.java.in
+                  content/XBMCMediaContentProvider.java.in
+                  content/XBMCContentProvider.java.in
+                  content/XBMCImageContentProvider.java.in
+                  XBMCSettingsContentObserver.java.in
+                  XBMCMainView.java.in
                   )
 foreach(file IN LISTS package_files)
   configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/xbmc/${file}.in
