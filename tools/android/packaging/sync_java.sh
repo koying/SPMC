@@ -50,4 +50,4 @@ cp -f $TMP_DIR/strings.xml.in $TARGET_DIR/strings.xml.in
 cp -f $TMP_DIR/colors.xml.in $TARGET_DIR/colors.xml.in
 cp -f $TMP_DIR/searchable.xml.in $TARGET_DIR/searchable.xml.in
 
-#rm -rf $TMP_DIR
+rm -rf $TMP_DIR
