@@ -97,8 +97,15 @@ public class TvUtil
     }
 
     Intent playlistIntent = new Intent(context, Splash.class);
-    playlistIntent.setAction(Intent.ACTION_GET_CONTENT);
-    playlistIntent.setData(Uri.parse("special://profile" + Uri.parse(subscription.getUri()).getPath()));
+    if (subscription.getUri().isEmpty())
+    {
+      playlistIntent.setAction(Intent.ACTION_VIEW);
+    }
+    else
+    {
+      playlistIntent.setAction(Intent.ACTION_GET_CONTENT);
+      playlistIntent.setData(Uri.parse("special://profile" + Uri.parse(subscription.getUri()).getPath()));
+    }
 
     Channel.Builder builder = new Channel.Builder();
     builder.setType(TvContractCompat.Channels.TYPE_PREVIEW)
@@ -239,6 +246,7 @@ public class TvUtil
 
     JobScheduler scheduler =
             (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    scheduler.cancel(getImmediateJobIdForChannelId(channelId));
     scheduler.cancel(getTimedJobIdForChannelId(channelId));
     scheduler.schedule(job);
   }
@@ -265,6 +273,7 @@ public class TvUtil
     JobScheduler scheduler =
             (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
     scheduler.cancel(getImmediateJobIdForChannelId(channelId));
+    scheduler.cancel(getTimedJobIdForChannelId(channelId));
     scheduler.schedule(builder.build());
   }
 

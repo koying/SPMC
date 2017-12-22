@@ -310,7 +310,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     {
       if (Build.VERSION.SDK_INT >= VERSION_CODES.O)
         TvUtil.scheduleSyncingChannel(this);
-
+      else
       {
         // Leanback
         mJsonRPC = new XBMCJsonRPC();

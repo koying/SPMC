@@ -87,6 +87,8 @@ public class SyncChannelJobService extends JobService
     {
       List<Subscription> subscriptions = XBMCDatabase.getSubscriptions(mContext);
       List<Subscription> freshsubscriptions = new ArrayList<>();
+      List<File> playlistsContent = new ArrayList<>();
+
       try (Cursor cursor =
                    mContext.getContentResolver()
                            .query(
@@ -96,23 +98,67 @@ public class SyncChannelJobService extends JobService
                                    null,
                                    null))
       {
-        if (cursor == null)
-          return false;
-
-        while (cursor.moveToNext())
+        if (cursor != null)
         {
-          File file = File.fromCursor(cursor);
-          Subscription sub = Subscription.createSubscription(file.getName(), file.getUri(), R.drawable.ic_recommendation_80dp);
-          freshsubscriptions.add(sub);
-
-          int subidx = subscriptions.indexOf(sub);
-          if (subidx != -1)
-            continue;
-
-          long channelId = TvUtil.createChannel(mContext, sub);
-          sub.setChannelId(channelId);
-          subscriptions.add(sub);
+          while (cursor.moveToNext())
+            playlistsContent.add(File.fromCursor(cursor));
         }
+      }
+      try (Cursor cursor =
+                   mContext.getContentResolver()
+                           .query(
+                                   XBMCFileContentProvider.buildUri("/playlists/mixed"),
+                                   null,
+                                   null,
+                                   null,
+                                   null))
+      {
+        if (cursor != null)
+        {
+          while (cursor.moveToNext())
+            playlistsContent.add(File.fromCursor(cursor));
+        }
+      }
+      try (Cursor cursor =
+                   mContext.getContentResolver()
+                           .query(
+                                   XBMCFileContentProvider.buildUri("/playlists/music"),
+                                   null,
+                                   null,
+                                   null,
+                                   null))
+      {
+        if (cursor != null)
+        {
+          while (cursor.moveToNext())
+            playlistsContent.add(File.fromCursor(cursor));
+        }
+      }
+
+      if (subscriptions.size() == 0)  // First-run: Add default channel
+      {
+        Subscription sub = Subscription.createSubscription(mContext.getString(R.string.suggestion_channel), "", R.drawable.ic_recommendation_80dp);
+        freshsubscriptions.add(sub);
+
+        long channelId = TvUtil.createChannel(mContext, sub);
+        sub.setChannelId(channelId);
+        subscriptions.add(sub);
+
+        TvContractCompat.requestChannelBrowsable(mContext, channelId);
+      }
+
+      for (File file : playlistsContent)
+      {
+        Subscription sub = Subscription.createSubscription(file.getName(), file.getUri(), R.drawable.ic_recommendation_80dp);
+        freshsubscriptions.add(sub);
+
+        int subidx = subscriptions.indexOf(sub);
+        if (subidx != -1)
+          continue;
+
+        long channelId = TvUtil.createChannel(mContext, sub);
+        sub.setChannelId(channelId);
+        subscriptions.add(sub);
       }
 
       // Kick off a job to update default programs.
