@@ -15,6 +15,7 @@
 package @APP_PACKAGE@.channels;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import android.app.job.JobParameters;
@@ -135,11 +136,10 @@ public class SyncChannelJobService extends JobService
         }
       }
 
+      Subscription sub = Subscription.createSubscription(mContext.getString(R.string.suggestion_channel), "", R.drawable.ic_recommendation_80dp);
+      freshsubscriptions.add(sub);
       if (subscriptions.size() == 0)  // First-run: Add default channel
       {
-        Subscription sub = Subscription.createSubscription(mContext.getString(R.string.suggestion_channel), "", R.drawable.ic_recommendation_80dp);
-        freshsubscriptions.add(sub);
-
         long channelId = TvUtil.createChannel(mContext, sub);
         sub.setChannelId(channelId);
         subscriptions.add(sub);
@@ -149,7 +149,7 @@ public class SyncChannelJobService extends JobService
 
       for (File file : playlistsContent)
       {
-        Subscription sub = Subscription.createSubscription(file.getName(), file.getUri(), R.drawable.ic_recommendation_80dp);
+        sub = Subscription.createSubscription(file.getName(), file.getUri(), R.drawable.ic_recommendation_80dp);
         freshsubscriptions.add(sub);
 
         int subidx = subscriptions.indexOf(sub);
@@ -163,12 +163,13 @@ public class SyncChannelJobService extends JobService
 
       // Kick off a job to update default programs.
       // The program job should verify if the channel is visible before updating programs.
-      for (Subscription channel : subscriptions)
+      for (Iterator<Subscription> iterator = subscriptions.iterator(); iterator.hasNext();)
       {
+        Subscription channel = iterator.next();
+
         if (freshsubscriptions.indexOf(channel) == -1)
         {
           // Channel is gone
-          subscriptions.remove(channel);
           mContext.getContentResolver()
                   .delete(
                           TvContractCompat.buildPreviewProgramsUriForChannel(channel.getChannelId()),
@@ -180,13 +181,14 @@ public class SyncChannelJobService extends JobService
                           null,
                           null);
           XBMCDatabase.removeMedias(mContext, channel.getChannelId());
+          iterator.remove();
           continue;
         }
-        XBMCDatabase.saveSubscriptions(mContext, subscriptions);
         TvUtil.scheduleTriggeredSyncingProgramsForChannel(mContext, channel.getChannelId());
         TvUtil.scheduleTimedSyncingProgramsForChannel(mContext, channel.getChannelId());
         TvUtil.scheduleSyncingProgramsForChannel(mContext, channel.getChannelId());
       }
+      XBMCDatabase.saveSubscriptions(mContext, subscriptions);
 
       return true;
     }

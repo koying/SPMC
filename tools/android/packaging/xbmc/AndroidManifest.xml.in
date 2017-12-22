@@ -118,6 +118,11 @@
             android:authorities="@APP_PACKAGE@.media"
             android:exported="true" />
 
+        <provider
+            android:name=".content.XBMCFileContentProvider"
+            android:authorities="@APP_PACKAGE@.file"
+            android:exported="true" />
+
         <activity android:name=".XBMCSearchableActivity" >
              <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

@@ -76,7 +76,7 @@ public class XBMCJsonRPC
                   + "\"id\": \"1\"}";
 
   private String RECOMMENDATIONS_SHOWS_JSON =
-                 "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{\"and\":[{\"field\":\"playcount\",\"operator\":\"is\",\"value\":\"0\"},{\"field\":\"plot\",\"operator\":\"isnot\",\"value\":\"\"}]},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"1\"}";
+                 "{\"jsonrpc\":\"2.0\",\"method\":\"VideoLibrary.GetTVShows\",\"params\":{\"filter\":{\"and\":[{\"field\":\"playcount\",\"operator\":\"is\",\"value\":\"0\"},{\"field\":\"plot\",\"operator\":\"isnot\",\"value\":\"\"}]},\"limits\":{\"start\":0,\"end\":10},\"properties\":[\"imdbnumber\",\"title\",\"plot\",\"thumbnail\",\"fanart\", \"studio\"],\"sort\":{\"order\":\"descending\",\"method\":\"lastplayed\",\"ignorearticle\":true}},\"id\":\"1\"}";
 
   private String RECOMMENDATIONS_ALBUMS_JSON =
                  "{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetAlbums\", \"params\": { \"limits\": { \"start\" : 0, \"end\": 3}, \"properties\" : [\"title\", \"displayartist\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"random\", \"ignorearticle\": true } }, \"id\": \"1\"}";
@@ -839,8 +839,7 @@ public class XBMCJsonRPC
         String url = getDownloadUrl(details.getString("fanart"));
         if (!url.isEmpty())
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
-      } else if (med.getCardImageUrl() != null)
-        med.setBackgroundImageUrl(med.getCardImageUrl());
+      }
       med.setXbmcUrl("videodb://movies/titles/" + details.getString("movieid") + "?showinfo=true");
       String url = getDownloadUrl(details.getString("file"));
       if (!url.isEmpty())
@@ -881,8 +880,6 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
-      else if (med.getCardImageUrl() != null)
-        med.setBackgroundImageUrl(med.getCardImageUrl());
       med.setXbmcUrl("videodb://tvshows/titles/" + details.getInt("tvshowid") + "/");
       med.setCategory("tvshow");
     }
@@ -915,8 +912,6 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
-      else if (med.getCardImageUrl() != null)
-        med.setBackgroundImageUrl(med.getCardImageUrl());
       med.setXbmcUrl("videodb://tvshows/titles/" + details.getInt("tvshowid") + "/" + details.getInt("episodeid") + "?showinfo=true");
       String url = getDownloadUrl(details.getString("file"));
       if (!url.isEmpty())
@@ -955,12 +950,7 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
-      else if (med.getCardImageUrl() != null)
-        med.setBackgroundImageUrl(med.getCardImageUrl());
       med.setXbmcUrl("musicdb://albums/" + details.getString("albumid") + "/");
-      String url = getDownloadUrl(details.getString("file"));
-      if (!url.isEmpty())
-        med.setVideoUrl(url);
       med.setCategory("album");
     }
     catch (Exception e)

@@ -235,7 +235,7 @@ public class TvUtil
 
     JobInfo.Builder builder =
             new JobInfo.Builder(getTimedJobIdForChannelId(channelId), componentName);
-    builder.setPeriodic(10000);
+    builder.setPeriodic(1800000);
 
     PersistableBundle bundle = new PersistableBundle();
     bundle.putLong(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
@@ -281,7 +281,6 @@ public class TvUtil
   {
     return (int) (CHANNEL_TRIGGERED_JOB_ID_OFFSET + channelId);
   }
-
   private static int getTimedJobIdForChannelId(long channelId)
   {
     return (int) (CHANNEL_TIMED_JOB_ID_OFFSET + channelId);

@@ -258,9 +258,15 @@ public class SyncProgramsJobService extends JobService
               .setIntent(detailsIntent);
 
       if (media.getCardImageUrl() != null)
+      {
         builder.setPosterArtUri(Uri.parse(media.getCardImageUrl()));
+        builder.setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_2_3);
+      }
       else if (media.getBackgroundImageUrl() != null)
+      {
         builder.setPosterArtUri(Uri.parse(media.getBackgroundImageUrl()));
+        builder.setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_16_9);
+      }
       if (media.getVideoUrl() != null)
         builder.setPreviewVideoUri(Uri.parse(media.getVideoUrl()));
 

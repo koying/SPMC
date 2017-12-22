@@ -30,41 +30,41 @@ set(package_files strings.xml
                   searchable.xml
                   AndroidManifest.xml
                   build.gradle
-                  Splash.java.in
-                  XBMCVideoView.java.in
-                  XBMCJsonRPC.java.in
-                  channels/SyncChannelJobService.java.in
-                  channels/SyncProgramsJobService.java.in
-                  channels/model/XBMCDatabase.java.in
-                  channels/model/Subscription.java.in
-                  channels/util/SharedPreferencesHelper.java.in
-                  channels/util/TvUtil.java.in
-                  XBMCCrashHandler.java.in
-                  Main.java.in
-                  XBMCProjection.java.in
-                  XBMCMediaSession.java.in
-                  interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java.in
-                  interfaces/XBMCNsdManagerResolveListener.java.in
-                  interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java.in
-                  interfaces/XBMCNsdManagerRegistrationListener.java.in
-                  interfaces/XBMCNsdManagerDiscoveryListener.java.in
-                  XBMCBroadcastReceiver.java.in
-                  model/TVEpisode.java.in
-                  model/Movie.java.in
-                  model/TVShow.java.in
-                  model/File.java.in
-                  model/Album.java.in
-                  model/Media.java.in
-                  XBMCSearchableActivity.java.in
-                  XBMCRecommendationBuilder.java.in
-                  XBMCInputDeviceListener.java.in
-                  XBMCProperties.java.in
-                  content/XBMCFileContentProvider.java.in
-                  content/XBMCMediaContentProvider.java.in
-                  content/XBMCContentProvider.java.in
-                  content/XBMCImageContentProvider.java.in
-                  XBMCSettingsContentObserver.java.in
-                  XBMCMainView.java.in
+                  src/Splash.java
+                  src/XBMCVideoView.java
+                  src/XBMCJsonRPC.java
+                  src/channels/SyncChannelJobService.java
+                  src/channels/SyncProgramsJobService.java
+                  src/channels/model/XBMCDatabase.java
+                  src/channels/model/Subscription.java
+                  src/channels/util/SharedPreferencesHelper.java
+                  src/channels/util/TvUtil.java
+                  src/XBMCCrashHandler.java
+                  src/Main.java
+                  src/XBMCProjection.java
+                  src/XBMCMediaSession.java
+                  src/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java
+                  src/interfaces/XBMCNsdManagerResolveListener.java
+                  src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
+                  src/interfaces/XBMCNsdManagerRegistrationListener.java
+                  src/interfaces/XBMCNsdManagerDiscoveryListener.java
+                  src/XBMCBroadcastReceiver.java
+                  src/model/TVEpisode.java
+                  src/model/Movie.java
+                  src/model/TVShow.java
+                  src/model/File.java
+                  src/model/Album.java
+                  src/model/Media.java
+                  src/XBMCSearchableActivity.java
+                  src/XBMCRecommendationBuilder.java
+                  src/XBMCInputDeviceListener.java
+                  src/XBMCProperties.java
+                  src/content/XBMCFileContentProvider.java
+                  src/content/XBMCMediaContentProvider.java
+                  src/content/XBMCContentProvider.java
+                  src/content/XBMCImageContentProvider.java
+                  src/XBMCSettingsContentObserver.java
+                  src/XBMCMainView.java
                   )
 foreach(file IN LISTS package_files)
   configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/xbmc/${file}.in
