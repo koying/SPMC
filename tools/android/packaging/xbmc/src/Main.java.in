@@ -300,6 +300,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     NotificationManager nMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     nMgr.cancelAll();
 
+    // keep alive
+    startService(new Intent(this, KeepAliveService.class));
+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
     {
       AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -431,6 +434,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onDestroy()
   {
+    // kill keepalive
+    stopService(new Intent(this, KeepAliveService.class));
+
     // unregister the InputDeviceListener implementation
     InputManager manager = (InputManager) getSystemService(INPUT_SERVICE);
     manager.unregisterInputDeviceListener(mInputDeviceListener);
