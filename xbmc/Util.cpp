@@ -40,7 +40,7 @@
 #if defined(TARGET_ANDROID)
 #include <androidjni/ApplicationInfo.h>
 #include "platform/android/bionic_supplement/bionic_supplement.h"
-#include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "CompileInfo.h"
 #endif
 #include <stdlib.h>
@@ -1792,7 +1792,7 @@ std::string CUtil::ResolveExecutablePath()
   else
     strExecutablePath = buf;
 #elif defined(TARGET_ANDROID)
-  strExecutablePath = CXBMCApp::get()->getApplicationInfo().nativeLibraryDir;
+  strExecutablePath = CXBMCService::get()->getApplicationInfo().nativeLibraryDir;
 
   std::string appName = CCompileInfo::GetAppName();
   std::string libName = "lib" + appName + ".so";

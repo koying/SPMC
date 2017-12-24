@@ -1,0 +1,71 @@
+package @APP_PACKAGE@;
+
+import android.app.Notification;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.IBinder;
+
+public class Service extends android.app.Service
+{
+  native boolean _launchApplication();
+
+  static private Boolean m_isStarted = false;
+  public static Boolean isStarted()
+  {
+    return m_isStarted;
+  }
+
+  public Service()
+  {
+  }
+
+  @Override
+  public void onCreate()
+  {
+    System.loadLibrary("@APP_NAME_LC@");
+    super.onCreate();
+  }
+
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId)
+  {
+    if (!m_isStarted)
+      m_isStarted =_launchApplication();
+    if (m_isStarted)
+    {
+      Intent i = new Intent("@APP_PACKAGE@.SERVICE_STARTED");
+      sendBroadcast(i);
+    }
+
+    Bitmap icon = BitmapFactory.decodeResource(getResources(),
+            R.drawable.ic_recommendation_80dp);
+
+    Notification.Builder builder = new Notification.Builder(this)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("@APP_NAME@ is running...")
+            .setSmallIcon(R.drawable.notif_icon)
+            .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
+            ;
+
+    Notification notification = builder.build();
+    startForeground(1, notification);
+    return START_STICKY;
+  }
+
+  @Override
+  public void onDestroy()
+  {
+    Intent i = new Intent("@APP_PACKAGE@.SERVICE_STOPPED");
+    sendBroadcast(i);
+
+    super.onDestroy();
+  }
+
+  @Override
+  public IBinder onBind(Intent intent)
+  {
+    // TODO: Return the communication channel to the service.
+    throw new UnsupportedOperationException("Not implemented");
+  }
+}

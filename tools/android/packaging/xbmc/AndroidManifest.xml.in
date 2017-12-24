@@ -165,7 +165,7 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name=".KeepAliveService"
+            android:name=".Service"
             android:enabled="true"
             android:exported="true"/>
     </application>

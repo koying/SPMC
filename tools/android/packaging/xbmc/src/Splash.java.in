@@ -3,7 +3,6 @@ package @APP_PACKAGE@;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,19 +10,15 @@ import java.io.OutputStream;
 import java.lang.System;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.ArrayList;
 
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -63,6 +58,8 @@ public class Splash extends Activity
   private static final int StorageChecked = 8;
   private static final int DownloadingObb = 90;
   private static final int DownloadObbDone = 91;
+  private static final int StartingService = 97;
+  private static final int WaitingService = 98;
   private static final int StartingXBMC = 99;
 
   private static final String TAG = "@APP_NAME@";
@@ -85,6 +82,8 @@ public class Splash extends Activity
 
   private BroadcastReceiver mExternalStorageReceiver = null;
   private boolean mExternalStorageChecked = false;
+  private BroadcastReceiver mServiceReceiver = null;
+  private boolean mServiceChecked = false;
   private boolean mCachingDone = false;
   private boolean mInstallLibs = false;
 
@@ -123,7 +122,7 @@ public class Splash extends Activity
           break;
         case CachingDone:
           mSplash.mCachingDone = true;
-          sendEmptyMessage(StartingXBMC);
+          sendEmptyMessage(StartingService);
           break;
         case WaitingStorageChecked:
           mSplash.mTextView.setText("Waiting for external storage...");
@@ -134,7 +133,7 @@ public class Splash extends Activity
           mExternalStorageChecked = true;
           mSplash.stopWatchingExternalStorage();
           if (mSplash.mCachingDone)
-            sendEmptyMessage(StartingXBMC);
+            sendEmptyMessage(StartingService);
           else
           {
             SetupEnvironment();
@@ -147,7 +146,7 @@ public class Splash extends Activity
               mState = CachingDone;
               mCachingDone = true;
 
-              sendEmptyMessage(StartingXBMC);
+              sendEmptyMessage(StartingService);
             }
             else
             {
@@ -156,7 +155,23 @@ public class Splash extends Activity
           }
 
           break;
+        case StartingService:
+          if (mServiceChecked)
+            sendEmptyMessage(StartingXBMC);
+          else
+          {
+            mSplash.mTextView.setText("Starting Service...");
+            mSplash.mProgress.setVisibility(View.INVISIBLE);
+            mSplash.startService();
+            sendEmptyMessage(WaitingService);
+          }
+          break;
+        case WaitingService:
+          mSplash.mTextView.setText("Waiting for Service...");
+          mSplash.mProgress.setVisibility(View.INVISIBLE);
+          break;
         case StartingXBMC:
+          stopWatchingService();
           mSplash.mTextView.setText("Starting @APP_NAME@...");
           mSplash.mProgress.setVisibility(View.INVISIBLE);
           mSplash.startXBMC();
@@ -739,6 +754,45 @@ public class Splash extends Activity
       unregisterReceiver(mExternalStorageReceiver);
   }
 
+  void updateServiceState()
+  {
+    mServiceChecked = Service.isStarted();
+    if (!mServiceChecked)
+      mStateMachine.sendEmptyMessage(StartingService);
+    else
+      mStateMachine.sendEmptyMessage(StartingXBMC);
+  }
+
+  void startWatchingService()
+  {
+    mServiceReceiver = new BroadcastReceiver()
+    {
+      @Override
+      public void onReceive(Context context, Intent intent)
+      {
+        updateServiceState();
+      }
+    };
+    IntentFilter filter = new IntentFilter();
+    filter.addAction("@APP_PACKAGE@.SERVICE_STARTED");
+    registerReceiver(mServiceReceiver, filter);
+  }
+
+  void stopWatchingService()
+  {
+    if (mServiceReceiver != null)
+      unregisterReceiver(mServiceReceiver);
+  }
+
+  protected void startService()
+  {
+    if (!Service.isStarted())
+    {
+      startWatchingService();
+      startService(new Intent(this, Service.class));
+    }
+  }
+
   protected void startXBMC()
   {
     // Run @APP_NAME@
@@ -746,6 +800,7 @@ public class Splash extends Activity
     intent.setClass(this, @APP_PACKAGE@.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
+
     finish();
   }
 
@@ -845,6 +900,9 @@ public class Splash extends Activity
     if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()))
       mExternalStorageChecked = true;
 
+    if (Service.isStarted())
+      mServiceChecked = true;
+
     if (mState != InError && mExternalStorageChecked)
     {
       mState = ChecksDone;
@@ -859,7 +917,7 @@ public class Splash extends Activity
       }
     }
 
-    if ((mState != DownloadingObb && mState != InError) && mCachingDone && mExternalStorageChecked)
+    if ((mState != DownloadingObb && mState != InError) && mCachingDone && mExternalStorageChecked && mServiceChecked)
     {
       startXBMC();
       return;

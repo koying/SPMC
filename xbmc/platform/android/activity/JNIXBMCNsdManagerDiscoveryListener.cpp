@@ -23,7 +23,7 @@
 #include <androidjni/jutils-details.hpp>
 #include <androidjni/NsdServiceInfo.h>
 
-#include "XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "CompileInfo.h"
 #include "utils/log.h"
 
@@ -35,7 +35,7 @@ static std::string s_className = std::string(CCompileInfo::GetClass()) + "/inter
 CJNIXBMCNsdManagerDiscoveryListener::CJNIXBMCNsdManagerDiscoveryListener()
   : CJNIBase(s_className)
 {
-  m_object = new_object(CXBMCApp::get()->getClassLoader().loadClass(GetDotClassName(GetClassName())));
+  m_object = new_object(CXBMCService::get()->getClassLoader().loadClass(GetDotClassName(GetClassName())));
   m_object.setGlobal();
 
   add_instance(m_object, this);
