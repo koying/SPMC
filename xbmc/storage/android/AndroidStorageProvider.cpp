@@ -31,7 +31,7 @@
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "guilib/LocalizeStrings.h"
-#include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 
 #include "Util.h"
 #include "utils/log.h"
@@ -107,7 +107,7 @@ void CAndroidStorageProvider::GetLocalDrives(VECSOURCES &localDrives)
 
   // external directory
   std::string path;
-  if (CXBMCApp::GetExternalStorage(path) && !path.empty()  && XFILE::CDirectory::Exists(path))
+  if (CXBMCService::GetExternalStorage(path) && !path.empty()  && XFILE::CDirectory::Exists(path))
   {
     share.strPath = path;
     share.strName = g_localizeStrings.Get(21456);
@@ -127,7 +127,7 @@ void CAndroidStorageProvider::GetRemovableDrives(VECSOURCES &removableDrives)
   bool inError = false;
   VECSOURCES droidDrives;
 
-  CJNIStorageManager manager(CXBMCApp::get()->getSystemService("storage"));
+  CJNIStorageManager manager(CXBMCService::get()->getSystemService("storage"));
   if (xbmc_jnienv()->ExceptionCheck())
   {
     xbmc_jnienv()->ExceptionClear();
@@ -321,19 +321,19 @@ std::vector<std::string> CAndroidStorageProvider::GetDiskUsage()
 
   std::string usage;
   // add header
-  CXBMCApp::GetStorageUsage("", usage);
+  CXBMCService::GetStorageUsage("", usage);
   result.push_back(usage);
 
   usage.clear();
   // add rootfs
-  if (CXBMCApp::GetStorageUsage("/", usage) && !usage.empty())
+  if (CXBMCService::GetStorageUsage("/", usage) && !usage.empty())
     result.push_back(usage);
 
   usage.clear();
   // add external storage if available
   std::string path;
-  if (CXBMCApp::GetExternalStorage(path) && !path.empty() &&
-      CXBMCApp::GetStorageUsage(path, usage) && !usage.empty())
+  if (CXBMCService::GetExternalStorage(path) && !path.empty() &&
+      CXBMCService::GetStorageUsage(path, usage) && !usage.empty())
     result.push_back(usage);
 
   // add removable storage
@@ -342,7 +342,7 @@ std::vector<std::string> CAndroidStorageProvider::GetDiskUsage()
   for (unsigned int i = 0; i < drives.size(); i++)
   {
     usage.clear();
-    if (CXBMCApp::GetStorageUsage(drives[i].strPath, usage) && !usage.empty())
+    if (CXBMCService::GetStorageUsage(drives[i].strPath, usage) && !usage.empty())
       result.push_back(usage);
   }
 

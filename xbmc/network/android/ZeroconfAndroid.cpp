@@ -22,12 +22,12 @@
 
 #include "utils/log.h"
 
-#include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "threads/SingleLock.h"
 
 CZeroconfAndroid::CZeroconfAndroid()
 {
-  m_manager = CXBMCApp::get()->getSystemService(CJNIContext::NSD_SERVICE);
+  m_manager = CXBMCService::get()->getSystemService(CJNIContext::NSD_SERVICE);
 }
 
 CZeroconfAndroid::~CZeroconfAndroid()

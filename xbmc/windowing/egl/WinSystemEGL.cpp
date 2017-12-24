@@ -505,7 +505,7 @@ void CWinSystemEGL::NotifyAppActiveChange(bool bActivated)
 bool CWinSystemEGL::Minimize()
 {
 #ifdef TARGET_ANDROID
-  CXBMCApp::get()->moveTaskToBack(true);
+  CXBMCApp::get()->Minimize();
 #else
   Hide();
 #endif
