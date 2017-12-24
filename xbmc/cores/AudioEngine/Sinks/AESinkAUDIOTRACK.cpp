@@ -27,6 +27,7 @@
 
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/log.h"
@@ -923,7 +924,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   // Enumerate audio devices on API >= 23
   if (CJNIAudioManager::GetSDKVersion() >= 23)
   {
-    CJNIAudioManager audioManager(CXBMCApp::get()->getSystemService("audio"));
+    CJNIAudioManager audioManager(CXBMCService::get()->getSystemService("audio"));
     CJNIAudioDeviceInfos audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
     if (g_advancedSettings.CanLogComponent(LOGAUDIO))
       LogAudoDevices("EnumerateDevicesEx", audiodevices);
