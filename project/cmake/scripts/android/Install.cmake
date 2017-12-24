@@ -65,6 +65,7 @@ set(package_files strings.xml
                   src/content/XBMCImageContentProvider.java
                   src/XBMCSettingsContentObserver.java
                   src/XBMCMainView.java
+                  src/KeepAliveService.java
                   )
 foreach(file IN LISTS package_files)
   configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/xbmc/${file}.in
