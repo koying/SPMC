@@ -30,6 +30,7 @@ public class Media implements Serializable
   private String description;
   private String bgImageUrl = null;
   private String cardImageUrl = null;
+  private String cardImageAspectRatio = null;
   private String videoUrl = null;
   private String xbmcUrl = null;
   private String category;
@@ -139,6 +140,16 @@ public class Media implements Serializable
   public void setCategory(String category)
   {
     this.category = category;
+  }
+
+  public String getCardImageAspectRatio()
+  {
+    return cardImageAspectRatio;
+  }
+
+  public void setCardImageAspectRatio(String cardImageAspectRatio)
+  {
+    this.cardImageAspectRatio = cardImageAspectRatio;
   }
 
   @Override

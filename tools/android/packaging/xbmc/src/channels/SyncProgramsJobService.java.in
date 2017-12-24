@@ -260,7 +260,12 @@ public class SyncProgramsJobService extends JobService
       if (media.getCardImageUrl() != null)
       {
         builder.setPosterArtUri(Uri.parse(media.getCardImageUrl()));
-        builder.setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_2_3);
+        if (media.getCardImageAspectRatio().equals("2:3"))
+          builder.setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_2_3);
+        else if (media.getCardImageAspectRatio().equals("1:1"))
+          builder.setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_1_1);
+        else
+          builder.setPosterArtAspectRatio(TvContractCompat.PreviewProgramColumns.ASPECT_RATIO_16_9);
       }
       else if (media.getBackgroundImageUrl() != null)
       {

@@ -6,7 +6,7 @@
     android:versionCode="@APP_VERSION_CODE@"
     android:versionName="@APP_VERSION@" >
 
-    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="26" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -24,6 +24,7 @@
     <uses-feature android:name="android.hardware.type.television" android:required="false" />
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
+    <uses-feature android:name="android.software.leanback" android:required="false" />
 
     <application android:icon="@drawable/ic_launcher"
                                 android:banner="@drawable/banner"

@@ -834,6 +834,7 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setCardImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
+      med.setCardImageAspectRatio("2:3");
       if (details.has("fanart") && !details.getString("fanart").isEmpty())
       {
         String url = getDownloadUrl(details.getString("fanart"));
@@ -874,6 +875,7 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setCardImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
+      med.setCardImageAspectRatio("2:3");
       if (details.has("fanart") && !details.getString("fanart").isEmpty())
       {
         String url = getDownloadUrl(details.getString("fanart"));
@@ -906,6 +908,7 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setCardImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
+      med.setCardImageAspectRatio("16:9");
       if (details.has("fanart") && !details.getString("fanart").isEmpty())
       {
         String url = getDownloadUrl(details.getString("fanart"));
@@ -944,6 +947,7 @@ public class XBMCJsonRPC
         if (!url.isEmpty())
           med.setCardImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
+      med.setCardImageAspectRatio("1:1");
       if (details.has("fanart") && !details.getString("fanart").isEmpty())
       {
         String url = getDownloadUrl(details.getString("fanart"));
