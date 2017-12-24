@@ -209,6 +209,7 @@
 #include <androidjni/ApplicationInfo.h>
 #include <androidjni/System.h>
 #include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
 
@@ -271,6 +272,8 @@ CApplication::CApplication(void)
   , m_stackFileItemToUpdate(new CFileItem)
   , m_threadID(0)
   , m_bInitializing(true)
+  , m_bGUIInitialized(false)
+  , m_bGUICreated(false)
   , m_bPlatformDirectories(true)
   , m_progressTrackingVideoResumeBookmark(*new CBookmark)
   , m_progressTrackingItem(new CFileItem)
@@ -391,7 +394,7 @@ static void CopyUserDataIfNeeded(const std::string &strPath, const std::string &
     destPath = URIUtils::AddFileToFolder(strPath, file);
   else
     destPath = URIUtils::AddFileToFolder(strPath, destname);
-  
+
   if (!CFile::Exists(destPath))
   {
     // need to copy it across
@@ -476,7 +479,7 @@ bool CApplication::Create()
     // set special://envhome
     CSpecialProtocol::SetEnvHomePath(getenv("HOME"));
   #endif
-    
+
   // only the InitDirectories* for the current platform should return true
   bool inited = InitDirectoriesLinux();
   if (!inited)
@@ -488,7 +491,7 @@ bool CApplication::Create()
   CopyUserDataIfNeeded("special://masterprofile/", "RssFeeds.xml");
   CopyUserDataIfNeeded("special://masterprofile/", "favourites.xml");
   CopyUserDataIfNeeded("special://masterprofile/", "Lircmap.xml");
-  
+
   //! @todo - move to CPlatformXXX
   #ifdef TARGET_DARWIN_IOS
     CopyUserDataIfNeeded("special://masterprofile/", "iOS/sources.xml", "sources.xml");
@@ -518,7 +521,7 @@ bool CApplication::Create()
   buildType = "Unknown";
 #endif
   std::string specialVersion;
-  
+
   //! @todo - move to CPlatformXXX
 #if defined(TARGET_RASPBERRY_PI)
   specialVersion = " (version for Raspberry Pi)";
@@ -547,7 +550,7 @@ bool CApplication::Create()
     CLog::Log(LOGNOTICE, "Host CPU: %s, %d core%s available", cpuModel.c_str(), g_cpuInfo.getCPUCount(), (g_cpuInfo.getCPUCount() == 1) ? "" : "s");
   else
     CLog::Log(LOGNOTICE, "%d CPU core%s available", g_cpuInfo.getCPUCount(), (g_cpuInfo.getCPUCount() == 1) ? "" : "s");
-  
+
   //! @todo - move to CPlatformXXX ???
 #if defined(TARGET_WINDOWS)
   CLog::Log(LOGNOTICE, "%s", CWIN32Util::GetResInfoString().c_str());
@@ -560,11 +563,11 @@ bool CApplication::Create()
         CJNIBuild::PRODUCT.c_str(), CJNIBuild::DEVICE.c_str(), CJNIBuild::BOARD.c_str(),
         CJNIBuild::MANUFACTURER.c_str(), CJNIBuild::BRAND.c_str(), CJNIBuild::MODEL.c_str(), CJNIBuild::HARDWARE.c_str());
   std::string extstorage;
-  bool extready = CXBMCApp::GetExternalStorage(extstorage);
+  bool extready = CXBMCService::GetExternalStorage(extstorage);
   CLog::Log(LOGNOTICE, "External storage path = %s; status = %s", extstorage.c_str(), extready ? "ok" : "nok");
   CLog::Log(LOGNOTICE, "System library paths = %s", CJNISystem::getProperty("java.library.path").c_str());
-  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCApp::get()->getApplicationInfo().nativeLibraryDir.c_str());
-  CLog::Log(LOGNOTICE, "APK = %s", CXBMCApp::get()->getPackageResourcePath().c_str());
+  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCService::get()->getApplicationInfo().nativeLibraryDir.c_str());
+  CLog::Log(LOGNOTICE, "APK = %s", CXBMCService::get()->getPackageResourcePath().c_str());
   CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
 #endif
 
@@ -703,7 +706,7 @@ bool CApplication::Create()
 
 bool CApplication::CreateGUI()
 {
-  m_frameMoveGuard.lock();
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
   m_renderGUI = true;
 #ifdef HAS_SDL
@@ -780,7 +783,7 @@ bool CApplication::CreateGUI()
     CDisplaySettings::GetInstance().SetCurrentResolution(RES_DESKTOP);
     sav_res = true;
   }
-  if (!InitWindow())
+  if (!InitWindow(CDisplaySettings::GetInstance().GetCurrentResolution()))
   {
     return false;
   }
@@ -802,6 +805,93 @@ bool CApplication::CreateGUI()
             info.strMode.c_str());
 
   g_windowManager.Initialize();
+  g_windowManager.CreateWindows();
+
+  CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
+
+  std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
+  if (!LoadSkin(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)))
+  {
+    CLog::Log(LOGERROR, "Failed to load skin '%s'", CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN).c_str());
+    if (!LoadSkin(defaultSkin))
+    {
+      CLog::Log(LOGFATAL, "Default skin '%s' could not be loaded! Terminating..", defaultSkin.c_str());
+      return false;
+    }
+  }
+  m_bGUICreated = true;
+
+  return true;
+}
+
+bool CApplication::DestroyGUI()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  UnloadSkin();
+
+  g_Windowing.DestroyRenderSystem();
+  g_Windowing.DestroyWindowSystem();
+  g_windowManager.DestroyWindows();
+
+  m_bGUICreated = false;
+
+  return true;
+}
+
+bool CApplication::StartGUI()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+  bool uiInitializationFinished = true;
+
+  // initialize splash window after splash screen disappears
+  // because we need a real window in the background which gets
+  // rendered while we load the main window or enter the master lock key
+  if (g_advancedSettings.m_splashImage)
+    g_windowManager.ActivateWindow(WINDOW_SPLASH);
+
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_MASTERLOCK_STARTUPLOCK) &&
+      CProfilesManager::GetInstance().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE &&
+     !CProfilesManager::GetInstance().GetMasterProfile().getLockCode().empty())
+  {
+     g_passwordManager.CheckStartUpLock();
+  }
+
+  // check if we should use the login screen
+  if (CProfilesManager::GetInstance().UsingLoginScreen())
+  {
+    // the login screen still needs to perform additional initialization
+    uiInitializationFinished = false;
+
+    g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
+  }
+  else
+  {
+    // activate the configured start window
+    int firstWindow = g_SkinInfo->GetFirstWindow();
+    g_windowManager.ActivateWindow(firstWindow);
+
+    if (g_windowManager.GetActiveWindowID() == WINDOW_STARTUP_ANIM)
+    {
+      CLog::Log(LOGWARNING, "CApplication::Initialize - startup.xml taints init process");
+    }
+
+    // the startup window is considered part of the initialization as it most likely switches to the final window
+    uiInitializationFinished = firstWindow != WINDOW_STARTUP_ANIM;
+
+    CStereoscopicsManager::GetInstance().Initialize();
+
+    if (!m_ServiceManager->Init3())
+    {
+      CLog::Log(LOGERROR, "Application - Init3 failed");
+    }
+  }
+  // if the user interfaces has been fully initialized let everyone know
+  if (uiInitializationFinished)
+  {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UI_READY);
+    g_windowManager.SendThreadMessage(msg);
+  }
 
   return true;
 }
@@ -944,7 +1034,7 @@ bool CApplication::InitDirectoriesLinux()
   CSpecialProtocol::SetXBMCBinAddonPath(appBinPath + "/addons");
 
 #if defined(TARGET_ANDROID)
-  CXBMCApp::get()->InitDirectories();
+  CXBMCService::get()->InitDirectories();
 #endif
 
   return true;
@@ -1093,6 +1183,8 @@ void CApplication::CreateUserDirs() const
 
 bool CApplication::Initialize()
 {
+  m_frameMoveGuard.lock();
+
 #if defined(HAS_DVD_DRIVE) && !defined(TARGET_WINDOWS) // somehow this throws an "unresolved external symbol" on win32
   // turn off cdio logging
   cdio_loglevel_default = CDIO_LOG_ERROR;
@@ -1115,10 +1207,6 @@ bool CApplication::Initialize()
     StringUtils::Format(g_localizeStrings.Get(177).c_str(), g_sysinfo.GetAppName().c_str()),
     StringUtils::Format(g_localizeStrings.Get(178).c_str(), g_sysinfo.GetAppName().c_str()),
     "special://xbmc/media/icon256x256.png", EventLevel::Basic)));
-
-#if !defined(TARGET_DARWIN_IOS)
-  g_peripherals.Initialise();
-#endif
 
   // Load curl so curl_global_init gets called before any service threads
   // are started. Unloading will have no effect as curl is never fully unloaded.
@@ -1164,38 +1252,42 @@ bool CApplication::Initialize()
 
   // Init DPMS, before creating the corresponding setting control.
   m_dpms = new DPMSSupport();
-  bool uiInitializationFinished = true;
+  bool uiInitializationFinished = false;
+
+  std::vector<std::string> incompatibleAddons;
+  event.Reset();
+  std::atomic<bool> isMigratingAddons(false);
+  CJobManager::GetInstance().Submit([&event, &incompatibleAddons, &isMigratingAddons]() {
+      incompatibleAddons = CAddonSystemSettings::GetInstance().MigrateAddons([&isMigratingAddons]() {
+        isMigratingAddons = true;
+      });
+      event.Set();
+    }, CJob::PRIORITY_DEDICATED);
+  localizedStr = g_localizeStrings.Get(24151);
+  iDots = 1;
+  while (!event.WaitMSec(1000))
+  {
+    if (isMigratingAddons)
+      CSplash::GetInstance().Show(std::string(iDots, ' ') + localizedStr + std::string(iDots, '.'));
+    if (iDots == 3)
+      iDots = 1;
+    else
+      ++iDots;
+  }
+  CSplash::GetInstance().Show();
+  m_incompatibleAddons = incompatibleAddons;
+
   if (g_windowManager.Initialized())
   {
+    CLog::Log(LOGDEBUG, "CApplication: Start with GUI");
+
+#if !defined(TARGET_DARWIN_IOS)
+    g_peripherals.Initialise();
+#endif
+
     CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
 
     g_windowManager.CreateWindows();
-
-    m_confirmSkinChange = false;
-
-    std::vector<std::string> incompatibleAddons;
-    event.Reset();
-    std::atomic<bool> isMigratingAddons(false);
-    CJobManager::GetInstance().Submit([&event, &incompatibleAddons, &isMigratingAddons]() {
-        incompatibleAddons = CAddonSystemSettings::GetInstance().MigrateAddons([&isMigratingAddons]() {
-          isMigratingAddons = true;
-        });
-        event.Set();
-      }, CJob::PRIORITY_DEDICATED);
-    localizedStr = g_localizeStrings.Get(24151);
-    iDots = 1;
-    while (!event.WaitMSec(1000))
-    {
-      if (isMigratingAddons)
-        CSplash::GetInstance().Show(std::string(iDots, ' ') + localizedStr + std::string(iDots, '.'));
-      if (iDots == 3)
-        iDots = 1;
-      else
-        ++iDots;
-    }
-    CSplash::GetInstance().Show();
-    m_incompatibleAddons = incompatibleAddons;
-    m_confirmSkinChange = true;
 
     std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
     if (!LoadSkin(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)))
@@ -1221,6 +1313,7 @@ bool CApplication::Initialize()
        g_passwordManager.CheckStartUpLock();
     }
 
+    uiInitializationFinished = true;
     // check if we should use the login screen
     if (CProfilesManager::GetInstance().UsingLoginScreen())
     {
@@ -1259,6 +1352,8 @@ bool CApplication::Initialize()
   }
   else //No GUI Created
   {
+    CLog::Log(LOGDEBUG, "CApplication: No GUI");
+
 #ifdef HAS_JSONRPC
     CJSONRPC::Initialize();
 #endif
@@ -1300,6 +1395,7 @@ bool CApplication::Initialize()
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UI_READY);
     g_windowManager.SendThreadMessage(msg);
   }
+  m_bInitializing = false;
 
   return true;
 }
@@ -1582,7 +1678,7 @@ bool CApplication::OnSettingsSaving() const
 
 void CApplication::ReloadSkin(bool confirm/*=false*/)
 {
-  if (!g_SkinInfo || m_bInitializing)
+  if (!g_SkinInfo || !m_bGUIInitialized)
     return; // Don't allow reload before skin is loaded by system
 
   std::string oldSkin = g_SkinInfo->ID();
@@ -2523,17 +2619,38 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
   break;
 
 #ifdef TARGET_ANDROID
-  case TMSG_DISPLAY_SETUP:
-    // If we are rendering GUI, we are in first run
+  case TMSG_DISPLAY_INIT:
     if (m_renderGUI)
       break;
+    CreateGUI();
+    if (!g_application.IsGUIInitialized())
+      StartGUI();
+
+    if (g_advancedSettings.m_videoUseDroidProjectionCapture)
+      CXBMCApp::get()->startProjection();
+
+    CXBMCApp::get()->Initialize();
+    break;
+
+  case TMSG_DISPLAY_SETUP:
+    if (m_renderGUI)
+      break;
+
+    if (!g_application.IsGUICreated())
+      CreateGUI();
+
     // We might come from a refresh rate switch destroying the native window; use the context resolution
     InitWindow(g_graphicsContext.GetVideoResolution());
     SetRenderGUI(true);
     break;
 
-  case TMSG_DISPLAY_DESTROY:
+  case TMSG_DISPLAY_CLEANUP:
     DestroyWindow();
+    SetRenderGUI(false);
+    break;
+
+  case TMSG_DISPLAY_DESTROY:
+    DestroyGUI();
     SetRenderGUI(false);
     break;
 #endif
@@ -2870,10 +2987,7 @@ bool CApplication::Cleanup()
     // unloading
     CScriptInvocationManager::GetInstance().Uninitialize();
 
-    g_Windowing.DestroyRenderSystem();
-    g_Windowing.DestroyWindow();
-    g_Windowing.DestroyWindowSystem();
-    g_windowManager.DestroyWindows();
+    DestroyGUI();
 
     CLog::Log(LOGNOTICE, "unload sections");
 
@@ -2978,16 +3092,22 @@ void CApplication::Stop(int exitCode)
     CLog::Log(LOGNOTICE, "stop all");
 
     // cancel any jobs from the jobmanager
+    CLog::Log(LOGNOTICE, "CancelJobs");
     CJobManager::GetInstance().CancelJobs();
 
     // stop scanning before we kill the network and so on
+    CLog::Log(LOGNOTICE, "m_musicInfoScanner->Stop");
     if (m_musicInfoScanner->IsScanning())
       m_musicInfoScanner->Stop(true);
 
+    CLog::Log(LOGNOTICE, "CancelAllJobs");
     if (CVideoLibraryQueue::GetInstance().IsRunning())
       CVideoLibraryQueue::GetInstance().CancelAllJobs();
 
+    CLog::Log(LOGNOTICE, "GetADSP().Deactivate");
     CServiceBroker::GetADSP().Deactivate();
+
+    CLog::Log(LOGNOTICE, "messenger cleanup");
     CApplicationMessenger::GetInstance().Cleanup();
 
     CLog::Log(LOGNOTICE, "stop player");
@@ -3028,7 +3148,7 @@ void CApplication::Stop(int exitCode)
 
     // Close network handles
     CloseNetworkShares();
-    
+
     g_audioManager.DeInitialize();
     // shutdown the AudioEngine
     CAEFactory::Shutdown();
@@ -4235,7 +4355,7 @@ bool CApplication::OnMessage(CGUIMessage& message)
         // show info dialog about moved configuration files if needed
         ShowAppMigrationMessage();
 
-        m_bInitializing = false;
+        m_bGUIInitialized = true;
       }
     }
     break;
@@ -4602,7 +4722,8 @@ void CApplication::ProcessSlow()
 
 #ifdef TARGET_ANDROID
   // Pass the slow loop to droid
-  CXBMCApp::get()->ProcessSlow();
+  if (CXBMCApp::get())
+    CXBMCApp::get()->ProcessSlow();
 #endif
 
   // check for any idle curl connections

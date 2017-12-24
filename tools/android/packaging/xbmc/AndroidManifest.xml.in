@@ -71,7 +71,6 @@
                 <data android:mimeType="video/*" />
                 <data android:mimeType="audio/*" />
                 <data android:mimeType="image/*" />
-
                 <data android:scheme="file" />
                 <data android:scheme="content" />
                 <data android:scheme="http" />
@@ -109,7 +108,6 @@
                 android:name="android.app.lib_name"
                 android:value="@APP_NAME_LC@" />
         </activity>
-
         <activity
             android:name=".XBMCCrashHandler"
             android:configChanges="keyboard|keyboardHidden|orientation"
@@ -130,7 +128,6 @@
             android:name=".content.XBMCMediaContentProvider"
             android:authorities="@APP_PACKAGE@.media"
             android:exported="true" />
-
         <provider
             android:name=".content.XBMCFileContentProvider"
             android:authorities="@APP_PACKAGE@.file"
@@ -140,8 +137,8 @@
             android:authorities="@APP_PACKAGE@.ytdl"
             android:exported="true" />
 
-        <activity android:name=".XBMCSearchableActivity" >
-             <intent-filter>
+        <activity android:name=".XBMCSearchableActivity">
+            <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -159,16 +156,18 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-       <service
-           android:name=".channels.SyncChannelJobService"
-           android:exported="false"
-           android:permission="android.permission.BIND_JOB_SERVICE" />
-
-       <service
-           android:name=".channels.SyncProgramsJobService"
-           android:exported="false"
-           android:permission="android.permission.BIND_JOB_SERVICE" />
-
+        <service
+            android:name=".channels.SyncChannelJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".channels.SyncProgramsJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".Service"
+            android:enabled="true"
+            android:exported="true"/>
     </application>
 
-</manifest><!-- END_INCLUDE(manifest) -->
+</manifest> <!-- END_INCLUDE(manifest) -->

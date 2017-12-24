@@ -20,6 +20,7 @@
 
 #include "system.h"
 #include "Splash.h"
+#include "Application.h"
 #include "guilib/GUIImage.h"
 #include "guilib/GUILabelControl.h"
 #include "guilib/GUIFontManager.h"
@@ -41,6 +42,9 @@ CSplash& CSplash::GetInstance()
 
 void CSplash::Show(const std::string& message /* = "" */)
 {
+  if (!g_application.GetRenderGUI())
+    return;
+
   if (!g_advancedSettings.m_splashImage && !(m_image || !message.empty()))
     return;
 
