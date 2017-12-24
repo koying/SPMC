@@ -120,6 +120,11 @@ public class SyncProgramsJobService extends JobService
     @Override
     protected Boolean doInBackground(Long... channelIds)
     {
+      XBMCJsonRPC json = new XBMCJsonRPC();
+      if (!json.Ping())
+        return false;
+      json = null;
+
       List<Long> params = Arrays.asList(channelIds);
       if (!params.isEmpty())
       {
@@ -252,10 +257,18 @@ public class SyncProgramsJobService extends JobService
 
       PreviewProgram.Builder builder = new PreviewProgram.Builder();
       builder.setChannelId(channelId)
-              .setType(TvContractCompat.PreviewProgramColumns.TYPE_CLIP)
               .setTitle(media.getTitle())
               .setDescription(media.getDescription())
               .setIntent(detailsIntent);
+
+      if(media.getCategory().equals(Media.MEDIA_TYPE_MOVIE))
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_MOVIE);
+      else if(media.getCategory().equals(Media.MEDIA_TYPE_TVSHOW))
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_TV_SERIES);
+      else if(media.getCategory().equals(Media.MEDIA_TYPE_TVEPISODE))
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_TV_EPISODE);
+      else if(media.getCategory().equals(Media.MEDIA_TYPE_ALBUM))
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_ALBUM);
 
       if (media.getCardImageUrl() != null)
       {

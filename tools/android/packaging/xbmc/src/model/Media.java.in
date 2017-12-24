@@ -38,6 +38,11 @@ public class Media implements Serializable
   private long programId;
   private long watchNextId;
 
+  public static final String MEDIA_TYPE_MOVIE = "movie";
+  public static final String MEDIA_TYPE_TVSHOW = "tvshow";
+  public static final String MEDIA_TYPE_TVEPISODE = "episode";
+  public static final String MEDIA_TYPE_ALBUM = "album";
+
   public Media()
   {
   }

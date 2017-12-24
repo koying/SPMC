@@ -66,7 +66,8 @@ public class XBMCJsonRPC
 
   private int MAX_RECOMMENDATIONS = 3;
 
-  // {"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "filter": {"field": "playcount", "operator": "is", "value": "0"}, "limits": { "start" : 0, "end": 3}, "properties" : ["imdbnumber", "title", "tagline", "thumbnail", "fanart"], "sort": { "order": "descending", "method": "dateadded", "ignorearticle": true } }, "id": "1"}
+  private String GET_VERSION =
+          "{ \"jsonrpc\": \"2.0\", \"method\": \"JSONRPC.Version\", \"id\": 1 }";
   private String RECOMMENDATION_MOVIES_JSON =
                   "{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", "
                   + "\"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, "
@@ -272,6 +273,21 @@ public class XBMCJsonRPC
       e.printStackTrace();
       return "";
     }
+  }
+
+  public boolean Ping()
+  {
+    try
+    {
+      JSONObject req = request_object(GET_VERSION);
+      if (req == null || req.isNull("result"))
+        return false;
+    }
+    catch (Exception e)
+    {
+      return false;
+    }
+    return true;
   }
 
   public Cursor search(String query)
@@ -845,7 +861,7 @@ public class XBMCJsonRPC
       String url = getDownloadUrl(details.getString("file"));
       if (!url.isEmpty())
         med.setVideoUrl(url);
-      med.setCategory("movie");
+      med.setCategory(Media.MEDIA_TYPE_MOVIE);
 
       med.setYear(details.getString("year"));
       med.setPlot(details.getString("plot"));
@@ -883,7 +899,7 @@ public class XBMCJsonRPC
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
       med.setXbmcUrl("videodb://tvshows/titles/" + details.getInt("tvshowid") + "/");
-      med.setCategory("tvshow");
+      med.setCategory(Media.MEDIA_TYPE_TVSHOW);
     }
     catch (Exception e)
     {
@@ -919,7 +935,7 @@ public class XBMCJsonRPC
       String url = getDownloadUrl(details.getString("file"));
       if (!url.isEmpty())
         med.setVideoUrl(url);
-      med.setCategory("episode");
+      med.setCategory(Media.MEDIA_TYPE_TVEPISODE);
 
       med.setSeason(details.getInt("season"));
       med.setEpisode(details.getInt("episode"));
@@ -955,7 +971,7 @@ public class XBMCJsonRPC
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
       med.setXbmcUrl("musicdb://albums/" + details.getString("albumid") + "/");
-      med.setCategory("album");
+      med.setCategory(Media.MEDIA_TYPE_ALBUM);
     }
     catch (Exception e)
     {

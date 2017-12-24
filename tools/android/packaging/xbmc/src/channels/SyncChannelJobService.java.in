@@ -27,6 +27,7 @@ import android.support.media.tv.TvContractCompat;
 import android.util.Log;
 
 import @APP_PACKAGE@.R;
+import @APP_PACKAGE@.XBMCJsonRPC;
 import @APP_PACKAGE@.channels.model.Subscription;
 import @APP_PACKAGE@.channels.model.XBMCDatabase;
 import @APP_PACKAGE@.channels.util.TvUtil;
@@ -86,6 +87,11 @@ public class SyncChannelJobService extends JobService
     @Override
     protected Boolean doInBackground(Void... voids)
     {
+      XBMCJsonRPC json = new XBMCJsonRPC();
+      if (!json.Ping())
+        return false;
+      json = null;
+
       List<Subscription> subscriptions = XBMCDatabase.getSubscriptions(mContext);
       List<Subscription> freshsubscriptions = new ArrayList<>();
       List<File> playlistsContent = new ArrayList<>();
