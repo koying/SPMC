@@ -42,6 +42,8 @@ public class Media implements Serializable
   public static final String MEDIA_TYPE_TVSHOW = "tvshow";
   public static final String MEDIA_TYPE_TVEPISODE = "episode";
   public static final String MEDIA_TYPE_ALBUM = "album";
+  public static final String MEDIA_TYPE_SONG = "song";
+  public static final String MEDIA_TYPE_MUSICVIDEO = "musicvideo";
 
   public Media()
   {

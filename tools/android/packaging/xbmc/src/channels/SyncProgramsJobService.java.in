@@ -269,6 +269,10 @@ public class SyncProgramsJobService extends JobService
         builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_TV_EPISODE);
       else if(media.getCategory().equals(Media.MEDIA_TYPE_ALBUM))
         builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_ALBUM);
+      else if(media.getCategory().equals(Media.MEDIA_TYPE_SONG))
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_TRACK);
+      else if(media.getCategory().equals(Media.MEDIA_TYPE_MUSICVIDEO))
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_CLIP);
 
       if (media.getCardImageUrl() != null)
       {

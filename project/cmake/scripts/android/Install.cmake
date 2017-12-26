@@ -54,6 +54,8 @@ set(package_files strings.xml
                   src/model/TVShow.java
                   src/model/File.java
                   src/model/Album.java
+                  src/model/Song.java
+                  src/model/MusicVideo.java
                   src/model/Media.java
                   src/XBMCSearchableActivity.java
                   src/XBMCRecommendationBuilder.java
