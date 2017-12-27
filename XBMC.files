@@ -6172,6 +6172,16 @@ xbmc/network/android/ZeroconfAndroid.cpp
 xbmc/network/android/ZeroconfAndroid.h
 xbmc/network/android/ZeroconfBrowserAndroid.cpp
 xbmc/network/android/ZeroconfBrowserAndroid.h
+xbmc/network/httprequesthandler/HTTPPythonHandler.cpp
+xbmc/network/httprequesthandler/HTTPPythonHandler.h
+xbmc/network/httprequesthandler/HTTPWebinterfaceAddonsHandler.cpp
+xbmc/network/httprequesthandler/python/CMakeLists.txt
+xbmc/network/httprequesthandler/python/HTTPPythonInvoker.cpp
+xbmc/network/httprequesthandler/python/HTTPPythonInvoker.h
+xbmc/network/httprequesthandler/python/HTTPPythonRequest.h
+xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
+xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.h
+xbmc/network/httprequesthandler/python/Makefile.in
 xbmc/platform/android/activity/AndroidKeyboard.cpp
 xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt
