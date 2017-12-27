@@ -139,6 +139,10 @@
             android:name=".content.XBMCFileContentProvider"
             android:authorities="@APP_PACKAGE@.file"
             android:exported="true" />
+        <provider
+            android:name=".content.XBMCYTDLContentProvider"
+            android:authorities="@APP_PACKAGE@.ytdl"
+            android:exported="true" />
 
         <activity android:name=".XBMCSearchableActivity">
             <intent-filter>

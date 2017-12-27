@@ -177,16 +177,17 @@ public class TvUtil
    */
   public static void scheduleSyncingChannel(Context context)
   {
+    JobScheduler scheduler =
+            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    if (scheduler.getPendingJob(CHANNEL_JOB_ID) != null)
+      return;
+
     ComponentName componentName = new ComponentName(context, SyncChannelJobService.class);
     JobInfo.Builder builder = new JobInfo.Builder(CHANNEL_JOB_ID, componentName);
     builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
     builder.setMinimumLatency(10000);
 
-    JobScheduler scheduler =
-            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-
     Log.d(TAG, "Scheduled channel creation.");
-    scheduler.cancel(CHANNEL_JOB_ID);
     scheduler.schedule(builder.build());
   }
 
@@ -199,6 +200,11 @@ public class TvUtil
    */
   public static void scheduleTriggeredSyncingProgramsForChannel(Context context, long channelId)
   {
+    JobScheduler scheduler =
+            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    if (scheduler.getPendingJob(getTriggeredJobIdForChannelId(channelId)) != null)
+      return;
+
     ComponentName componentName = new ComponentName(context, SyncProgramsJobService.class);
 
     JobInfo.Builder builder =
@@ -216,9 +222,6 @@ public class TvUtil
     bundle.putLong(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
     builder.setExtras(bundle);
 
-    JobScheduler scheduler =
-            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    scheduler.cancel(getTriggeredJobIdForChannelId(channelId));
     scheduler.schedule(builder.build());
   }
 
@@ -231,6 +234,11 @@ public class TvUtil
    */
   public static void scheduleTimedSyncingProgramsForChannel(Context context, long channelId)
   {
+    JobScheduler scheduler =
+            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    if (scheduler.getPendingJob(getTimedJobIdForChannelId(channelId)) != null)
+      return;
+
     ComponentName componentName = new ComponentName(context, SyncProgramsJobService.class);
 
     JobInfo.Builder builder =
@@ -244,10 +252,6 @@ public class TvUtil
     JobInfo job = builder.build();
     Log.d(TAG, "scheduleTimedSyncingProgramsForChannel: minperiod=" + job.getMinPeriodMillis());
 
-    JobScheduler scheduler =
-            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    scheduler.cancel(getImmediateJobIdForChannelId(channelId));
-    scheduler.cancel(getTimedJobIdForChannelId(channelId));
     scheduler.schedule(job);
   }
 
@@ -260,6 +264,11 @@ public class TvUtil
    */
   public static void scheduleSyncingProgramsForChannel(Context context, long channelId)
   {
+    JobScheduler scheduler =
+            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+    if (scheduler.getPendingJob(getImmediateJobIdForChannelId(channelId)) != null)
+      return;
+
     ComponentName componentName = new ComponentName(context, SyncProgramsJobService.class);
 
     JobInfo.Builder builder =
@@ -270,22 +279,18 @@ public class TvUtil
     bundle.putLong(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
     builder.setExtras(bundle);
 
-    JobScheduler scheduler =
-            (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-    scheduler.cancel(getImmediateJobIdForChannelId(channelId));
-    scheduler.cancel(getTimedJobIdForChannelId(channelId));
     scheduler.schedule(builder.build());
   }
 
-  private static int getTriggeredJobIdForChannelId(long channelId)
+  public static int getTriggeredJobIdForChannelId(long channelId)
   {
     return (int) (CHANNEL_TRIGGERED_JOB_ID_OFFSET + channelId);
   }
-  private static int getTimedJobIdForChannelId(long channelId)
+  public static int getTimedJobIdForChannelId(long channelId)
   {
     return (int) (CHANNEL_TIMED_JOB_ID_OFFSET + channelId);
   }
-  private static int getImmediateJobIdForChannelId(long channelId)
+  public static int getImmediateJobIdForChannelId(long channelId)
   {
     return (int) (CHANNEL_IMMEDIATE_JOB_ID_OFFSET + channelId);
   }

@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import @APP_PACKAGE@.content.XBMCYTDLContentProvider;
 import @APP_PACKAGE@.model.Album;
 import @APP_PACKAGE@.model.Movie;
 import @APP_PACKAGE@.model.MusicVideo;
@@ -63,7 +64,7 @@ public class XBMCJsonRPC
 
   private static String TAG = "@APP_NAME@json";
 
-  private String m_jsonURL = "http://localhost:8080";
+  private String m_xbmc_web_url = "http://localhost:8080";
   private java.util.HashSet<Integer> mRecomendationIds = new java.util.HashSet<Integer>();
 
   private int MAX_RECOMMENDATIONS = 3;
@@ -102,7 +103,7 @@ public class XBMCJsonRPC
                  "{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetArtists\", \"params\": {\"filter\":{%s},\"limits\": { \"start\" : 0, \"end\": 10}, \"properties\" : [\"description\", \"thumbnail\", \"fanart\"], \"sort\": { \"order\": \"descending\", \"method\": \"dateadded\", \"ignorearticle\": true } }, \"id\": \"%s\"}";
 
   private String RETRIEVE_MOVIE_DETAILS =
-          "{ \"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovieDetails\", \"params\": { \"movieid\" : %s, \"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\", \"year\", \"runtime\", \"file\", \"plot\"] }, \"id\": \"%s\" }";
+          "{ \"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovieDetails\", \"params\": { \"movieid\" : %s, \"properties\" : [\"imdbnumber\", \"title\", \"tagline\", \"thumbnail\", \"fanart\", \"year\", \"runtime\", \"file\", \"plot\", \"trailer\"] }, \"id\": \"%s\" }";
 
   private String RETRIEVE_EPISODE_DETAILS =
           "{ \"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetEpisodeDetails\", \"params\": { \"episodeid\" : %s, \"properties\" : [\"title\", \"tvshowid\", \"showtitle\", \"season\", \"episode\", \"thumbnail\", \"fanart\", \"file\"] }, \"id\": \"%s\" }";
@@ -127,7 +128,7 @@ public class XBMCJsonRPC
   public XBMCJsonRPC()
   {
     String jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "8080");
-    m_jsonURL = "http://localhost:" + jsonPort;
+    m_xbmc_web_url = "http://localhost:" + jsonPort;
   }
 
   public String request_string(String jsonRequest)
@@ -135,12 +136,12 @@ public class XBMCJsonRPC
     try
     {
       //Log.d(TAG, "JSON in: " + jsonRequest);
-      //Log.d(TAG, "JSON url: " + m_jsonURL);
+      //Log.d(TAG, "JSON url: " + m_xbmc_web_url);
 
       String returnStr = null;
       StringBuilder strbuilder = new StringBuilder();
 
-      URL url = new URL(m_jsonURL + "/jsonrpc");
+      URL url = new URL(m_xbmc_web_url + "/jsonrpc");
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setDoInput(true);
@@ -249,7 +250,7 @@ public class XBMCJsonRPC
       JSONObject result = req.getJSONObject("result");
       String surl = result.getJSONObject("details").getString("path");
 
-      URL url = new URL(m_jsonURL + "/" + surl);
+      URL url = new URL(m_xbmc_web_url + "/" + surl);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       String auth = XBMCProperties.getJsonAuthorization();
       if (!auth.isEmpty())
@@ -278,7 +279,7 @@ public class XBMCJsonRPC
       JSONObject result = req.getJSONObject("result");
       String surl = result.getJSONObject("details").getString("path");
 
-      return (m_jsonURL + "/" + surl);
+      return (m_xbmc_web_url + "/" + surl);
     } catch (Exception e)
     {
       e.printStackTrace();
@@ -869,9 +870,26 @@ public class XBMCJsonRPC
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
       med.setXbmcUrl("videodb://movies/titles/" + details.getString("movieid") + "?showinfo=true");
-      String url = getDownloadUrl(details.getString("file"));
-      if (!url.isEmpty())
-        med.setVideoUrl(url);
+
+      if (details.has("trailer") && !details.getString("trailer").isEmpty())
+      {
+        String trailer_url = details.getString("trailer");
+        if (trailer_url.startsWith("plugin://plugin.video.youtube"))
+        {
+          Uri u = Uri.parse(trailer_url);
+          String videoid = u.getQueryParameter("videoid");
+          String yturl = Uri.parse(m_xbmc_web_url)
+                  .buildUpon()
+                  .appendPath("addons").appendPath("webinterface.youtube-dl")
+                  .appendQueryParameter("url", "http://www.youtube.com/watch?v=" + videoid)
+                  .build()
+                  .toString();
+          med.setVideoUrl(XBMCYTDLContentProvider.GetYTDLUri(yturl).toString());
+          Log.d(TAG, "createMovieFromJson: " + med.getVideoUrl());
+        }
+        else
+          med.setVideoUrl(trailer_url);
+      }
       med.setCategory(Media.MEDIA_TYPE_MOVIE);
 
       med.setYear(details.getString("year"));
@@ -943,9 +961,11 @@ public class XBMCJsonRPC
           med.setBackgroundImageUrl(XBMCImageContentProvider.GetImageUri(url).toString());
       }
       med.setXbmcUrl("videodb://tvshows/titles/" + details.getInt("tvshowid") + "/" + details.getInt("episodeid") + "?showinfo=true");
+/*
       String url = getDownloadUrl(details.getString("file"));
       if (!url.isEmpty())
         med.setVideoUrl(url);
+*/
       med.setCategory(Media.MEDIA_TYPE_TVEPISODE);
 
       med.setSeason(details.getInt("season"));

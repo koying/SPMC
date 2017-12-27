@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.Context;
 import android.database.Cursor;
@@ -176,23 +177,31 @@ public class SyncChannelJobService extends JobService
         if (freshsubscriptions.indexOf(channel) == -1)
         {
           // Channel is gone
+          Long chanid = channel.getChannelId();
           mContext.getContentResolver()
                   .delete(
-                          TvContractCompat.buildPreviewProgramsUriForChannel(channel.getChannelId()),
+                          TvContractCompat.buildPreviewProgramsUriForChannel(chanid),
                           null,
                           null);
           mContext.getContentResolver()
                   .delete(
-                          TvContractCompat.buildChannelUri(channel.getChannelId()),
+                          TvContractCompat.buildChannelUri(chanid),
                           null,
                           null);
-          XBMCDatabase.removeMedias(mContext, channel.getChannelId());
+          XBMCDatabase.removeMedias(mContext, chanid);
           iterator.remove();
+
+          JobScheduler scheduler =
+                  (JobScheduler) mContext.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+          if (scheduler.getPendingJob(TvUtil.getTriggeredJobIdForChannelId(chanid)) != null)
+            scheduler.cancel(TvUtil.getTriggeredJobIdForChannelId(chanid));
+          if (scheduler.getPendingJob(TvUtil.getTimedJobIdForChannelId(chanid)) != null)
+            scheduler.cancel(TvUtil.getTimedJobIdForChannelId(chanid));
+
           continue;
         }
         TvUtil.scheduleTriggeredSyncingProgramsForChannel(mContext, channel.getChannelId());
         TvUtil.scheduleTimedSyncingProgramsForChannel(mContext, channel.getChannelId());
-        TvUtil.scheduleSyncingProgramsForChannel(mContext, channel.getChannelId());
       }
       XBMCDatabase.saveSubscriptions(mContext, subscriptions);
 

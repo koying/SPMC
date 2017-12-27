@@ -74,9 +74,6 @@ public class SyncProgramsJobService extends JobService
               protected void onPostExecute(Boolean finished)
               {
                 super.onPostExecute(finished);
-                // Daisy chain listening for the next change to the channel.
-                TvUtil.scheduleTriggeredSyncingProgramsForChannel(
-                        SyncProgramsJobService.this, channelId);
                 mSyncProgramsTask = null;
                 jobFinished(jobParameters, !finished);
               }
@@ -262,7 +259,7 @@ public class SyncProgramsJobService extends JobService
               .setIntent(detailsIntent);
 
       if(media.getCategory().equals(Media.MEDIA_TYPE_MOVIE))
-        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_MOVIE);
+        builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_CLIP);
       else if(media.getCategory().equals(Media.MEDIA_TYPE_TVSHOW))
         builder.setType(TvContractCompat.PreviewProgramColumns.TYPE_TV_SERIES);
       else if(media.getCategory().equals(Media.MEDIA_TYPE_TVEPISODE))
