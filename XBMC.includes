@@ -498,3 +498,4 @@ tools/android/packaging/xbmc/src
 tools/android/packaging
 tools/android/packaging/gradle/wrapper
 system/keymaps
+xbmc/network/httprequesthandler/python
