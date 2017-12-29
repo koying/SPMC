@@ -58,7 +58,7 @@ config.log
 *.diagsession
 
 # osx specifics
-/build/
+/build*
 /kodi.build/
 /Debug/
 /Release/
