@@ -413,6 +413,17 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
         Initialize(resultCode, resultData);
       return;
     }
+    else if (requestCode == INTENT_MAKE_BROWSABLE_REQUEST_CODE)
+    {
+      if (resultCode == RESULT_OK)
+      {
+        Toast.makeText(this, R.string.channel_added, Toast.LENGTH_LONG).show();
+      }
+      else
+      {
+        Toast.makeText(this, R.string.channel_not_added, Toast.LENGTH_LONG).show();
+      }
+    }
 
     _onActivityResult(requestCode, resultCode, resultData);
   }
@@ -490,4 +501,66 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       }
     });
   }
+
+  // Oreo
+
+  public void addChannel(String title, String url)
+  {
+    Log.d(TAG, "addChannel: title = " + title + "; url = " + url);
+    Uri uri = Uri.parse(url);
+    Subscription subscription = XBMCDatabase.getSubscription(getApplicationContext(), title, XBMCFileContentProvider.buildUri(uri.getPath()).toString());
+    new AddChannelTask(getApplicationContext()).execute(subscription);
+  }
+
+  private class AddChannelTask extends AsyncTask<Subscription, Void, Long>
+  {
+
+    private final Context mContext;
+
+    AddChannelTask(Context context)
+    {
+      this.mContext = context;
+    }
+
+    @Override
+    protected Long doInBackground(Subscription... varArgs)
+    {
+      List<Subscription> subscriptions = Arrays.asList(varArgs);
+      if (subscriptions.size() != 1)
+      {
+        return -1L;
+      }
+      Subscription subscription = subscriptions.get(0);
+      long channelId = TvUtil.createChannel(mContext, subscription);
+      subscription.setChannelId(channelId);
+      TvContractCompat.requestChannelBrowsable(mContext, channelId);
+
+      XBMCDatabase.saveSubscription(mContext, subscription);
+      // Scheduler listen on channel's uri. Updates after the user interacts with the system
+      // dialog.
+      TvUtil.scheduleTriggeredSyncingProgramsForChannel(getApplicationContext(), channelId);
+      return channelId;
+    }
+
+    @Override
+    protected void onPostExecute(Long channelId)
+    {
+      super.onPostExecute(channelId);
+      promptUserToDisplayChannel(channelId);
+    }
+  }
+
+  private void promptUserToDisplayChannel(long channelId)
+  {
+    Intent intent = new Intent(TvContractCompat.ACTION_REQUEST_CHANNEL_BROWSABLE);
+    intent.putExtra(TvContractCompat.EXTRA_CHANNEL_ID, channelId);
+    try
+    {
+      this.startActivityForResult(intent, INTENT_MAKE_BROWSABLE_REQUEST_CODE);
+    } catch (ActivityNotFoundException e)
+    {
+      Log.e(TAG, "Could not start activity: " + intent.getAction(), e);
+    }
+  }
+
 }
