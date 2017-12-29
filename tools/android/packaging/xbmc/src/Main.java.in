@@ -3,7 +3,9 @@ package @APP_PACKAGE@;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build.VERSION_CODES;
 import android.os.Build;
 import android.app.NativeActivity;
@@ -12,10 +14,7 @@ import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.hardware.input.InputManager;
-import android.graphics.Rect;
-import android.graphics.PixelFormat;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -23,26 +22,33 @@ import android.media.Image;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.media.tv.TvContractCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.Gravity;
-import android.view.Surface;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import @APP_PACKAGE@.channels.model.Subscription;
+import @APP_PACKAGE@.channels.model.XBMCDatabase;
+import @APP_PACKAGE@.channels.util.TvUtil;
+import @APP_PACKAGE@.content.XBMCFileContentProvider;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main extends NativeActivity implements Choreographer.FrameCallback
 {
   private static final String TAG = "@APP_NAME@";
   private static final int INTENT_RESULT_PROJECT_CODE = 4658;
+  private static final int INTENT_MAKE_BROWSABLE_REQUEST_CODE = 9001;
+
   private static final int XBMC_EXITCODE_POWERDOWN = 64;
   private static final int XBMC_EXITCODE_RESTARTAPP = 65;
   private static final int XBMC_EXITCODE_REBOOT = 66;
@@ -302,10 +308,15 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
     if (getPackageManager().hasSystemFeature("android.software.leanback"))
     {
-      // Leanback
-      mJsonRPC = new XBMCJsonRPC();
-      handler.removeCallbacks(leanbackUpdateRunnable);
-      handler.postDelayed(leanbackUpdateRunnable, 30 * 1000);
+      if (Build.VERSION.SDK_INT >= VERSION_CODES.O)
+        TvUtil.scheduleSyncingChannel(this);
+      else
+      {
+        // Leanback
+        mJsonRPC = new XBMCJsonRPC();
+        handler.removeCallbacks(leanbackUpdateRunnable);
+        handler.postDelayed(leanbackUpdateRunnable, 30 * 1000);
+      }
     }
 
     // register the InputDeviceListener implementation
@@ -369,12 +380,10 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
           {
             if (mNewIntent != null)  // Still valid?
               _onNewIntent(mNewIntent);
-          }
-          catch (UnsatisfiedLinkError e)
+          } catch (UnsatisfiedLinkError e)
           {
             Log.e("Main", "Native not registered");
-          }
-          finally
+          } finally
           {
             mNewIntent = null;
           }
@@ -387,12 +396,17 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onPause()
   {
     super.onPause();
+
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.O)
+      TvUtil.scheduleSyncingChannel(this);
   }
 
   @Override
   public void onActivityResult(int requestCode, int resultCode,
                                Intent resultData)
   {
+    super.onActivityResult(requestCode, resultCode, resultData);
+
     if (requestCode == mProjectionIntentId)
     {
       if (resultCode == RESULT_OK)

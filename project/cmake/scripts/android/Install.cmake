@@ -30,27 +30,44 @@ set(package_files strings.xml
                   searchable.xml
                   AndroidManifest.xml
                   build.gradle
-                  src/Main.java
                   src/Splash.java
-                  src/XBMCBroadcastReceiver.java
-                  src/XBMCCrashHandler.java
-                  src/XBMCImageContentProvider.java
-                  src/XBMCInputDeviceListener.java
-                  src/XBMCJsonRPC.java
-                  src/XBMCMainView.java
-                  src/XBMCMediaContentProvider.java
-                  src/XBMCMediaSession.java
-                  src/XBMCProjection.java
-                  src/XBMCRecommendationBuilder.java
-                  src/XBMCSearchableActivity.java
-                  src/XBMCSettingsContentObserver.java
-                  src/XBMCProperties.java
                   src/XBMCVideoView.java
-                  src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
+                  src/XBMCJsonRPC.java
+                  src/channels/SyncChannelJobService.java
+                  src/channels/SyncProgramsJobService.java
+                  src/channels/model/XBMCDatabase.java
+                  src/channels/model/Subscription.java
+                  src/channels/util/SharedPreferencesHelper.java
+                  src/channels/util/TvUtil.java
+                  src/XBMCCrashHandler.java
+                  src/Main.java
+                  src/XBMCProjection.java
+                  src/XBMCMediaSession.java
                   src/interfaces/XBMCSurfaceTextureOnFrameAvailableListener.java
-                  src/interfaces/XBMCNsdManagerDiscoveryListener.java
-                  src/interfaces/XBMCNsdManagerRegistrationListener.java
                   src/interfaces/XBMCNsdManagerResolveListener.java
+                  src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
+                  src/interfaces/XBMCNsdManagerRegistrationListener.java
+                  src/interfaces/XBMCNsdManagerDiscoveryListener.java
+                  src/XBMCBroadcastReceiver.java
+                  src/model/TVEpisode.java
+                  src/model/Movie.java
+                  src/model/TVShow.java
+                  src/model/File.java
+                  src/model/Album.java
+                  src/model/Song.java
+                  src/model/MusicVideo.java
+                  src/model/Media.java
+                  src/XBMCSearchableActivity.java
+                  src/XBMCRecommendationBuilder.java
+                  src/XBMCInputDeviceListener.java
+                  src/XBMCProperties.java
+                  src/content/XBMCFileContentProvider.java
+                  src/content/XBMCMediaContentProvider.java
+                  src/content/XBMCContentProvider.java
+                  src/content/XBMCImageContentProvider.java
+                  src/content/XBMCYTDLContentProvider.java
+                  src/XBMCSettingsContentObserver.java
+                  src/XBMCMainView.java
                   )
 foreach(file IN LISTS package_files)
   configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/xbmc/${file}.in
