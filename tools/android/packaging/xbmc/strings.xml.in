@@ -12,6 +12,7 @@
     <string name="sticky_project_crash">@APP_NAME_LC@crash</string>
     <string name="sticky_project_log">@APP_NAME_LC@log</string>
 
+    <string name="suggestion_channel">Suggestions</string>
 
     <!-- Crash report dialog -->
     <string name="crash_email">@APP_EMAIL@</string>

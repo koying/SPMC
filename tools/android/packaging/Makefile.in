@@ -161,9 +161,8 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
              "$(NDKROOT)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)/include $(CORE_SOURCE_DIR)  $(PREFIX)/include jni" >> ./xbmc/lib/$(CPU)/gdb.setup
 
 java: res
-	mkdir -p xbmc/java/$(APP_PACKAGE_DIR) xbmc/java/$(APP_PACKAGE_DIR)/interfaces xbmc/obj
-	@cp xbmc/src/*.java xbmc/java/$(APP_PACKAGE_DIR)/
-	@cp xbmc/src/interfaces/*.java xbmc/java/$(APP_PACKAGE_DIR)/interfaces/
+	mkdir -p xbmc/java/$(APP_PACKAGE_DIR) xbmc/obj
+	@cp -R xbmc/src/* xbmc/java/$(APP_PACKAGE_DIR)/
 
 package: libs python java
 	@echo "Gradle build..."
