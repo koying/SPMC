@@ -6172,6 +6172,9 @@ xbmc/network/android/ZeroconfAndroid.cpp
 xbmc/network/android/ZeroconfAndroid.h
 xbmc/network/android/ZeroconfBrowserAndroid.cpp
 xbmc/network/android/ZeroconfBrowserAndroid.h
+xbmc/network/httprequesthandler/CMakeLists.txt
+xbmc/network/httprequesthandler/HTTPLogHandler.cpp
+xbmc/network/httprequesthandler/HTTPLogHandler.h
 xbmc/network/httprequesthandler/HTTPPythonHandler.cpp
 xbmc/network/httprequesthandler/HTTPPythonHandler.h
 xbmc/network/httprequesthandler/HTTPWebinterfaceAddonsHandler.cpp
