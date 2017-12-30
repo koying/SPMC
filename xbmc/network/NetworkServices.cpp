@@ -70,6 +70,7 @@
 #include "network/httprequesthandler/HTTPImageHandler.h"
 #include "network/httprequesthandler/HTTPImageTransformationHandler.h"
 #include "network/httprequesthandler/HTTPVfsHandler.h"
+#include "network/httprequesthandler/HTTPLogHandler.h"
 #ifdef HAS_JSONRPC
 #include "network/httprequesthandler/HTTPJsonRpcHandler.h"
 #endif // HAS_JSONRPC
@@ -105,7 +106,8 @@ CNetworkServices::CNetworkServices()
   m_webserver(*new CWebServer),
   m_httpImageHandler(*new CHTTPImageHandler),
   m_httpImageTransformationHandler(*new CHTTPImageTransformationHandler),
-  m_httpVfsHandler(*new CHTTPVfsHandler)
+  m_httpVfsHandler(*new CHTTPVfsHandler),
+  m_httpLogHandler(*new CHTTPLogHandler)
 #ifdef HAS_JSONRPC
   , m_httpJsonRpcHandler(*new CHTTPJsonRpcHandler)
 #endif // HAS_JSONRPC
@@ -123,6 +125,7 @@ CNetworkServices::CNetworkServices()
   m_webserver.RegisterRequestHandler(&m_httpImageHandler);
   m_webserver.RegisterRequestHandler(&m_httpImageTransformationHandler);
   m_webserver.RegisterRequestHandler(&m_httpVfsHandler);
+  m_webserver.RegisterRequestHandler(&m_httpLogHandler);
 #ifdef HAS_JSONRPC
   m_webserver.RegisterRequestHandler(&m_httpJsonRpcHandler);
 #endif // HAS_JSONRPC
@@ -145,6 +148,8 @@ CNetworkServices::~CNetworkServices()
   delete &m_httpImageTransformationHandler;
   m_webserver.UnregisterRequestHandler(&m_httpVfsHandler);
   delete &m_httpVfsHandler;
+  m_webserver.UnregisterRequestHandler(&m_httpLogHandler);
+  delete &m_httpLogHandler;
 #ifdef HAS_JSONRPC
   m_webserver.UnregisterRequestHandler(&m_httpJsonRpcHandler);
   delete &m_httpJsonRpcHandler;
