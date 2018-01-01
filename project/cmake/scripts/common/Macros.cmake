@@ -643,6 +643,7 @@ endfunction()
 #   APP_ADDON_API - the addon API version in the form of 16.9.702
 #   FILE_VERSION - file version in the form of 16,9,702,0 - Windows only
 #   APP_STICKYURL - Log upload url
+#   APP_EMAIL - Log upload email
 #
 # The following variables are set from libKODI_guilib.h:
 #   guilib_version - current ADDONGUI API version
@@ -651,7 +652,7 @@ macro(core_find_versions)
   include(CMakeParseArguments)
   core_file_read_filtered(version_list ${CORE_SOURCE_DIR}/version.txt)
   string(REPLACE " " ";" version_list "${version_list}")
-  cmake_parse_arguments(APP "" "APP_NAME;COMPANY_NAME;WEBSITE;VERSION_MAJOR;VERSION_MINOR;VERSION_TAG;VERSION_CODE;ADDON_API;APP_PACKAGE;APP_STICKYURL" "" ${version_list})
+  cmake_parse_arguments(APP "" "APP_NAME;COMPANY_NAME;WEBSITE;VERSION_MAJOR;VERSION_MINOR;VERSION_TAG;VERSION_CODE;ADDON_API;APP_PACKAGE;APP_STICKYURL;APP_EMAIL" "" ${version_list})
 
   set(APP_NAME ${APP_APP_NAME}) # inconsistency but APP_APP_NAME looks weird
   string(TOLOWER ${APP_APP_NAME} APP_NAME_LC)
@@ -661,6 +662,7 @@ macro(core_find_versions)
   set(APP_PACKAGE ${APP_APP_PACKAGE})
   string(REPLACE "." "/" APP_PACKAGE_DIR ${APP_APP_PACKAGE})
   set(APP_STICKYURL ${APP_APP_STICKYURL})
+  set(APP_EMAIL ${APP_APP_EMAIL})
   if(APP_VERSION_TAG)
     set(APP_VERSION ${APP_VERSION}-${APP_VERSION_TAG})
     string(TOLOWER ${APP_VERSION_TAG} APP_VERSION_TAG_LC)
