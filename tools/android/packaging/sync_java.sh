@@ -42,7 +42,7 @@ cp $SRC_DIR/res/values/strings.xml $TMP_DIR/strings.xml.in
 cp $SRC_DIR/res/values/colors.xml $TMP_DIR/colors.xml.in
 cp $SRC_DIR/res/xml/searchable.xml $TMP_DIR/searchable.xml.in
 
-find $TMP_DIR -name "*.in" |xargs -i sed -i -e "s#${VARIABLES[APP_PACKAGE]}#@APP_PACKAGE@#g" -e "s#${VARIABLES[APP_NAME]}#@APP_NAME@#g" -e "s#${APP_NAME_LC}#@APP_NAME_LC@#g" -e "s#${VARIABLES[VERSION_CODE]}#@APP_VERSION_CODE@#g" -e "s#${APP_VERSION}#@APP_VERSION@#g" -e "s#${VARIABLES[APP_STICKYURL]}#@APP_STICKYURL@#g" -e "s#${VARIABLES[APP_EMAIL]}#@APP_EMAIL@#g" {}
+find $TMP_DIR -name "*.in" |xargs -i sed -i -e "s#${VARIABLES[APP_EMAIL]}#@APP_EMAIL@#g" -e "s#${VARIABLES[APP_PACKAGE]}#@APP_PACKAGE@#g" -e "s#${VARIABLES[APP_NAME]}#@APP_NAME@#g" -e "s#${APP_NAME_LC}#@APP_NAME_LC@#g" -e "s#${VARIABLES[VERSION_CODE]}#@APP_VERSION_CODE@#g" -e "s#${APP_VERSION}#@APP_VERSION@#g" -e "s#${VARIABLES[APP_STICKYURL]}#@APP_STICKYURL@#g" {}
 
 rsync -a --delete $TMP_JAVA_DIR/ $TARGET_JAVA_DIR
 cp -f $TMP_DIR/AndroidManifest.xml.in $TARGET_DIR/AndroidManifest.xml.in
