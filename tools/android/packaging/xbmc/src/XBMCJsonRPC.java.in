@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -133,15 +134,11 @@ public class XBMCJsonRPC
     m_xbmc_web_url = "http://localhost:" + jsonPort;
   }
 
-  public String request_string(String jsonRequest)
+  public JsonElement request_json(String jsonRequest)
   {
     try
     {
-      //Log.d(TAG, "JSON in: " + jsonRequest);
-      //Log.d(TAG, "JSON url: " + m_xbmc_web_url);
-
-      String returnStr = null;
-      StringBuilder strbuilder = new StringBuilder();
+      JsonElement rootElem = null;
 
       URL url = new URL(m_xbmc_web_url + "/jsonrpc");
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -163,18 +160,10 @@ public class XBMCJsonRPC
         if (statusCode == 200)
         {
           InputStream content = connection.getInputStream();
-          BufferedReader reader = new BufferedReader(new InputStreamReader(content, "UTF-8"));
-          String line;
-          while ((line = reader.readLine()) != null)
-          {
-            strbuilder.append(line);
-          }
-          reader.close();
-          connection.disconnect();
-
-          // Log.d(TAG, "JSON out: " + strbuilder.toString());
-          returnStr = strbuilder.toString();
-
+          JsonParser parser = new JsonParser();
+          InputStreamReader in = new InputStreamReader(content, "UTF-8");
+          rootElem = parser.parse(in);
+          in.close();
         }
         else
         {
@@ -189,7 +178,7 @@ public class XBMCJsonRPC
       {
         connection.disconnect();
       }
-      return returnStr;
+      return rootElem;
     }
     catch (ConnectException ce)
     {
@@ -204,54 +193,12 @@ public class XBMCJsonRPC
     }
   }
 
-  public JsonObject request_object(String jsonRequest)
-  {
-    try
-    {
-      String stringResp = request_string(jsonRequest);
-      if (stringResp == null)
-        return null;
-
-      JsonParser parser = new JsonParser();
-      JsonElement element = parser.parse(stringResp);
-      JsonObject resp = element.getAsJsonObject();
-      return resp;
-    }
-    catch (Exception e)
-    {
-      Log.e(TAG, "Failed to parse JSON");
-      e.printStackTrace();
-      return null;
-    }
-  }
-
-  public JsonArray request_array(String jsonRequest)
-  {
-    try
-    {
-      String stringResp = request_string(jsonRequest);
-      if (stringResp == null)
-        return null;
-
-      JsonParser parser = new JsonParser();
-      JsonElement element = parser.parse(stringResp);
-      JsonArray resp = element.getAsJsonArray();
-      return resp;
-    }
-    catch (Exception e)
-    {
-      Log.e(TAG, "Failed to parse JSON");
-      e.printStackTrace();
-      return null;
-    }
-  }
-
   public Bitmap getBitmap(String src)
   {
     try
     {
-      JsonObject req = request_object("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
-          + src + "\"}, \"id\": \"1\"}");
+      JsonObject req = request_json("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
+          + src + "\"}, \"id\": \"1\"}").getAsJsonObject();
       if (req == null || !req.has("result"))
         return null;
 
@@ -279,8 +226,8 @@ public class XBMCJsonRPC
   {
     try
     {
-      JsonObject req = request_object("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
-          + src + "\"}, \"id\": \"1\"}");
+      JsonObject req = request_json("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
+          + src + "\"}, \"id\": \"1\"}").getAsJsonObject();
       if (req == null || !req.has("result"))
         return null;
 
@@ -299,7 +246,7 @@ public class XBMCJsonRPC
   {
     try
     {
-      JsonObject req = request_object(GET_VERSION);
+      JsonObject req = request_json(GET_VERSION).getAsJsonObject();
       if (req == null || !req.has("result"))
         return false;
     }
@@ -323,13 +270,13 @@ public class XBMCJsonRPC
 
       try
       {
-        JsonObject req = request_object(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
+        JsonObject req = request_json(String.format(SEARCH_MOVIES_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
         "\"or\": [" +
         "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"originaltitle\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"set\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]")).getAsJsonObject();
 
         if (req == null || !req.has("result"))
           return null;
@@ -350,11 +297,11 @@ public class XBMCJsonRPC
 
       try
       {
-        JsonObject req = request_object(String.format(SEARCH_SHOWS_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
+        JsonObject req = request_json(String.format(SEARCH_SHOWS_JSON, /*"\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"", limit));*/
         "\"or\": [" +
         "{\"operator\": \"contains\", \"field\": \"title\", \"value\": \"" + query + "\"}," +
         "{\"operator\": \"contains\", \"field\": \"actor\", \"value\": \"" + query + "\"}," +
-        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]"));
+        "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]")).getAsJsonObject();
 
         if (req == null || !req.has("result"))
           return null;
@@ -429,7 +376,7 @@ public class XBMCJsonRPC
         "{\"operator\": \"contains\", \"field\": \"director\", \"value\": \"" + query + "\"}]", REQ_ID_SHOWS_ACTOR) +
     "]";
 
-    JsonArray res_array = request_array(str_req);
+    JsonArray res_array = request_json(str_req).getAsJsonArray();
     if (res_array == null)
       return null;
 
@@ -642,7 +589,7 @@ public class XBMCJsonRPC
         .setContext(ctx)
         .setSmallIcon(R.drawable.notif_icon);
 
-    JsonObject rep = request_object(RECOMMENDATION_MOVIES_JSON);
+    JsonObject rep = request_json(RECOMMENDATION_MOVIES_JSON).getAsJsonObject();
     if (rep != null && rep.has("result"))
     {
       try
@@ -684,7 +631,7 @@ public class XBMCJsonRPC
       }
     }
 
-    rep = request_object(RECOMMENDATIONS_SHOWS_JSON);
+    rep = request_json(RECOMMENDATIONS_SHOWS_JSON).getAsJsonObject();
     if (rep != null && rep.has("result"))
     {
       try
@@ -727,7 +674,7 @@ public class XBMCJsonRPC
       }
     }
 
-    rep = request_object(RECOMMENDATIONS_ALBUMS_JSON);
+    rep = request_json(RECOMMENDATIONS_ALBUMS_JSON).getAsJsonObject();
     if (rep != null && rep.has("result"))
     {
       try
@@ -828,7 +775,7 @@ public class XBMCJsonRPC
 
     try
     {
-      JsonObject req = request_object(String.format(RETRIEVE_FILE_ITEMS, url, "1"));
+      JsonObject req = request_json(String.format(RETRIEVE_FILE_ITEMS, url, "1")).getAsJsonObject();
 
       if (req == null || !req.has("result"))
         return files;
@@ -1116,7 +1063,7 @@ public class XBMCJsonRPC
   {
     List<Media> medias = new ArrayList<Media>();
 
-    JsonObject rep = request_object(RECOMMENDATION_MOVIES_JSON);
+    JsonObject rep = request_json(RECOMMENDATION_MOVIES_JSON).getAsJsonObject();
     if (rep != null && rep.has("result"))
     {
       try
@@ -1147,7 +1094,7 @@ public class XBMCJsonRPC
       }
     }
 
-    rep = request_object(RECOMMENDATIONS_SHOWS_JSON);
+    rep = request_json(RECOMMENDATIONS_SHOWS_JSON).getAsJsonObject();
     if (rep != null && rep.has("result"))
     {
       try
@@ -1179,7 +1126,7 @@ public class XBMCJsonRPC
       }
     }
 
-    rep = request_object(RECOMMENDATIONS_ALBUMS_JSON);
+    rep = request_json(RECOMMENDATIONS_ALBUMS_JSON).getAsJsonObject();
     if (rep != null && rep.has("result"))
     {
       try
@@ -1245,7 +1192,7 @@ public class XBMCJsonRPC
       }
       strReq += "]";
 
-      JsonArray reqBatch = request_array(strReq);
+      JsonArray reqBatch = request_json(strReq).getAsJsonArray();
       if (reqBatch == null)
         return medias;
 
