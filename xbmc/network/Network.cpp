@@ -31,6 +31,9 @@
 #include "platform/win32/WIN32Util.h"
 #include "utils/CharsetConverter.h"
 #endif
+#if defined(TARGET_ANDROID)
+#include <androidjni/Build.h>
+#endif
 #include "utils/StringUtils.h"
 
 using namespace KODI::MESSAGING;
@@ -477,40 +480,43 @@ int CreateTCPServerSocket(const int port, const bool bindLocal, const int backlo
   unsigned int no = 0;
 #endif
   
-  // first try ipv6
-  if ((sock = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP)) >= 0)
+  if (CJNIBuild::PRODUCT != "google_sdk")  // Droid emulator has issues with ipv6
   {
-    // in case we're on ipv6, make sure the socket is dual stacked
-    if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&no, sizeof(no)) < 0)
+    // first try ipv6
+    if ((sock = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP)) >= 0)
     {
+      // in case we're on ipv6, make sure the socket is dual stacked
+      if (setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&no, sizeof(no)) < 0)
+      {
 #ifdef _MSC_VER
-      std::string sock_err = CWIN32Util::WUSysMsg(WSAGetLastError());
+        std::string sock_err = CWIN32Util::WUSysMsg(WSAGetLastError());
 #else
-      std::string sock_err = strerror(errno);
+        std::string sock_err = strerror(errno);
 #endif
-      CLog::Log(LOGWARNING, "%s Server: Only IPv6 supported (%s)", callerName, sock_err.c_str());
-    }
+        CLog::Log(LOGWARNING, "%s Server: Only IPv6 supported (%s)", callerName, sock_err.c_str());
+      }
 
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(yes));
+      setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(yes));
 
-    struct sockaddr_in6 *s6;
-    memset(&addr, 0, sizeof(addr));
-    addr.ss_family = AF_INET6;
-    s6 = (struct sockaddr_in6 *) &addr;
-    s6->sin6_port = htons(port);
-    if (bindLocal)
-      s6->sin6_addr = in6addr_loopback;
-    else
-      s6->sin6_addr = in6addr_any;
+      struct sockaddr_in6 *s6;
+      memset(&addr, 0, sizeof(addr));
+      addr.ss_family = AF_INET6;
+      s6 = (struct sockaddr_in6 *) &addr;
+      s6->sin6_port = htons(port);
+      if (bindLocal)
+        s6->sin6_addr = in6addr_loopback;
+      else
+        s6->sin6_addr = in6addr_any;
 
-    if (bind( sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in6)) < 0)
-    {
-      closesocket(sock);
-      sock = -1;
-      CLog::Log(LOGDEBUG, "%s Server: Failed to bind ipv6 serversocket, trying ipv4", callerName);
+      if (bind( sock, (struct sockaddr *) &addr, sizeof(struct sockaddr_in6)) < 0)
+      {
+        closesocket(sock);
+        sock = -1;
+        CLog::Log(LOGDEBUG, "%s Server: Failed to bind ipv6 serversocket, trying ipv4", callerName);
+      }
     }
   }
-  
+
   // ipv4 fallback
   if (sock < 0 && (sock = socket(PF_INET, SOCK_STREAM, 0)) >= 0)
   {
