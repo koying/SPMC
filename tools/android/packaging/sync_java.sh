@@ -41,6 +41,7 @@ cp $SRC_DIR/AndroidManifest.xml $TMP_DIR/AndroidManifest.xml.in
 cp $SRC_DIR/res/values/strings.xml $TMP_DIR/strings.xml.in
 cp $SRC_DIR/res/values/colors.xml $TMP_DIR/colors.xml.in
 cp $SRC_DIR/res/xml/searchable.xml $TMP_DIR/searchable.xml.in
+cp $SRC_DIR/build.gradle $TMP_DIR/build.gradle.in
 
 find $TMP_DIR -name "*.in" |xargs -i sed -i -e "s#${VARIABLES[APP_EMAIL]}#@APP_EMAIL@#g" -e "s#${VARIABLES[APP_PACKAGE]}#@APP_PACKAGE@#g" -e "s#${VARIABLES[APP_NAME]}#@APP_NAME@#g" -e "s#${APP_NAME_LC}#@APP_NAME_LC@#g" -e "s#${VARIABLES[VERSION_CODE]}#@APP_VERSION_CODE@#g" -e "s#${APP_VERSION}#@APP_VERSION@#g" -e "s#${VARIABLES[APP_STICKYURL]}#@APP_STICKYURL@#g" {}
 
@@ -49,5 +50,6 @@ cp -f $TMP_DIR/AndroidManifest.xml.in $TARGET_DIR/AndroidManifest.xml.in
 cp -f $TMP_DIR/strings.xml.in $TARGET_DIR/strings.xml.in
 cp -f $TMP_DIR/colors.xml.in $TARGET_DIR/colors.xml.in
 cp -f $TMP_DIR/searchable.xml.in $TARGET_DIR/searchable.xml.in
+cp -f $TMP_DIR/build.gradle.in $TARGET_DIR/build.gradle.in
 
 rm -rf $TMP_DIR
