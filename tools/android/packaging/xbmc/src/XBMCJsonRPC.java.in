@@ -46,6 +46,7 @@ import @APP_PACKAGE@.content.XBMCImageContentProvider;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class XBMCJsonRPC
@@ -141,36 +142,49 @@ public class XBMCJsonRPC
 
     public XBMCWebSocket(URI serverURI)
     {
-      super(serverURI);
+      super(serverURI, new Draft_6455());
     }
 
     @Override
     public void onOpen(ServerHandshake serverHandshake)
     {
-      Log.i("Websocket", "Opened");
-      send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+      synchronized (this)
+      {
+        Log.i("Websocket", "Opened");
+        send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+        notify();
+      }
     }
 
     @Override
     public void onMessage(String message)
     {
-      JsonParser parser = new JsonParser();
-      rootElem = parser.parse(message);
-      notify();
+      synchronized (this)
+      {
+        JsonParser parser = new JsonParser();
+        rootElem = parser.parse(message);
+        notify();
+      }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote)
     {
-      Log.i("Websocket", "Closed " + reason);
-      notify();
+      synchronized (this)
+      {
+        Log.i("Websocket", "Closed " + reason);
+        notify();
+      }
     }
 
     @Override
     public void onError(Exception ex)
     {
-      Log.e("Websocket", "Error " + ex.getMessage());
-      notify();
+      synchronized (this)
+      {
+        Log.e("Websocket", "Error " + ex.getMessage());
+        notify();
+      }
     }
   }
 
@@ -178,6 +192,7 @@ public class XBMCJsonRPC
   {
     String jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "8080");
     m_xbmc_web_url = "http://localhost:" + jsonPort;
+    jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "9090");
     m_xbmc_ws_url = "ws://localhost:" + jsonPort;
   }
 
@@ -190,10 +205,16 @@ public class XBMCJsonRPC
       URI uri = new URI(m_xbmc_ws_url + "/jsonrpc");
       XBMCWebSocket webSocketClient = new XBMCWebSocket(uri);
 
-      webSocketClient.connectBlocking();
-      webSocketClient.send(jsonRequest);
-      webSocketClient.wait(5000);
-
+      synchronized (webSocketClient)
+      {
+        webSocketClient.connect();
+        webSocketClient.wait(5000);
+        if (webSocketClient.getConnection().isOpen())
+          webSocketClient.send(jsonRequest);
+        else
+          return  null;
+        webSocketClient.wait(5000);
+      }
       return webSocketClient.rootElem;
     }
     catch (Exception e)
@@ -298,7 +319,7 @@ public class XBMCJsonRPC
       JsonObject req = request_json("{\"jsonrpc\": \"2.0\", \"method\": \"Files.PrepareDownload\", \"params\": { \"path\": \""
           + src + "\"}, \"id\": \"1\"}").getAsJsonObject();
       if (req == null || !req.has("result"))
-        return null;
+        return "";
 
       JsonObject result = req.getAsJsonObject("result");
       String surl = result.getAsJsonObject("details").get("path").getAsString();
@@ -850,8 +871,10 @@ public class XBMCJsonRPC
         return files;
 
       JsonObject results = req.getAsJsonObject("result");
-      JsonArray filesA = results.get("files").getAsJsonArray();
+      if (!results.has("files"))
+        return files;
 
+      JsonArray filesA = results.get("files").getAsJsonArray();
       for (int i = 0; i < filesA.size(); ++i)
       {
         JsonObject fileO = filesA.get(i).getAsJsonObject();
@@ -1261,7 +1284,11 @@ public class XBMCJsonRPC
       }
       strReq += "]";
 
-      JsonArray reqBatch = request_json(strReq).getAsJsonArray();
+      JsonElement root = request_json(strReq);
+      if (root == null)
+        return medias;
+
+      JsonArray reqBatch = root.getAsJsonArray();
       if (reqBatch == null)
         return medias;
 
