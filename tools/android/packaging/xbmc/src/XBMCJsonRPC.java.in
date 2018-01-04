@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import android.database.MatrixCursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -41,6 +43,10 @@ import @APP_PACKAGE@.content.XBMCFileContentProvider;
 import @APP_PACKAGE@.model.File;
 import @APP_PACKAGE@.model.Media;
 import @APP_PACKAGE@.content.XBMCImageContentProvider;
+
+import org.java_websocket.WebSocket;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 
 public class XBMCJsonRPC
 {
@@ -68,6 +74,7 @@ public class XBMCJsonRPC
   private static String TAG = "@APP_NAME@json";
 
   private String m_xbmc_web_url = "http://localhost:8080";
+  private String m_xbmc_ws_url = "ws://localhost:9090";
   private java.util.HashSet<Integer> mRecomendationIds = new java.util.HashSet<Integer>();
 
   private int MAX_RECOMMENDATIONS = 3;
@@ -128,14 +135,75 @@ public class XBMCJsonRPC
 
   private NotificationManager mNotificationManager;
 
+  class XBMCWebSocket extends WebSocketClient
+  {
+    public JsonElement rootElem = null;
+
+    public XBMCWebSocket(URI serverURI)
+    {
+      super(serverURI);
+    }
+
+    @Override
+    public void onOpen(ServerHandshake serverHandshake)
+    {
+      Log.i("Websocket", "Opened");
+      send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+    }
+
+    @Override
+    public void onMessage(String message)
+    {
+      JsonParser parser = new JsonParser();
+      rootElem = parser.parse(message);
+      notify();
+    }
+
+    @Override
+    public void onClose(int code, String reason, boolean remote)
+    {
+      Log.i("Websocket", "Closed " + reason);
+      notify();
+    }
+
+    @Override
+    public void onError(Exception ex)
+    {
+      Log.e("Websocket", "Error " + ex.getMessage());
+      notify();
+    }
+  }
+
   public XBMCJsonRPC()
   {
     String jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "8080");
     m_xbmc_web_url = "http://localhost:" + jsonPort;
+    m_xbmc_ws_url = "ws://localhost:" + jsonPort;
   }
 
   public JsonElement request_json(String jsonRequest)
   {
+    JsonElement rootElem = null;
+
+    try
+    {
+      URI uri = new URI(m_xbmc_ws_url + "/jsonrpc");
+      XBMCWebSocket webSocketClient = new XBMCWebSocket(uri);
+
+      webSocketClient.connectBlocking();
+      webSocketClient.send(jsonRequest);
+      webSocketClient.wait(5000);
+
+      return webSocketClient.rootElem;
+    }
+    catch (Exception e)
+    {
+      Log.e(TAG, "Failed to read JSON");
+      e.printStackTrace();
+      return null;
+    }
+
+    /*
     try
     {
       JsonElement rootElem = null;
@@ -191,6 +259,7 @@ public class XBMCJsonRPC
       e.printStackTrace();
       return null;
     }
+    */
   }
 
   public Bitmap getBitmap(String src)
