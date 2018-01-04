@@ -192,8 +192,8 @@ public class XBMCJsonRPC
   {
     String jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "8080");
     m_xbmc_web_url = "http://localhost:" + jsonPort;
-    jsonPort = XBMCProperties.getStringProperty("xbmc.jsonPort", "9090");
-    m_xbmc_ws_url = "ws://localhost:" + jsonPort;
+    String jsonTcpPort = XBMCProperties.getStringProperty("xbmc.jsonTcpPort", "9090");
+    m_xbmc_ws_url = "ws://localhost:" + jsonTcpPort;
   }
 
   public JsonElement request_json(String jsonRequest)
