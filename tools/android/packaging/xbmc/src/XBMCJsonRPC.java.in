@@ -1,16 +1,12 @@
 package @APP_PACKAGE@;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
@@ -72,8 +68,6 @@ public class XBMCJsonRPC
   private static String TAG = "@APP_NAME@json";
 
   private String m_xbmc_web_url = "http://localhost:8080";
-  private int m_xbmc_tcp_port = 9090;
-
   private java.util.HashSet<Integer> mRecomendationIds = new java.util.HashSet<Integer>();
 
   private int MAX_RECOMMENDATIONS = 3;
@@ -142,53 +136,10 @@ public class XBMCJsonRPC
 
   public JsonElement request_json(String jsonRequest)
   {
-    JsonElement rootElem = null;
-    Socket socket = null;
-
     try
     {
-      try
-      {
-        InetAddress serverAddr = InetAddress.getByName("127.0.0.1");
+      JsonElement rootElem = null;
 
-        Log.e("TCP Client", "C: Connecting...");
-
-        //create a socket to make the connection with the server
-        socket = new Socket(serverAddr, m_xbmc_tcp_port);
-
-        //sends the message to the server
-        PrintWriter mBufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-        mBufferOut.println(jsonRequest);
-        mBufferOut.flush();
-
-        //receives the message which the server sends back
-        BufferedReader mBufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-        JsonParser parser = new JsonParser();
-        rootElem = parser.parse(mBufferIn);
-      }
-      catch (Exception e)
-      {
-        Log.e(TAG, "Failed to read JSON");
-        e.printStackTrace();
-        return null;
-      }
-      finally
-      {
-        if (socket != null)
-          socket.close();
-      }
-    }
-    catch (Exception e)
-    {
-      return null;
-    }
-
-    return rootElem;
-
-      /*
-    try
-    {
       URL url = new URL(m_xbmc_web_url + "/jsonrpc");
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
@@ -240,7 +191,6 @@ public class XBMCJsonRPC
       e.printStackTrace();
       return null;
     }
-    */
   }
 
   public Bitmap getBitmap(String src)
