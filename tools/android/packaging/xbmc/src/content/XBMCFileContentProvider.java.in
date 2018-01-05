@@ -8,23 +8,33 @@ import android.net.Uri;
 import @APP_PACKAGE@.XBMCJsonRPC;
 import @APP_PACKAGE@.model.File;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class XBMCFileContentProvider extends XBMCContentProvider
 {
-  private static String TAG = "@APP_NAME@_File_Provider";
+  native void _createNativeInstance();
+  native void _releaseNativeInstance();
+  native ArrayList<File> _getDirectoryContent(String url);
 
+  private static String TAG = "@APP_NAME@_File_Provider";
   public static final String AUTHORITY = AUTHORITY_ROOT + ".file";
 
-  private XBMCJsonRPC mJsonRPC = null;
-
-  public static Uri buildUri(String path)
+  public static Uri buildUri(String surl)
   {
+    if (surl == null)
+      return null;
+    if (surl.isEmpty())
+      return null;
+
     Uri.Builder builder = new Uri.Builder();
     builder.scheme("content")
             .authority(AUTHORITY)
-            .path(path);
-    return builder.build();
+            .fragment(surl);
+
+    Uri out = builder.build();
+    // Log.d(TAG, "GetImageUri: in:" + surl + " out:" + out.toString());
+    return out;
   }
 
   @Override
@@ -50,7 +60,7 @@ public class XBMCFileContentProvider extends XBMCContentProvider
   @Override
   public boolean onCreate()
   {
-    mJsonRPC = new XBMCJsonRPC();
+    _createNativeInstance();
 
     return true;
   }
@@ -66,8 +76,7 @@ public class XBMCFileContentProvider extends XBMCContentProvider
   public Cursor query(Uri uri, String[] projection, String selection,
                       String[] selectionArgs, String sortOrder)
   {
-    String path = uri.getPath();
-    String xbmcURL = "special://profile" + path;
+    String xbmcURL = uri.getFragment();
 
     List<File> files = mJsonRPC.getFiles(xbmcURL);
     if (files.isEmpty())
@@ -95,5 +104,13 @@ public class XBMCFileContentProvider extends XBMCContentProvider
               });
     }
     return mc;
+  }
+
+  @Override
+  protected void finalize() throws Throwable
+  {
+    super.finalize();
+
+    _releaseNativeInstance();
   }
 }

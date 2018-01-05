@@ -6190,6 +6190,10 @@ xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt
 xbmc/platform/android/activity/JNISoftKeyboardView.cpp
 xbmc/platform/android/activity/JNISoftKeyboardView.h
+xbmc/platform/android/activity/JNIXBMCFileContent.cpp
+xbmc/platform/android/activity/JNIXBMCFileContent.h
+xbmc/platform/android/activity/JNIXBMCFileObject.cpp
+xbmc/platform/android/activity/JNIXBMCFileObject.h
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
 xbmc/platform/android/activity/android_main.cpp

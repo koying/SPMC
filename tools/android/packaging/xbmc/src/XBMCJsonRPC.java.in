@@ -879,7 +879,7 @@ public class XBMCJsonRPC
       {
         JsonObject fileO = filesA.get(i).getAsJsonObject();
         Uri uri = Uri.parse(fileO.get("file").getAsString());
-        File file = File.createFile(fileO.get("label").getAsString(), fileO.get("filetype").getAsString(), XBMCFileContentProvider.buildUri(uri.getPath()).toString());
+        File file = File.createFile(fileO.get("label").getAsString(), fileO.get("filetype").getAsString(), XBMCFileContentProvider.buildUri("special://profile" + uri.getPath()).toString());
         if (fileO.has("id"))
           file.setId(fileO.get("id").getAsInt());
         if (fileO.has("type") && !fileO.get("type").getAsString().equals("unknown"))
