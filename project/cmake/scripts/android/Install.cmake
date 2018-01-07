@@ -66,7 +66,6 @@ set(package_files strings.xml
                   src/content/XBMCFileContentProvider.java
                   src/content/XBMCMediaContentProvider.java
                   src/content/XBMCContentProvider.java
-                  src/content/XBMCImageContentProvider.java
                   src/content/XBMCYTDLContentProvider.java
                   src/XBMCSettingsContentObserver.java
                   src/XBMCMainView.java
