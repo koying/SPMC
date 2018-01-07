@@ -100,7 +100,7 @@ public class SyncChannelJobService extends JobService
       try (Cursor cursor =
                    mContext.getContentResolver()
                            .query(
-                                   XBMCFileContentProvider.buildUri("/playlists/video"),
+                                   XBMCFileContentProvider.buildUri("special://profile/playlists/video/"),
                                    null,
                                    null,
                                    null,
@@ -115,7 +115,7 @@ public class SyncChannelJobService extends JobService
       try (Cursor cursor =
                    mContext.getContentResolver()
                            .query(
-                                   XBMCFileContentProvider.buildUri("/playlists/mixed"),
+                                   XBMCFileContentProvider.buildUri("special://profile/playlists/mixed/"),
                                    null,
                                    null,
                                    null,
@@ -130,7 +130,7 @@ public class SyncChannelJobService extends JobService
       try (Cursor cursor =
                    mContext.getContentResolver()
                            .query(
-                                   XBMCFileContentProvider.buildUri("/playlists/music"),
+                                   XBMCFileContentProvider.buildUri("special://profile/playlists/music/"),
                                    null,
                                    null,
                                    null,
