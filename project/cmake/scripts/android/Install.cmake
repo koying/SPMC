@@ -34,6 +34,7 @@ set(package_files strings.xml
                   src/Splash.java
                   src/XBMCVideoView.java
                   src/XBMCJsonRPC.java
+                  src/XBMCFile.java
                   src/channels/SyncChannelJobService.java
                   src/channels/SyncProgramsJobService.java
                   src/channels/model/XBMCDatabase.java
