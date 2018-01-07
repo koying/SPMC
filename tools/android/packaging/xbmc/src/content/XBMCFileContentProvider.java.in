@@ -155,9 +155,9 @@ public class XBMCFileContentProvider extends XBMCContentProvider
     @Override
     public void run()
     {
+      XBMCFile in = new XBMCFile();
       try
       {
-        XBMCFile in = new XBMCFile();
         if (!in.Open(path))
         {
           out.flush();
@@ -171,13 +171,16 @@ public class XBMCFileContentProvider extends XBMCContentProvider
           out.write(buf, 0, buf.length);
         }
 
-        in.Close();
         out.flush();
         out.close();
       }
       catch (Exception e)
       {
         Log.e(getClass().getSimpleName(), "Exception transferring file", e);
+      }
+      finally
+      {
+        in.Close();
       }
     }
   }
