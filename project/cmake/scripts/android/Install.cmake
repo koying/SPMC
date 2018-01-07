@@ -16,11 +16,12 @@ endif()
 # Configure files into packaging environment.
 configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/Makefile.in
                ${CMAKE_BINARY_DIR}/tools/android/packaging/Makefile @ONLY)
+configure_file(${CORE_SOURCE_DIR}/tools/android/packaging/settings.gradle.in
+               ${CMAKE_BINARY_DIR}/tools/android/packaging/settings.gradle @ONLY)
 file(COPY ${CORE_SOURCE_DIR}/tools/android/packaging/apksign         DESTINATION ${CMAKE_BINARY_DIR}/tools/android/packaging/)
 file(COPY ${CORE_SOURCE_DIR}/tools/android/packaging/make_symbols.sh DESTINATION ${CMAKE_BINARY_DIR}/tools/android/packaging/)
 file(COPY ${CORE_SOURCE_DIR}/tools/android/packaging/build.gradle    DESTINATION ${CMAKE_BINARY_DIR}/tools/android/packaging/)
 file(COPY ${CORE_SOURCE_DIR}/tools/android/packaging/gradlew         DESTINATION ${CMAKE_BINARY_DIR}/tools/android/packaging/)
-file(COPY ${CORE_SOURCE_DIR}/tools/android/packaging/settings.gradle DESTINATION ${CMAKE_BINARY_DIR}/tools/android/packaging/)
 file(COPY ${CORE_SOURCE_DIR}/tools/android/packaging/gradle DESTINATION ${CMAKE_BINARY_DIR}/tools/android/packaging/)
 file(WRITE ${CMAKE_BINARY_DIR}/tools/depends/Makefile.include
      "$(PREFIX)/lib/${APP_NAME_LC}/lib${APP_NAME_LC}.so: ;\n")
