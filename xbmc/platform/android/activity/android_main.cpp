@@ -45,6 +45,7 @@
 #include "platform/android/activity/JNIXBMCNsdManagerRegistrationListener.h"
 #include "platform/android/activity/JNIXBMCNsdManagerResolveListener.h"
 #include "platform/android/activity/JNIXBMCJsonHandler.h"
+#include "platform/android/activity/JNIXBMCFile.h"
 #include "utils/StringUtils.h"
 #include "XBMCApp.h"
 
@@ -193,6 +194,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   jni::CJNIXBMCNsdManagerResolveListener::RegisterNatives(env);
   jni::CJNIXBMCMediaSession::RegisterNatives(env);
   jni::CJNIXBMCJsonHandler::RegisterNatives(env);
+  jni::CJNIXBMCFile::RegisterNatives(env);
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)
