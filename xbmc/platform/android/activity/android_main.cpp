@@ -29,26 +29,13 @@
 
 #include "CompileInfo.h"
 #include "EventLoop.h"
+#include "XBMCApp.h"
+
 #if defined(HAVE_BREAKPAD)
 #define __STDC_FORMAT_MACROS
 #include "client/linux/handler/minidump_descriptor.h"
 #include "client/linux/handler/exception_handler.h"
 #endif
-
-#include "platform/android/activity/JNIMainActivity.h"
-#include "platform/android/activity/JNIXBMCMainView.h"
-#include "platform/android/activity/JNIXBMCVideoView.h"
-#include "platform/android/activity/JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
-#include "platform/android/activity/JNIXBMCSurfaceTextureOnFrameAvailableListener.h"
-#include "platform/android/activity/JNIXBMCNsdManagerDiscoveryListener.h"
-#include "platform/android/activity/JNIXBMCMediaSession.h"
-#include "platform/android/activity/JNIXBMCNsdManagerRegistrationListener.h"
-#include "platform/android/activity/JNIXBMCNsdManagerResolveListener.h"
-#include "platform/android/activity/JNIXBMCJsonHandler.h"
-#include "platform/android/activity/JNIXBMCFile.h"
-#include "utils/StringUtils.h"
-#include "XBMCApp.h"
-
 
 // redirect stdout / stderr to logcat
 // https://codelab.wordpress.com/2014/11/03/how-to-use-standard-output-streams-for-logging-in-android-apps/
@@ -169,84 +156,4 @@ extern void android_main(struct android_app* state)
     // been properly uninitialized
   }
   exit(0);
-}
-
-extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
-{
-  jint version = JNI_VERSION_1_6;
-  JNIEnv* env;
-  if (vm->GetEnv(reinterpret_cast<void**>(&env), version) != JNI_OK)
-    return -1;
-
-  std::string pkgRoot = CCompileInfo::GetClass();
-  
-  std::string mainClass = pkgRoot + "/Main";
-  std::string bcReceiver = pkgRoot + "/XBMCBroadcastReceiver";
-  std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
-  std::string inputDeviceListener = pkgRoot + "/XBMCInputDeviceListener";
-
-  CJNIXBMCAudioManagerOnAudioFocusChangeListener::RegisterNatives(env);
-  CJNIXBMCSurfaceTextureOnFrameAvailableListener::RegisterNatives(env);
-  CJNIXBMCMainView::RegisterNatives(env);
-  CJNIXBMCVideoView::RegisterNatives(env);
-  jni::CJNIXBMCNsdManagerDiscoveryListener::RegisterNatives(env);
-  jni::CJNIXBMCNsdManagerRegistrationListener::RegisterNatives(env);
-  jni::CJNIXBMCNsdManagerResolveListener::RegisterNatives(env);
-  jni::CJNIXBMCMediaSession::RegisterNatives(env);
-  jni::CJNIXBMCJsonHandler::RegisterNatives(env);
-  jni::CJNIXBMCFile::RegisterNatives(env);
-
-  jclass cMain = env->FindClass(mainClass.c_str());
-  if(cMain)
-  {
-    JNINativeMethod methods[] = 
-    {
-      {"_onNewIntent", "(Landroid/content/Intent;)V", (void*)&CJNIMainActivity::_onNewIntent},
-      {"_onActivityResult", "(IILandroid/content/Intent;)V", (void*)&CJNIMainActivity::_onActivityResult},
-      {"_doFrame", "(J)V", (void*)&CJNIMainActivity::_doFrame},
-      {"_callNative", "(JJ)V", (void*)&CJNIMainActivity::_callNative},
-      {"_onCaptureAvailable", "(Landroid/media/Image;)V", (void*)&CJNIMainActivity::_onCaptureAvailable},
-      {"_onScreenshotAvailable", "(Landroid/media/Image;)V", (void*)&CJNIMainActivity::_onScreenshotAvailable},
-      {"_onVisibleBehindCanceled", "()V", (void*)&CJNIMainActivity::_onVisibleBehindCanceled},
-      {"_onMultiWindowModeChanged", "(Z)V", (void*)&CJNIMainActivity::_onMultiWindowModeChanged},
-      {"_onPictureInPictureModeChanged", "(Z)V", (void*)&CJNIMainActivity::_onPictureInPictureModeChanged},
-      {"_onAudioDeviceAdded", "([Landroid/media/AudioDeviceInfo;)V", (void*)&CJNIMainActivity::_onAudioDeviceAdded},
-      {"_onAudioDeviceRemoved", "([Landroid/media/AudioDeviceInfo;)V", (void*)&CJNIMainActivity::_onAudioDeviceRemoved},
-    };
-    env->RegisterNatives(cMain, methods, sizeof(methods)/sizeof(methods[0]));
-  }
-
-  jclass cBroadcastReceiver = env->FindClass(bcReceiver.c_str());
-  if(cBroadcastReceiver)
-  {
-    JNINativeMethod methods[] = 
-    {
-      {"_onReceive", "(Landroid/content/Intent;)V", (void*)&CJNIBroadcastReceiver::_onReceive},
-    };
-    env->RegisterNatives(cBroadcastReceiver, methods, sizeof(methods)/sizeof(methods[0]));
-  }
-
-  jclass cSettingsObserver = env->FindClass(settingsObserver.c_str());
-  if(cSettingsObserver)
-  {
-    JNINativeMethod methods[] = 
-    {
-      {"_onVolumeChanged", "(I)V", (void*)&CJNIMainActivity::_onVolumeChanged},
-    };
-    env->RegisterNatives(cSettingsObserver, methods, sizeof(methods)/sizeof(methods[0]));
-  }
-
-  jclass cInputDeviceListener = env->FindClass(inputDeviceListener.c_str());
-  if(cInputDeviceListener)
-  {
-    JNINativeMethod methods[] = 
-    {
-      { "_onInputDeviceAdded", "(I)V", (void*)&CJNIMainActivity::_onInputDeviceAdded },
-      { "_onInputDeviceChanged", "(I)V", (void*)&CJNIMainActivity::_onInputDeviceChanged },
-      { "_onInputDeviceRemoved", "(I)V", (void*)&CJNIMainActivity::_onInputDeviceRemoved }
-    };
-    env->RegisterNatives(cInputDeviceListener, methods, sizeof(methods)/sizeof(methods[0]));
-  }
-
-  return version;
 }
