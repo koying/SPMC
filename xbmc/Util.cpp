@@ -1792,7 +1792,7 @@ std::string CUtil::ResolveExecutablePath()
   else
     strExecutablePath = buf;
 #elif defined(TARGET_ANDROID)
-  strExecutablePath = CXBMCApp::getApplicationInfo().nativeLibraryDir;
+  strExecutablePath = CXBMCApp::get()->getApplicationInfo().nativeLibraryDir;
 
   std::string appName = CCompileInfo::GetAppName();
   std::string libName = "lib" + appName + ".so";

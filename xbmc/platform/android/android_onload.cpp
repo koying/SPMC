@@ -20,6 +20,8 @@
 
 #include "CompileInfo.h"
 
+#include <androidjni/JNIThreading.h>
+
 #include "platform/android/activity/JNIMainActivity.h"
 #include "platform/android/activity/JNIXBMCMainView.h"
 #include "platform/android/activity/JNIXBMCVideoView.h"
@@ -42,6 +44,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   JNIEnv* env;
   if (vm->GetEnv(reinterpret_cast<void**>(&env), version) != JNI_OK)
     return -1;
+  xbmc_jni_on_load(vm, env);
 
   std::string pkgRoot = CCompileInfo::GetClass();
   
