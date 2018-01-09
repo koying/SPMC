@@ -1019,7 +1019,7 @@ bool CGUIMediaWindow::OnClick(int iItem, const std::string &player)
   {
     CURL url(pItem->GetPath());
     CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnClick Trying to run: %s - %s", URIUtils::GetFileName(url.GetFileName()).c_str(), url.GetOption("class").c_str());
-    return CXBMCApp::StartAppActivity(URIUtils::GetFileName(url.GetFileName()), url.GetOption("class"));
+    return CXBMCApp::get()->StartAppActivity(URIUtils::GetFileName(url.GetFileName()), url.GetOption("class"));
   }
 #endif
   else

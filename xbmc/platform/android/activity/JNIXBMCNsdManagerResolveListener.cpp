@@ -21,9 +21,9 @@
 #include "JNIXBMCNsdManagerResolveListener.h"
 
 #include <androidjni/jutils-details.hpp>
-#include <androidjni/Context.h>
 #include <androidjni/NsdServiceInfo.h>
 
+#include "XBMCApp.h"
 #include "CompileInfo.h"
 
 using namespace jni;
@@ -34,7 +34,7 @@ static std::string s_className = std::string(CCompileInfo::GetClass()) + "/inter
 CJNIXBMCNsdManagerResolveListener::CJNIXBMCNsdManagerResolveListener()
   : CJNIBase(s_className)
 {
-  m_object = new_object(CJNIContext::getClassLoader().loadClass(GetDotClassName(s_className)));
+  m_object = new_object(CXBMCApp::get()->getClassLoader().loadClass(GetDotClassName(GetClassName())));
   m_object.setGlobal();
 
   add_instance(m_object, this);
