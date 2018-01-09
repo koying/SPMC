@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.interfaces;
 
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.util.Log;
