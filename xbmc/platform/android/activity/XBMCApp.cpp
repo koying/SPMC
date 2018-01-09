@@ -161,6 +161,7 @@ CRect CXBMCApp::m_surface_rect;
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIMainActivity(nativeActivity)
   , CJNIBroadcastReceiver(CJNIContext::getPackageName() + ".XBMCBroadcastReceiver")
+  , CJNIXBMCInputDeviceListener()
   , m_videosurfaceInUse(false)
 {
   m_xbmcappinstance = this;
