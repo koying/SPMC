@@ -31,7 +31,7 @@ static std::string s_className = std::string(CCompileInfo::GetClass()) + "/inter
 CJNIXBMCSurfaceTextureOnFrameAvailableListener::CJNIXBMCSurfaceTextureOnFrameAvailableListener()
   : CJNIBase(s_className)
 {
-  m_object = new_object(CJNIContext::getClassLoader().loadClass(GetDotClassName(s_className)));
+  m_object = new_object(GetClassName());
   m_object.setGlobal();
 
   add_instance(m_object, this);

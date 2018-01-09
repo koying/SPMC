@@ -71,7 +71,7 @@ CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(CJNISurfaceHolderCallback*
 {
   std::string signature = "()L" + s_className + ";";
 
-  CJNIXBMCVideoView* pvw = new CJNIXBMCVideoView(call_static_method<jhobject>(xbmc_jnienv(), CJNIContext::getClassLoader().loadClass(GetDotClassName(s_className)),
+  CJNIXBMCVideoView* pvw = new CJNIXBMCVideoView(call_static_method<jhobject>(s_className.c_str(),
                                                                               "createVideoView", signature.c_str()));
   if (!*pvw)
   {

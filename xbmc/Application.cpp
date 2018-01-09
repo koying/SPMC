@@ -564,8 +564,8 @@ bool CApplication::Create()
   bool extready = CXBMCApp::GetExternalStorage(extstorage);
   CLog::Log(LOGNOTICE, "External storage path = %s; status = %s", extstorage.c_str(), extready ? "ok" : "nok");
   CLog::Log(LOGNOTICE, "System library paths = %s", CJNISystem::getProperty("java.library.path").c_str());
-  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCApp::getApplicationInfo().nativeLibraryDir.c_str());
-  CLog::Log(LOGNOTICE, "APK = %s", CXBMCApp::getPackageResourcePath().c_str());
+  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCApp::get()->getApplicationInfo().nativeLibraryDir.c_str());
+  CLog::Log(LOGNOTICE, "APK = %s", CXBMCApp::get()->getPackageResourcePath().c_str());
   CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
 #endif
 
@@ -1032,7 +1032,7 @@ bool CApplication::InitDirectoriesLinux()
   CSpecialProtocol::SetXBMCBinAddonPath(appBinPath + "/addons");
 
 #if defined(TARGET_ANDROID)
-  CXBMCApp::InitDirectories();
+  CXBMCApp::get()->InitDirectories();
 #endif
 
   return true;
@@ -1620,7 +1620,7 @@ void CApplication::OnSettingAction(const CSetting *setting)
     g_windowManager.ActivateWindow(WINDOW_PICTURES);
 #ifdef TARGET_ANDROID
   else if (settingId == CSettings::SETTING_DEBUG_UPLOADLOG)
-    CXBMCApp::uploadLog();
+    CXBMCApp::get()->uploadLog();
 #endif
 }
 
@@ -2506,7 +2506,7 @@ bool CApplication::OnAction(const CAction &action)
 
 // Android has steps based on the max available volume level
 #if defined(TARGET_ANDROID)
-      float step = (VOLUME_MAXIMUM - VOLUME_MINIMUM) / CXBMCApp::GetMaxSystemVolume();
+      float step = (VOLUME_MAXIMUM - VOLUME_MINIMUM) / CXBMCApp::get()->GetMaxSystemVolume();
 #else
       float step   = (VOLUME_MAXIMUM - VOLUME_MINIMUM) / volumesteps;
 
@@ -2646,7 +2646,7 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
 #if defined(TARGET_ANDROID)
     if (pMsg->params.size())
     {
-      CXBMCApp::StartActivity(pMsg->params[0],
+      CXBMCApp::get()->StartActivity(pMsg->params[0],
         pMsg->params.size() > 1 ? pMsg->params[1] : "",
         pMsg->params.size() > 2 ? pMsg->params[2] : "",
         pMsg->params.size() > 3 ? pMsg->params[3] : "");
@@ -4079,7 +4079,7 @@ bool CApplication::WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed /* = false 
 
 #ifdef TARGET_ANDROID
   // Screensaver deactivated -> acquire wake lock
-  CXBMCApp::EnableWakeLock(true);
+  CXBMCApp::get()->EnableWakeLock(true);
 #endif
 
   if(result)
@@ -4238,7 +4238,7 @@ void CApplication::ActivateScreenSaver(bool forceType /*= false */)
   {
 #ifdef TARGET_ANDROID
     if (m_screenSaver->ID() == "screensaver.xbmc.builtin.system")
-      CXBMCApp::EnableWakeLock(false);
+      CXBMCApp::get()->EnableWakeLock(false);
 #endif
     return;
   }

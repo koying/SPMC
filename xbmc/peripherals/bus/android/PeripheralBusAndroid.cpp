@@ -42,10 +42,10 @@ CPeripheralBusAndroid::CPeripheralBusAndroid(CPeripherals *manager) :
   m_bNeedsPolling = false;
 
   // register for input device callbacks
-  CXBMCApp::RegisterInputDeviceCallbacks(this);
+  CXBMCApp::get()->RegisterInputDeviceCallbacks(this);
 
   // register for input device events
-  CXBMCApp::RegisterInputDeviceEventHandler(this);
+  CXBMCApp::get()->RegisterInputDeviceEventHandler(this);
 
   // get all currently connected input devices
   m_scanResults = GetInputDevices();
@@ -54,10 +54,10 @@ CPeripheralBusAndroid::CPeripheralBusAndroid(CPeripherals *manager) :
 CPeripheralBusAndroid::~CPeripheralBusAndroid()
 {
   // unregister from input device events
-  CXBMCApp::UnregisterInputDeviceEventHandler();
+  CXBMCApp::get()->UnregisterInputDeviceEventHandler();
 
   // unregister from input device callbacks
-  CXBMCApp::UnregisterInputDeviceCallbacks();
+  CXBMCApp::get()->UnregisterInputDeviceCallbacks();
 }
 
 bool CPeripheralBusAndroid::InitializeProperties(CPeripheral& peripheral)
@@ -78,7 +78,7 @@ bool CPeripheralBusAndroid::InitializeProperties(CPeripheral& peripheral)
     return false;
   }
 
-  const CJNIViewInputDevice device = CXBMCApp::GetInputDevice(deviceId);
+  const CJNIViewInputDevice device = CXBMCApp::get()->GetInputDevice(deviceId);
   if (!device)
   {
     CLog::Log(LOGWARNING, "CPeripheralBusAndroid: failed to get input device with ID %d", deviceId);
@@ -184,7 +184,7 @@ void CPeripheralBusAndroid::OnInputDeviceAdded(int deviceId)
         return;
     }
 
-    const CJNIViewInputDevice device = CXBMCApp::GetInputDevice(deviceId);
+    const CJNIViewInputDevice device = CXBMCApp::get()->GetInputDevice(deviceId);
     if (!device)
     {
       CLog::Log(LOGWARNING, "CPeripheralBusAndroid: failed to add input device with ID %d because it couldn't be found", deviceId);
@@ -212,7 +212,7 @@ void CPeripheralBusAndroid::OnInputDeviceChanged(int deviceId)
     {
       if (result->m_strLocation == deviceLocation)
       {
-        const CJNIViewInputDevice device = CXBMCApp::GetInputDevice(deviceId);
+        const CJNIViewInputDevice device = CXBMCApp::get()->GetInputDevice(deviceId);
         if (!device)
         {
           CLog::Log(LOGWARNING, "CPeripheralBusAndroid: failed to update input device \"%s\" with ID %d because it couldn't be found", result->m_strDeviceName.c_str(), deviceId);
@@ -297,11 +297,11 @@ PeripheralScanResults CPeripheralBusAndroid::GetInputDevices()
   CLog::Log(LOGINFO, "CPeripheralBusAndroid: scanning for input devices...");
 
   PeripheralScanResults results;
-  std::vector<int> deviceIds = CXBMCApp::GetInputDeviceIds();
+  std::vector<int> deviceIds = CXBMCApp::get()->GetInputDeviceIds();
 
   for (const auto& deviceId : deviceIds)
   {
-    const CJNIViewInputDevice device = CXBMCApp::GetInputDevice(deviceId);
+    const CJNIViewInputDevice device = CXBMCApp::get()->GetInputDevice(deviceId);
     if (!device)
     {
       CLog::Log(LOGWARNING, "CPeripheralBusAndroid: no input device with ID %d found", deviceId);

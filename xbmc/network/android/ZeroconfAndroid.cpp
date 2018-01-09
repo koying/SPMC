@@ -20,14 +20,14 @@
 
 #include "ZeroconfAndroid.h"
 
-#include <androidjni/Context.h>
 #include "utils/log.h"
 
+#include "platform/android/activity/XBMCApp.h"
 #include "threads/SingleLock.h"
 
 CZeroconfAndroid::CZeroconfAndroid()
 {
-  m_manager = CJNIContext::getSystemService(CJNIContext::NSD_SERVICE);
+  m_manager = CXBMCApp::get()->getSystemService(CJNIContext::NSD_SERVICE);
 }
 
 CZeroconfAndroid::~CZeroconfAndroid()
