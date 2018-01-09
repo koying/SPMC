@@ -21,34 +21,19 @@
 
 #include <pthread.h>
 
-#include <androidjni/Service.h>
-
-#include "threads/Event.h"
 #include "threads/SharedSection.h"
 
 class CXBMCService
 {
-  friend class XBMCApp;
-
 public:
   CXBMCService();
 
-  static CXBMCService* get() { return m_xbmcserviceinstance; }
-  static void _launchApplication(JNIEnv*, jobject thiz);
-  int android_printf(const char* format...);
-
-protected:
-  void run();
-  void SetupEnv();
-
-  CEvent m_appReady;
+  void LaunchApplication();
 
 private:
   static CCriticalSection m_SvcMutex;
   static bool m_SvcThreadCreated;
   static pthread_t m_SvcThread;
-  static CXBMCService* m_xbmcserviceinstance;
-  CJNIService m_jniservice;
 
-  void LaunchApplication();
+  static void _launchApplication(JNIEnv*, jobject);
 };
