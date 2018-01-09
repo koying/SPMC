@@ -119,8 +119,6 @@ public:
   virtual ~CXBMCApp();
   static CXBMCApp* get() { return m_xbmcappinstance; }
 
-  void run();
-
   // IAnnouncer IF
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
@@ -167,7 +165,7 @@ public:
   void onLostFocus();
 
   void Initialize();
-  void Deinitialize();
+  void Deinitialize(int status);
 
   static const ANativeWindow** GetNativeWindow(int timeout);
   static int SetBuffersGeometry(int width, int height);

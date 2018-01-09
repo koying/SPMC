@@ -92,8 +92,6 @@
 #include "utils/Variant.h"
 #include "video/videosync/VideoSyncAndroid.h"
 #include "windowing/WinEvents.h"
-#include "platform/xbmc.h"
-#include "platform/XbmcContext.h"
 
 #include "CompileInfo.h"
 #include "interfaces/AnnouncementManager.h"
@@ -116,13 +114,6 @@
 using namespace KODI::MESSAGING;
 using namespace ANNOUNCEMENT;
 using namespace jni;
-
-template<class T, void(T::*fn)()>
-void* thread_run(void* obj)
-{
-  (static_cast<T*>(obj)->*fn)();
-  return NULL;
-}
 
 CXBMCApp* CXBMCApp::m_xbmcappinstance = NULL;
 CCriticalSection CXBMCApp::m_LayoutMutex;
@@ -238,12 +229,6 @@ void CXBMCApp::onStart()
 
   if (m_firstActivityRun)
   {
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&m_thread, &attr, thread_run<CXBMCApp, &CXBMCApp::run>, this);
-    pthread_attr_destroy(&attr);
-
     // Some intent filters MUST be registered in code rather than through the manifest
     CJNIIntentFilter intentFilter;
     intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
@@ -255,6 +240,8 @@ void CXBMCApp::onStart()
     registerReceiver(*this, intentFilter);
 
     m_mediaSession.reset(new CJNIXBMCMediaSession());
+
+    m_firstActivityRun=false;
   }
 }
 
@@ -390,7 +377,7 @@ void CXBMCApp::Initialize()
   g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(CXBMCApp::get());
 }
 
-void CXBMCApp::Deinitialize()
+void CXBMCApp::Deinitialize(int status)
 {
   while(!m_texturePool.empty())
   {
@@ -398,6 +385,16 @@ void CXBMCApp::Deinitialize()
     glDeleteTextures(1, &texture_id);
     m_texturePool.pop_back();
   }
+
+  // Pass the return code to Java
+  set_field(m_object, "mExitCode", status);
+
+  // If we are have not been force by Android to exit, notify its finish routine.
+  // This will cause android to run through its teardown events, it calls:
+  // onPause(), onLostFocus(), onDestroyWindow(), onStop(), onDestroy().
+  ANativeActivity_finish(m_activity);
+  m_exiting=true;
+
 }
 
 bool CXBMCApp::EnableWakeLock(bool on)
@@ -530,36 +527,6 @@ bool CXBMCApp::IsHeadsetPlugged()
 bool CXBMCApp::IsHDMIPlugged()
 {
   return m_hdmiPlugged;
-}
-
-void CXBMCApp::run()
-{
-  int status = 0;
-
-  SetupEnv();
-  XBMC::Context context;
-
-  m_firstActivityRun=false;
-  android_printf(" => running XBMC_Run...");
-  try
-  {
-    CFileItemList dummyPL;
-    status = XBMC_Run(false, dummyPL);
-    android_printf(" => XBMC_Run finished with %d", status);
-  }
-  catch(...)
-  {
-    android_printf("ERROR: Exception caught on main loop. Exiting");
-  }
-
-  // Pass the return code to Java
-  set_field(m_context, "mExitCode", status);
-
-  // If we are have not been force by Android to exit, notify its finish routine.
-  // This will cause android to run through its teardown events, it calls:
-  // onPause(), onLostFocus(), onDestroyWindow(), onStop(), onDestroy().
-  ANativeActivity_finish(m_activity);
-  m_exiting=true;
 }
 
 void CXBMCApp::XBMC_SetupDisplay()
@@ -1413,53 +1380,6 @@ void CXBMCApp::doFrame(int64_t frameTimeNanos)
 bool CXBMCApp::WaitVSync(unsigned int milliSeconds)
 {
   return m_vsyncEvent.WaitMSec(milliSeconds);
-}
-
-void CXBMCApp::SetupEnv()
-{
-  setenv("XBMC_ANDROID_SYSTEM_LIBS", CJNISystem::getProperty("java.library.path").c_str(), 0);
-  setenv("XBMC_ANDROID_LIBS", getApplicationInfo().nativeLibraryDir.c_str(), 0);
-  setenv("XBMC_ANDROID_APK", getPackageResourcePath().c_str(), 0);
-
-  std::string appName = CCompileInfo::GetAppName();
-  StringUtils::ToLower(appName);
-  std::string className = CCompileInfo::GetPackage();
-
-  std::string xbmcHome = CJNISystem::getProperty("xbmc.home", "");
-  if (xbmcHome.empty())
-  {
-    std::string cacheDir = getCacheDir().getAbsolutePath();
-    setenv("KODI_BIN_HOME", (cacheDir + "/apk/assets").c_str(), 0);
-    setenv("KODI_HOME", (cacheDir + "/apk/assets").c_str(), 0);
-  }
-  else
-  {
-    setenv("KODI_BIN_HOME", (xbmcHome + "/assets").c_str(), 0);
-    setenv("KODI_HOME", (xbmcHome + "/assets").c_str(), 0);
-  }
-
-  std::string externalDir = CJNISystem::getProperty("xbmc.data", "");
-  if (externalDir.empty())
-  {
-    CJNIFile androidPath = getExternalFilesDir("");
-    if (!androidPath)
-      androidPath = getDir(className.c_str(), 1);
-
-    if (androidPath)
-      externalDir = androidPath.getAbsolutePath();
-  }
-
-  if (!externalDir.empty())
-    setenv("HOME", externalDir.c_str(), 0);
-  else
-    setenv("HOME", getenv("KODI_TEMP"), 0);
-
-  std::string apkPath = getenv("XBMC_ANDROID_APK");
-  apkPath += "/assets/python2.7";
-  setenv("PYTHONHOME", apkPath.c_str(), 1);
-  setenv("PYTHONPATH", "", 1);
-  setenv("PYTHONOPTIMIZE","", 1);
-  setenv("PYTHONNOUSERSITE", "1", 1);
 }
 
 std::string CXBMCApp::GetFilenameFromIntent(const CJNIIntent &intent)
