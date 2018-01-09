@@ -148,6 +148,7 @@ void CXBMCService::LaunchApplication()
 
 void CXBMCService::_launchApplication(JNIEnv*, jobject thiz)
 {
-  CXBMCService::get()->m_jniservice = jhobject::fromJNI(thiz);
-  CXBMCService::get()->LaunchApplication();
+  m_xbmcserviceinstance = new CXBMCService();
+  m_xbmcserviceinstance->m_jniservice = jhobject::fromJNI(thiz);
+  m_xbmcserviceinstance->LaunchApplication();
 }
