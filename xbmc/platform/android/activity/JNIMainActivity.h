@@ -37,9 +37,6 @@ public:
   static void _onActivityResult(JNIEnv *env, jobject context, jint requestCode, jint resultCode, jobject resultData);
   static void _onVolumeChanged(JNIEnv *env, jobject context, jint volume);
   static void _doFrame(JNIEnv *env, jobject context, jlong frameTimeNanos);
-  static void _onInputDeviceAdded(JNIEnv *env, jobject context, jint deviceId);
-  static void _onInputDeviceChanged(JNIEnv *env, jobject context, jint deviceId);
-  static void _onInputDeviceRemoved(JNIEnv *env, jobject context, jint deviceId);
   static void _onCaptureAvailable(JNIEnv *env, jobject context, jobject image);
   static void _onScreenshotAvailable(JNIEnv *env, jobject context, jobject image);
   static void _onVisibleBehindCanceled(JNIEnv *env, jobject context);
