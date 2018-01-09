@@ -665,8 +665,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   if (m_passthrough && (m_wantsIECPassthrough && m_encoding != CJNIAudioFormat::ENCODING_IEC61937))
   {
     CXBMCApp::get()->AcquireAudioFocus();
-    m_volume = CXBMCApp::GetSystemVolume();
-    CXBMCApp::SetSystemVolume(1.0);
+    m_volume = CXBMCApp::get()->GetSystemVolume();
+    CXBMCApp::get()->SetSystemVolume(1.0);
   }
 
   return true;
@@ -680,7 +680,7 @@ void CAESinkAUDIOTRACK::Deinitialize()
   // Restore volume
   if (m_volume != -1)
   {
-    CXBMCApp::SetSystemVolume(m_volume);
+    CXBMCApp::get()->SetSystemVolume(m_volume);
     CXBMCApp::get()->ReleaseAudioFocus();
   }
 
@@ -923,7 +923,7 @@ void CAESinkAUDIOTRACK::EnumerateDevicesEx(AEDeviceInfoList &list, bool force)
   // Enumerate audio devices on API >= 23
   if (CJNIAudioManager::GetSDKVersion() >= 23)
   {
-    CJNIAudioManager audioManager(CJNIContext::getSystemService("audio"));
+    CJNIAudioManager audioManager(CXBMCApp::get()->getSystemService("audio"));
     CJNIAudioDeviceInfos audiodevices = audioManager.getDevices(CJNIAudioManager::GET_DEVICES_OUTPUTS);
     if (g_advancedSettings.CanLogComponent(LOGAUDIO))
       LogAudoDevices("EnumerateDevicesEx", audiodevices);

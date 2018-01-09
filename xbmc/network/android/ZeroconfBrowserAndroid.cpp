@@ -21,8 +21,8 @@
 #include "ZeroconfBrowserAndroid.h"
 
 #include <androidjni/jutils-details.hpp>
-#include <androidjni/Context.h>
 
+#include "platform/android/activity/XBMCApp.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/GUIWindowManager.h"
 #include "GUIUserMessages.h"
@@ -35,7 +35,7 @@
 
 CZeroconfBrowserAndroid::CZeroconfBrowserAndroid()
 {
-  m_manager = CJNIContext::getSystemService(CJNIContext::NSD_SERVICE);
+  m_manager = CXBMCApp::get()->getSystemService(CJNIContext::NSD_SERVICE);
 }
 
 CZeroconfBrowserAndroid::~CZeroconfBrowserAndroid()

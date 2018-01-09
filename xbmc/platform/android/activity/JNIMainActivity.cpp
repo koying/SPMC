@@ -28,8 +28,8 @@ using namespace jni;
 
 CJNIMainActivity* CJNIMainActivity::m_appInstance(NULL);
 
-CJNIMainActivity::CJNIMainActivity(const ANativeActivity *nativeActivity)
-  : CJNIActivity(nativeActivity)
+CJNIMainActivity::CJNIMainActivity(const jobject& clazz)
+  : CJNIActivity(clazz)
 {
   m_appInstance = this;
 }
@@ -104,19 +104,19 @@ void CJNIMainActivity::_onPictureInPictureModeChanged(JNIEnv* env, jobject conte
 
 void CJNIMainActivity::runNativeOnUiThread(void (*callback)(CVariant *), CVariant* variant)
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "runNativeOnUiThread", "(JJ)V", (jlong)callback, (jlong)variant);
 }
 
 void CJNIMainActivity::startCrashHandler()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "startCrashHandler", "()V");
 }
 
 void CJNIMainActivity::uploadLog()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "uploadLog", "()V");
 }
 
@@ -156,36 +156,36 @@ void CJNIMainActivity::_doFrame(JNIEnv *env, jobject context, jlong frameTimeNan
 
 void CJNIMainActivity::registerMediaButtonEventReceiver()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "registerMediaButtonEventReceiver", "()V");
 }
 
 void CJNIMainActivity::unregisterMediaButtonEventReceiver()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "unregisterMediaButtonEventReceiver", "()V");
 }
 
 void CJNIMainActivity::takeScreenshot()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "takeScreenshot", "()V");
 }
 
 void CJNIMainActivity::startProjection()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "startProjection", "()V");
 }
 
 void CJNIMainActivity::startCapture(int width, int height)
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "startCapture", "(II)V", width, height);
 }
 
 void CJNIMainActivity::stopCapture()
 {
-  call_method<void>(m_context,
+  call_method<void>(m_object,
                     "stopCapture", "()V");
 }
