@@ -28,7 +28,7 @@
 class CJNIMainActivity : public CJNIActivity
 {
 public:
-  CJNIMainActivity(const ANativeActivity *nativeActivity);
+  CJNIMainActivity(const jobject& clazz);
   ~CJNIMainActivity();
 
   static CJNIMainActivity* GetAppInstance() { return m_appInstance; }
@@ -46,16 +46,16 @@ public:
   static void _onAudioDeviceRemoved(JNIEnv *env, jobject context, jobjectArray devices);
 
   static void _callNative(JNIEnv *env, jobject context, jlong funcAddr, jlong variantAddr);
-  static void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
-  static void registerMediaButtonEventReceiver();
-  static void unregisterMediaButtonEventReceiver();
-  static void startCrashHandler();
-  static void uploadLog();
+  void runNativeOnUiThread(void (*callback)(CVariant *), CVariant *variant);
+  void registerMediaButtonEventReceiver();
+  void unregisterMediaButtonEventReceiver();
+  void startCrashHandler();
+  void uploadLog();
 
-  static void takeScreenshot();
-  static void startProjection();
-  static void startCapture(int width, int height);
-  static void stopCapture();
+  void takeScreenshot();
+  void startProjection();
+  void startCapture(int width, int height);
+  void stopCapture();
 
 private:
   static CJNIMainActivity *m_appInstance;

@@ -279,7 +279,7 @@ void CGUIWindowSlideShow::OnDeinitWindow(int nextWindowID)
 
 #if defined(TARGET_ANDROID)
   // enable android screensaver
-  CXBMCApp::EnableWakeLock(false);
+  CXBMCApp::get()->EnableWakeLock(false);
 #elif defined(TARGET_DARWIN_TVOS)
   CDarwinUtils::EnableOSScreenSaver(true);
 #endif
@@ -381,7 +381,7 @@ void CGUIWindowSlideShow::StartSlideShow()
 {
 #if defined(TARGET_ANDROID)
   // disable android screensaver
-  CXBMCApp::EnableWakeLock(true);
+  CXBMCApp::get()->EnableWakeLock(true);
 #elif defined(TARGET_DARWIN_TVOS)
   CDarwinUtils::EnableOSScreenSaver(false);
 #endif

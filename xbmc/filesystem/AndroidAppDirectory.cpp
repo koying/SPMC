@@ -53,7 +53,7 @@ bool CAndroidAppDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
   if (dirname == "apps")
   {
-    std::vector<androidPackage> applications = CXBMCApp::GetApplications();
+    std::vector<androidPackage> applications = CXBMCApp::get()->GetApplications();
     if (applications.empty())
     {
       CLog::Log(LOGERROR, "CAndroidAppDirectory::GetDirectory Application lookup listing failed");

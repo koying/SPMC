@@ -25,7 +25,6 @@
 #include <cstring>
 #include <map>
 
-#include <androidjni/Context.h>
 #include <androidjni/StorageManager.h>
 #include <androidjni/Environment.h>
 
@@ -128,7 +127,7 @@ void CAndroidStorageProvider::GetRemovableDrives(VECSOURCES &removableDrives)
   bool inError = false;
   VECSOURCES droidDrives;
 
-  CJNIStorageManager manager(CJNIContext::getSystemService("storage"));
+  CJNIStorageManager manager(CXBMCApp::get()->getSystemService("storage"));
   if (xbmc_jnienv()->ExceptionCheck())
   {
     xbmc_jnienv()->ExceptionClear();
