@@ -18,6 +18,7 @@ set(SOURCES android_main.cpp
             JNIXBMCJsonHandler.cpp
             JNIXBMCFile.cpp
             XBMCApp.cpp
+            XBMCService.cpp
             ${NDKROOT}/sources/android/native_app_glue/android_native_app_glue.c
             ${NDKROOT}/sources/android/cpufeatures/cpu-features.c)
 
@@ -42,7 +43,9 @@ set(HEADERS AndroidExtra.h
             JNIXBMCNsdManagerResolveListener.h
             JNIXBMCJsonHandler.h
             JNIXBMCFile.h
-            XBMCApp.h)
+            XBMCApp.h
+            XBMCService.h
+            )
 
 core_add_library(platform_android_activity)
 target_include_directories(${CORE_LIBRARY}

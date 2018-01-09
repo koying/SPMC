@@ -271,6 +271,7 @@ CApplication::CApplication(void)
   , m_stackFileItemToUpdate(new CFileItem)
   , m_threadID(0)
   , m_bInitializing(true)
+  , m_bGUIInitialized(false)
   , m_bPlatformDirectories(true)
   , m_progressTrackingVideoResumeBookmark(*new CBookmark)
   , m_progressTrackingItem(new CFileItem)
@@ -391,7 +392,7 @@ static void CopyUserDataIfNeeded(const std::string &strPath, const std::string &
     destPath = URIUtils::AddFileToFolder(strPath, file);
   else
     destPath = URIUtils::AddFileToFolder(strPath, destname);
-  
+
   if (!CFile::Exists(destPath))
   {
     // need to copy it across
@@ -476,7 +477,7 @@ bool CApplication::Create()
     // set special://envhome
     CSpecialProtocol::SetEnvHomePath(getenv("HOME"));
   #endif
-    
+
   // only the InitDirectories* for the current platform should return true
   bool inited = InitDirectoriesLinux();
   if (!inited)
@@ -488,7 +489,7 @@ bool CApplication::Create()
   CopyUserDataIfNeeded("special://masterprofile/", "RssFeeds.xml");
   CopyUserDataIfNeeded("special://masterprofile/", "favourites.xml");
   CopyUserDataIfNeeded("special://masterprofile/", "Lircmap.xml");
-  
+
   //! @todo - move to CPlatformXXX
   #ifdef TARGET_DARWIN_IOS
     CopyUserDataIfNeeded("special://masterprofile/", "iOS/sources.xml", "sources.xml");
@@ -518,7 +519,7 @@ bool CApplication::Create()
   buildType = "Unknown";
 #endif
   std::string specialVersion;
-  
+
   //! @todo - move to CPlatformXXX
 #if defined(TARGET_RASPBERRY_PI)
   specialVersion = " (version for Raspberry Pi)";
@@ -547,7 +548,7 @@ bool CApplication::Create()
     CLog::Log(LOGNOTICE, "Host CPU: %s, %d core%s available", cpuModel.c_str(), g_cpuInfo.getCPUCount(), (g_cpuInfo.getCPUCount() == 1) ? "" : "s");
   else
     CLog::Log(LOGNOTICE, "%d CPU core%s available", g_cpuInfo.getCPUCount(), (g_cpuInfo.getCPUCount() == 1) ? "" : "s");
-  
+
   //! @todo - move to CPlatformXXX ???
 #if defined(TARGET_WINDOWS)
   CLog::Log(LOGNOTICE, "%s", CWIN32Util::GetResInfoString().c_str());
@@ -703,6 +704,8 @@ bool CApplication::Create()
 
 bool CApplication::CreateGUI()
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
   m_frameMoveGuard.lock();
 
   m_renderGUI = true;
@@ -780,7 +783,7 @@ bool CApplication::CreateGUI()
     CDisplaySettings::GetInstance().SetCurrentResolution(RES_DESKTOP);
     sav_res = true;
   }
-  if (!InitWindow())
+  if (!InitWindow(CDisplaySettings::GetInstance().GetCurrentResolution()))
   {
     return false;
   }
@@ -802,6 +805,91 @@ bool CApplication::CreateGUI()
             info.strMode.c_str());
 
   g_windowManager.Initialize();
+  g_windowManager.CreateWindows();
+
+  CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
+
+  std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
+  if (!LoadSkin(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)))
+  {
+    CLog::Log(LOGERROR, "Failed to load skin '%s'", CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN).c_str());
+    if (!LoadSkin(defaultSkin))
+    {
+      CLog::Log(LOGFATAL, "Default skin '%s' could not be loaded! Terminating..", defaultSkin.c_str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool CApplication::DestroyGUI()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  UnloadSkin();
+
+  g_Windowing.DestroyRenderSystem();
+  g_Windowing.DestroyWindow();
+  g_Windowing.DestroyWindowSystem();
+  g_windowManager.DestroyWindows();
+
+  return true;
+}
+
+bool CApplication::StartGUI()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+  bool uiInitializationFinished = true;
+
+  // initialize splash window after splash screen disappears
+  // because we need a real window in the background which gets
+  // rendered while we load the main window or enter the master lock key
+  if (g_advancedSettings.m_splashImage)
+    g_windowManager.ActivateWindow(WINDOW_SPLASH);
+
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_MASTERLOCK_STARTUPLOCK) &&
+      CProfilesManager::GetInstance().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE &&
+     !CProfilesManager::GetInstance().GetMasterProfile().getLockCode().empty())
+  {
+     g_passwordManager.CheckStartUpLock();
+  }
+
+  // check if we should use the login screen
+  if (CProfilesManager::GetInstance().UsingLoginScreen())
+  {
+    // the login screen still needs to perform additional initialization
+    uiInitializationFinished = false;
+
+    g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
+  }
+  else
+  {
+    // activate the configured start window
+    int firstWindow = g_SkinInfo->GetFirstWindow();
+    g_windowManager.ActivateWindow(firstWindow);
+
+    if (g_windowManager.GetActiveWindowID() == WINDOW_STARTUP_ANIM)
+    {
+      CLog::Log(LOGWARNING, "CApplication::Initialize - startup.xml taints init process");
+    }
+
+    // the startup window is considered part of the initialization as it most likely switches to the final window
+    uiInitializationFinished = firstWindow != WINDOW_STARTUP_ANIM;
+
+    CStereoscopicsManager::GetInstance().Initialize();
+
+    if (!m_ServiceManager->Init3())
+    {
+      CLog::Log(LOGERROR, "Application - Init3 failed");
+    }
+  }
+  // if the user interfaces has been fully initialized let everyone know
+  if (uiInitializationFinished)
+  {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UI_READY);
+    g_windowManager.SendThreadMessage(msg);
+  }
 
   return true;
 }
@@ -1164,38 +1252,38 @@ bool CApplication::Initialize()
 
   // Init DPMS, before creating the corresponding setting control.
   m_dpms = new DPMSSupport();
-  bool uiInitializationFinished = true;
+  bool uiInitializationFinished = false;
+
+  std::vector<std::string> incompatibleAddons;
+  event.Reset();
+  std::atomic<bool> isMigratingAddons(false);
+  CJobManager::GetInstance().Submit([&event, &incompatibleAddons, &isMigratingAddons]() {
+      incompatibleAddons = CAddonSystemSettings::GetInstance().MigrateAddons([&isMigratingAddons]() {
+        isMigratingAddons = true;
+      });
+      event.Set();
+    }, CJob::PRIORITY_DEDICATED);
+  localizedStr = g_localizeStrings.Get(24151);
+  iDots = 1;
+  while (!event.WaitMSec(1000))
+  {
+    if (isMigratingAddons)
+      CSplash::GetInstance().Show(std::string(iDots, ' ') + localizedStr + std::string(iDots, '.'));
+    if (iDots == 3)
+      iDots = 1;
+    else
+      ++iDots;
+  }
+  CSplash::GetInstance().Show();
+  m_incompatibleAddons = incompatibleAddons;
+
   if (g_windowManager.Initialized())
   {
+    CLog::Log(LOGDEBUG, "CApplication: Start with GUI");
+
     CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
 
     g_windowManager.CreateWindows();
-
-    m_confirmSkinChange = false;
-
-    std::vector<std::string> incompatibleAddons;
-    event.Reset();
-    std::atomic<bool> isMigratingAddons(false);
-    CJobManager::GetInstance().Submit([&event, &incompatibleAddons, &isMigratingAddons]() {
-        incompatibleAddons = CAddonSystemSettings::GetInstance().MigrateAddons([&isMigratingAddons]() {
-          isMigratingAddons = true;
-        });
-        event.Set();
-      }, CJob::PRIORITY_DEDICATED);
-    localizedStr = g_localizeStrings.Get(24151);
-    iDots = 1;
-    while (!event.WaitMSec(1000))
-    {
-      if (isMigratingAddons)
-        CSplash::GetInstance().Show(std::string(iDots, ' ') + localizedStr + std::string(iDots, '.'));
-      if (iDots == 3)
-        iDots = 1;
-      else
-        ++iDots;
-    }
-    CSplash::GetInstance().Show();
-    m_incompatibleAddons = incompatibleAddons;
-    m_confirmSkinChange = true;
 
     std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
     if (!LoadSkin(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)))
@@ -1221,6 +1309,7 @@ bool CApplication::Initialize()
        g_passwordManager.CheckStartUpLock();
     }
 
+    uiInitializationFinished = true;
     // check if we should use the login screen
     if (CProfilesManager::GetInstance().UsingLoginScreen())
     {
@@ -1259,6 +1348,8 @@ bool CApplication::Initialize()
   }
   else //No GUI Created
   {
+    CLog::Log(LOGDEBUG, "CApplication: No GUI");
+
 #ifdef HAS_JSONRPC
     CJSONRPC::Initialize();
 #endif
@@ -1300,6 +1391,7 @@ bool CApplication::Initialize()
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UI_READY);
     g_windowManager.SendThreadMessage(msg);
   }
+  m_bInitializing = false;
 
   return true;
 }
@@ -1582,7 +1674,7 @@ bool CApplication::OnSettingsSaving() const
 
 void CApplication::ReloadSkin(bool confirm/*=false*/)
 {
-  if (!g_SkinInfo || m_bInitializing)
+  if (!g_SkinInfo || !m_bGUIInitialized)
     return; // Don't allow reload before skin is loaded by system
 
   std::string oldSkin = g_SkinInfo->ID();
@@ -2527,13 +2619,17 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     // If we are rendering GUI, we are in first run
     if (m_renderGUI)
       break;
+    CreateGUI();
+    if (!g_application.IsGUIInitialized())
+      StartGUI();
+
     // We might come from a refresh rate switch destroying the native window; use the context resolution
     InitWindow(g_graphicsContext.GetVideoResolution());
     SetRenderGUI(true);
     break;
 
   case TMSG_DISPLAY_DESTROY:
-    DestroyWindow();
+    DestroyGUI();
     SetRenderGUI(false);
     break;
 #endif
@@ -2862,18 +2958,12 @@ bool CApplication::Cleanup()
 {
   try
   {
-    CLog::Log(LOGNOTICE, "unload skin");
-    UnloadSkin();
-
     // stop all remaining scripts; must be done after skin has been unloaded,
     // not before some windows still need it when deinitializing during skin
     // unloading
     CScriptInvocationManager::GetInstance().Uninitialize();
 
-    g_Windowing.DestroyRenderSystem();
-    g_Windowing.DestroyWindow();
-    g_Windowing.DestroyWindowSystem();
-    g_windowManager.DestroyWindows();
+    DestroyGUI();
 
     CLog::Log(LOGNOTICE, "unload sections");
 
@@ -3028,7 +3118,7 @@ void CApplication::Stop(int exitCode)
 
     // Close network handles
     CloseNetworkShares();
-    
+
     g_audioManager.DeInitialize();
     // shutdown the AudioEngine
     CAEFactory::Shutdown();
@@ -4235,7 +4325,7 @@ bool CApplication::OnMessage(CGUIMessage& message)
         // show info dialog about moved configuration files if needed
         ShowAppMigrationMessage();
 
-        m_bInitializing = false;
+        m_bGUIInitialized = true;
       }
     }
     break;

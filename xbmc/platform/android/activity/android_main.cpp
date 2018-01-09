@@ -48,6 +48,7 @@
 #include "platform/android/activity/JNIXBMCFile.h"
 #include "utils/StringUtils.h"
 #include "XBMCApp.h"
+#include "XBMCService.h"
 
 
 // redirect stdout / stderr to logcat
@@ -180,6 +181,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
   std::string pkgRoot = CCompileInfo::GetClass();
   
+  std::string keepAliveService = pkgRoot + "/KeepAliveService";
   std::string mainClass = pkgRoot + "/Main";
   std::string bcReceiver = pkgRoot + "/XBMCBroadcastReceiver";
   std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
@@ -195,6 +197,16 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   jni::CJNIXBMCMediaSession::RegisterNatives(env);
   jni::CJNIXBMCJsonHandler::RegisterNatives(env);
   jni::CJNIXBMCFile::RegisterNatives(env);
+
+  jclass cKASvc = env->FindClass(keepAliveService.c_str());
+  if(cKASvc)
+  {
+    JNINativeMethod methods[] =
+    {
+      {"_launchApplication", "()V", (void*)&CXBMCService::_launchApplication},
+    };
+    env->RegisterNatives(cKASvc, methods, sizeof(methods)/sizeof(methods[0]));
+  }
 
   jclass cMain = env->FindClass(mainClass.c_str());
   if(cMain)

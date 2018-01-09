@@ -119,6 +119,8 @@ public:
   virtual ~CXBMCApp();
   static CXBMCApp* get() { return m_xbmcappinstance; }
 
+  void run();
+
   // IAnnouncer IF
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
@@ -255,9 +257,9 @@ protected:
   bool ReleaseAudioFocus();
   static void RequestVisibleBehind(bool requested);
 
-private:
+private: 
   static CXBMCApp* m_xbmcappinstance;
-  static CCriticalSection m_AppMutex;
+  static CCriticalSection m_LayoutMutex;
 
   CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
   static std::unique_ptr<CJNIXBMCMainView> m_mainView;
@@ -282,7 +284,7 @@ private:
   static bool m_hasReqVisible;
   static bool m_hasPIP;
   bool m_videosurfaceInUse;
-  bool m_firstrun;
+  bool m_firstActivityRun;
   bool m_exiting;
   pthread_t m_thread;
   static CCriticalSection m_applicationsMutex;

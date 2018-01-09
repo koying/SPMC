@@ -499,3 +499,4 @@ tools/android/packaging
 tools/android/packaging/gradle/wrapper
 system/keymaps
 xbmc/network/httprequesthandler/python
+xbmc/platform/android/service

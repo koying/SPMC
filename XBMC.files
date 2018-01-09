@@ -6196,6 +6196,8 @@ xbmc/platform/android/activity/JNIXBMCJsonHandler.cpp
 xbmc/platform/android/activity/JNIXBMCJsonHandler.h
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
+xbmc/platform/android/activity/XBMCService.cpp
+xbmc/platform/android/activity/XBMCService.h
 xbmc/platform/android/activity/android_main.cpp
 xbmc/platform/android/activity/AndroidExtra.h
 xbmc/platform/android/activity/AndroidFeatures.cpp
@@ -7676,6 +7678,9 @@ xbmc/pictures/PictureThumbLoader.cpp
 xbmc/pictures/PictureThumbLoader.h
 xbmc/pictures/SlideShowPicture.cpp
 xbmc/pictures/SlideShowPicture.h
+xbmc/platform/android/service/CMakeLists.txt
+xbmc/platform/android/service/XBMCService.cpp
+xbmc/platform/android/service/XBMCService.h
 xbmc/platform/darwin/ios/IOSKeyboard.h
 xbmc/platform/darwin/ios/IOSKeyboard.mm
 xbmc/platform/darwin/ios/IOSKeyboardView.h

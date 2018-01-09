@@ -746,6 +746,12 @@ public class Splash extends Activity
     intent.setClass(this, @APP_PACKAGE@.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
+
+/*
+    // keep alive
+    startService(new Intent(this, KeepAliveService.class));
+*/
+
     finish();
   }
 

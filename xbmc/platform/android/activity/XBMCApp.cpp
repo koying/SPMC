@@ -125,7 +125,7 @@ void* thread_run(void* obj)
 }
 
 CXBMCApp* CXBMCApp::m_xbmcappinstance = NULL;
-CCriticalSection CXBMCApp::m_AppMutex;
+CCriticalSection CXBMCApp::m_LayoutMutex;
 
 std::unique_ptr<CJNIXBMCMainView> CXBMCApp::m_mainView;
 ANativeActivity *CXBMCApp::m_activity = NULL;
@@ -172,7 +172,7 @@ CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
     return;
   }
   m_mainView.reset(new CJNIXBMCMainView(this));
-  m_firstrun = true;
+  m_firstActivityRun = true;
   m_exiting = false;
   android_printf("CXBMCApp: Created");
 }
@@ -236,7 +236,7 @@ void CXBMCApp::onStart()
   }
 #endif
 
-  if (m_firstrun)
+  if (m_firstActivityRun)
   {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
@@ -539,12 +539,12 @@ void CXBMCApp::run()
   SetupEnv();
   XBMC::Context context;
 
-  m_firstrun=false;
+  m_firstActivityRun=false;
   android_printf(" => running XBMC_Run...");
   try
   {
     CFileItemList dummyPL;
-    status = XBMC_Run(true, dummyPL);
+    status = XBMC_Run(false, dummyPL);
     android_printf(" => XBMC_Run finished with %d", status);
   }
   catch(...)
@@ -685,21 +685,21 @@ int CXBMCApp::GetDPI()
 
 CRect CXBMCApp::GetSurfaceRect()
 {
-  CSingleLock lock(m_AppMutex);
+  CSingleLock lock(m_LayoutMutex);
 
   return m_surface_rect;
 }
 
 CRect CXBMCApp::MapRenderToDroid(const CRect& srcRect)
 {
-  CSingleLock lock(m_AppMutex);
+  CSingleLock lock(m_LayoutMutex);
 
   return CRect(srcRect.x1 / m_droid2guiRatio.x2, srcRect.y1 / m_droid2guiRatio.y2, srcRect.x2 / m_droid2guiRatio.x2, srcRect.y2 / m_droid2guiRatio.y2);
 }
 
 CPoint CXBMCApp::MapDroidToGui(const CPoint& src)
 {
-  CSingleLock lock(m_AppMutex);
+  CSingleLock lock(m_LayoutMutex);
 
   return CPoint((src.x - m_droid2guiRatio.x1) * m_droid2guiRatio.x2, (src.y - m_droid2guiRatio.y1) * m_droid2guiRatio.y2);
 }
@@ -1591,6 +1591,7 @@ void CXBMCApp::surfaceChanged(CJNISurfaceHolder holder, int format, int width, i
 
 void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
   m_window = ANativeWindow_fromSurface(xbmc_jnienv(), holder.getSurface().get_raw());
   if (m_window == NULL)
   {
@@ -1602,6 +1603,7 @@ void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
 
 void CXBMCApp::surfaceDestroyed(CJNISurfaceHolder holder)
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
   // If we have exited XBMC, it no longer exists.
   if (!m_exiting)
   {
@@ -1612,7 +1614,7 @@ void CXBMCApp::surfaceDestroyed(CJNISurfaceHolder holder)
 
 void CXBMCApp::onLayoutChange(int left, int top, int width, int height)
 {
-  CSingleLock lock(m_AppMutex);
+  CSingleLock lock(m_LayoutMutex);
 
   m_surface_rect.x1 = left;
   m_surface_rect.y1 = top;
@@ -1624,3 +1626,4 @@ void CXBMCApp::onLayoutChange(int left, int top, int width, int height)
   if (g_application.GetRenderGUI())
     CalculateGUIRatios();
 }
+
