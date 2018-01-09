@@ -21,6 +21,8 @@
 
 #include <pthread.h>
 
+#include <androidjni/Service.h>
+
 #include "threads/SharedSection.h"
 
 class CXBMCService
@@ -28,6 +30,7 @@ class CXBMCService
 public:
   CXBMCService();
 
+  static void _launchApplication(JNIEnv*, jobject);
   void LaunchApplication();
 
 private:
@@ -35,5 +38,4 @@ private:
   static bool m_SvcThreadCreated;
   static pthread_t m_SvcThread;
 
-  static void _launchApplication(JNIEnv*, jobject);
 };

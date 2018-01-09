@@ -31,6 +31,7 @@ CXBMCService::CXBMCService()
 
 void CXBMCService::LaunchApplication()
 {
+  /*
   CSingleLock lock(m_SvcMutex);
 
   if( !m_SvcThreadCreated)
@@ -43,11 +44,14 @@ void CXBMCService::LaunchApplication()
 
     m_SvcThreadCreated = true;
   }
+  */
 }
 
-void _launchApplication(JNIEnv*, jobject)
+void CXBMCService::_launchApplication(JNIEnv*, jobject)
 {
+  /*
   m_xbmcserviceinstance = new CXBMCService();
   m_xbmcserviceinstance->m_jniservice = jhobject::fromJNI(thiz);
   m_xbmcserviceinstance->LaunchApplication();
+  */
 }

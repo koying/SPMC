@@ -119,8 +119,6 @@ public:
   virtual ~CXBMCApp();
   static CXBMCApp* get() { return m_xbmcappinstance; }
 
-  void run();
-
   // IAnnouncer IF
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
@@ -266,7 +264,9 @@ private:
   std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
   bool HasLaunchIntent(const std::string &package);
   std::string GetFilenameFromIntent(const CJNIIntent &intent);
+  void run();
   void stop();
+  void SetupEnv();
   static void SetRefreshRateCallback(CVariant *rate);
   static void SetDisplayModeCallback(CVariant *mode);
   static ANativeActivity *m_activity;
