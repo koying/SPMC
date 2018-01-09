@@ -137,8 +137,6 @@ bool CXBMCApp::m_isResumed = false;
 bool CXBMCApp::m_hasAudioFocus = false;
 bool CXBMCApp::m_headsetPlugged = false;
 bool CXBMCApp::m_hdmiPlugged = true;
-IInputDeviceCallbacks* CXBMCApp::m_inputDeviceCallbacks = nullptr;
-IInputDeviceEventHandler* CXBMCApp::m_inputDeviceEventHandler = nullptr;
 bool CXBMCApp::m_hasReqVisible = false;
 bool CXBMCApp::m_hasPIP = false;
 CCriticalSection CXBMCApp::m_applicationsMutex;
@@ -159,10 +157,14 @@ uint32_t CXBMCApp::m_playback_state = PLAYBACK_STATE_STOPPED;
 CRect CXBMCApp::m_surface_rect;
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
-  : CJNIMainActivity(nativeActivity)
-  , CJNIBroadcastReceiver(CJNIContext::getPackageName() + ".XBMCBroadcastReceiver")
+  : CJNIBase()
+  , CJNIMainActivity(nativeActivity->clazz)
+  , CJNIBroadcastReceiver(std::string(CCompileInfo::GetPackage()) + "/XBMCBroadcastReceiver")
   , CJNIXBMCInputDeviceListener()
   , m_videosurfaceInUse(false)
+  , m_inputDeviceCallbacks(nullptr)
+  , m_inputDeviceEventHandler(nullptr)
+
 {
   m_xbmcappinstance = this;
   m_activity = nativeActivity;
@@ -588,7 +590,7 @@ void CXBMCApp::SetRefreshRateCallback(CVariant* rateVariant)
   float rate = rateVariant->asFloat();
   delete rateVariant;
 
-  CJNIWindow window = getWindow();
+  CJNIWindow window = CXBMCApp::get()->getWindow();
   if (window)
   {
     CJNIWindowManagerLayoutParams params = window.getAttributes();
@@ -606,7 +608,7 @@ void CXBMCApp::SetDisplayModeCallback(CVariant* modeVariant)
   int mode = modeVariant->asFloat();
   delete modeVariant;
 
-  CJNIWindow window = getWindow();
+  CJNIWindow window = CXBMCApp::get()->getWindow();
   if (window)
   {
     CJNIWindowManagerLayoutParams params = window.getAttributes();
@@ -903,7 +905,7 @@ std::vector<androidPackage> CXBMCApp::GetApplications()
 
 bool CXBMCApp::HasLaunchIntent(const std::string &package)
 {
-  return GetPackageManager().getLaunchIntentForPackage(package) != NULL;
+  return (GetPackageManager().getLaunchIntentForPackage(package) != NULL);
 }
 
 bool CXBMCApp::StartAppActivity(const std::string &package, const std::string &cls)

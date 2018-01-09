@@ -58,7 +58,7 @@ bool CFileAndroidApp::Open(const CURL& url)
   m_packageName =  URIUtils::GetFileName(url.Get());
   m_packageName = m_packageName.substr(0, m_packageName.size() - 4);
 
-  std::vector<androidPackage> applications = CXBMCApp::GetApplications();
+  std::vector<androidPackage> applications = CXBMCApp::get()->GetApplications();
   for(std::vector<androidPackage>::iterator i = applications.begin(); i != applications.end(); ++i)
   {
     if ((*i).packageName == m_packageName)
@@ -77,7 +77,7 @@ bool CFileAndroidApp::Exists(const CURL& url)
   std::string appname =  URIUtils::GetFileName(url.Get());
   appname = appname.substr(0, appname.size() - 4);
 
-  std::vector<androidPackage> applications = CXBMCApp::GetApplications();
+  std::vector<androidPackage> applications = CXBMCApp::get()->GetApplications();
   for(std::vector<androidPackage>::iterator i = applications.begin(); i != applications.end(); ++i)
   {
     if ((*i).packageName == appname)
@@ -98,7 +98,7 @@ unsigned int CFileAndroidApp::ReadIcon(unsigned char** lpBuf, unsigned int* widt
 
   if (CJNIBuild::SDK_INT >= 15 && m_icon)
   {
-    CJNIResources res = CJNIContext::GetPackageManager().getResourcesForApplication(m_packageName);
+    CJNIResources res = CXBMCApp::get()->GetPackageManager().getResourcesForApplication(m_packageName);
     if (res)
     {
       for (int i=0; densities[i] != -1 && !bmp; ++i)
@@ -123,7 +123,7 @@ unsigned int CFileAndroidApp::ReadIcon(unsigned char** lpBuf, unsigned int* widt
 
   if (!bmp)
   {
-    CJNIDrawable drw = CJNIContext::GetPackageManager().getApplicationIcon(m_packageName);
+    CJNIDrawable drw = CXBMCApp::get()->GetPackageManager().getApplicationIcon(m_packageName);
     if (xbmc_jnienv()->ExceptionCheck())
       xbmc_jnienv()->ExceptionClear();
     else if (!drw);
