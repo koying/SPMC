@@ -50,6 +50,7 @@ set(package_files strings.xml
                   src/interfaces/XBMCAudioManagerOnAudioFocusChangeListener.java
                   src/interfaces/XBMCNsdManagerRegistrationListener.java
                   src/interfaces/XBMCNsdManagerDiscoveryListener.java
+                  src/interfaces/XBMCInputDeviceListener.java
                   src/XBMCBroadcastReceiver.java
                   src/model/TVEpisode.java
                   src/model/Movie.java
@@ -61,7 +62,6 @@ set(package_files strings.xml
                   src/model/Media.java
                   src/XBMCSearchableActivity.java
                   src/XBMCRecommendationBuilder.java
-                  src/XBMCInputDeviceListener.java
                   src/XBMCProperties.java
                   src/content/XBMCFileContentProvider.java
                   src/content/XBMCMediaContentProvider.java
