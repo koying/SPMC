@@ -6191,6 +6191,8 @@ xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt
 xbmc/platform/android/activity/JNISoftKeyboardView.cpp
 xbmc/platform/android/activity/JNISoftKeyboardView.h
+xbmc/platform/android/activity/JNIXBMCBroadcastReceiver.cpp
+xbmc/platform/android/activity/JNIXBMCBroadcastReceiver.h
 xbmc/platform/android/activity/JNIXBMCFile.cpp
 xbmc/platform/android/activity/JNIXBMCFile.h
 xbmc/platform/android/activity/JNIXBMCInputDeviceListener.cpp

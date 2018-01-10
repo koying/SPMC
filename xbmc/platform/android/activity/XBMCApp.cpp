@@ -158,8 +158,8 @@ CRect CXBMCApp::m_surface_rect;
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIMainActivity(nativeActivity)
-  , CJNIXBMCBroadcastReceiver()
   , CJNIXBMCInputDeviceListener()
+  , CJNIBroadcastReceiver()
   , m_videosurfaceInUse(false)
   , m_inputDeviceCallbacks(nullptr)
   , m_inputDeviceEventHandler(nullptr)
@@ -173,6 +173,8 @@ CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
     exit(1);
     return;
   }
+  m_audioFocusListener.reset(new CJNIXBMCAudioManagerOnAudioFocusChangeListener());
+  m_broadcastReceiver.reset(new CJNIXBMCBroadcastReceiver(this));
   m_mainView.reset(new CJNIXBMCMainView(this));
   m_firstActivityRun = true;
   m_exiting = false;
@@ -254,7 +256,7 @@ void CXBMCApp::onStart()
     intentFilter.addAction("android.intent.action.HEADSET_PLUG");
     intentFilter.addAction("android.media.action.HDMI_AUDIO_PLUG");
     intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-    registerReceiver(*this, intentFilter);
+    registerReceiver(*m_broadcastReceiver, intentFilter);
 
     m_mediaSession.reset(new CJNIXBMCMediaSession());
   }
@@ -281,7 +283,7 @@ void CXBMCApp::onResume()
   // Re-request Visible Behind
   if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
     RequestVisibleBehind(true);
-  
+
   m_isResumed = true;
 }
 
@@ -453,7 +455,7 @@ bool CXBMCApp::AcquireAudioFocus()
   }
 
   // Request audio focus for playback
-  int result = audioManager.requestAudioFocus(m_audioFocusListener,
+  int result = audioManager.requestAudioFocus(*m_audioFocusListener,
                                               // Use the music stream.
                                               CJNIAudioManager::STREAM_MUSIC,
                                               // Request permanent focus.
@@ -484,7 +486,7 @@ bool CXBMCApp::ReleaseAudioFocus()
   }
 
   // Release audio focus after playback
-  int result = audioManager.abandonAudioFocus(m_audioFocusListener);
+  int result = audioManager.abandonAudioFocus(*m_audioFocusListener);
   if (result != CJNIAudioManager::AUDIOFOCUS_REQUEST_GRANTED)
   {
     CXBMCApp::android_printf("Audio Focus abandon failed");

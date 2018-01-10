@@ -29,18 +29,18 @@ namespace jni
 class CJNIXBMCBroadcastReceiver : public CJNIBroadcastReceiver, public CJNIInterfaceImplem<CJNIXBMCBroadcastReceiver>
 {
 public:
-  CJNIXBMCBroadcastReceiver();
+  CJNIXBMCBroadcastReceiver(CJNIBroadcastReceiver* receiver);
   CJNIXBMCBroadcastReceiver(const CJNIXBMCBroadcastReceiver& other);
   CJNIXBMCBroadcastReceiver(const jni::jhobject &object) : CJNIBase(object) {}
   virtual ~CJNIXBMCBroadcastReceiver();
 
   static void RegisterNatives(JNIEnv* env);
 
-  // CJNINsdManagerDiscoveryListener interface
 public:
-  void onReceive(CJNIIntent intent) = 0;
+  void onReceive(CJNIIntent intent);
 
 protected:
+  CJNIBroadcastReceiver* m_receiver;
   static void _onReceive(JNIEnv* env, jobject thiz, jobject intent);
 };
 

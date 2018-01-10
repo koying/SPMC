@@ -25,15 +25,20 @@
 #include <androidjni/jutils-details.hpp>
 #include <androidjni/Intent.h>
 
+#include "XBMCApp.h"
 #include "CompileInfo.h"
 
 using namespace jni;
 
 static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCBroadcastReceiver";
 
-CJNIXBMCBroadcastReceiver::CJNIXBMCBroadcastReceiver()
-  : CJNIBase()
+CJNIXBMCBroadcastReceiver::CJNIXBMCBroadcastReceiver(CJNIBroadcastReceiver* receiver)
+  : CJNIBase(s_className)
+  , m_receiver(receiver)
 {
+  m_object = new_object(CXBMCApp::get()->getClassLoader().loadClass(GetDotClassName(GetClassName())));
+  m_object.setGlobal();
+
   add_instance(m_object, this);
 }
 
@@ -70,3 +75,10 @@ void CJNIXBMCBroadcastReceiver::_onReceive(JNIEnv *env, jobject thiz, jobject in
   if (inst)
     inst->onReceive(CJNIIntent(jhobject::fromJNI(intent)));
 }
+
+void CJNIXBMCBroadcastReceiver::onReceive(CJNIIntent intent)
+{
+  if (m_receiver)
+    m_receiver->onReceive(intent);
+}
+

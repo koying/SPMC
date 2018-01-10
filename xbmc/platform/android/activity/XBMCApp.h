@@ -112,7 +112,7 @@ protected:
 class CXBMCApp
     : public IActivityHandler
     , public CJNIMainActivity
-    , public jni::CJNIXBMCBroadcastReceiver
+    , public CJNIBroadcastReceiver
     , public ANNOUNCEMENT::IAnnouncer
     , public CJNISurfaceHolderCallback
     , public jni::CJNIXBMCInputDeviceListener
@@ -262,7 +262,8 @@ private:
   static CXBMCApp* m_xbmcappinstance;
   static CCriticalSection m_LayoutMutex;
 
-  CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
+  std::unique_ptr<CJNIXBMCAudioManagerOnAudioFocusChangeListener> m_audioFocusListener;
+  std::unique_ptr<jni::CJNIXBMCBroadcastReceiver> m_broadcastReceiver;
   static std::unique_ptr<CJNIXBMCMainView> m_mainView;
   std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
   bool HasLaunchIntent(const std::string &package);
