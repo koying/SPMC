@@ -30,11 +30,8 @@ using namespace jni;
 static std::string s_className = std::string(CCompileInfo::GetClass()) + "/interfaces/XBMCInputDeviceListener";
 
 CJNIXBMCInputDeviceListener::CJNIXBMCInputDeviceListener()
-  : CJNIBase(s_className)
+  : CJNIBase()
 {
-  m_object = new_object(GetClassName());
-  m_object.setGlobal();
-
   add_instance(m_object, this);
 }
 

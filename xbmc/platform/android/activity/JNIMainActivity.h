@@ -25,7 +25,7 @@
 #include <androidjni/Image.h>
 #include <androidjni/AudioDeviceInfo.h>
 
-class CJNIMainActivity : public CJNIActivity, public CJNIInputManagerInputDeviceListener
+class CJNIMainActivity : public CJNIActivity
 {
 public:
   CJNIMainActivity(const ANativeActivity *nativeActivity);

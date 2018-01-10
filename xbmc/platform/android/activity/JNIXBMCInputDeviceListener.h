@@ -45,5 +45,7 @@ public:
 protected:
   static void _onInputDeviceAdded(JNIEnv *env, jobject thiz, jint deviceId);
   static void _onInputDeviceChanged(JNIEnv *env, jobject thiz, jint deviceId);
-  static void _onInputDeviceRemoved(JNIEnv *env, jobject thiz, jint deviceId);};
+  static void _onInputDeviceRemoved(JNIEnv *env, jobject thiz, jint deviceId);
+};
+
 }
