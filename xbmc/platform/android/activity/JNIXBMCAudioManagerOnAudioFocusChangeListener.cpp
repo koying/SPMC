@@ -32,7 +32,7 @@ static std::string s_className = std::string(CCompileInfo::GetClass()) + "/inter
 CJNIXBMCAudioManagerOnAudioFocusChangeListener::CJNIXBMCAudioManagerOnAudioFocusChangeListener()
   : CJNIBase(s_className)
 {
-  m_object = new_object(GetClassName());
+  m_object = new_object(CXBMCApp::get()->getClassLoader().loadClass(GetDotClassName(GetClassName())));
   m_object.setGlobal();
 
   add_instance(m_object, this);
