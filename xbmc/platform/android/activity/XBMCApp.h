@@ -52,6 +52,7 @@
 #include "JNIXBMCAudioManagerOnAudioFocusChangeListener.h"
 #include "JNIXBMCMainView.h"
 #include "JNIXBMCMediaSession.h"
+#include "JNIXBMCBroadcastReceiver.h"
 #include "platform/xbmc.h"
 
 // forward delares
@@ -110,7 +111,7 @@ protected:
 class CXBMCApp
     : public IActivityHandler
     , public CJNIMainActivity
-    , public CJNIBroadcastReceiver
+    , public jni::CJNIXBMCBroadcastReceiver
     , public ANNOUNCEMENT::IAnnouncer
     , public CJNISurfaceHolderCallback
 {
