@@ -168,7 +168,7 @@ public:
   void onLostFocus();
 
   void Initialize();
-  void Deinitialize();
+  void Deinitialize(int status);
 
   static const ANativeWindow** GetNativeWindow(int timeout);
   static int SetBuffersGeometry(int width, int height);

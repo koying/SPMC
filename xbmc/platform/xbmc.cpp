@@ -127,7 +127,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
 #ifdef TARGET_RASPBERRY_PI
   g_RBP.Deinitialize();
 #elif defined(TARGET_ANDROID)
-  CXBMCApp::get()->Deinitialize();
+  CXBMCApp::get()->Deinitialize(status);
 #endif
 
   return status;
