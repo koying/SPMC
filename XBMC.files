@@ -9181,6 +9181,7 @@ xbmc/win32/XBMC.ico
 xbmc/win32/XBMC_PC.cpp
 xbmc/win32/XBMC_PC.rc
 xbmc/windowing/CMakeLists.txt
+xbmc/windowing/WinEvents.cpp
 xbmc/windowing/android/CMakeLists.txt
 xbmc/windowing/android/WinEventsAndroid.cpp
 xbmc/windowing/android/WinEventsAndroid.h

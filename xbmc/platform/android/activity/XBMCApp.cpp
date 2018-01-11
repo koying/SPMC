@@ -233,6 +233,16 @@ void CXBMCApp::onStart()
 
   if (m_firstActivityRun)
   {
+    // Wait for the service to settle
+    int nb = 0;
+    while(!g_application.IsInitialized() && nb < 20)
+    {
+      usleep(1 * 1000000);
+      nb++;
+    }
+    if (!g_application.IsInitialized())
+      abort();
+
     // Some intent filters MUST be registered in code rather than through the manifest
     CJNIIntentFilter intentFilter;
     intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
@@ -245,7 +255,7 @@ void CXBMCApp::onStart()
 
     m_mediaSession.reset(new CJNIXBMCMediaSession());
 
-    m_firstActivityRun=false;
+    m_firstActivityRun = false;
   }
 }
 
