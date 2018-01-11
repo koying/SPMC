@@ -28,11 +28,12 @@
 #include <androidjni/WifiManager.h>
 #include <androidjni/WifiInfo.h>
 
-#include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
+#include <stdlib.h>
 #include <net/if_arp.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -66,7 +67,7 @@ std::string& CNetworkInterfaceAndroid::GetName()
 
 bool CNetworkInterfaceAndroid::IsEnabled()
 {
-  CJNIConnectivityManager connman(CXBMCApp::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNIConnectivityManager connman(CXBMCService::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
   if (!ni)
     return false;
@@ -76,7 +77,7 @@ bool CNetworkInterfaceAndroid::IsEnabled()
 
 bool CNetworkInterfaceAndroid::IsConnected()
 {
-  CJNIConnectivityManager connman(CXBMCApp::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNIConnectivityManager connman(CXBMCService::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
   if (!ni)
     return false;
@@ -86,7 +87,7 @@ bool CNetworkInterfaceAndroid::IsConnected()
 
 bool CNetworkInterfaceAndroid::IsWireless()
 {
-  CJNIConnectivityManager connman(CXBMCApp::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNIConnectivityManager connman(CXBMCService::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
   if (!ni)
     return false;
@@ -237,14 +238,14 @@ std::string CNetworkInterfaceAndroid::GetCurrentWirelessEssId()
 {
   std::string ret;
 
-  CJNIConnectivityManager connman(CXBMCApp::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNIConnectivityManager connman(CXBMCService::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   CJNINetworkInfo ni = connman.getNetworkInfo(m_network);
   if (!ni)
     return "";
 
   if (ni.getType() == CJNIConnectivityManager::TYPE_WIFI)
   {
-    CJNIWifiManager wm = CXBMCApp::get()->getSystemService("wifi");
+    CJNIWifiManager wm = CXBMCService::get()->getSystemService("wifi");
     if (wm.isWifiEnabled())
     {
       CJNIWifiInfo wi = wm.getConnectionInfo();
@@ -384,7 +385,7 @@ void CNetworkAndroid::RetrieveInterfaces()
   m_oldInterfaces = m_interfaces;
   m_interfaces.clear();
 
-  CJNIConnectivityManager connman(CXBMCApp::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
+  CJNIConnectivityManager connman(CXBMCService::get()->getSystemService(CJNIContext::CONNECTIVITY_SERVICE));
   std::vector<CJNINetwork> networks = connman.getAllNetworks();
 
   for (auto n : networks)

@@ -19,10 +19,8 @@ public class KeepAliveService extends Service
   @Override
   public int onStartCommand(Intent intent, int flags, int startId)
   {
-/*
     System.loadLibrary("@APP_NAME_LC@");
     _launchApplication();
-*/
 
     Bitmap icon = BitmapFactory.decodeResource(getResources(),
             R.drawable.ic_recommendation_80dp);

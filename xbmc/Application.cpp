@@ -209,6 +209,7 @@
 #include <androidjni/ApplicationInfo.h>
 #include <androidjni/System.h>
 #include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
 
@@ -561,11 +562,11 @@ bool CApplication::Create()
         CJNIBuild::PRODUCT.c_str(), CJNIBuild::DEVICE.c_str(), CJNIBuild::BOARD.c_str(),
         CJNIBuild::MANUFACTURER.c_str(), CJNIBuild::BRAND.c_str(), CJNIBuild::MODEL.c_str(), CJNIBuild::HARDWARE.c_str());
   std::string extstorage;
-  bool extready = CXBMCApp::GetExternalStorage(extstorage);
+  bool extready = CXBMCService::GetExternalStorage(extstorage);
   CLog::Log(LOGNOTICE, "External storage path = %s; status = %s", extstorage.c_str(), extready ? "ok" : "nok");
   CLog::Log(LOGNOTICE, "System library paths = %s", CJNISystem::getProperty("java.library.path").c_str());
-  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCApp::get()->getApplicationInfo().nativeLibraryDir.c_str());
-  CLog::Log(LOGNOTICE, "APK = %s", CXBMCApp::get()->getPackageResourcePath().c_str());
+  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCService::get()->getApplicationInfo().nativeLibraryDir.c_str());
+  CLog::Log(LOGNOTICE, "APK = %s", CXBMCService::get()->getPackageResourcePath().c_str());
   CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
 #endif
 
@@ -1032,7 +1033,7 @@ bool CApplication::InitDirectoriesLinux()
   CSpecialProtocol::SetXBMCBinAddonPath(appBinPath + "/addons");
 
 #if defined(TARGET_ANDROID)
-  CXBMCApp::get()->InitDirectories();
+  CXBMCService::get()->InitDirectories();
 #endif
 
   return true;
@@ -1204,10 +1205,6 @@ bool CApplication::Initialize()
     StringUtils::Format(g_localizeStrings.Get(178).c_str(), g_sysinfo.GetAppName().c_str()),
     "special://xbmc/media/icon256x256.png", EventLevel::Basic)));
 
-#if !defined(TARGET_DARWIN_IOS)
-  g_peripherals.Initialise();
-#endif
-
   // Load curl so curl_global_init gets called before any service threads
   // are started. Unloading will have no effect as curl is never fully unloaded.
   // To quote man curl_global_init:
@@ -1281,7 +1278,11 @@ bool CApplication::Initialize()
   {
     CLog::Log(LOGDEBUG, "CApplication: Start with GUI");
 
-    CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
+#if !defined(TARGET_DARWIN_IOS)
+    g_peripherals.Initialise();
+#endif
+
+  CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
 
     g_windowManager.CreateWindows();
 
@@ -4692,7 +4693,8 @@ void CApplication::ProcessSlow()
 
 #ifdef TARGET_ANDROID
   // Pass the slow loop to droid
-  CXBMCApp::get()->ProcessSlow();
+  if (CXBMCApp::get())
+    CXBMCApp::get()->ProcessSlow();
 #endif
 
   // check for any idle curl connections

@@ -22,21 +22,27 @@
 #include <pthread.h>
 
 #include <androidjni/Service.h>
+#include <androidjni/Context.h>
 
 #include "threads/Event.h"
 #include "threads/SharedSection.h"
 
 class CXBMCService
+    : public CJNIService
 {
   friend class XBMCApp;
 
 public:
-  CXBMCService();
+  CXBMCService(jobject thiz);
 
   static CXBMCService* get() { return m_xbmcserviceinstance; }
   static void _launchApplication(JNIEnv*, jobject thiz);
-  void LaunchApplication();
   int android_printf(const char* format...);
+
+  void InitDirectories();
+
+  static bool GetExternalStorage(std::string &path, const std::string &type = "");
+  static bool GetStorageUsage(const std::string &path, std::string &usage);
 
 protected:
   void run();
@@ -49,7 +55,6 @@ private:
   static bool m_SvcThreadCreated;
   static pthread_t m_SvcThread;
   static CXBMCService* m_xbmcserviceinstance;
-  CJNIService m_jniservice;
 
   void LaunchApplication();
 };

@@ -28,7 +28,7 @@
 class CJNIMainActivity : public CJNIActivity
 {
 public:
-  CJNIMainActivity(const ANativeActivity *nativeActivity);
+  CJNIMainActivity(const jobject& clazz);
   ~CJNIMainActivity();
 
   static CJNIMainActivity* GetAppInstance() { return m_appInstance; }

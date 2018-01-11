@@ -28,8 +28,8 @@ using namespace jni;
 
 CJNIMainActivity* CJNIMainActivity::m_appInstance(NULL);
 
-CJNIMainActivity::CJNIMainActivity(const ANativeActivity *nativeActivity)
-  : CJNIActivity(nativeActivity)
+CJNIMainActivity::CJNIMainActivity(const jobject& clazz)
+  : CJNIActivity(clazz)
 {
   m_appInstance = this;
 }

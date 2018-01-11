@@ -100,7 +100,6 @@
 #include "utils/AMLUtils.h"
 #endif
 
-#define GIGABYTES       1073741824
 #define CAPTURE_QUEUE_MAXDEPTH 3
 
 #define ACTION_XBMC_RESUME "android.intent.XBMC_RESUME"
@@ -149,7 +148,7 @@ CRect CXBMCApp::m_surface_rect;
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
   : CJNIBase()
-  , CJNIMainActivity(nativeActivity)
+  , CJNIMainActivity(nativeActivity->clazz)
   , CJNIXBMCInputDeviceListener()
   , CJNIBroadcastReceiver()
   , m_videosurfaceInUse(false)
@@ -947,91 +946,6 @@ int CXBMCApp::GetBatteryLevel()
   return m_batteryLevel;
 }
 
-bool CXBMCApp::GetExternalStorage(std::string &path, const std::string &type /* = "" */)
-{
-  std::string sType;
-  std::string mountedState;
-  bool mounted = false;
-
-  if(type == "files" || type.empty())
-  {
-    CJNIFile external = CJNIEnvironment::getExternalStorageDirectory();
-    if (external)
-      path = external.getAbsolutePath();
-  }
-  else
-  {
-    if (type == "music")
-      sType = "Music"; // Environment.DIRECTORY_MUSIC
-    else if (type == "videos")
-      sType = "Movies"; // Environment.DIRECTORY_MOVIES
-    else if (type == "pictures")
-      sType = "Pictures"; // Environment.DIRECTORY_PICTURES
-    else if (type == "photos")
-      sType = "DCIM"; // Environment.DIRECTORY_DCIM
-    else if (type == "downloads")
-      sType = "Download"; // Environment.DIRECTORY_DOWNLOADS
-    if (!sType.empty())
-    {
-      CJNIFile external = CJNIEnvironment::getExternalStoragePublicDirectory(sType);
-      if (external)
-        path = external.getAbsolutePath();
-    }
-  }
-  mountedState = CJNIEnvironment::getExternalStorageState();
-  mounted = (mountedState == "mounted" || mountedState == "mounted_ro");
-  return mounted && !path.empty();
-}
-
-bool CXBMCApp::GetStorageUsage(const std::string &path, std::string &usage)
-{
-#define PATH_MAXLEN 50
-
-  if (path.empty())
-  {
-    std::ostringstream fmt;
-    fmt.width(PATH_MAXLEN);  fmt << std::left  << "Filesystem";
-    fmt.width(12);  fmt << std::right << "Size";
-    fmt.width(12);  fmt << "Used";
-    fmt.width(12);  fmt << "Avail";
-    fmt.width(12);  fmt << "Use %";
-
-    usage = fmt.str();
-    return false;
-  }
-
-  CJNIStatFs fileStat(path);
-  if (!fileStat)
-  {
-    CLog::Log(LOGERROR, "CXBMCApp::GetStorageUsage cannot stat %s", path.c_str());
-    return false;
-  }
-  int blockSize = fileStat.getBlockSize();
-  int blockCount = fileStat.getBlockCount();
-  int freeBlocks = fileStat.getFreeBlocks();
-
-  if (blockSize <= 0 || blockCount <= 0 || freeBlocks < 0)
-    return false;
-
-  float totalSize = (float)blockSize * blockCount / GIGABYTES;
-  float freeSize = (float)blockSize * freeBlocks / GIGABYTES;
-  float usedSize = totalSize - freeSize;
-  float usedPercentage = usedSize / totalSize * 100;
-
-  std::ostringstream fmt;
-  fmt << std::fixed;
-  fmt.precision(1);
-  fmt.width(PATH_MAXLEN);  fmt << std::left  << (path.size() < PATH_MAXLEN-1 ? path : StringUtils::Left(path, PATH_MAXLEN-4) + "...");
-  fmt.width(12);  fmt << std::right << totalSize << "G"; // size in GB
-  fmt.width(12);  fmt << usedSize << "G"; // used in GB
-  fmt.width(12);  fmt << freeSize << "G"; // free
-  fmt.precision(0);
-  fmt.width(12);  fmt << usedPercentage << "%"; // percentage used
-
-  usage = fmt.str();
-  return true;
-}
-
 // Used in Application.cpp to figure out volume steps
 int CXBMCApp::GetMaxSystemVolume()
 {
@@ -1076,10 +990,6 @@ void CXBMCApp::SetSystemVolume(float percent)
     android_printf("CXBMCApp::SetSystemVolume: Could not get Audio Manager");
 }
 
-void CXBMCApp::InitDirectories()
-{
-  CSpecialProtocol::SetXBMCBinAddonPath(getApplicationInfo().nativeLibraryDir.c_str());
-}
 
 void CXBMCApp::onReceive(CJNIIntent intent)
 {
