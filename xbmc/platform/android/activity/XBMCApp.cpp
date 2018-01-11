@@ -157,7 +157,8 @@ uint32_t CXBMCApp::m_playback_state = PLAYBACK_STATE_STOPPED;
 CRect CXBMCApp::m_surface_rect;
 
 CXBMCApp::CXBMCApp(ANativeActivity* nativeActivity)
-  : CJNIMainActivity(nativeActivity)
+  : CJNIBase()
+  , CJNIMainActivity(nativeActivity)
   , CJNIXBMCInputDeviceListener()
   , CJNIBroadcastReceiver()
   , m_videosurfaceInUse(false)
