@@ -23,6 +23,7 @@
 
 #include "CompileInfo.h"
 
+#include "Application.h"
 #include "utils/log.h"
 #include "utils/FileUtils.h"
 
@@ -58,6 +59,9 @@ void CJNIXBMCFile::RegisterNatives(JNIEnv *env)
 jboolean CJNIXBMCFile::_open(JNIEnv *env, jobject thiz, jstring path)
 {
   std::string strPath = jcast<std::string>(jhstring::fromJNI(path));
+
+  if (!g_application.IsInitialized())
+    return false;
 
   if (find_instance(thiz))
     return false;
