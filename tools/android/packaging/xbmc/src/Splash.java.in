@@ -741,11 +741,15 @@ public class Splash extends Activity
 
   protected void startXBMC()
   {
+    // keep alive
+    startService(new Intent(this, KeepAliveService.class));
+
     // Run @APP_NAME@
     Intent intent = getIntent();
     intent.setClass(this, @APP_PACKAGE@.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
+
     finish();
   }
 

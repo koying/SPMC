@@ -22,7 +22,7 @@
 
 #include <androidjni/jutils-details.hpp>
 
-#include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/GUIWindowManager.h"
 #include "GUIUserMessages.h"
@@ -35,7 +35,7 @@
 
 CZeroconfBrowserAndroid::CZeroconfBrowserAndroid()
 {
-  m_manager = CXBMCApp::get()->getSystemService(CJNIContext::NSD_SERVICE);
+  m_manager = CXBMCService::get()->getSystemService(CJNIContext::NSD_SERVICE);
 }
 
 CZeroconfBrowserAndroid::~CZeroconfBrowserAndroid()

@@ -168,7 +168,7 @@ public:
   void onLostFocus();
 
   void Initialize();
-  void Deinitialize();
+  void Deinitialize(int status);
 
   static const ANativeWindow** GetNativeWindow(int timeout);
   static int SetBuffersGeometry(int width, int height);
@@ -195,12 +195,9 @@ public:
    * \param type optional type. Possible values are "", "files", "music", "videos", "pictures", "photos, "downloads"
    * \return true if external storage is available and a valid path has been stored in the path parameter
    */
-  static bool GetExternalStorage(std::string &path, const std::string &type = "");
-  static bool GetStorageUsage(const std::string &path, std::string &usage);
   int GetMaxSystemVolume();
   float GetSystemVolume();
   void SetSystemVolume(float percent);
-  void InitDirectories();
 
   void SetRefreshRate(float rate);
   void SetDisplayMode(int mode);
@@ -260,9 +257,9 @@ protected:
 
 private:
   static CXBMCApp* m_xbmcappinstance;
-  static CCriticalSection m_AppMutex;
+  static CCriticalSection m_LayoutMutex;
 
-  CJNIXBMCAudioManagerOnAudioFocusChangeListener m_audioFocusListener;
+  std::unique_ptr<CJNIXBMCAudioManagerOnAudioFocusChangeListener> m_audioFocusListener;
   std::unique_ptr<jni::CJNIXBMCBroadcastReceiver> m_broadcastReceiver;
   static std::unique_ptr<CJNIXBMCMainView> m_mainView;
   std::unique_ptr<jni::CJNIXBMCMediaSession> m_mediaSession;
@@ -284,7 +281,7 @@ private:
   static bool m_hasReqVisible;
   static bool m_hasPIP;
   bool m_videosurfaceInUse;
-  bool m_firstrun;
+  bool m_firstActivityRun;
   bool m_exiting;
   pthread_t m_thread;
   static CCriticalSection m_applicationsMutex;
