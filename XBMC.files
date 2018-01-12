@@ -5969,6 +5969,7 @@ tools/android/packaging/xbmc/res/drawable/progresscolor.xml
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
+tools/android/packaging/xbmc/src/interfaces/XBMCInputDeviceListener.java.in
 tools/buildsteps/android/configure-depends
 tools/buildsteps/android/configure-xbmc
 tools/buildsteps/android/make-binary-addons
@@ -6190,12 +6191,18 @@ xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt
 xbmc/platform/android/activity/JNISoftKeyboardView.cpp
 xbmc/platform/android/activity/JNISoftKeyboardView.h
+xbmc/platform/android/activity/JNIXBMCBroadcastReceiver.cpp
+xbmc/platform/android/activity/JNIXBMCBroadcastReceiver.h
 xbmc/platform/android/activity/JNIXBMCFile.cpp
 xbmc/platform/android/activity/JNIXBMCFile.h
+xbmc/platform/android/activity/JNIXBMCInputDeviceListener.cpp
+xbmc/platform/android/activity/JNIXBMCInputDeviceListener.h
 xbmc/platform/android/activity/JNIXBMCJsonHandler.cpp
 xbmc/platform/android/activity/JNIXBMCJsonHandler.h
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
+xbmc/platform/android/activity/XBMCService.cpp
+xbmc/platform/android/activity/XBMCService.h
 xbmc/platform/android/activity/android_main.cpp
 xbmc/platform/android/activity/AndroidExtra.h
 xbmc/platform/android/activity/AndroidFeatures.cpp
@@ -6215,6 +6222,7 @@ xbmc/platform/android/activity/IActivityHandler.h
 xbmc/platform/android/activity/IInputHandler.h
 xbmc/platform/android/activity/XBMCApp.cpp
 xbmc/platform/android/activity/XBMCApp.h
+xbmc/platform/android/android_onload.cpp
 xbmc/platform/android/bionic_supplement/bionic_supplement.h
 xbmc/platform/android/bionic_supplement/getdelim.c
 xbmc/platform/android/bionic_supplement/rand_r.c
@@ -7676,6 +7684,9 @@ xbmc/pictures/PictureThumbLoader.cpp
 xbmc/pictures/PictureThumbLoader.h
 xbmc/pictures/SlideShowPicture.cpp
 xbmc/pictures/SlideShowPicture.h
+xbmc/platform/android/service/CMakeLists.txt
+xbmc/platform/android/service/XBMCService.cpp
+xbmc/platform/android/service/XBMCService.h
 xbmc/platform/darwin/ios/IOSKeyboard.h
 xbmc/platform/darwin/ios/IOSKeyboard.mm
 xbmc/platform/darwin/ios/IOSKeyboardView.h
@@ -9170,6 +9181,7 @@ xbmc/win32/XBMC.ico
 xbmc/win32/XBMC_PC.cpp
 xbmc/win32/XBMC_PC.rc
 xbmc/windowing/CMakeLists.txt
+xbmc/windowing/WinEvents.cpp
 xbmc/windowing/android/CMakeLists.txt
 xbmc/windowing/android/WinEventsAndroid.cpp
 xbmc/windowing/android/WinEventsAndroid.h
