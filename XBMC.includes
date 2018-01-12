@@ -1,7 +1,7 @@
 /home/cbro/android-toolchains/android-14/sysroot/usr/include
 /mnt/d/winlin/android-toolchain-arm-21-r14b/sysroot/usr/include
 /mnt/d/winlin/android-toolchain-arm-21-r14b/include/c++/4.9.x
-/mnt/d/winlin/spmc-build/arm-linux-androideabi-21/include
+/mnt/d/winlin/spmc-build/i686-linux-android-21/include
 
 addons/library.xbmc.addon
 addons/library.xbmc.codec
@@ -499,3 +499,5 @@ tools/android/packaging
 tools/android/packaging/gradle/wrapper
 system/keymaps
 xbmc/network/httprequesthandler/python
+xbmc/platform/android/service
+xbmc/platform/android
