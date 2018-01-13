@@ -243,8 +243,7 @@ void CXBMCApp::onStart()
     if (!g_application.IsInitialized())
       abort();
 
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_DISPLAY_INIT);
-    Initialize();
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_INIT);
 
     // Some intent filters MUST be registered in code rather than through the manifest
     CJNIIntentFilter intentFilter;
@@ -387,8 +386,6 @@ void CXBMCApp::Initialize()
 
 void CXBMCApp::Deinitialize(int status)
 {
-  g_application.m_ServiceManager->GetAnnouncementManager().RemoveAnnouncer(this);
-
   while(!m_texturePool.empty())
   {
     GLuint texture_id = m_texturePool.back();

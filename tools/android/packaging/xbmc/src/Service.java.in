@@ -8,11 +8,11 @@ import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
-public class KeepAliveService extends Service
+public class Service extends android.app.Service
 {
   native void _launchApplication();
 
-  public KeepAliveService()
+  public Service()
   {
   }
 

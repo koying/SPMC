@@ -145,6 +145,11 @@ void CXBMCService::InitDirectories()
   CSpecialProtocol::SetXBMCBinAddonPath(getApplicationInfo().nativeLibraryDir.c_str());
 }
 
+void CXBMCService::Deinitialize()
+{
+  stopSelf();
+}
+
 bool CXBMCService::GetExternalStorage(std::string &path, const std::string &type /* = "" */)
 {
   std::string sType;

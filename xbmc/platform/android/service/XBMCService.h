@@ -40,6 +40,7 @@ public:
   int android_printf(const char* format...);
 
   void InitDirectories();
+  void Deinitialize();
 
   static bool GetExternalStorage(std::string &path, const std::string &type = "");
   static bool GetStorageUsage(const std::string &path, std::string &usage);

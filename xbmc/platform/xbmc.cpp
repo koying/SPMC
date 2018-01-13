@@ -32,6 +32,7 @@
 
 #if defined(TARGET_ANDROID)
 #include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
 #endif
 
 #include "platform/MessagePrinter.h"
@@ -121,6 +122,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
 #elif defined(TARGET_ANDROID)
   if (CXBMCApp::get())
     CXBMCApp::get()->Deinitialize(status);
+  CXBMCService::get()->Deinitialize();
 #endif
 
   return status;

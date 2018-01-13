@@ -273,6 +273,7 @@ CApplication::CApplication(void)
   , m_threadID(0)
   , m_bInitializing(true)
   , m_bGUIInitialized(false)
+  , m_bGUICreated(false)
   , m_bPlatformDirectories(true)
   , m_progressTrackingVideoResumeBookmark(*new CBookmark)
   , m_progressTrackingItem(new CFileItem)
@@ -818,6 +819,7 @@ bool CApplication::CreateGUI()
       return false;
     }
   }
+  m_bGUICreated = true;
 
   return true;
 }
@@ -831,6 +833,8 @@ bool CApplication::DestroyGUI()
   g_Windowing.DestroyRenderSystem();
   g_Windowing.DestroyWindowSystem();
   g_windowManager.DestroyWindows();
+
+  m_bGUICreated = false;
 
   return true;
 }
@@ -1281,7 +1285,7 @@ bool CApplication::Initialize()
     g_peripherals.Initialise();
 #endif
 
-  CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
+    CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
 
     g_windowManager.CreateWindows();
 
@@ -2622,14 +2626,18 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     if (!g_application.IsGUIInitialized())
       StartGUI();
 
-  if (g_advancedSettings.m_videoUseDroidProjectionCapture)
-    CXBMCApp::get()->startProjection();
+    if (g_advancedSettings.m_videoUseDroidProjectionCapture)
+      CXBMCApp::get()->startProjection();
 
+    CXBMCApp::get()->Initialize();
     break;
 
   case TMSG_DISPLAY_SETUP:
     if (m_renderGUI)
       break;
+
+    if (!g_application.IsGUICreated())
+      CreateGUI();
 
     // We might come from a refresh rate switch destroying the native window; use the context resolution
     InitWindow(g_graphicsContext.GetVideoResolution());
@@ -2971,6 +2979,9 @@ bool CApplication::Cleanup()
 {
   try
   {
+    CLog::Log(LOGNOTICE, "unload skin");
+    UnloadSkin();
+
     // stop all remaining scripts; must be done after skin has been unloaded,
     // not before some windows still need it when deinitializing during skin
     // unloading

@@ -149,6 +149,7 @@ public:
   virtual bool Cleanup() override;
 
   bool IsInitialized() { return !m_bInitializing; }
+  bool IsGUICreated() { return m_bGUICreated; }
   bool IsGUIInitialized() { return m_bGUIInitialized; }
 
   bool CreateGUI();
@@ -479,6 +480,7 @@ protected:
   ThreadIdentifier m_threadID;       // application thread ID.  Used in applicationMessanger to know where we are firing a thread with delay from.
   bool m_bInitializing;
   bool m_bGUIInitialized;
+  bool m_bGUICreated;
   bool m_bPlatformDirectories;
 
   CBookmark& m_progressTrackingVideoResumeBookmark;
