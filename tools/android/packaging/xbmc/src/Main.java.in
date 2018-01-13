@@ -251,8 +251,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
 
   public void startCapture(int width, int height)
   {
-    if (mMediaProjection == null)
-      return;
     mCaptureProjection.startCapture(width, height);
   }
 

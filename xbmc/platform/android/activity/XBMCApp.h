@@ -174,6 +174,7 @@ public:
   static int SetBuffersGeometry(int width, int height);
   static int android_printf(const char *format, ...);
   void BringToFront();
+  void Minimize();
   static GLuint pullTexture();
   static void pushTexture(GLuint tex);
 
@@ -283,7 +284,6 @@ private:
   bool m_videosurfaceInUse;
   bool m_firstActivityRun;
   bool m_exiting;
-  pthread_t m_thread;
   static CCriticalSection m_applicationsMutex;
   static std::vector<androidPackage> m_applications;
   static std::vector<CActivityResultEvent*> m_activityResultEvents;
@@ -298,8 +298,6 @@ private:
   static uint64_t m_vsynctime;
   static CEvent m_vsyncEvent;
 
-  void XBMC_DestroyDisplay();
-  void XBMC_SetupDisplay();
   static void CalculateGUIRatios();
   static CRect m_droid2guiRatio;
 

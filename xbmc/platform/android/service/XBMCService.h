@@ -56,5 +56,6 @@ private:
   static pthread_t m_SvcThread;
   static CXBMCService* m_xbmcserviceinstance;
 
-  void LaunchApplication();
+  void StartApplication();
+  void StopApplication();
 };

@@ -707,8 +707,6 @@ bool CApplication::CreateGUI()
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
-  m_frameMoveGuard.lock();
-
   m_renderGUI = true;
 #ifdef HAS_SDL
   CLog::Log(LOGNOTICE, "Setup SDL");
@@ -831,7 +829,6 @@ bool CApplication::DestroyGUI()
   UnloadSkin();
 
   g_Windowing.DestroyRenderSystem();
-  g_Windowing.DestroyWindow();
   g_Windowing.DestroyWindowSystem();
   g_windowManager.DestroyWindows();
 
@@ -1182,6 +1179,8 @@ void CApplication::CreateUserDirs() const
 
 bool CApplication::Initialize()
 {
+  m_frameMoveGuard.lock();
+
 #if defined(HAS_DVD_DRIVE) && !defined(TARGET_WINDOWS) // somehow this throws an "unresolved external symbol" on win32
   // turn off cdio logging
   cdio_loglevel_default = CDIO_LOG_ERROR;
@@ -2616,17 +2615,30 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
   break;
 
 #ifdef TARGET_ANDROID
-  case TMSG_DISPLAY_SETUP:
-    // If we are rendering GUI, we are in first run
+  case TMSG_DISPLAY_INIT:
     if (m_renderGUI)
       break;
     CreateGUI();
     if (!g_application.IsGUIInitialized())
       StartGUI();
 
+  if (g_advancedSettings.m_videoUseDroidProjectionCapture)
+    CXBMCApp::get()->startProjection();
+
+    break;
+
+  case TMSG_DISPLAY_SETUP:
+    if (m_renderGUI)
+      break;
+
     // We might come from a refresh rate switch destroying the native window; use the context resolution
     InitWindow(g_graphicsContext.GetVideoResolution());
     SetRenderGUI(true);
+    break;
+
+  case TMSG_DISPLAY_CLEANUP:
+    DestroyWindow();
+    SetRenderGUI(false);
     break;
 
   case TMSG_DISPLAY_DESTROY:
@@ -3069,16 +3081,22 @@ void CApplication::Stop(int exitCode)
     CLog::Log(LOGNOTICE, "stop all");
 
     // cancel any jobs from the jobmanager
+    CLog::Log(LOGNOTICE, "CancelJobs");
     CJobManager::GetInstance().CancelJobs();
 
     // stop scanning before we kill the network and so on
+    CLog::Log(LOGNOTICE, "m_musicInfoScanner->Stop");
     if (m_musicInfoScanner->IsScanning())
       m_musicInfoScanner->Stop(true);
 
+    CLog::Log(LOGNOTICE, "CancelAllJobs");
     if (CVideoLibraryQueue::GetInstance().IsRunning())
       CVideoLibraryQueue::GetInstance().CancelAllJobs();
 
+    CLog::Log(LOGNOTICE, "GetADSP().Deactivate");
     CServiceBroker::GetADSP().Deactivate();
+
+    CLog::Log(LOGNOTICE, "messenger cleanup");
     CApplicationMessenger::GetInstance().Cleanup();
 
     CLog::Log(LOGNOTICE, "stop player");

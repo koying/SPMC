@@ -230,7 +230,7 @@ bool CXBMCService::GetStorageUsage(const std::string &path, std::string &usage)
   return true;
 }
 
-void CXBMCService::LaunchApplication()
+void CXBMCService::StartApplication()
 {
   CSingleLock lock(m_SvcMutex);
 
@@ -246,9 +246,14 @@ void CXBMCService::LaunchApplication()
   }
 }
 
+void CXBMCService::StopApplication()
+{
+  pthread_join(m_SvcThread, NULL);
+}
+
 void CXBMCService::_launchApplication(JNIEnv*, jobject thiz)
 {
   jobject o = (jobject)xbmc_jnienv()->NewGlobalRef(thiz);
   m_xbmcserviceinstance = new CXBMCService(o);
-  m_xbmcserviceinstance->LaunchApplication();
+  m_xbmcserviceinstance->StartApplication();
 }

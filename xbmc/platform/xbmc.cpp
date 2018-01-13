@@ -63,10 +63,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
   if(!g_RBP.Initialize())
     return false;
   g_RBP.LogFirmwareVerison();
-#elif defined(TARGET_ANDROID)
-  CXBMCApp::get()->Initialize();
 #endif
-
   if (renderGUI && !g_application.CreateGUI())
   {
     CMessagePrinter::DisplayError("ERROR: Unable to create GUI. Exiting");
@@ -88,11 +85,6 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
     pEnumerator->RegisterEndpointNotificationCallback(&cMMNC);
     SAFE_RELEASE(pEnumerator);
   }
-#endif
-
-#if defined(TARGET_ANDROID)
-  if (renderGUI && g_advancedSettings.m_videoUseDroidProjectionCapture)
-    CXBMCApp::get()->startProjection();
 #endif
 
   try
@@ -127,7 +119,8 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
 #ifdef TARGET_RASPBERRY_PI
   g_RBP.Deinitialize();
 #elif defined(TARGET_ANDROID)
-  CXBMCApp::get()->Deinitialize(status);
+  if (CXBMCApp::get())
+    CXBMCApp::get()->Deinitialize(status);
 #endif
 
   return status;

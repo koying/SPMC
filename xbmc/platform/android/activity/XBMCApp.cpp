@@ -243,6 +243,9 @@ void CXBMCApp::onStart()
     if (!g_application.IsInitialized())
       abort();
 
+    CApplicationMessenger::GetInstance().SendMsg(TMSG_DISPLAY_INIT);
+    Initialize();
+
     // Some intent filters MUST be registered in code rather than through the manifest
     CJNIIntentFilter intentFilter;
     intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
@@ -321,15 +324,6 @@ void CXBMCApp::onDestroy()
   unregisterReceiver(*this);
 
   m_mediaSession.release();
-
-  // If android is forcing us to stop, ask XBMC to exit then wait until it's
-  // been destroyed.
-  if (!m_exiting)
-  {
-    CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
-    pthread_join(m_thread, NULL);
-    android_printf(" => XBMC finished");
-  }
 }
 
 void CXBMCApp::onSaveState(void **data, size_t *size)
@@ -388,11 +382,13 @@ void CXBMCApp::Initialize()
   for (int i=0; i<5; ++i)
     m_texturePool.push_back(texture_ids[i]);
 
-  g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(CXBMCApp::get());
+  g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(this);
 }
 
 void CXBMCApp::Deinitialize(int status)
 {
+  g_application.m_ServiceManager->GetAnnouncementManager().RemoveAnnouncer(this);
+
   while(!m_texturePool.empty())
   {
     GLuint texture_id = m_texturePool.back();
@@ -543,18 +539,6 @@ bool CXBMCApp::IsHDMIPlugged()
   return m_hdmiPlugged;
 }
 
-void CXBMCApp::XBMC_SetupDisplay()
-{
-  android_printf("XBMC_SetupDisplay()");
-  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_SETUP);
-}
-
-void CXBMCApp::XBMC_DestroyDisplay()
-{
-  android_printf("XBMC_DestroyDisplay()");
-  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_DESTROY);
-}
-
 int CXBMCApp::SetBuffersGeometry(int width, int height)
 {
   return ANativeWindow_setBuffersGeometry(m_window, width, height, WINDOW_FORMAT_RGBA_8888);
@@ -633,6 +617,12 @@ void CXBMCApp::BringToFront()
     CLog::Log(LOGERROR, "CXBMCApp::BringToFront");
     StartActivity(getPackageName());
   }
+}
+
+void CXBMCApp::Minimize()
+{
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_DESTROY);
+  moveTaskToBack(true);
 }
 
 GLuint CXBMCApp::pullTexture()
@@ -1443,7 +1433,7 @@ void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
     android_printf(" => invalid ANativeWindow object");
     return;
   }
-  XBMC_SetupDisplay();
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_SETUP);
 }
 
 void CXBMCApp::surfaceDestroyed(CJNISurfaceHolder holder)
@@ -1452,7 +1442,7 @@ void CXBMCApp::surfaceDestroyed(CJNISurfaceHolder holder)
   // If we have exited XBMC, it no longer exists.
   if (!m_exiting)
   {
-    XBMC_DestroyDisplay();
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_CLEANUP);
     m_window = NULL;
   }
 }
