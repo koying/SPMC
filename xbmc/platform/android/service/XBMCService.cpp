@@ -31,6 +31,7 @@
 #include <androidjni/Environment.h>
 #include <androidjni/StatFs.h>
 
+#include "Application.h"
 #include "CompileInfo.h"
 #include "FileItem.h"
 #include "utils/StringUtils.h"
@@ -249,6 +250,13 @@ void CXBMCService::StartApplication()
 
     m_SvcThreadCreated = true;
   }
+  // Wait for the service to settle
+  int nb = 0;
+  while(!g_application.IsInitialized() && nb < 30)
+  {
+    usleep(1 * 1000000);
+    nb++;
+  }
 }
 
 void CXBMCService::StopApplication()
@@ -256,9 +264,10 @@ void CXBMCService::StopApplication()
   pthread_join(m_SvcThread, NULL);
 }
 
-void CXBMCService::_launchApplication(JNIEnv*, jobject thiz)
+jboolean CXBMCService::_launchApplication(JNIEnv*, jobject thiz)
 {
   jobject o = (jobject)xbmc_jnienv()->NewGlobalRef(thiz);
   m_xbmcserviceinstance = new CXBMCService(o);
   m_xbmcserviceinstance->StartApplication();
+  return g_application.IsInitialized();
 }

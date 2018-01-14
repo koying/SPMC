@@ -36,7 +36,7 @@ public:
   CXBMCService(jobject thiz);
 
   static CXBMCService* get() { return m_xbmcserviceinstance; }
-  static void _launchApplication(JNIEnv*, jobject thiz);
+  static jboolean _launchApplication(JNIEnv*, jobject thiz);
   int android_printf(const char* format...);
 
   void InitDirectories();

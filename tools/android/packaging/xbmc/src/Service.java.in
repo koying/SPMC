@@ -8,17 +8,35 @@ import android.os.IBinder;
 
 public class Service extends android.app.Service
 {
-  native void _launchApplication();
+  native boolean _launchApplication();
+
+  static private Boolean m_isStarted = false;
+  public static Boolean isStarted()
+  {
+    return m_isStarted;
+  }
 
   public Service()
   {
   }
 
   @Override
-  public int onStartCommand(Intent intent, int flags, int startId)
+  public void onCreate()
   {
     System.loadLibrary("@APP_NAME_LC@");
-    _launchApplication();
+    super.onCreate();
+  }
+
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId)
+  {
+    if (!m_isStarted)
+      m_isStarted =_launchApplication();
+    if (m_isStarted)
+    {
+      Intent i = new Intent("@APP_PACKAGE@.SERVICE_STARTED");
+      sendBroadcast(i);
+    }
 
     Bitmap icon = BitmapFactory.decodeResource(getResources(),
             R.drawable.ic_recommendation_80dp);
@@ -33,6 +51,15 @@ public class Service extends android.app.Service
     Notification notification = builder.build();
     startForeground(1, notification);
     return START_STICKY;
+  }
+
+  @Override
+  public void onDestroy()
+  {
+    Intent i = new Intent("@APP_PACKAGE@.SERVICE_STOPPED");
+    sendBroadcast(i);
+
+    super.onDestroy();
   }
 
   @Override
