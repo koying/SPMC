@@ -804,9 +804,6 @@ bool CApplication::CreateGUI()
             info.iHeight,
             info.strMode.c_str());
 
-  g_windowManager.Initialize();
-  g_windowManager.CreateWindows();
-
   CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
 
   std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
@@ -821,6 +818,8 @@ bool CApplication::CreateGUI()
   }
   m_bGUICreated = true;
 
+  CLog::Log(LOGDEBUG, ">>> %s", __PRETTY_FUNCTION__);
+
   return true;
 }
 
@@ -832,7 +831,6 @@ bool CApplication::DestroyGUI()
 
   g_Windowing.DestroyRenderSystem();
   g_Windowing.DestroyWindowSystem();
-  g_windowManager.DestroyWindows();
 
   m_bGUICreated = false;
 
@@ -1277,6 +1275,8 @@ bool CApplication::Initialize()
   CSplash::GetInstance().Show();
   m_incompatibleAddons = incompatibleAddons;
 
+  g_windowManager.CreateWindows();
+
   if (g_windowManager.Initialized())
   {
     CLog::Log(LOGDEBUG, "CApplication: Start with GUI");
@@ -1286,8 +1286,6 @@ bool CApplication::Initialize()
 #endif
 
     CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
-
-    g_windowManager.CreateWindows();
 
     std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
     if (!LoadSkin(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)))
@@ -2988,6 +2986,7 @@ bool CApplication::Cleanup()
     CScriptInvocationManager::GetInstance().Uninitialize();
 
     DestroyGUI();
+    g_windowManager.DestroyWindows();
 
     CLog::Log(LOGNOTICE, "unload sections");
 

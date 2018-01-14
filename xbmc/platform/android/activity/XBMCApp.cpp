@@ -320,7 +320,7 @@ void CXBMCApp::onDestroy()
 {
   android_printf("%s", __PRETTY_FUNCTION__);
 
-  unregisterReceiver(*this);
+  unregisterReceiver(*m_broadcastReceiver);
 
   m_mediaSession.release();
 }

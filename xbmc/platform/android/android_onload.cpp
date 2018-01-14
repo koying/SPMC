@@ -49,7 +49,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
   std::string pkgRoot = CCompileInfo::GetClass();
   
-  std::string keepAliveService = pkgRoot + "/KeepAliveService";
+  std::string serviceClass = pkgRoot + "/Service";
   std::string mainClass = pkgRoot + "/Main";
   std::string bcReceiver = pkgRoot + "/XBMCBroadcastReceiver";
   std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
@@ -67,7 +67,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
   jni::CJNIXBMCInputDeviceListener::RegisterNatives(env);
   jni::CJNIXBMCBroadcastReceiver::RegisterNatives(env);
 
-  jclass cKASvc = env->FindClass(keepAliveService.c_str());
+  jclass cKASvc = env->FindClass(serviceClass.c_str());
   if(cKASvc)
   {
     JNINativeMethod methods[] =

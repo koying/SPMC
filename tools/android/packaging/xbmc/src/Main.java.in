@@ -421,9 +421,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onDestroy()
   {
-    // kill keepalive
-    stopService(new Intent(this, Service.class));
-
     // unregister the InputDeviceListener implementation
     InputManager manager = (InputManager) getSystemService(INPUT_SERVICE);
     manager.unregisterInputDeviceListener(mInputDeviceListener);
