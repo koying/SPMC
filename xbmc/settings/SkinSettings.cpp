@@ -48,44 +48,68 @@ CSkinSettings& CSkinSettings::GetInstance()
 
 int CSkinSettings::TranslateString(const std::string &setting)
 {
+  if (!g_SkinInfo)
+    return -1;
+
   return g_SkinInfo->TranslateString(setting);
 }
 
 const std::string& CSkinSettings::GetString(int setting) const
 {
+  if (!g_SkinInfo)
+    return "";
+
   return g_SkinInfo->GetString(setting);
 }
 
 void CSkinSettings::SetString(int setting, const std::string &label)
 {
+  if (!g_SkinInfo)
+    return;
+
   g_SkinInfo->SetString(setting, label);
   g_SkinInfo->SaveSettings();
 }
 
 int CSkinSettings::TranslateBool(const std::string &setting)
 {
+  if (!g_SkinInfo)
+    return -1;
+
   return g_SkinInfo->TranslateBool(setting);
 }
 
 bool CSkinSettings::GetBool(int setting) const
 {
+  if (!g_SkinInfo)
+    return false;
+
   return g_SkinInfo->GetBool(setting);
 }
 
 void CSkinSettings::SetBool(int setting, bool set)
 {
+  if (!g_SkinInfo)
+    return;
+
   g_SkinInfo->SetBool(setting, set);
   g_SkinInfo->SaveSettings();
 }
 
 void CSkinSettings::Reset(const std::string &setting)
 {
+  if (!g_SkinInfo)
+    return;
+
   g_SkinInfo->Reset(setting);
   g_SkinInfo->SaveSettings();
 }
 
 void CSkinSettings::Reset()
 {
+  if (!g_SkinInfo)
+    return;
+
   g_SkinInfo->Reset();
   g_SkinInfo->SaveSettings();
 

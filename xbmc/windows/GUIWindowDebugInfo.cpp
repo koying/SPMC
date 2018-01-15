@@ -53,7 +53,7 @@ CGUIWindowDebugInfo::~CGUIWindowDebugInfo(void)
 
 void CGUIWindowDebugInfo::UpdateVisibility()
 {
-  if (LOG_LEVEL_DEBUG_FREEMEM <= g_advancedSettings.m_logLevel || g_SkinInfo->IsDebugging())
+  if (LOG_LEVEL_DEBUG_FREEMEM <= g_advancedSettings.m_logLevel || (g_SkinInfo && g_SkinInfo->IsDebugging()))
     Open();
   else
     Close();
@@ -125,7 +125,7 @@ void CGUIWindowDebugInfo::Process(unsigned int currentTime, CDirtyRegionList &di
   }
 
   // render the skin debug info
-  if (g_SkinInfo->IsDebugging())
+  if (g_SkinInfo && g_SkinInfo->IsDebugging())
   {
     if (!info.empty())
       info += "\n";
