@@ -136,7 +136,7 @@ void CGUIDialogPeripheralSettings::InitializeSettings()
   }
 
   m_initialising = true;
-  bool usePopup = g_SkinInfo->HasSkinFile("DialogSlider.xml");
+  bool usePopup = g_SkinInfo && g_SkinInfo->HasSkinFile("DialogSlider.xml");
 
   PeripheralPtr peripheral = g_peripherals.GetByPath(m_item->GetPath());
   if (!peripheral)

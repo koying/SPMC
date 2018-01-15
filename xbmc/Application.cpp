@@ -1906,6 +1906,7 @@ void CApplication::UnloadSkin(bool forReload /* = false */)
 //  The g_SkinInfo shared_ptr ought to be reset here
 // but there are too many places it's used without checking for NULL
 // and as a result a race condition on exit can cause a crash.
+  g_SkinInfo.reset();
 }
 
 bool CApplication::LoadUserWindows()
