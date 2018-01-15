@@ -120,6 +120,9 @@ public class XBMCJsonRPC
   private String RETRIEVE_MUSICVIDEO_DETAILS =
           "{ \"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMusicVideoDetails\", \"params\": { \"musicvideoid\" : %s, \"properties\" : [\"title\", \"artist\", \"thumbnail\", \"fanart\", \"file\"] }, \"id\": \"%s\" }";
 
+  private String RETRIEVE_FILE_DETAILS =
+          "{ \"jsonrpc\": \"2.0\", \"method\": \"Files.GetFileDetails\", \"params\": { \"file\" : \"%s\", \"properties\": [\"file\", \"size\"] }, \"id\": \"%s\" }";
+
   private String RETRIEVE_FILE_ITEMS =
           "{ \"jsonrpc\": \"2.0\", \"method\": \"Files.GetDirectory\", \"params\": { \"directory\" : \"%s\" }, \"id\": \"%s\" }";
 
@@ -752,6 +755,31 @@ public class XBMCJsonRPC
     }
   }
 
+  public File getFileDetails(String url)
+  {
+    File f = null;
+    try
+    {
+      JsonObject req = request_object(String.format(RETRIEVE_FILE_DETAILS, url, "1"));
+      if (req == null || !req.has("result"))
+        return null;
+
+      JsonObject results = req.getAsJsonObject("result");
+      if (!results.has("filedetails"))
+        return null;
+
+      JsonObject fileO = results.get("filedetails").getAsJsonObject();
+      Uri uri = Uri.parse(fileO.get("file").getAsString());
+      f = File.createFile(fileO.get("label").getAsString(), "file", XBMCFileContentProvider.buildUri(uri.toString()).toString(), fileO.get("size").getAsLong());
+    }
+     catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+
+    return f;
+  }
+
   public List<File> getFiles(String url)
   {
     List<File> files = new ArrayList<File>();
@@ -773,7 +801,7 @@ public class XBMCJsonRPC
       {
         JsonObject fileO = filesA.get(i).getAsJsonObject();
         Uri uri = Uri.parse(fileO.get("file").getAsString());
-        File file = File.createFile(fileO.get("label").getAsString(), fileO.get("filetype").getAsString(), XBMCFileContentProvider.buildUri(uri.toString()).toString());
+        File file = File.createFile(fileO.get("label").getAsString(), fileO.get("filetype").getAsString(), XBMCFileContentProvider.buildUri(uri.toString()).toString(), 0);
         if (fileO.has("id"))
           file.setId(fileO.get("id").getAsInt());
         if (fileO.has("type") && !fileO.get("type").getAsString().equals("unknown"))
