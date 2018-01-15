@@ -77,18 +77,17 @@ void CHTTPFileHandler::SetFile(const std::string& file, int responseStatus)
     StringUtils::ToLower(ext);
     m_response.contentType = CMime::GetMimeType(ext);
 
-    // determine the last modified date
-    XFILE::CFile fileObj;
-    if (!fileObj.Open(m_url, XFILE::READ_NO_CACHE))
+    // determine the last modified date & size
+    struct __stat64 statBuffer;
+    if (XFILE::CFile::Stat(m_url, &statBuffer) == 0)
     {
-      m_response.type = HTTPError;
-      m_response.status = MHD_HTTP_INTERNAL_SERVER_ERROR;
+      SetLastModifiedDate(&statBuffer);
+      m_response.totalLength = statBuffer.st_size;
     }
     else
     {
-      struct __stat64 statBuffer;
-      if (fileObj.Stat(&statBuffer) == 0)
-        SetLastModifiedDate(&statBuffer);
+      m_response.type = HTTPError;
+      m_response.status = MHD_HTTP_INTERNAL_SERVER_ERROR;
     }
   }
 
