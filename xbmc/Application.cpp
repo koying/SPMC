@@ -177,6 +177,7 @@
 
 #ifdef TARGET_WINDOWS
 #include "win32util.h"
+#define __PRETTY_FUNCTION__ __FUNCTION__
 #endif
 
 #ifdef TARGET_DARWIN_OSX
@@ -803,8 +804,6 @@ bool CApplication::CreateGUI()
             info.iWidth,
             info.iHeight,
             info.strMode.c_str());
-
-  CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
 
   std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
   if (!LoadSkin(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)))
