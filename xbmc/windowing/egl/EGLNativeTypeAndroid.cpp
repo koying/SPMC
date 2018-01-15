@@ -307,8 +307,8 @@ bool CEGLNativeTypeAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
   else if (abs(currentRefreshRate() - res.fRefreshRate) > 0.0001)
     CXBMCApp::get()->SetRefreshRate(res.fRefreshRate);
 
-  EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
-  if (nativeWindow)
+  EGLNativeWindowType* *nativeWindow = (EGLNativeWindowType**)CXBMCApp::GetNativeWindow(30000);
+  if (nativeWindow && *nativeWindow)
     CXBMCApp::SetBuffersGeometry(res.iWidth, res.iHeight);
 
   return true;
