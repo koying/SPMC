@@ -314,8 +314,12 @@ void CXBMCApp::onDestroy()
   android_printf("%s", __PRETTY_FUNCTION__);
 
   unregisterReceiver(*m_broadcastReceiver);
-
   m_mediaSession.release();
+
+  if (m_playback_state & PLAYBACK_STATE_PLAYING)
+    CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
+
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_DESTROY);
 }
 
 void CXBMCApp::onSaveState(void **data, size_t *size)
@@ -333,7 +337,14 @@ void CXBMCApp::onConfigurationChanged()
 void CXBMCApp::onLowMemory()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
-  // can't do much as we don't want to close completely
+
+  if (!m_isResumed)
+  {
+    if (m_playback_state & PLAYBACK_STATE_PLAYING)
+      CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
+
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_DESTROY);
+  }
 }
 
 void CXBMCApp::onCreateWindow(ANativeWindow* window)
