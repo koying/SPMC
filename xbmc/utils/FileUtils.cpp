@@ -280,8 +280,7 @@ bool CFileUtils::ZebraListAccessCheck(const std::string &filePath)
       return true;
 
     // if this is a real path and accesses outside app, deny.
-    std::string appRoot;
-    CUtil::GetHomePath(appRoot);
+    std::string appRoot = CUtil::GetHomePath();
     // need both test and app paths from realpath or the might not match
 #if defined(_MSC_VER)
     char *approot = _fullpath(NULL, appRoot.c_str(), MAX_PATH);
