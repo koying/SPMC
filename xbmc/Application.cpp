@@ -2648,8 +2648,11 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     break;
 
   case TMSG_DISPLAY_DESTROY:
-    DestroyGUI();
-    SetRenderGUI(false);
+    if (g_application.IsGUICreated())
+    {
+      DestroyGUI();
+      SetRenderGUI(false);
+    }
     break;
 #endif
 
