@@ -1,4 +1,5 @@
 set(SOURCES 
+            MessagePrinter.cpp
             android_onload.cpp
             )
 
