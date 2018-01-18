@@ -5966,9 +5966,14 @@ tools/android/packaging/settings.gradle
 tools/android/packaging/xbmc/AndroidManifest.xml.in
 tools/android/packaging/xbmc/build.gradle.in
 tools/android/packaging/xbmc/res/drawable/progresscolor.xml
+tools/android/packaging/xbmc/src/Service.java.in
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
+tools/android/packaging/xbmc/src/content/XBMCContentProvider.java.in
+tools/android/packaging/xbmc/src/content/XBMCFileContentProvider.java.in
+tools/android/packaging/xbmc/src/content/XBMCMediaContentProvider.java.in
+tools/android/packaging/xbmc/src/content/XBMCYTDLContentProvider.java.in
 tools/android/packaging/xbmc/src/interfaces/XBMCInputDeviceListener.java.in
 tools/buildsteps/android/configure-depends
 tools/buildsteps/android/configure-xbmc
@@ -6186,6 +6191,8 @@ xbmc/network/httprequesthandler/python/HTTPPythonRequest.h
 xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.cpp
 xbmc/network/httprequesthandler/python/HTTPPythonWsgiInvoker.h
 xbmc/network/httprequesthandler/python/Makefile.in
+xbmc/platform/MessagePrinter.h
+xbmc/platform/android/MessagePrinter.cpp
 xbmc/platform/android/activity/AndroidKeyboard.cpp
 xbmc/platform/android/activity/AndroidKeyboard.h
 xbmc/platform/android/activity/CMakeLists.txt

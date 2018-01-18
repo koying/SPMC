@@ -501,3 +501,4 @@ system/keymaps
 xbmc/network/httprequesthandler/python
 xbmc/platform/android/service
 xbmc/platform/android
+tools/android/packaging/xbmc/src/content
