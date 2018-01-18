@@ -35,7 +35,7 @@ void CMessagePrinter::DisplayWarning(const std::string& warning)
 
 void CMessagePrinter::DisplayError(const std::string& error)
 {
-  CXBMCApp::android_printf("%s, error.c_str());
+  CXBMCApp::android_printf("%s", error.c_str());
 }
 
 void CMessagePrinter::DisplayHelpMessage(const std::vector<std::pair<std::string, std::string>>& help)
