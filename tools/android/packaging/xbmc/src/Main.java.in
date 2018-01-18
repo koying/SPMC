@@ -422,7 +422,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void onDestroy()
   {
     // kill keepalive
-    stopService(new Intent(this, KeepAliveService.class));
+    stopService(new Intent(this, Service.class));
 
     // unregister the InputDeviceListener implementation
     InputManager manager = (InputManager) getSystemService(INPUT_SERVICE);
@@ -433,7 +433,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     Log.i(TAG, "onDestroy: exit code = " + mExitCode);
     if (mExitCode == XBMC_EXITCODE_RESTARTAPP)
     {
-      Intent mStartActivity = new Intent(this, Main.class);
+      Intent mStartActivity = new Intent(this, Splash.class);
       int mPendingIntentId = 123456;
       PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
       AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
