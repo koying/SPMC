@@ -236,6 +236,7 @@ void CXBMCApp::onStart()
     if (!g_application.IsInitialized())
       abort();
 
+    g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(this);
     CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_INIT);
 
     // Some intent filters MUST be registered in code rather than through the manifest
@@ -384,8 +385,6 @@ void CXBMCApp::Initialize()
   glGenTextures(5, texture_ids);
   for (int i=0; i<5; ++i)
     m_texturePool.push_back(texture_ids[i]);
-
-  g_application.m_ServiceManager->GetAnnouncementManager().AddAnnouncer(this);
 }
 
 void CXBMCApp::Deinitialize(int status)
