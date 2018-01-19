@@ -3,6 +3,7 @@ package @APP_PACKAGE@;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -16,14 +17,18 @@ import android.widget.RelativeLayout;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-public class XBMCVideoView extends SurfaceView implements
-        SurfaceHolder.Callback
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+public class XBMCVideoView extends GLSurfaceView implements
+        SurfaceHolder.Callback, GLSurfaceView.Renderer
 {
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
-
   native void _surfaceCreated(SurfaceHolder holder);
-
   native void _surfaceDestroyed(SurfaceHolder holder);
+  native void _onDrawFrame(GL10 gl10);
+  native void _onSurfaceCreated(GL10 gl10, EGLConfig eglConfig);
+  native void _onSurfaceChanged(GL10 gl10, int w, int h);
 
   private static final String TAG = "XBMCVideoPlayView";
 
@@ -154,5 +159,23 @@ public class XBMCVideoView extends SurfaceView implements
     Log.d(TAG, "Destroyed");
     mIsCreated = false;
     _surfaceDestroyed(holder);
+  }
+
+  @Override
+  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
+  {
+    _onSurfaceCreated(gl10, eglConfig);
+  }
+
+  @Override
+  public void onSurfaceChanged(GL10 gl10, int w, int h)
+  {
+    _onSurfaceChanged(gl10, w, h);
+  }
+
+  @Override
+  public void onDrawFrame(GL10 gl10)
+  {
+    _onDrawFrame(gl10);
   }
 }
