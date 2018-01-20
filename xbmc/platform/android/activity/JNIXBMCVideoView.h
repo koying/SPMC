@@ -31,6 +31,8 @@
 #include "guilib/Geometry.h"
 #include "threads/Event.h"
 
+class IPlayer;
+
 class CJNIXBMCVideoView : virtual public CJNIBase, public CJNISurfaceHolderCallback, public CJNIInterfaceImplem<CJNIXBMCVideoView>
 {
 public:
@@ -39,7 +41,9 @@ public:
 
   static void RegisterNatives(JNIEnv* env);
   
-  static CJNIXBMCVideoView* createVideoView(CJNISurfaceHolderCallback* holderCallback);
+  static CJNIXBMCVideoView* createVideoView(IPlayer* player);
+
+  void setSurfaceholderCallback(CJNISurfaceHolderCallback* holderCallback);
 
   // CJNISurfaceHolderCallback interface
   void surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height);
@@ -70,6 +74,7 @@ public:
   bool isCreated() const;
 
 protected:
+  IPlayer* m_player;
   CJNISurfaceHolderCallback* m_holderCallback;
   CEvent m_surfaceCreated;
   CRect m_surfaceRect;

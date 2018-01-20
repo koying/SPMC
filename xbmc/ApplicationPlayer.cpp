@@ -787,24 +787,6 @@ bool CApplicationPlayer::IsRenderingVideo()
     return false;
 }
 
-bool CApplicationPlayer::IsRenderingGuiLayer()
-{
-  std::shared_ptr<IPlayer> player = GetInternal();
-  if (player)
-    return player->IsRenderingGuiLayer();
-  else
-    return false;
-}
-
-bool CApplicationPlayer::IsRenderingVideoLayer()
-{
-  std::shared_ptr<IPlayer> player = GetInternal();
-  if (player)
-    return player->IsRenderingVideoLayer();
-  else
-    return false;
-}
-
 bool CApplicationPlayer::Supports(EINTERLACEMETHOD method)
 {
   std::shared_ptr<IPlayer> player = GetInternal();

@@ -196,11 +196,10 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
 
 void CGUIWindowFullScreen::ClearBackground()
 {
-  if (g_application.m_pPlayer->IsRenderingVideoLayer())
 #ifdef HAS_IMXVPU
-    g_graphicsContext.Clear((16 << 16)|(8 << 8)|16);
+  g_graphicsContext.Clear((16 << 16)|(8 << 8)|16);
 #else
-    g_graphicsContext.Clear(0);
+  g_graphicsContext.Clear(0);
 #endif
 }
 
@@ -412,8 +411,6 @@ void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &d
 
 void CGUIWindowFullScreen::Render()
 {
-  g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
-  g_application.m_pPlayer->Render(true, 255);
   g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
   CGUIWindow::Render();
 }
@@ -421,8 +418,6 @@ void CGUIWindowFullScreen::Render()
 void CGUIWindowFullScreen::RenderEx()
 {
   CGUIWindow::RenderEx();
-  g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
-  g_application.m_pPlayer->Render(false, 255, false);
   g_graphicsContext.SetRenderingResolution(m_coordsRes, m_needsScaling);
 }
 

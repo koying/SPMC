@@ -66,7 +66,7 @@ struct CRenderInfo
   // Supported pixel formats, can be called before configure
   std::vector<ERenderFormat> formats;
   std::vector<EINTERLACEMETHOD> m_deintMethods;
-  // Can be used for initialising video codec with information from renderer (e.g. a shared image pool)
+// Can be used for initialising video codec with information from renderer (e.g. a shared image pool)
   void *opaque_pointer;
 };
 

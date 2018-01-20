@@ -22,6 +22,7 @@
 
 #include <androidjni/jutils-details.hpp>
 
+#include "cores/IPlayer.h"
 #include "platform/android/service/XBMCService.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
@@ -46,9 +47,9 @@ void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
       {"_surfaceChanged", "(Landroid/view/SurfaceHolder;III)V", (void*)&CJNIXBMCVideoView::_surfaceChanged},
       {"_surfaceCreated", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceCreated},
       {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceDestroyed},
-      {"_onDrawFrame", "(Ljavax.microedition.khronos.opengles.GL10;)V", (void*)&CJNIXBMCVideoView::_onDrawFrame},
-      {"_onSurfaceCreated", "(Ljavax.microedition.khronos.opengles.GL10;javax.microedition.khronos.egl.EGLConfig;)V", (void*)&CJNIXBMCVideoView::_onSurfaceCreated},
-      {"_onSurfaceChanged", "(javax.microedition.khronos.opengles.GL10;II)V", (void*)&CJNIXBMCVideoView::_onSurfaceChanged}
+      {"_onDrawFrame", "(Ljavax/microedition/khronos/opengles/GL10;)V", (void*)&CJNIXBMCVideoView::_onDrawFrame},
+      {"_onSurfaceCreated", "(Ljavax/microedition/khronos/opengles/GL10;Ljavax/microedition/khronos/egl/EGLConfig;)V", (void*)&CJNIXBMCVideoView::_onSurfaceCreated},
+      {"_onSurfaceChanged", "(Ljavax/microedition/khronos/opengles/GL10;II)V", (void*)&CJNIXBMCVideoView::_onSurfaceChanged}
     };
 
     env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
@@ -62,6 +63,7 @@ CJNIXBMCVideoView::CJNIXBMCVideoView()
 
 CJNIXBMCVideoView::CJNIXBMCVideoView(const jni::jhobject &object)
   : CJNIBase(object)
+  , m_player(nullptr)
   , m_holderCallback(nullptr)
 {
 }
@@ -70,7 +72,7 @@ CJNIXBMCVideoView::~CJNIXBMCVideoView()
 {
 }
 
-CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(CJNISurfaceHolderCallback* holderCallback)
+CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(IPlayer* player)
 {
   std::string signature = "()L" + s_className + ";";
 
@@ -84,12 +86,17 @@ CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(CJNISurfaceHolderCallback*
   }
 
   add_instance(pvw->get_raw(), pvw);
-  pvw->m_holderCallback = holderCallback;
+  pvw->m_player = player;
   if (pvw->isCreated())
     pvw->m_surfaceCreated.Set();
   pvw->add();
 
   return pvw;
+}
+
+void CJNIXBMCVideoView::setSurfaceholderCallback(CJNISurfaceHolderCallback* holderCallback)
+{
+  m_holderCallback = holderCallback;
 }
 
 void CJNIXBMCVideoView::_surfaceChanged(JNIEnv *env, jobject thiz, jobject holder, jint format, jint width, jint height )
@@ -171,7 +178,11 @@ void CJNIXBMCVideoView::surfaceDestroyed(CJNISurfaceHolder holder)
 
 void CJNIXBMCVideoView::onDrawFrame(CJNIGL10 gl)
 {
-
+  if (m_player)
+  {
+    m_player->FrameMove();
+    m_player->Render(false, 255, false);
+  }
 }
 
 void CJNIXBMCVideoView::onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config)

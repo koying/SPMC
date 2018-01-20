@@ -64,7 +64,12 @@ public class XBMCVideoView extends GLSurfaceView implements
     super(context);
     setZOrderMediaOverlay(true);
     getHolder().addCallback(this);
+
+    setEGLContextClientVersion(2);
+    setEGLConfigChooser(8,8,8,8,16,0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+    setRenderer(this);
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
   }
@@ -78,7 +83,6 @@ public class XBMCVideoView extends GLSurfaceView implements
       {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         mVideoLayout.addView(XBMCVideoView.this, layoutParams);
-        mVideoLayout.setBackgroundColor(Color.BLACK);
       }
     });
   }
@@ -91,7 +95,6 @@ public class XBMCVideoView extends GLSurfaceView implements
       public void run()
       {
         mVideoLayout.removeView(XBMCVideoView.this);
-        mVideoLayout.setBackgroundColor(Color.TRANSPARENT);
       }
     });
   }

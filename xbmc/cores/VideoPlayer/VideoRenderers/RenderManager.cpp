@@ -65,6 +65,7 @@
 #endif
 
 #if defined(TARGET_ANDROID)
+#include "platform/android/activity/JNIXBMCVideoView.h"
 #include "HwDecRender/RendererMediaCodec.h"
 #include "HwDecRender/RendererMediaCodecSurface.h"
 #endif
@@ -126,7 +127,7 @@ void CRenderManager::CClockSync::Reset()
 
 unsigned int CRenderManager::m_nextCaptureId = 0;
 
-CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *player) :
+CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *playerMsg, IPlayer* player) :
   m_pRenderer(nullptr),
   m_bTriggerUpdateResolution(false),
   m_bRenderGUI(true),
@@ -154,7 +155,8 @@ CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *player) :
   m_forceNext(false),
   m_presentsource(0),
   m_dvdClock(clock),
-  m_playerPort(player),
+  m_playerPort(playerMsg),
+  m_player(player),
   m_captureWaitCounter(0),
   m_hasCaptures(false)
 {
@@ -519,9 +521,23 @@ bool CRenderManager::Flush()
 }
 
 void CRenderManager::CreateRenderer()
-{
+{  
   if (!m_pRenderer)
   {
+#if defined TARGET_ANDROID
+    m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(m_player));
+    if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
+    {
+      CLog::Log(LOGERROR, "RenderManager::CreateRenderer: VideoView creation failed!!");
+      if (m_jnivideoview)
+      {
+        m_jnivideoview->release();
+        m_jnivideoview.reset();
+      }
+      return;
+    }
+#endif
+
     if (m_format == RENDER_FMT_VAAPI || m_format == RENDER_FMT_VAAPINV12)
     {
 #if defined(HAVE_LIBVA)
@@ -614,6 +630,8 @@ void CRenderManager::DeleteRenderer()
     delete m_pRenderer;
     m_pRenderer = NULL;
   }
+  m_jnivideoview->release();
+  m_jnivideoview.reset();
 }
 
 unsigned int CRenderManager::AllocRenderCapture()
@@ -1116,7 +1134,11 @@ CRenderInfo CRenderManager::GetRenderInfo()
     info.max_buffer_size = NUM_BUFFERS;
     return info;;
   }
-  return m_pRenderer->GetRenderInfo();
+  info =  m_pRenderer->GetRenderInfo();
+#ifdef TARGET_ANDROID
+  info.opaque_pointer = static_cast<void*>(&m_jnivideoview);
+#endif
+  return info;
 }
 
 int CRenderManager::AddVideoPicture(DVDVideoPicture& pic)

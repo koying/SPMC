@@ -49,6 +49,7 @@
 #include "utils/log.h"
 #include "settings/AdvancedSettings.h"
 #include "platform/android/activity/XBMCApp.h"
+#include "cores/VideoPlayer/DVDCodecs/DVDCodecs.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
 #include "utils/TimeUtils.h"
@@ -655,20 +656,8 @@ bool CDVDVideoCodecAndroidMediaCodec::Open(CDVDStreamInfo &hints, CDVDCodecOptio
 
   if (m_render_surface)
   {
-    m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(this));
-    if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
-    {
-      CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: VideoView creation failed!!");
-      if (m_jnivideoview)
-      {
-        m_jnivideoview->release();
-        m_jnivideoview.reset();
-      }
-      AMediaCodec_delete(m_codec);
-      m_codec = nullptr;
-      SAFE_DELETE(m_bitstream);
-      return false;
-    }
+    m_jnivideoview = *((std::shared_ptr<CJNIXBMCVideoView>*)(options.m_opaque_pointer));
+    m_jnivideoview->setSurfaceholderCallback(this);
   }
 
   // setup a YUV420P DVDVideoPicture buffer.
@@ -748,12 +737,8 @@ void CDVDVideoCodecAndroidMediaCodec::Dispose()
   if(m_surface)
     ANativeWindow_release(m_surface);
   m_surface = nullptr;
-
-  if (m_render_surface)
-  {
-    m_jnivideoview->release();
-    m_jnivideoview.reset();
-  }
+  if (m_jnivideoview)
+    m_jnivideoview->setSurfaceholderCallback(nullptr);
 
   SAFE_DELETE(m_bitstream);
   s_instances--;
@@ -1088,8 +1073,6 @@ bool CDVDVideoCodecAndroidMediaCodec::ConfigureMediaCodec(void)
     if (!m_jnivideosurface)
     {
       CLog::Log(LOGERROR, "CDVDVideoCodecAndroidMediaCodec: VideoView getSurface failed!!");
-      m_jnivideoview->release();
-      m_jnivideoview.reset();
       return false;
     }
     m_surface = ANativeWindow_fromSurface(xbmc_jnienv(), m_jnivideosurface.get_raw());

@@ -38,6 +38,9 @@
 #include "DVDClock.h"
 
 class CRenderCapture;
+#ifdef TARGET_ANDROID
+class CJNIXBMCVideoView;
+#endif
 
 namespace DXVA { class CProcessor; }
 namespace VAAPI { class CSurfaceHolder; }
@@ -65,7 +68,7 @@ protected:
 class CRenderManager
 {
 public:
-  CRenderManager(CDVDClock &clock, IRenderMsg *player);
+  CRenderManager(CDVDClock &clock, IRenderMsg *playerMsg, IPlayer* player);
   ~CRenderManager();
 
   // Functions called from render thread
@@ -173,6 +176,10 @@ protected:
   void UpdateDisplayLatency();
   void CheckEnableClockSync();
 
+#ifdef TARGET_ANDROID
+  std::shared_ptr<CJNIXBMCVideoView> m_jnivideoview;
+#endif
+
   CBaseRenderer *m_pRenderer;
   OVERLAY::CRenderer m_overlays;
   CDebugRenderer m_debugRenderer;
@@ -249,6 +256,7 @@ protected:
   CEvent m_flushEvent;
   CDVDClock &m_dvdClock;
   IRenderMsg *m_playerPort;
+  IPlayer *m_player;
 
   struct CClockSync
   {

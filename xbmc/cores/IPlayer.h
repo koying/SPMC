@@ -378,10 +378,6 @@ public:
 
   virtual bool IsRenderingVideo() { return false; };
 
-  virtual bool IsRenderingGuiLayer() { return false; };
-
-  virtual bool IsRenderingVideoLayer() { return false; };
-
   virtual bool Supports(EINTERLACEMETHOD method) { return false; };
   virtual EINTERLACEMETHOD GetDeinterlacingMethodDefault() { return EINTERLACEMETHOD::VS_INTERLACEMETHOD_NONE; }
   virtual bool Supports(ESCALINGMETHOD method) { return false; };

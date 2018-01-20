@@ -1399,6 +1399,9 @@ void CXBMCApp::CalculateGUIRatios()
 {
   m_droid2guiRatio = CRect(0.0, 0.0, 1.0, 1.0);
 
+//  if (GetSDKVersion() >= 26) // Fixed as of O
+//    return;
+
   if(!m_xbmcappinstance || !m_surface_rect.Width() || !m_surface_rect.Height())
     return;
 
