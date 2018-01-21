@@ -2620,6 +2620,11 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
   case TMSG_DISPLAY_INIT:
     if (m_renderGUI)
       break;
+
+    // Wait for main window
+    if (!*CXBMCApp::GetNativeWindow(30000))
+      break;
+
     CreateGUI();
     if (!g_application.IsGUIInitialized())
       StartGUI();
