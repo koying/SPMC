@@ -147,8 +147,7 @@ void CEGLNativeTypeAndroid::Initialize()
   std::string displaySize;
   m_width = m_height = 0;
 
-  EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
-  if (!nativeWindow)
+  if (!*CXBMCApp::GetNativeWindow(30000))
     return;
 
   if (CJNIBuild::DEVICE != "foster" || CJNIBase::GetSDKVersion() >= 24)   // Buggy implementation of DisplayMode API on SATV
@@ -240,7 +239,7 @@ bool CEGLNativeTypeAndroid::GetNativeWindow(XBNativeWindowType **nativeWindow) c
 {
   if (!nativeWindow)
     return false;
-  *nativeWindow = (XBNativeWindowType*) CXBMCApp::GetNativeWindow(2000);
+  *nativeWindow = (XBNativeWindowType*) CXBMCApp::GetNativeWindow(30000);
   return (*nativeWindow != NULL && **nativeWindow != NULL);
 }
 
@@ -257,9 +256,6 @@ bool CEGLNativeTypeAndroid::DestroyNativeWindow()
 bool CEGLNativeTypeAndroid::GetNativeResolution(RESOLUTION_INFO *res) const
 {
   EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
-  if (!nativeWindow)
-    return false;
-
   if (!*nativeWindow)
     return false;
 
@@ -311,8 +307,7 @@ bool CEGLNativeTypeAndroid::SetNativeResolution(const RESOLUTION_INFO &res)
   else if (abs(currentRefreshRate() - res.fRefreshRate) > 0.0001)
     CXBMCApp::get()->SetRefreshRate(res.fRefreshRate);
 
-  EGLNativeWindowType *nativeWindow = (EGLNativeWindowType*)CXBMCApp::GetNativeWindow(30000);
-  if (nativeWindow)
+  if (*CXBMCApp::GetNativeWindow(30000))
     CXBMCApp::SetBuffersGeometry(res.iWidth, res.iHeight);
 
   return true;
