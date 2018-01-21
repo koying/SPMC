@@ -26,6 +26,7 @@ public class XBMCVideoView extends GLSurfaceView implements
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
   native void _surfaceCreated(SurfaceHolder holder);
   native void _surfaceDestroyed(SurfaceHolder holder);
+  native void _setThreadId();
   native void _onDrawFrame(GL10 gl10);
   native void _onSurfaceCreated(GL10 gl10, EGLConfig eglConfig);
   native void _onSurfaceChanged(GL10 gl10, int w, int h);
@@ -70,6 +71,17 @@ public class XBMCVideoView extends GLSurfaceView implements
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
     setRenderer(this);
+
+    queueEvent(new Runnable()
+      {
+        // This method will be called on the rendering
+        // thread:
+        public void run()
+        {
+          _setThreadId();
+        }
+      }
+    );
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
   }

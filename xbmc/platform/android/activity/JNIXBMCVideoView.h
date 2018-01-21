@@ -31,6 +31,8 @@
 #include "guilib/Geometry.h"
 #include "threads/Event.h"
 
+#include <pthread.h>
+
 class IPlayer;
 
 class CJNIXBMCVideoView : virtual public CJNIBase, public CJNISurfaceHolderCallback, public CJNIInterfaceImplem<CJNIXBMCVideoView>
@@ -59,6 +61,7 @@ public:
   virtual void onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config);
   virtual void onSurfaceChanged(CJNIGL10 gl, int width, int height);
 
+  static void _setThreadId(JNIEnv* env, jobject thiz);
   static void _onDrawFrame(JNIEnv* env, jobject thiz, jobject gl);
   static void _onSurfaceCreated(JNIEnv* env, jobject thiz, jobject gl, jobject config);
   static void _onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height) ;
@@ -75,6 +78,7 @@ public:
 
 protected:
   IPlayer* m_player;
+  pthread_t m_threadid;
   CJNISurfaceHolderCallback* m_holderCallback;
   CEvent m_surfaceCreated;
   CRect m_surfaceRect;

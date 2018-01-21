@@ -54,6 +54,16 @@ CVideoPlayerMessenger& CVideoPlayerMessenger::GetInstance()
   return appMessenger;
 }
 
+void CVideoPlayerMessenger::setMainThreadId(pthread_t tid)
+{
+  m_mainThreadId = tid;
+}
+
+bool CVideoPlayerMessenger::IsCurrentThread() const
+{
+  return pthread_equal(pthread_self(), m_mainThreadId);
+}
+
 CVideoPlayerMessenger::CVideoPlayerMessenger()
 {
 }
@@ -90,7 +100,7 @@ int CVideoPlayerMessenger::SendMsg(KODI::MESSAGING::ThreadMessage&& message, boo
     message.result = std::make_shared<int>(-1);
     // check that we're not being called from our application thread, else we'll be waiting
     // forever!
-    if (!g_application.IsCurrentThread())
+    if (!IsCurrentThread())
     {
       message.waitEvent.reset(new CEvent(true));
       waitEvent = message.waitEvent;
@@ -104,10 +114,6 @@ int CVideoPlayerMessenger::SendMsg(KODI::MESSAGING::ThreadMessage&& message, boo
       return *message.result;
     }
   }
-
-
-  if (g_application.m_bStop)
-    return -1;
 
   KODI::MESSAGING::ThreadMessage* msg = new KODI::MESSAGING::ThreadMessage(std::move(message));
   

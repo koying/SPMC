@@ -170,6 +170,8 @@ public:
    \return the global instance.
    */
   static CVideoPlayerMessenger& GetInstance();
+  void setMainThreadId(pthread_t tid);
+  bool IsCurrentThread() const;
 
   void Cleanup();
   // if a message has to be send to the gui, use MSG_TYPE_WINDOW instead
@@ -197,6 +199,7 @@ private:
   int SendMsg(KODI::MESSAGING::ThreadMessage&& msg, bool wait);
   void ProcessMessage(KODI::MESSAGING::ThreadMessage *pMsg);
 
+  pthread_t m_mainThreadId;
   std::queue<KODI::MESSAGING::ThreadMessage*> m_vecMessages;
   std::map<int, CVideoPlayer*> m_mapTargets;
   CCriticalSection m_critSection;

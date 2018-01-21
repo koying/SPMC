@@ -23,6 +23,7 @@
 #include <androidjni/jutils-details.hpp>
 
 #include "cores/IPlayer.h"
+#include "cores/VideoPlayer/VideoPlayerMessenger.h"
 #include "platform/android/service/XBMCService.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
@@ -49,7 +50,8 @@ void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
       {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceDestroyed},
       {"_onDrawFrame", "(Ljavax/microedition/khronos/opengles/GL10;)V", (void*)&CJNIXBMCVideoView::_onDrawFrame},
       {"_onSurfaceCreated", "(Ljavax/microedition/khronos/opengles/GL10;Ljavax/microedition/khronos/egl/EGLConfig;)V", (void*)&CJNIXBMCVideoView::_onSurfaceCreated},
-      {"_onSurfaceChanged", "(Ljavax/microedition/khronos/opengles/GL10;II)V", (void*)&CJNIXBMCVideoView::_onSurfaceChanged}
+      {"_onSurfaceChanged", "(Ljavax/microedition/khronos/opengles/GL10;II)V", (void*)&CJNIXBMCVideoView::_onSurfaceChanged},
+      {"_setThreadId", "()V", (void*)&CJNIXBMCVideoView::_setThreadId}
     };
 
     env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
@@ -126,6 +128,15 @@ void CJNIXBMCVideoView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hol
     inst->surfaceDestroyed(CJNISurfaceHolder(jhobject::fromJNI(holder)));
 }
 
+void CJNIXBMCVideoView::_setThreadId(JNIEnv* env, jobject thiz)
+{
+  (void)env;
+  (void)thiz;
+
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().setMainThreadId(pthread_self());
+}
+
+
 void CJNIXBMCVideoView::_onDrawFrame(JNIEnv* env, jobject thiz, jobject gl)
 {
   (void)env;
@@ -180,6 +191,7 @@ void CJNIXBMCVideoView::onDrawFrame(CJNIGL10 gl)
 {
   if (m_player)
   {
+    KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().ProcessMessages();
     m_player->FrameMove();
     m_player->Render(false, 255, false);
   }
@@ -194,7 +206,6 @@ void CJNIXBMCVideoView::onSurfaceChanged(CJNIGL10 gl, int width, int height)
 {
 
 }
-
 
 bool CJNIXBMCVideoView::waitForSurface(unsigned int millis)
 {
