@@ -47,6 +47,7 @@
 #include "Application.h"
 #include "ServiceBroker.h"
 #include "messaging/ApplicationMessenger.h"
+#include "VideoPlayerMessenger.h"
 
 #include "DVDDemuxers/DVDDemuxCC.h"
 #include "cores/FFmpeg.h"
@@ -80,6 +81,9 @@
 #include "cores/omxplayer/OMXPlayerAudio.h"
 #include "cores/omxplayer/OMXPlayerVideo.h"
 #include "cores/omxplayer/OMXHelper.h"
+#endif
+#if defined(TARGET_ANDROID)
+#include "platform/android/activity/JNIXBMCVideoView.h"
 #endif
 #include "VideoPlayerAudio.h"
 #include "cores/DataCacheCore.h"
@@ -622,7 +626,7 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
       m_CurrentTeletext(STREAM_TELETEXT, VideoPlayer_TELETEXT),
       m_CurrentRadioRDS(STREAM_RADIO_RDS, VideoPlayer_RDS),
       m_messenger("player"),
-      m_renderManager(m_clock, this, this),
+      m_renderManager(this),
       m_ready(true)
 {
   m_players_created = false;
@@ -661,6 +665,19 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
 #else
   m_omxplayer_mode                     = false;
 #endif
+#if defined TARGET_ANDROID
+  m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(this));
+  if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
+  {
+    CLog::Log(LOGERROR, "VideoPlayer: VideoView creation failed!!");
+    if (m_jnivideoview)
+    {
+      m_jnivideoview->release();
+      m_jnivideoview.reset();
+    }
+    return;
+  }
+#endif
 
   m_SkipCommercials = true;
 
@@ -677,6 +694,10 @@ CVideoPlayer::~CVideoPlayer()
 
   CloseFile();
   DestroyPlayers();
+#ifdef TARGET_ANDROID
+  m_jnivideoview->release();
+  m_jnivideoview.reset();
+#endif
 }
 
 bool CVideoPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
@@ -5146,16 +5167,6 @@ bool CVideoPlayer::IsRenderingVideo()
   return m_renderManager.IsConfigured();
 }
 
-bool CVideoPlayer::IsRenderingGuiLayer()
-{
-  return m_renderManager.IsGuiLayer();
-}
-
-bool CVideoPlayer::IsRenderingVideoLayer()
-{
-  return m_renderManager.IsVideoLayer();
-}
-
 bool CVideoPlayer::Supports(EINTERLACEMETHOD method)
 {
   if (!m_processInfo)
@@ -5246,4 +5257,18 @@ void CVideoPlayer::OnResetDisplay()
   m_VideoPlayerVideo->SendMessage(new CDVDMsgBool(CDVDMsg::GENERAL_PAUSE, false), 1);
   m_clock.Pause(false);
   m_displayLost = false;
+}
+
+void CVideoPlayer::OnApplicationMessage(KODI::MESSAGING::ThreadMessage* pMsg)
+{
+  switch (pMsg->dwMessage)
+  {
+  default:
+    break;
+  }
+}
+
+int CVideoPlayer::GetMessageMask()
+{
+  return TMSG_MASK_VIDEOPLAYER;
 }

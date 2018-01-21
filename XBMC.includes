@@ -1,7 +1,9 @@
-/home/cbro/android-toolchains/android-14/sysroot/usr/include
-/mnt/d/winlin/android-toolchain-arm-21-r14b/sysroot/usr/include
-/mnt/d/winlin/android-toolchain-arm-21-r14b/include/c++/4.9.x
+/mnt/d/winlin/android-toolchain-x86-21-r14b/sysroot/usr/include
+/mnt/d/winlin/android-toolchain-x86-21-r14b/include/c++/4.9.x
+/mnt/d/winlin/android-toolchain-x86-21-r14b/include/c++/4.9.x/i686-linux-android
 /mnt/d/winlin/spmc-build/i686-linux-android-21/include
+
+build-i686/build
 
 addons/library.xbmc.addon
 addons/library.xbmc.codec
@@ -489,6 +491,7 @@ project/cmake/platform/android
 project/cmake/treedata/android
 xbmc/network/android
 tools/android/packaging/xbmc/src/interfaces
+xbmc/cores/VideoPlayer
 xbmc/cores/VideoPlayer/VideoRenderers
 xbmc/cores/VideoPlayer/VideoRenderers/VideoCaptures
 tools/buildsteps/android

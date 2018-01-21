@@ -30,6 +30,7 @@
 
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
+#include "../VideoPlayer.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/MediaSettings.h"
 #include "settings/Settings.h"
@@ -65,7 +66,6 @@
 #endif
 
 #if defined(TARGET_ANDROID)
-#include "platform/android/activity/JNIXBMCVideoView.h"
 #include "HwDecRender/RendererMediaCodec.h"
 #include "HwDecRender/RendererMediaCodecSurface.h"
 #endif
@@ -127,7 +127,7 @@ void CRenderManager::CClockSync::Reset()
 
 unsigned int CRenderManager::m_nextCaptureId = 0;
 
-CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *playerMsg, IPlayer* player) :
+CRenderManager::CRenderManager(CVideoPlayer* player) :
   m_pRenderer(nullptr),
   m_bTriggerUpdateResolution(false),
   m_bRenderGUI(true),
@@ -154,8 +154,7 @@ CRenderManager::CRenderManager(CDVDClock &clock, IRenderMsg *playerMsg, IPlayer*
   m_presentstep(PRESENT_IDLE),
   m_forceNext(false),
   m_presentsource(0),
-  m_dvdClock(clock),
-  m_playerPort(playerMsg),
+  m_dvdClock(player->m_clock),
   m_player(player),
   m_captureWaitCounter(0),
   m_hasCaptures(false)
@@ -301,7 +300,7 @@ bool CRenderManager::Configure()
     m_pRenderer->SetBufferSize(m_QueueSize);
     m_pRenderer->Update();
 
-    m_playerPort->UpdateRenderInfo(info);
+    m_player->UpdateRenderInfo(info);
 
     m_queued.clear();
     m_discard.clear();
@@ -330,7 +329,7 @@ bool CRenderManager::Configure()
     m_renderState = STATE_UNCONFIGURED;
 
   m_stateEvent.Set();
-  m_playerPort->VideoParamsChange();
+  m_player->VideoParamsChange();
   return result;
 }
 
@@ -421,7 +420,7 @@ void CRenderManager::FrameMove()
       else
         ++it;
 
-      m_playerPort->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
+      m_player->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
     }
 
     m_bRenderGUI = true;
@@ -524,20 +523,6 @@ void CRenderManager::CreateRenderer()
 {  
   if (!m_pRenderer)
   {
-#if defined TARGET_ANDROID
-    m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(m_player));
-    if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
-    {
-      CLog::Log(LOGERROR, "RenderManager::CreateRenderer: VideoView creation failed!!");
-      if (m_jnivideoview)
-      {
-        m_jnivideoview->release();
-        m_jnivideoview.reset();
-      }
-      return;
-    }
-#endif
-
     if (m_format == RENDER_FMT_VAAPI || m_format == RENDER_FMT_VAAPINV12)
     {
 #if defined(HAVE_LIBVA)
@@ -630,8 +615,6 @@ void CRenderManager::DeleteRenderer()
     delete m_pRenderer;
     m_pRenderer = NULL;
   }
-  m_jnivideoview->release();
-  m_jnivideoview.reset();
 }
 
 unsigned int CRenderManager::AllocRenderCapture()
@@ -806,7 +789,7 @@ void CRenderManager::SetViewMode(int iViewMode)
   CSingleLock lock(m_statelock);
   if (m_pRenderer)
     m_pRenderer->SetViewMode(iViewMode);
-  m_playerPort->VideoParamsChange();
+  m_player->VideoParamsChange();
 }
 
 void CRenderManager::FlipPage(volatile std::atomic_bool& bStop, double pts,
@@ -864,7 +847,7 @@ void CRenderManager::FlipPage(volatile std::atomic_bool& bStop, double pts,
   m.presentmethod = presentmethod;
   m.pts = pts;
   requeue(m_queued, m_free);
-  m_playerPort->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
+  m_player->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
 
   // signal to any waiters to check state
   if (m_presentstep == PRESENT_IDLE)
@@ -948,7 +931,7 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
     {
       std::string acodec, audio, vcodec, video, player, vsync;
 
-      m_playerPort->GetDebugInfo(acodec, audio, vcodec, video, player);
+      m_player->GetDebugInfo(acodec, audio, vcodec, video, player);
 
       double refreshrate, clockspeed;
       int missedvblanks;
@@ -993,36 +976,6 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
 
     m_presentevent.notifyAll();
   }
-}
-
-bool CRenderManager::IsGuiLayer()
-{
-  { CSingleLock lock(m_statelock);
-
-    if (!m_pRenderer)
-      return false;
-
-    if ((m_pRenderer->IsGuiLayer() && IsPresenting()) ||
-        m_renderedOverlay || m_overlays.HasOverlay(m_presentsource))
-      return true;
-
-    if (m_renderDebug && m_debugTimer.IsTimePast())
-      return true;
-  }
-  return false;
-}
-
-bool CRenderManager::IsVideoLayer()
-{
-  { CSingleLock lock(m_statelock);
-
-    if (!m_pRenderer)
-      return false;
-
-    if (!m_pRenderer->IsGuiLayer())
-      return true;
-  }
-  return false;
 }
 
 /* simple present method */
@@ -1102,7 +1055,7 @@ void CRenderManager::UpdateResolution()
         UpdateDisplayLatency();
       }
       m_bTriggerUpdateResolution = false;
-      m_playerPort->VideoParamsChange();
+      m_player->VideoParamsChange();
     }
   }
 }
@@ -1136,7 +1089,7 @@ CRenderInfo CRenderManager::GetRenderInfo()
   }
   info =  m_pRenderer->GetRenderInfo();
 #ifdef TARGET_ANDROID
-  info.opaque_pointer = static_cast<void*>(&m_jnivideoview);
+  info.opaque_pointer = static_cast<void*>(&(m_player->m_jnivideoview));
 #endif
   return info;
 }
@@ -1364,7 +1317,7 @@ void CRenderManager::PrepareNextRender()
     m_presentpts = m_Queue[idx].pts - totalLatency;
     m_presentevent.notifyAll();
 
-    m_playerPort->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
+    m_player->UpdateRenderBuffers(m_queued.size(), m_discard.size(), m_free.size());
   }
 }
 
@@ -1421,5 +1374,5 @@ void CRenderManager::CheckEnableClockSync()
     m_dvdClock.SetVsyncAdjust(0);
   }
 
-  m_playerPort->UpdateClockSync(m_clockSync.m_enabled);
+  m_player->UpdateClockSync(m_clockSync.m_enabled);
 }

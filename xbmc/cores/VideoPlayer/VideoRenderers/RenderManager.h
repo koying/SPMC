@@ -53,6 +53,7 @@ class CLinuxRenderer;
 class CLinuxRendererGL;
 class CLinuxRendererGLES;
 class CRenderManager;
+class CVideoPlayer;
 
 class IRenderMsg
 {
@@ -68,7 +69,7 @@ protected:
 class CRenderManager
 {
 public:
-  CRenderManager(CDVDClock &clock, IRenderMsg *playerMsg, IPlayer* player);
+  CRenderManager(CVideoPlayer* player);
   ~CRenderManager();
 
   // Functions called from render thread
@@ -77,8 +78,6 @@ public:
   void FrameMove();
   void FrameWait(int ms);
   void Render(bool clear, DWORD flags = 0, DWORD alpha = 255, bool gui = true);
-  bool IsGuiLayer();
-  bool IsVideoLayer();
   RESOLUTION GetResolution();
   void UpdateResolution();
   void TriggerUpdateResolution(float fps, int width, int flags);
@@ -176,9 +175,6 @@ protected:
   void UpdateDisplayLatency();
   void CheckEnableClockSync();
 
-#ifdef TARGET_ANDROID
-  std::shared_ptr<CJNIXBMCVideoView> m_jnivideoview;
-#endif
 
   CBaseRenderer *m_pRenderer;
   OVERLAY::CRenderer m_overlays;
@@ -255,8 +251,7 @@ protected:
   XbmcThreads::ConditionVariable  m_presentevent;
   CEvent m_flushEvent;
   CDVDClock &m_dvdClock;
-  IRenderMsg *m_playerPort;
-  IPlayer *m_player;
+  CVideoPlayer *m_player;
 
   struct CClockSync
   {

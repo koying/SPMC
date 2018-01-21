@@ -6166,6 +6166,9 @@ xbmc/addons/Skin.cpp
 xbmc/addons/Skin.h
 xbmc/addons/Visualisation.cpp
 xbmc/addons/Visualisation.h
+xbmc/cores/VideoPlayer/CMakeLists.txt
+xbmc/cores/VideoPlayer/VideoPlayerMessenger.cpp
+xbmc/cores/VideoPlayer/VideoPlayerMessenger.h
 xbmc/guilib/Resolution.cpp
 xbmc/interfaces/python/AddonPythonInvoker.cpp
 xbmc/interfaces/python/AddonPythonInvoker.h
