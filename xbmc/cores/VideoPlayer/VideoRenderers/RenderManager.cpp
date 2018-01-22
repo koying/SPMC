@@ -29,8 +29,8 @@
 #include "windowing/WindowingFactory.h"
 
 #include "Application.h"
-#include "messaging/ApplicationMessenger.h"
 #include "../VideoPlayer.h"
+#include "../VideoPlayerMessenger.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/MediaSettings.h"
 #include "settings/Settings.h"
@@ -378,11 +378,6 @@ void CRenderManager::FrameMove()
         return;
 
       FrameWait(50);
-
-      if (m_flags & CONF_FLAGS_FULLSCREEN)
-      {
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_SWITCHTOFULLSCREEN);
-      }
     }
 
     CheckEnableClockSync();
@@ -431,7 +426,7 @@ void CRenderManager::FrameMove()
 
 void CRenderManager::PreInit()
 {
-  if (!g_application.IsCurrentThread())
+  if (!KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().IsCurrentThread())
   {
     CLog::Log(LOGERROR, "CRenderManager::PreInit - not called from render thread");
     return;
@@ -455,7 +450,7 @@ void CRenderManager::PreInit()
 
 void CRenderManager::UnInit()
 {
-  if (!g_application.IsCurrentThread())
+  if (!KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().IsCurrentThread())
   {
     CLog::Log(LOGERROR, "CRenderManager::UnInit - not called from render thread");
     return;
@@ -477,7 +472,7 @@ bool CRenderManager::Flush()
   if (!m_pRenderer)
     return true;
 
-  if (g_application.IsCurrentThread())
+  if (KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().IsCurrentThread())
   {
     CLog::Log(LOGDEBUG, "%s - flushing renderer", __FUNCTION__);
 
@@ -507,7 +502,7 @@ bool CRenderManager::Flush()
   else
   {
     m_flushEvent.Reset();
-    CApplicationMessenger::GetInstance().PostMsg(TMSG_RENDERER_FLUSH);
+    KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().PostMsg(TMSG_VP_RENDERER_FLUSH);
     if (!m_flushEvent.WaitMSec(1000))
     {
       CLog::Log(LOGERROR, "%s - timed out waiting for renderer to flush", __FUNCTION__);
@@ -656,7 +651,7 @@ void CRenderManager::StartRenderCapture(unsigned int captureId, unsigned int wid
   capture->SetFlags(flags);
   capture->GetEvent().Reset();
 
-  if (g_application.IsCurrentThread())
+  if (KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().IsCurrentThread())
   {
     if (flags & CAPTUREFLAG_IMMEDIATELY)
     {

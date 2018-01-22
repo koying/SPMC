@@ -24,7 +24,6 @@
 #include <utility>
 
 #include "VideoPlayer.h"
-#include "guilib/GraphicContext.h"
 #include "threads/SingleLock.h"
 
 namespace KODI
@@ -129,8 +128,6 @@ int CVideoPlayerMessenger::SendMsg(KODI::MESSAGING::ThreadMessage&& message, boo
   if (waitEvent) // ... it just so happens we have a spare reference to the
                  //  waitEvent ... just for such contingencies :)
   { 
-    // ensure the thread doesn't hold the graphics lock
-    CSingleExit exit(g_graphicsContext);
     waitEvent->Wait();
     return *result;
   }

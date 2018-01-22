@@ -35,6 +35,7 @@ public class XBMCVideoView extends GLSurfaceView implements
 
   public boolean mIsCreated = false;
   private RelativeLayout mVideoLayout = null;
+  private XBMCVideoView _this = null;
 
   public static XBMCVideoView createVideoView()
   {
@@ -63,27 +64,15 @@ public class XBMCVideoView extends GLSurfaceView implements
   public XBMCVideoView(Context context)
   {
     super(context);
-    setZOrderMediaOverlay(true);
+    setZOrderOnTop(true);
     getHolder().addCallback(this);
 
     setEGLContextClientVersion(2);
     setEGLConfigChooser(8,8,8,8,16,0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
-    setRenderer(this);
-
-    queueEvent(new Runnable()
-      {
-        // This method will be called on the rendering
-        // thread:
-        public void run()
-        {
-          _setThreadId();
-        }
-      }
-    );
-
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
+    _this = this;
   }
 
   public void add()
@@ -95,6 +84,19 @@ public class XBMCVideoView extends GLSurfaceView implements
       {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         mVideoLayout.addView(XBMCVideoView.this, layoutParams);
+
+        setRenderer(_this);
+        queueEvent(new Runnable()
+                   {
+                     // This method will be called on the rendering
+                     // thread:
+                     public void run()
+                     {
+                       Log.d(TAG, "_setThreadId: ");
+                       _setThreadId();
+                     }
+                   }
+        );
       }
     });
   }
@@ -152,6 +154,7 @@ public class XBMCVideoView extends GLSurfaceView implements
   {
     Log.d(TAG, "Created");
     mIsCreated = true;
+    onResume();
     _surfaceCreated(holder);
   }
 
@@ -173,24 +176,28 @@ public class XBMCVideoView extends GLSurfaceView implements
   {
     Log.d(TAG, "Destroyed");
     mIsCreated = false;
+    onPause();
     _surfaceDestroyed(holder);
   }
 
   @Override
   public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
   {
+    Log.d(TAG, "onSurfaceCreated: ");
     _onSurfaceCreated(gl10, eglConfig);
   }
 
   @Override
   public void onSurfaceChanged(GL10 gl10, int w, int h)
   {
+    Log.d(TAG, "onSurfaceChanged: ");
     _onSurfaceChanged(gl10, w, h);
   }
 
   @Override
   public void onDrawFrame(GL10 gl10)
   {
+    Log.d(TAG, "onDrawFrame: ");
     _onDrawFrame(gl10);
   }
 }

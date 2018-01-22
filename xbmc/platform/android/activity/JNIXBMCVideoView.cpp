@@ -130,6 +130,8 @@ void CJNIXBMCVideoView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hol
 
 void CJNIXBMCVideoView::_setThreadId(JNIEnv* env, jobject thiz)
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
   (void)env;
   (void)thiz;
 
@@ -189,9 +191,11 @@ void CJNIXBMCVideoView::surfaceDestroyed(CJNISurfaceHolder holder)
 
 void CJNIXBMCVideoView::onDrawFrame(CJNIGL10 gl)
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().ProcessMessages();
   if (m_player)
   {
-    KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().ProcessMessages();
     m_player->FrameMove();
     m_player->Render(false, 255, false);
   }

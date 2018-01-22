@@ -40,9 +40,7 @@
 #include "guilib/LocalizeStrings.h"
 
 #include "utils/URIUtils.h"
-#include "GUIInfoManager.h"
 #include "cores/DataCacheCore.h"
-#include "guilib/GUIWindowManager.h"
 #include "guilib/StereoscopicsManager.h"
 #include "Application.h"
 #include "ServiceBroker.h"
@@ -61,7 +59,6 @@
 #endif
 #include "settings/AdvancedSettings.h"
 #include "FileItem.h"
-#include "GUIUserMessages.h"
 #include "settings/Settings.h"
 #include "settings/MediaSettings.h"
 #include "utils/log.h"
@@ -70,8 +67,6 @@
 #include "utils/StreamUtils.h"
 #include "utils/Variant.h"
 #include "storage/MediaManager.h"
-#include "dialogs/GUIDialogBusy.h"
-#include "dialogs/GUIDialogKaiToast.h"
 #include "utils/StringUtils.h"
 #include "Util.h"
 #include "LangInfo.h"
@@ -87,8 +82,10 @@
 #endif
 #include "VideoPlayerAudio.h"
 #include "cores/DataCacheCore.h"
-#include "windowing/WindowingFactory.h"
 #include "DVDCodecs/DVDCodecUtils.h"
+
+#include "GUIInfoManager.h"
+#include "dialogs/GUIDialogKaiToast.h"
 
 #include <iterator>
 
@@ -685,13 +682,10 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
   CreatePlayers();
 
   m_displayLost = false;
-  g_Windowing.Register(this);
 }
 
 CVideoPlayer::~CVideoPlayer()
 {
-  g_Windowing.Unregister(this);
-
   CloseFile();
   DestroyPlayers();
 #ifdef TARGET_ANDROID
@@ -726,12 +720,13 @@ bool CVideoPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options
 
   m_ready.Reset();
 
-  m_renderManager.PreInit();
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().SendMsg(TMSG_VP_RENDERER_PREINIT);
 
   Create();
 
-  // wait for the ready event
-  CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
+//  // wait for the ready event
+//  CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
+  m_ready.WaitMSec(30000);
 
   // Playback might have been stopped due to some error
   if (m_bStop || m_bAbortRequest)
@@ -771,7 +766,7 @@ bool CVideoPlayer::CloseFile(bool reopen)
   m_canTempo = false;
 
   CLog::Log(LOGNOTICE, "VideoPlayer: finished waiting");
-  m_renderManager.UnInit();
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().SendMsg(TMSG_VP_RENDERER_UNINIT);
   return true;
 }
 
@@ -4335,9 +4330,9 @@ bool CVideoPlayer::OnAction(const CAction &action)
           SetPlaySpeed(DVD_PLAYSPEED_NORMAL);
           m_callback.OnPlayBackResumed();
         }
-        // send a message to everyone that we've gone to the menu
-        CGUIMessage msg(GUI_MSG_VIDEO_MENU_STARTED, 0, 0);
-        g_windowManager.SendThreadMessage(msg);
+//        // send a message to everyone that we've gone to the menu
+//        CGUIMessage msg(GUI_MSG_VIDEO_MENU_STARTED, 0, 0);
+//        g_windowManager.SendThreadMessage(msg);
         return true;
       }
       break;
@@ -4608,11 +4603,11 @@ bool CVideoPlayer::OnAction(const CAction &action)
       break;
 
     case ACTION_PLAYER_PROCESS_INFO:
-      if (g_windowManager.GetActiveWindow() != WINDOW_DIALOG_PLAYER_PROCESS_INFO)
-      {
-        g_windowManager.ActivateWindow(WINDOW_DIALOG_PLAYER_PROCESS_INFO);
-        return true;
-      }
+//      if (g_windowManager.GetActiveWindow() != WINDOW_DIALOG_PLAYER_PROCESS_INFO)
+//      {
+//        g_windowManager.ActivateWindow(WINDOW_DIALOG_PLAYER_PROCESS_INFO);
+//        return true;
+//      }
       break;
   }
 
@@ -5263,6 +5258,15 @@ void CVideoPlayer::OnApplicationMessage(KODI::MESSAGING::ThreadMessage* pMsg)
 {
   switch (pMsg->dwMessage)
   {
+  case TMSG_VP_RENDERER_FLUSH:
+    m_renderManager.Flush();
+    break;
+  case TMSG_VP_RENDERER_PREINIT:
+    m_renderManager.PreInit();
+    break;
+  case TMSG_VP_RENDERER_UNINIT:
+    m_renderManager.UnInit();
+    break;
   default:
     break;
   }
