@@ -37,6 +37,96 @@
 using namespace jni;
 
 static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCVideoView";
+static std::string s_renderclassName = std::string(CCompileInfo::GetClass()) + "/XBMCVideoView$XBMCVideoRenderer";
+
+void CJNIXBMCVideoRenderer::RegisterNatives(JNIEnv *env)
+{
+  jclass cClass = env->FindClass(s_renderclassName.c_str());
+  if(cClass)
+  {
+    JNINativeMethod methods[] =
+    {
+      {"_onDrawFrame", "(Ljavax/microedition/khronos/opengles/GL10;)V", (void*)&CJNIXBMCVideoRenderer::_onDrawFrame},
+      {"_onSurfaceCreated", "(Ljavax/microedition/khronos/opengles/GL10;Ljavax/microedition/khronos/egl/EGLConfig;)V", (void*)&CJNIXBMCVideoRenderer::_onSurfaceCreated},
+      {"_onSurfaceChanged", "(Ljavax/microedition/khronos/opengles/GL10;II)V", (void*)&CJNIXBMCVideoRenderer::_onSurfaceChanged},
+      {"_setThreadId", "()V", (void*)&CJNIXBMCVideoRenderer::_setThreadId}
+    };
+
+    env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
+  }
+}
+
+void CJNIXBMCVideoRenderer::_setThreadId(JNIEnv* env, jobject thiz)
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  (void)env;
+
+
+  CJNIXBMCVideoRenderer* pvr = new CJNIXBMCVideoRenderer();
+  if (!*pvr)
+  {
+    CLog::Log(LOGERROR, "Cannot instantiate VideoRenderer!!");
+    abort();
+  }
+
+  pvr->m_object.reset(thiz);
+  pvr->m_object.setGlobal();
+
+  add_instance(jhobject::fromJNI(thiz), pvr);
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().setMainThreadId(pthread_self());
+}
+
+void CJNIXBMCVideoRenderer::_onDrawFrame(JNIEnv* env, jobject thiz, jobject gl)
+{
+  (void)env;
+
+  CJNIXBMCVideoRenderer *inst = find_instance(thiz);
+  if (inst)
+    inst->onDrawFrame(CJNIGL10(jhobject::fromJNI(gl)));
+}
+
+void CJNIXBMCVideoRenderer::_onSurfaceCreated(JNIEnv* env, jobject thiz, jobject gl, jobject config)
+{
+  (void)env;
+
+  CJNIXBMCVideoRenderer *inst = find_instance(thiz);
+  if (inst)
+    inst->onSurfaceCreated(CJNIGL10(jhobject::fromJNI(gl)), CJNIEGLConfig(jhobject::fromJNI(config)));
+}
+
+void CJNIXBMCVideoRenderer::_onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height)
+{
+  (void)env;
+
+  CJNIXBMCVideoRenderer *inst = find_instance(thiz);
+  if (inst)
+    inst->onSurfaceChanged(CJNIGL10(jhobject::fromJNI(gl)), width, height);
+}
+
+void CJNIXBMCVideoRenderer::onDrawFrame(CJNIGL10 gl)
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().ProcessMessages();
+  if (m_player)
+  {
+    m_player->FrameMove();
+    m_player->Render(false, 255, false);
+  }
+}
+
+void CJNIXBMCVideoRenderer::onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config)
+{
+
+}
+
+void CJNIXBMCVideoRenderer::onSurfaceChanged(CJNIGL10 gl, int width, int height)
+{
+
+}
+
+/*****************************/
 
 void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
 {
@@ -48,14 +138,12 @@ void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
       {"_surfaceChanged", "(Landroid/view/SurfaceHolder;III)V", (void*)&CJNIXBMCVideoView::_surfaceChanged},
       {"_surfaceCreated", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceCreated},
       {"_surfaceDestroyed", "(Landroid/view/SurfaceHolder;)V", (void*)&CJNIXBMCVideoView::_surfaceDestroyed},
-      {"_onDrawFrame", "(Ljavax/microedition/khronos/opengles/GL10;)V", (void*)&CJNIXBMCVideoView::_onDrawFrame},
-      {"_onSurfaceCreated", "(Ljavax/microedition/khronos/opengles/GL10;Ljavax/microedition/khronos/egl/EGLConfig;)V", (void*)&CJNIXBMCVideoView::_onSurfaceCreated},
-      {"_onSurfaceChanged", "(Ljavax/microedition/khronos/opengles/GL10;II)V", (void*)&CJNIXBMCVideoView::_onSurfaceChanged},
-      {"_setThreadId", "()V", (void*)&CJNIXBMCVideoView::_setThreadId}
     };
 
     env->RegisterNatives(cClass, methods, sizeof(methods)/sizeof(methods[0]));
   }
+
+  CJNIXBMCVideoRenderer::RegisterNatives(env);
 }
 
 CJNIXBMCVideoView::CJNIXBMCVideoView()
@@ -128,44 +216,6 @@ void CJNIXBMCVideoView::_surfaceDestroyed(JNIEnv* env, jobject thiz, jobject hol
     inst->surfaceDestroyed(CJNISurfaceHolder(jhobject::fromJNI(holder)));
 }
 
-void CJNIXBMCVideoView::_setThreadId(JNIEnv* env, jobject thiz)
-{
-  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
-
-  (void)env;
-  (void)thiz;
-
-  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().setMainThreadId(pthread_self());
-}
-
-
-void CJNIXBMCVideoView::_onDrawFrame(JNIEnv* env, jobject thiz, jobject gl)
-{
-  (void)env;
-
-  CJNIXBMCVideoView *inst = find_instance(thiz);
-  if (inst)
-    inst->onDrawFrame(CJNIGL10(jhobject::fromJNI(gl)));
-}
-
-void CJNIXBMCVideoView::_onSurfaceCreated(JNIEnv* env, jobject thiz, jobject gl, jobject config)
-{
-  (void)env;
-
-  CJNIXBMCVideoView *inst = find_instance(thiz);
-  if (inst)
-    inst->onSurfaceCreated(CJNIGL10(jhobject::fromJNI(gl)), CJNIEGLConfig(jhobject::fromJNI(config)));
-}
-
-void CJNIXBMCVideoView::_onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height)
-{
-  (void)env;
-
-  CJNIXBMCVideoView *inst = find_instance(thiz);
-  if (inst)
-    inst->onSurfaceChanged(CJNIGL10(jhobject::fromJNI(gl)), width, height);
-}
-
 void CJNIXBMCVideoView::surfaceChanged(CJNISurfaceHolder holder, int format, int width, int height)
 {
   // Reset Surface Rect
@@ -187,28 +237,6 @@ void CJNIXBMCVideoView::surfaceDestroyed(CJNISurfaceHolder holder)
   m_surfaceCreated.Reset();
   if (m_holderCallback)
     m_holderCallback->surfaceDestroyed(holder);
-}
-
-void CJNIXBMCVideoView::onDrawFrame(CJNIGL10 gl)
-{
-  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
-
-  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().ProcessMessages();
-  if (m_player)
-  {
-    m_player->FrameMove();
-    m_player->Render(false, 255, false);
-  }
-}
-
-void CJNIXBMCVideoView::onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config)
-{
-
-}
-
-void CJNIXBMCVideoView::onSurfaceChanged(CJNIGL10 gl, int width, int height)
-{
-
 }
 
 bool CJNIXBMCVideoView::waitForSurface(unsigned int millis)
@@ -251,4 +279,5 @@ bool CJNIXBMCVideoView::isCreated() const
 {
   return get_field<jboolean>(m_object, "mIsCreated");
 }
+
 

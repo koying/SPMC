@@ -35,6 +35,28 @@
 
 class IPlayer;
 
+class CJNIXBMCVideoRenderer: virtual public CJNIBase, public CJNIInterfaceImplem<CJNIXBMCVideoRenderer>
+{
+  CJNIXBMCVideoRenderer() : CJNIBase() {}
+  CJNIXBMCVideoRenderer(const jni::jhobject &object) : CJNIBase(object) {}
+  ~CJNIXBMCVideoRenderer() {}
+
+  static void RegisterNatives(JNIEnv* env);
+
+  // CJNIGLSurfaceViewRender interface
+  virtual void onDrawFrame(CJNIGL10 gl);
+  virtual void onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config);
+  virtual void onSurfaceChanged(CJNIGL10 gl, int width, int height);
+
+  static void _setThreadId(JNIEnv* env, jobject thiz);
+  static void _onDrawFrame(JNIEnv* env, jobject thiz, jobject gl);
+  static void _onSurfaceCreated(JNIEnv* env, jobject thiz, jobject gl, jobject config);
+  static void _onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height) ;
+
+protected:
+  pthread_t m_threadid;
+};
+
 class CJNIXBMCVideoView : virtual public CJNIBase, public CJNISurfaceHolderCallback, public CJNIInterfaceImplem<CJNIXBMCVideoView>
 {
 public:
@@ -56,15 +78,6 @@ public:
   static void _surfaceCreated(JNIEnv* env, jobject thiz, jobject holder);
   static void _surfaceDestroyed(JNIEnv* env, jobject thiz, jobject holder);
 
-  // CJNIGLSurfaceViewRender interface
-  virtual void onDrawFrame(CJNIGL10 gl);
-  virtual void onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config);
-  virtual void onSurfaceChanged(CJNIGL10 gl, int width, int height);
-
-  static void _setThreadId(JNIEnv* env, jobject thiz);
-  static void _onDrawFrame(JNIEnv* env, jobject thiz, jobject gl);
-  static void _onSurfaceCreated(JNIEnv* env, jobject thiz, jobject gl, jobject config);
-  static void _onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height) ;
 
   bool waitForSurface(unsigned int millis);
   bool isActive() { return m_surfaceCreated.Signaled(); }
@@ -78,11 +91,10 @@ public:
 
 protected:
   IPlayer* m_player;
-  pthread_t m_threadid;
   CJNISurfaceHolderCallback* m_holderCallback;
   CEvent m_surfaceCreated;
   CRect m_surfaceRect;
 
 private:
   CJNIXBMCVideoView();
-  };
+};

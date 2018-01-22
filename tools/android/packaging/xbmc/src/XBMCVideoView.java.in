@@ -1,17 +1,11 @@
 package @APP_PACKAGE@;
 
-import android.graphics.Color;
+import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import java.util.concurrent.Callable;
@@ -21,21 +15,17 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class XBMCVideoView extends GLSurfaceView implements
-        SurfaceHolder.Callback, GLSurfaceView.Renderer
+        SurfaceHolder.Callback
 {
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
   native void _surfaceCreated(SurfaceHolder holder);
   native void _surfaceDestroyed(SurfaceHolder holder);
-  native void _setThreadId();
-  native void _onDrawFrame(GL10 gl10);
-  native void _onSurfaceCreated(GL10 gl10, EGLConfig eglConfig);
-  native void _onSurfaceChanged(GL10 gl10, int w, int h);
 
   private static final String TAG = "XBMCVideoPlayView";
 
   public boolean mIsCreated = false;
   private RelativeLayout mVideoLayout = null;
-  private XBMCVideoView _this = null;
+  private XBMCVideoRenderer mRenderer;
 
   public static XBMCVideoView createVideoView()
   {
@@ -67,12 +57,13 @@ public class XBMCVideoView extends GLSurfaceView implements
     setZOrderOnTop(true);
     getHolder().addCallback(this);
 
+    mRenderer = new XBMCVideoRenderer();
     setEGLContextClientVersion(2);
     setEGLConfigChooser(8,8,8,8,16,0);
+
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
-    _this = this;
   }
 
   public void add()
@@ -85,7 +76,7 @@ public class XBMCVideoView extends GLSurfaceView implements
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         mVideoLayout.addView(XBMCVideoView.this, layoutParams);
 
-        setRenderer(_this);
+        setRenderer(mRenderer);
         queueEvent(new Runnable()
                    {
                      // This method will be called on the rendering
@@ -93,7 +84,7 @@ public class XBMCVideoView extends GLSurfaceView implements
                      public void run()
                      {
                        Log.d(TAG, "_setThreadId: ");
-                       _setThreadId();
+                       mRenderer._setThreadId();
                      }
                    }
         );
@@ -180,24 +171,34 @@ public class XBMCVideoView extends GLSurfaceView implements
     _surfaceDestroyed(holder);
   }
 
-  @Override
-  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
+  private class XBMCVideoRenderer implements GLSurfaceView.Renderer
   {
-    Log.d(TAG, "onSurfaceCreated: ");
-    _onSurfaceCreated(gl10, eglConfig);
-  }
+    native void _setThreadId();
+    native void _onDrawFrame(GL10 gl10);
+    native void _onSurfaceCreated(GL10 gl10, EGLConfig eglConfig);
+    native void _onSurfaceChanged(GL10 gl10, int w, int h);
 
-  @Override
-  public void onSurfaceChanged(GL10 gl10, int w, int h)
-  {
-    Log.d(TAG, "onSurfaceChanged: ");
-    _onSurfaceChanged(gl10, w, h);
-  }
+    private static final String TAG = "XBMCVideoRenderer";
 
-  @Override
-  public void onDrawFrame(GL10 gl10)
-  {
-    Log.d(TAG, "onDrawFrame: ");
-    _onDrawFrame(gl10);
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
+    {
+      Log.d(TAG, "onSurfaceCreated: ");
+      _onSurfaceCreated(gl10, eglConfig);
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl10, int w, int h)
+    {
+      Log.d(TAG, "onSurfaceChanged: ");
+      _onSurfaceChanged(gl10, w, h);
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl10)
+    {
+      Log.d(TAG, "onDrawFrame: ");
+      _onDrawFrame(gl10);
+    }
   }
 }
