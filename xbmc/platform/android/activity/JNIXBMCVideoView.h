@@ -32,13 +32,16 @@
 #include "threads/Event.h"
 
 #include <pthread.h>
+#include <memory>
 
 class IPlayer;
 
 class CJNIXBMCVideoRenderer: virtual public CJNIBase, public CJNIInterfaceImplem<CJNIXBMCVideoRenderer>
 {
-  CJNIXBMCVideoRenderer() : CJNIBase() {}
-  CJNIXBMCVideoRenderer(const jni::jhobject &object) : CJNIBase(object) {}
+  friend class CJNIXBMCVideoView;
+
+public:
+  CJNIXBMCVideoRenderer(jni::jhobject jRenderer, IPlayer* player);
   ~CJNIXBMCVideoRenderer() {}
 
   static void RegisterNatives(JNIEnv* env);
@@ -54,7 +57,11 @@ class CJNIXBMCVideoRenderer: virtual public CJNIBase, public CJNIInterfaceImplem
   static void _onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height) ;
 
 protected:
+  CJNIXBMCVideoRenderer() : CJNIBase() {}
+  CJNIXBMCVideoRenderer(const jni::jhobject &object) : CJNIBase(object) {}
+
   pthread_t m_threadid;
+  IPlayer* m_player;
 };
 
 class CJNIXBMCVideoView : virtual public CJNIBase, public CJNISurfaceHolderCallback, public CJNIInterfaceImplem<CJNIXBMCVideoView>
@@ -90,8 +97,8 @@ public:
   bool isCreated() const;
 
 protected:
-  IPlayer* m_player;
   CJNISurfaceHolderCallback* m_holderCallback;
+  std::shared_ptr<CJNIXBMCVideoRenderer> m_renderer;
   CEvent m_surfaceCreated;
   CRect m_surfaceRect;
 

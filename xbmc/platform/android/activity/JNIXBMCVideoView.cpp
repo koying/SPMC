@@ -56,24 +56,24 @@ void CJNIXBMCVideoRenderer::RegisterNatives(JNIEnv *env)
   }
 }
 
+CJNIXBMCVideoRenderer::CJNIXBMCVideoRenderer(jhobject jRenderer, IPlayer* player)
+  : CJNIBase ()
+  , m_player(player)
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  m_object.reset(jRenderer);
+  m_object.setGlobal();
+  add_instance(jRenderer, this);
+}
+
+
 void CJNIXBMCVideoRenderer::_setThreadId(JNIEnv* env, jobject thiz)
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
   (void)env;
 
-
-  CJNIXBMCVideoRenderer* pvr = new CJNIXBMCVideoRenderer();
-  if (!*pvr)
-  {
-    CLog::Log(LOGERROR, "Cannot instantiate VideoRenderer!!");
-    abort();
-  }
-
-  pvr->m_object.reset(thiz);
-  pvr->m_object.setGlobal();
-
-  add_instance(jhobject::fromJNI(thiz), pvr);
   KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().setMainThreadId(pthread_self());
 }
 
@@ -104,7 +104,7 @@ void CJNIXBMCVideoRenderer::_onSurfaceChanged(JNIEnv* env, jobject thiz, jobject
     inst->onSurfaceChanged(CJNIGL10(jhobject::fromJNI(gl)), width, height);
 }
 
-void CJNIXBMCVideoRenderer::onDrawFrame(CJNIGL10 gl)
+void CJNIXBMCVideoRenderer::onDrawFrame(CJNIGL10 /*gl*/)
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
@@ -116,12 +116,12 @@ void CJNIXBMCVideoRenderer::onDrawFrame(CJNIGL10 gl)
   }
 }
 
-void CJNIXBMCVideoRenderer::onSurfaceCreated(CJNIGL10 gl, CJNIEGLConfig config)
+void CJNIXBMCVideoRenderer::onSurfaceCreated(CJNIGL10 /*gl*/, CJNIEGLConfig /*config*/)
 {
 
 }
 
-void CJNIXBMCVideoRenderer::onSurfaceChanged(CJNIGL10 gl, int width, int height)
+void CJNIXBMCVideoRenderer::onSurfaceChanged(CJNIGL10 /*gl*/, int /*width*/, int /*height*/)
 {
 
 }
@@ -153,7 +153,6 @@ CJNIXBMCVideoView::CJNIXBMCVideoView()
 
 CJNIXBMCVideoView::CJNIXBMCVideoView(const jni::jhobject &object)
   : CJNIBase(object)
-  , m_player(nullptr)
   , m_holderCallback(nullptr)
 {
 }
@@ -176,10 +175,14 @@ CJNIXBMCVideoView* CJNIXBMCVideoView::createVideoView(IPlayer* player)
   }
 
   add_instance(pvw->get_raw(), pvw);
-  pvw->m_player = player;
   if (pvw->isCreated())
     pvw->m_surfaceCreated.Set();
   pvw->add();
+
+  std::string signature_renderer = "L" + s_renderclassName + ";";
+
+  jhobject jRenderer = get_field<jhobject>(pvw->m_object, "mRenderer", signature_renderer.c_str());
+  pvw->m_renderer.reset(new CJNIXBMCVideoRenderer(jRenderer, player));
 
   return pvw;
 }
