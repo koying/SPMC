@@ -77,7 +77,7 @@ public:
   float GetAspectRatio();
   void FrameMove();
   void FrameWait(int ms);
-  void Render(bool clear, DWORD flags = 0, DWORD alpha = 255, bool gui = true);
+  void Render(bool clear, DWORD flags = 0, DWORD alpha = 255);
   RESOLUTION GetResolution();
   void UpdateResolution();
   void TriggerUpdateResolution(float fps, int width, int flags);

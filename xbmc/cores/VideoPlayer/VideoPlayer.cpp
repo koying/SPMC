@@ -674,6 +674,7 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
     }
     return;
   }
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().RegisterReceiver(this);
 #endif
 
   m_SkipCommercials = true;
@@ -5134,7 +5135,7 @@ void CVideoPlayer::FrameMove()
 
 void CVideoPlayer::Render(bool clear, uint32_t alpha, bool gui)
 {
-  m_renderManager.Render(clear, 0, alpha, gui);
+  m_renderManager.Render(clear, 0, alpha);
 }
 
 void CVideoPlayer::FlushRenderer()

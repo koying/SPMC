@@ -64,7 +64,7 @@ CJNIXBMCVideoRenderer::CJNIXBMCVideoRenderer(jhobject jRenderer, IPlayer* player
 
   m_object.reset(jRenderer);
   m_object.setGlobal();
-  add_instance(jRenderer, this);
+  add_instance(m_object, this);
 }
 
 
@@ -106,8 +106,6 @@ void CJNIXBMCVideoRenderer::_onSurfaceChanged(JNIEnv* env, jobject thiz, jobject
 
 void CJNIXBMCVideoRenderer::onDrawFrame(CJNIGL10 /*gl*/)
 {
-  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
-
   KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().ProcessMessages();
   if (m_player)
   {

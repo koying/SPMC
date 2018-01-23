@@ -884,7 +884,7 @@ RESOLUTION CRenderManager::GetResolution()
   return res;
 }
 
-void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
+void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha)
 {
   CSingleExit exitLock(g_graphicsContext);
 
@@ -894,10 +894,7 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
       return;
   }
 
-  if (!gui && m_pRenderer->IsGuiLayer())
-    return;
-
-  if (!gui || m_pRenderer->IsGuiLayer())
+  if (m_pRenderer->IsGuiLayer())
   {
     SPresent& m = m_Queue[m_presentsource];
 
@@ -911,41 +908,39 @@ void CRenderManager::Render(bool clear, DWORD flags, DWORD alpha, bool gui)
       PresentSingle(clear, flags, alpha);
   }
 
-  if (gui)
+  if (!m_pRenderer->IsGuiLayer())
+    m_pRenderer->Update();
+
+  m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
+  CRect src, dst, view;
+  m_pRenderer->GetVideoRect(src, dst, view);
+  m_overlays.SetVideoRect(src, dst, view);
+  m_overlays.Render(m_presentsource);
+
+  if (m_renderDebug)
   {
-    if (!m_pRenderer->IsGuiLayer())
-      m_pRenderer->Update();
+    std::string acodec, audio, vcodec, video, player, vsync;
 
-    m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
-    CRect src, dst, view;
-    m_pRenderer->GetVideoRect(src, dst, view);
-    m_overlays.SetVideoRect(src, dst, view);
-    m_overlays.Render(m_presentsource);
+    m_player->GetDebugInfo(acodec, audio, vcodec, video, player);
 
-    if (m_renderDebug)
+    double refreshrate, clockspeed;
+    int missedvblanks;
+    vsync = StringUtils::Format("VSyncOff: %.1f  ", m_clockSync.m_syncOffset / 1000);
+    if (m_dvdClock.GetClockInfo(missedvblanks, clockspeed, refreshrate))
     {
-      std::string acodec, audio, vcodec, video, player, vsync;
-
-      m_player->GetDebugInfo(acodec, audio, vcodec, video, player);
-
-      double refreshrate, clockspeed;
-      int missedvblanks;
-      vsync = StringUtils::Format("VSyncOff: %.1f  ", m_clockSync.m_syncOffset / 1000);
-      if (m_dvdClock.GetClockInfo(missedvblanks, clockspeed, refreshrate))
-      {
-        vsync += StringUtils::Format("VSync: refresh:%.3f missed:%i speed:%.3f%%",
-                                     refreshrate,
-                                     missedvblanks,
-                                     clockspeed * 100);
-      }
-
-      m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
-      m_debugRenderer.Render(src, dst, view);
-
-      m_debugTimer.Set(1000);
-      m_renderedOverlay = true;
+      vsync += StringUtils::Format("VSync: refresh:%.3f missed:%i speed:%.3f%%",
+                                   refreshrate,
+                                   missedvblanks,
+                                   clockspeed * 100);
     }
+
+    m_debugRenderer.SetInfo(acodec, audio, vcodec, video, player, vsync);
+    m_debugRenderer.Render(src, dst, view);
+
+    m_debugTimer.Set(1000);
+    m_renderedOverlay = true;
   }
+
 
 
   SPresent& m = m_Queue[m_presentsource];

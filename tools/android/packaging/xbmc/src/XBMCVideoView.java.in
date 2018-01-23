@@ -14,8 +14,7 @@ import java.util.concurrent.FutureTask;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class XBMCVideoView extends GLSurfaceView implements
-        SurfaceHolder.Callback
+public class XBMCVideoView extends GLSurfaceView
 {
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
   native void _surfaceCreated(SurfaceHolder holder);
@@ -54,14 +53,26 @@ public class XBMCVideoView extends GLSurfaceView implements
   public XBMCVideoView(Context context)
   {
     super(context);
-    setZOrderOnTop(true);
-    getHolder().addCallback(this);
+    setZOrderMediaOverlay(true);
 
     mRenderer = new XBMCVideoRenderer();
     setEGLContextClientVersion(2);
     setEGLConfigChooser(8,8,8,8,16,0);
 
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+    setRenderer(mRenderer);
+    queueEvent(new Runnable()
+               {
+                 // This method will be called on the rendering
+                 // thread:
+                 public void run()
+                 {
+                   Log.d(TAG, "_setThreadId: ");
+                   mRenderer._setThreadId();
+                 }
+               }
+    );
 
     mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
   }
@@ -75,19 +86,6 @@ public class XBMCVideoView extends GLSurfaceView implements
       {
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         mVideoLayout.addView(XBMCVideoView.this, layoutParams);
-
-        setRenderer(mRenderer);
-        queueEvent(new Runnable()
-                   {
-                     // This method will be called on the rendering
-                     // thread:
-                     public void run()
-                     {
-                       Log.d(TAG, "_setThreadId: ");
-                       mRenderer._setThreadId();
-                     }
-                   }
-        );
       }
     });
   }
@@ -143,6 +141,8 @@ public class XBMCVideoView extends GLSurfaceView implements
   @Override
   public void surfaceCreated(SurfaceHolder holder)
   {
+    super.surfaceCreated(holder);
+
     Log.d(TAG, "Created");
     mIsCreated = true;
     onResume();
@@ -153,6 +153,8 @@ public class XBMCVideoView extends GLSurfaceView implements
   public void surfaceChanged(SurfaceHolder holder, int format, int width,
                              int height)
   {
+    super.surfaceChanged(holder, format, width, height);
+
     if (holder != getHolder())
       return;
 
@@ -165,6 +167,8 @@ public class XBMCVideoView extends GLSurfaceView implements
   @Override
   public void surfaceDestroyed(SurfaceHolder holder)
   {
+    super.surfaceDestroyed(holder);
+
     Log.d(TAG, "Destroyed");
     mIsCreated = false;
     onPause();
@@ -197,7 +201,6 @@ public class XBMCVideoView extends GLSurfaceView implements
     @Override
     public void onDrawFrame(GL10 gl10)
     {
-      Log.d(TAG, "onDrawFrame: ");
       _onDrawFrame(gl10);
     }
   }
