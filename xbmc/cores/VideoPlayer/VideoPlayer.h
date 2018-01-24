@@ -41,6 +41,7 @@
 #include "threads/Thread.h"
 #include "utils/StreamDetails.h"
 #include "guilib/DispResource.h"
+#include "messaging/ThreadMessage.h"
 
 #ifdef HAS_OMXPLAYER
 #include "OMXCore.h"
@@ -71,6 +72,9 @@ public:
   bool HDMIClockSync(bool lock = true) { return false; }
   void OMXSetSpeedAdjust(double adjust, bool lock = true) {}
 };
+#endif
+#ifdef TARGET_ANDROID
+class CJNIXBMCVideoView;
 #endif
 
 struct SOmxPlayerState
@@ -377,8 +381,6 @@ public:
   float GetRenderAspectRatio();
   virtual void TriggerUpdateResolution();
   virtual bool IsRenderingVideo();
-  virtual bool IsRenderingGuiLayer();
-  virtual bool IsRenderingVideoLayer();
   virtual bool Supports(EINTERLACEMETHOD method) override;
   virtual EINTERLACEMETHOD GetDeinterlacingMethodDefault() override;
   virtual bool Supports(ESCALINGMETHOD method) override;
@@ -398,6 +400,9 @@ public:
 
   virtual int OnDVDNavResult(void* pData, int iMessage) override;
   void GetVideoResolution(unsigned int &width, unsigned int &height) override;
+
+  void OnApplicationMessage(KODI::MESSAGING::ThreadMessage* pMsg);
+  int GetMessageMask();
 
 protected:
   friend class CSelectionStreams;
@@ -567,6 +572,11 @@ protected:
     int iSelectedAudioStream; // mpeg stream id, or -1 if disabled
     int iSelectedVideoStream; // mpeg stream id or angle, -1 if disabled
   } m_dvd;
+
+#ifdef TARGET_ANDROID
+  friend class CRenderManager;
+  std::shared_ptr<CJNIXBMCVideoView> m_jnivideoview;
+#endif
 
   friend class CVideoPlayerVideo;
   friend class CVideoPlayerAudio;
