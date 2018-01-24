@@ -34,7 +34,7 @@
 
 using namespace jni;
 
-static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCVideoView";
+static std::string s_className = std::string(CCompileInfo::GetClass()) + "/views/XBMCVideoView";
 
 void CJNIXBMCVideoView::RegisterNatives(JNIEnv* env)
 {

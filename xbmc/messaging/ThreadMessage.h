@@ -27,6 +27,11 @@ class CEvent;
 
 namespace KODI
 {
+
+namespace VIDEOPLAYER
+{
+  class CVideoPlayerMessenger;
+}
 namespace MESSAGING
 {
 
@@ -34,7 +39,9 @@ class CApplicationMessenger;
 
 class ThreadMessage
 {
-  friend CApplicationMessenger;
+  friend class CApplicationMessenger;
+  friend class KODI::VIDEOPLAYER::CVideoPlayerMessenger;
+
 public:
   ThreadMessage()
     : ThreadMessage{ 0, -1, -1, nullptr }

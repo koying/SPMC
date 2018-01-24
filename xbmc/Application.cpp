@@ -2070,7 +2070,7 @@ void CApplication::Render()
     g_infoManager.UpdateFPS();
   }
 
-  g_graphicsContext.Flip(hasRendered, m_pPlayer->IsRenderingVideoLayer());
+  g_graphicsContext.Flip(hasRendered);
 
   CTimeUtils::UpdateFrameTime(hasRendered);
 }
@@ -2975,8 +2975,6 @@ void CApplication::FrameMove(bool processEvents, bool processGUI)
     }
     g_windowManager.FrameMove();
   }
-
-  m_pPlayer->FrameMove();
 }
 
 

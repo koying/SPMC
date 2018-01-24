@@ -277,7 +277,7 @@ void CRenderSystemGLES::PresentRender(bool rendered, bool videoLayer)
   PresentRenderImpl(rendered);
 
   // if video is rendered to a separate layer, we should not block this thread
-  if (!rendered && !videoLayer)
+  if (!rendered)
     Sleep(40);
 }
 

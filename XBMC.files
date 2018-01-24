@@ -5969,12 +5969,16 @@ tools/android/packaging/xbmc/res/drawable/progresscolor.xml
 tools/android/packaging/xbmc/src/Service.java.in
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
+tools/android/packaging/xbmc/src/XBMCPlayerView.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
 tools/android/packaging/xbmc/src/content/XBMCContentProvider.java.in
 tools/android/packaging/xbmc/src/content/XBMCFileContentProvider.java.in
 tools/android/packaging/xbmc/src/content/XBMCMediaContentProvider.java.in
 tools/android/packaging/xbmc/src/content/XBMCYTDLContentProvider.java.in
 tools/android/packaging/xbmc/src/interfaces/XBMCInputDeviceListener.java.in
+tools/android/packaging/xbmc/src/views/XBMCMainView.java.in
+tools/android/packaging/xbmc/src/views/XBMCPlayerView.java.in
+tools/android/packaging/xbmc/src/views/XBMCVideoView.java.in
 tools/buildsteps/android/configure-depends
 tools/buildsteps/android/configure-xbmc
 tools/buildsteps/android/make-binary-addons
@@ -6166,6 +6170,9 @@ xbmc/addons/Skin.cpp
 xbmc/addons/Skin.h
 xbmc/addons/Visualisation.cpp
 xbmc/addons/Visualisation.h
+xbmc/cores/VideoPlayer/CMakeLists.txt
+xbmc/cores/VideoPlayer/VideoPlayerMessenger.cpp
+xbmc/cores/VideoPlayer/VideoPlayerMessenger.h
 xbmc/guilib/Resolution.cpp
 xbmc/interfaces/python/AddonPythonInvoker.cpp
 xbmc/interfaces/python/AddonPythonInvoker.h
@@ -6208,6 +6215,8 @@ xbmc/platform/android/activity/JNIXBMCJsonHandler.cpp
 xbmc/platform/android/activity/JNIXBMCJsonHandler.h
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
+xbmc/platform/android/activity/JNIXBMCPlayerView.cpp
+xbmc/platform/android/activity/JNIXBMCPlayerView.h
 xbmc/platform/android/activity/XBMCService.cpp
 xbmc/platform/android/activity/XBMCService.h
 xbmc/platform/android/activity/android_main.cpp

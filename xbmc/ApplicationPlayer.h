@@ -89,8 +89,6 @@ public:
   float GetRenderAspectRatio();
   void TriggerUpdateResolution();
   bool IsRenderingVideo();
-  bool IsRenderingGuiLayer();
-  bool IsRenderingVideoLayer();
   bool Supports(EINTERLACEMETHOD method);
   EINTERLACEMETHOD GetDeinterlacingMethodDefault();
   bool Supports(ESCALINGMETHOD method);

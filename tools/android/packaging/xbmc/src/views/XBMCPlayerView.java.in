@@ -1,0 +1,178 @@
+package @APP_PACKAGE@.views;
+
+import android.content.Context;
+import android.graphics.PixelFormat;
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.widget.RelativeLayout;
+
+import @APP_PACKAGE@.Main;
+import @APP_PACKAGE@.R;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+public class XBMCPlayerView extends GLSurfaceView
+{
+  native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
+  native void _surfaceCreated(SurfaceHolder holder);
+  native void _surfaceDestroyed(SurfaceHolder holder);
+
+  private static final String TAG = "XBMCPlayView";
+
+  public boolean mIsCreated = false;
+  private RelativeLayout mVideoLayout = null;
+  private XBMCPlayerRenderer mRenderer;
+
+  public static XBMCPlayerView createPlayerView()
+  {
+    FutureTask<XBMCPlayerView> futureResult = new FutureTask<XBMCPlayerView>(new Callable<XBMCPlayerView>()
+    {
+      @Override
+      public XBMCPlayerView call() throws Exception
+      {
+        return new XBMCPlayerView(Main.MainActivity);
+      }
+    });
+
+    try
+    {
+      Main.MainActivity.runOnUiThread(futureResult);
+      XBMCPlayerView vw = futureResult.get();
+      return vw;
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  public XBMCPlayerView(Context context)
+  {
+    super(context);
+    setZOrderMediaOverlay(true);
+    setElevation(25);
+
+    mRenderer = new XBMCPlayerRenderer();
+    setEGLContextClientVersion(2);
+    setEGLConfigChooser(8,8,8,8,16,0);
+
+    getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+    setRenderer(mRenderer);
+    queueEvent(new Runnable()
+               {
+                 // This method will be called on the rendering
+                 // thread:
+                 public void run()
+                 {
+                   Log.d(TAG, "_setThreadId: ");
+                   mRenderer._setThreadId();
+                 }
+               }
+    );
+
+    mVideoLayout = (RelativeLayout) Main.MainActivity.findViewById(R.id.VideoLayout);
+  }
+
+  public void add()
+  {
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        mVideoLayout.addView(XBMCPlayerView.this, layoutParams);
+      }
+    });
+  }
+
+  public void release()
+  {
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        mVideoLayout.removeView(XBMCPlayerView.this);
+      }
+    });
+  }
+
+  @Override
+  public void surfaceCreated(SurfaceHolder holder)
+  {
+    super.surfaceCreated(holder);
+
+    Log.d(TAG, "Created");
+    mIsCreated = true;
+    onResume();
+    _surfaceCreated(holder);
+  }
+
+  @Override
+  public void surfaceChanged(SurfaceHolder holder, int format, int width,
+                             int height)
+  {
+    super.surfaceChanged(holder, format, width, height);
+
+    if (holder != getHolder())
+      return;
+
+    _surfaceChanged(holder, format, width, height);
+
+    Log.d(TAG, "Changed, format:" + format + ", width:" + width
+            + ", height:" + height);
+  }
+
+  @Override
+  public void surfaceDestroyed(SurfaceHolder holder)
+  {
+    super.surfaceDestroyed(holder);
+
+    Log.d(TAG, "Destroyed");
+    mIsCreated = false;
+    onPause();
+    _surfaceDestroyed(holder);
+  }
+
+  private class XBMCPlayerRenderer implements GLSurfaceView.Renderer
+  {
+    native void _setThreadId();
+    native void _onDrawFrame(GL10 gl10);
+    native void _onSurfaceCreated(GL10 gl10, EGLConfig eglConfig);
+    native void _onSurfaceChanged(GL10 gl10, int w, int h);
+
+    private static final String TAG = "XBMCPlayerRenderer";
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig)
+    {
+      Log.d(TAG, "onSurfaceCreated: ");
+      _onSurfaceCreated(gl10, eglConfig);
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl10, int w, int h)
+    {
+      Log.d(TAG, "onSurfaceChanged: ");
+      _onSurfaceChanged(gl10, w, h);
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl10)
+    {
+      GLES20.glClearColor(0, 0, 0, 0);
+      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+      _onDrawFrame(gl10);
+    }
+  }
+}

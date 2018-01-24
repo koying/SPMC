@@ -64,8 +64,6 @@ void CGUIVideoControl::Render()
     g_graphicsContext.Clear(0);
 #endif
     g_graphicsContext.SetScissors(old);
-    g_application.m_pPlayer->Render(false, alpha);
-
     g_graphicsContext.RemoveTransform();
   }
   //! @todo remove this crap: HAS_VIDEO_PLAYBACK

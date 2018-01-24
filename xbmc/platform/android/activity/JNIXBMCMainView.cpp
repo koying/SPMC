@@ -35,7 +35,7 @@
 
 using namespace jni;
 
-static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCMainView";
+static std::string s_className = std::string(CCompileInfo::GetClass()) + "/views/XBMCMainView";
 CEvent CJNIXBMCMainView::m_surfaceCreated;
 CJNIXBMCMainView* CJNIXBMCMainView::m_instance = nullptr;
 

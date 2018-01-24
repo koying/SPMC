@@ -1,17 +1,16 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.views;
 
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.view.View;
 import android.widget.RelativeLayout;
+
+import @APP_PACKAGE@.Main;
+import @APP_PACKAGE@.R;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -20,12 +19,10 @@ public class XBMCVideoView extends SurfaceView implements
         SurfaceHolder.Callback
 {
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
-
   native void _surfaceCreated(SurfaceHolder holder);
-
   native void _surfaceDestroyed(SurfaceHolder holder);
 
-  private static final String TAG = "XBMCVideoPlayView";
+  private static final String TAG = "XBMCVideoView";
 
   public boolean mIsCreated = false;
   private RelativeLayout mVideoLayout = null;
@@ -58,6 +55,8 @@ public class XBMCVideoView extends SurfaceView implements
   {
     super(context);
     setZOrderMediaOverlay(true);
+    setElevation(10);
+
     getHolder().addCallback(this);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
 

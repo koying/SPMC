@@ -40,13 +40,12 @@
 #include "guilib/LocalizeStrings.h"
 
 #include "utils/URIUtils.h"
-#include "GUIInfoManager.h"
 #include "cores/DataCacheCore.h"
-#include "guilib/GUIWindowManager.h"
 #include "guilib/StereoscopicsManager.h"
 #include "Application.h"
 #include "ServiceBroker.h"
 #include "messaging/ApplicationMessenger.h"
+#include "VideoPlayerMessenger.h"
 
 #include "DVDDemuxers/DVDDemuxCC.h"
 #include "cores/FFmpeg.h"
@@ -60,7 +59,6 @@
 #endif
 #include "settings/AdvancedSettings.h"
 #include "FileItem.h"
-#include "GUIUserMessages.h"
 #include "settings/Settings.h"
 #include "settings/MediaSettings.h"
 #include "utils/log.h"
@@ -69,8 +67,6 @@
 #include "utils/StreamUtils.h"
 #include "utils/Variant.h"
 #include "storage/MediaManager.h"
-#include "dialogs/GUIDialogBusy.h"
-#include "dialogs/GUIDialogKaiToast.h"
 #include "utils/StringUtils.h"
 #include "Util.h"
 #include "LangInfo.h"
@@ -81,10 +77,15 @@
 #include "cores/omxplayer/OMXPlayerVideo.h"
 #include "cores/omxplayer/OMXHelper.h"
 #endif
+#if defined(TARGET_ANDROID)
+#include "platform/android/activity/JNIXBMCPlayerView.h"
+#endif
 #include "VideoPlayerAudio.h"
 #include "cores/DataCacheCore.h"
-#include "windowing/WindowingFactory.h"
 #include "DVDCodecs/DVDCodecUtils.h"
+
+#include "GUIInfoManager.h"
+#include "dialogs/GUIDialogKaiToast.h"
 
 #include <iterator>
 
@@ -622,7 +623,7 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
       m_CurrentTeletext(STREAM_TELETEXT, VideoPlayer_TELETEXT),
       m_CurrentRadioRDS(STREAM_RADIO_RDS, VideoPlayer_RDS),
       m_messenger("player"),
-      m_renderManager(m_clock, this),
+      m_renderManager(this),
       m_ready(true)
 {
   m_players_created = false;
@@ -661,6 +662,20 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
 #else
   m_omxplayer_mode                     = false;
 #endif
+#if defined TARGET_ANDROID
+  m_jniplayerview.reset(CJNIXBMCPlayerView::createPlayerView(this));
+  if (!m_jniplayerview || !m_jniplayerview->waitForSurface(500))
+  {
+    CLog::Log(LOGERROR, "VideoPlayer: VideoView creation failed!!");
+    if (m_jniplayerview)
+    {
+      m_jniplayerview->release();
+      m_jniplayerview.reset();
+    }
+    return;
+  }
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().RegisterReceiver(this);
+#endif
 
   m_SkipCommercials = true;
 
@@ -668,15 +683,16 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
   CreatePlayers();
 
   m_displayLost = false;
-  g_Windowing.Register(this);
 }
 
 CVideoPlayer::~CVideoPlayer()
 {
-  g_Windowing.Unregister(this);
-
   CloseFile();
   DestroyPlayers();
+#ifdef TARGET_ANDROID
+  m_jniplayerview->release();
+  m_jniplayerview.reset();
+#endif
 }
 
 bool CVideoPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
@@ -705,12 +721,13 @@ bool CVideoPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options
 
   m_ready.Reset();
 
-  m_renderManager.PreInit();
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().SendMsg(TMSG_VP_RENDERER_PREINIT);
 
   Create();
 
-  // wait for the ready event
-  CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
+//  // wait for the ready event
+//  CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
+  m_ready.WaitMSec(30000);
 
   // Playback might have been stopped due to some error
   if (m_bStop || m_bAbortRequest)
@@ -750,7 +767,7 @@ bool CVideoPlayer::CloseFile(bool reopen)
   m_canTempo = false;
 
   CLog::Log(LOGNOTICE, "VideoPlayer: finished waiting");
-  m_renderManager.UnInit();
+  KODI::VIDEOPLAYER::CVideoPlayerMessenger::GetInstance().SendMsg(TMSG_VP_RENDERER_UNINIT);
   return true;
 }
 
@@ -4314,9 +4331,9 @@ bool CVideoPlayer::OnAction(const CAction &action)
           SetPlaySpeed(DVD_PLAYSPEED_NORMAL);
           m_callback.OnPlayBackResumed();
         }
-        // send a message to everyone that we've gone to the menu
-        CGUIMessage msg(GUI_MSG_VIDEO_MENU_STARTED, 0, 0);
-        g_windowManager.SendThreadMessage(msg);
+//        // send a message to everyone that we've gone to the menu
+//        CGUIMessage msg(GUI_MSG_VIDEO_MENU_STARTED, 0, 0);
+//        g_windowManager.SendThreadMessage(msg);
         return true;
       }
       break;
@@ -4587,11 +4604,11 @@ bool CVideoPlayer::OnAction(const CAction &action)
       break;
 
     case ACTION_PLAYER_PROCESS_INFO:
-      if (g_windowManager.GetActiveWindow() != WINDOW_DIALOG_PLAYER_PROCESS_INFO)
-      {
-        g_windowManager.ActivateWindow(WINDOW_DIALOG_PLAYER_PROCESS_INFO);
-        return true;
-      }
+//      if (g_windowManager.GetActiveWindow() != WINDOW_DIALOG_PLAYER_PROCESS_INFO)
+//      {
+//        g_windowManager.ActivateWindow(WINDOW_DIALOG_PLAYER_PROCESS_INFO);
+//        return true;
+//      }
       break;
   }
 
@@ -5118,7 +5135,7 @@ void CVideoPlayer::FrameMove()
 
 void CVideoPlayer::Render(bool clear, uint32_t alpha, bool gui)
 {
-  m_renderManager.Render(clear, 0, alpha, gui);
+  m_renderManager.Render(clear, 0, alpha);
 }
 
 void CVideoPlayer::FlushRenderer()
@@ -5144,16 +5161,6 @@ void CVideoPlayer::TriggerUpdateResolution()
 bool CVideoPlayer::IsRenderingVideo()
 {
   return m_renderManager.IsConfigured();
-}
-
-bool CVideoPlayer::IsRenderingGuiLayer()
-{
-  return m_renderManager.IsGuiLayer();
-}
-
-bool CVideoPlayer::IsRenderingVideoLayer()
-{
-  return m_renderManager.IsVideoLayer();
 }
 
 bool CVideoPlayer::Supports(EINTERLACEMETHOD method)
@@ -5246,4 +5253,27 @@ void CVideoPlayer::OnResetDisplay()
   m_VideoPlayerVideo->SendMessage(new CDVDMsgBool(CDVDMsg::GENERAL_PAUSE, false), 1);
   m_clock.Pause(false);
   m_displayLost = false;
+}
+
+void CVideoPlayer::OnApplicationMessage(KODI::MESSAGING::ThreadMessage* pMsg)
+{
+  switch (pMsg->dwMessage)
+  {
+  case TMSG_VP_RENDERER_FLUSH:
+    m_renderManager.Flush();
+    break;
+  case TMSG_VP_RENDERER_PREINIT:
+    m_renderManager.PreInit();
+    break;
+  case TMSG_VP_RENDERER_UNINIT:
+    m_renderManager.UnInit();
+    break;
+  default:
+    break;
+  }
+}
+
+int CVideoPlayer::GetMessageMask()
+{
+  return TMSG_MASK_VIDEOPLAYER;
 }

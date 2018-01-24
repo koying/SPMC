@@ -10,6 +10,7 @@ set(SOURCES DVDAudio.cpp
             Edl.cpp
             VideoPlayerAudio.cpp
             VideoPlayer.cpp
+            VideoPlayerMessenger.cpp
             VideoPlayerRadioRDS.cpp
             VideoPlayerSubtitle.cpp
             VideoPlayerTeletext.cpp
@@ -28,6 +29,7 @@ set(HEADERS DVDAudio.h
             Edl.h
             IVideoPlayer.h
             VideoPlayer.h
+            VideoPlayerMessenger.h
             VideoPlayerAudio.h
             VideoPlayerRadioRDS.h
             VideoPlayerSubtitle.h
