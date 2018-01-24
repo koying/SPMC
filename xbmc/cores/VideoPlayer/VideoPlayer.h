@@ -74,7 +74,7 @@ public:
 };
 #endif
 #ifdef TARGET_ANDROID
-class CJNIXBMCVideoView;
+class CJNIXBMCPlayerView;
 #endif
 
 struct SOmxPlayerState
@@ -575,7 +575,7 @@ protected:
 
 #ifdef TARGET_ANDROID
   friend class CRenderManager;
-  std::shared_ptr<CJNIXBMCVideoView> m_jnivideoview;
+  std::shared_ptr<CJNIXBMCPlayerView> m_jniplayerview;
 #endif
 
   friend class CVideoPlayerVideo;

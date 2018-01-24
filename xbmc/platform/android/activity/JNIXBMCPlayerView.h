@@ -36,13 +36,13 @@
 
 class IPlayer;
 
-class CJNIXBMCVideoRenderer: virtual public CJNIBase, public CJNIInterfaceImplem<CJNIXBMCVideoRenderer>
+class CJNIXBMCPlayerRenderer: virtual public CJNIBase, public CJNIInterfaceImplem<CJNIXBMCPlayerRenderer>
 {
-  friend class CJNIXBMCVideoView;
+  friend class CJNIXBMCPlayerView;
 
 public:
-  CJNIXBMCVideoRenderer(jni::jhobject jRenderer, IPlayer* player);
-  ~CJNIXBMCVideoRenderer() {}
+  CJNIXBMCPlayerRenderer(jni::jhobject jRenderer, IPlayer* player);
+  ~CJNIXBMCPlayerRenderer() {}
 
   static void RegisterNatives(JNIEnv* env);
 
@@ -57,22 +57,22 @@ public:
   static void _onSurfaceChanged(JNIEnv* env, jobject thiz, jobject gl, int width, int height) ;
 
 protected:
-  CJNIXBMCVideoRenderer() : CJNIBase() {}
-  CJNIXBMCVideoRenderer(const jni::jhobject &object) : CJNIBase(object) {}
+  CJNIXBMCPlayerRenderer() : CJNIBase() {}
+  CJNIXBMCPlayerRenderer(const jni::jhobject &object) : CJNIBase(object) {}
 
   pthread_t m_threadid;
   IPlayer* m_player;
 };
 
-class CJNIXBMCVideoView : virtual public CJNIBase, public CJNISurfaceHolderCallback, public CJNIInterfaceImplem<CJNIXBMCVideoView>
+class CJNIXBMCPlayerView : virtual public CJNIBase, public CJNISurfaceHolderCallback, public CJNIInterfaceImplem<CJNIXBMCPlayerView>
 {
 public:
-  CJNIXBMCVideoView(const jni::jhobject &object);
-  ~CJNIXBMCVideoView();
+  CJNIXBMCPlayerView(const jni::jhobject &object);
+  ~CJNIXBMCPlayerView();
 
   static void RegisterNatives(JNIEnv* env);
   
-  static CJNIXBMCVideoView* createVideoView(IPlayer* player);
+  static CJNIXBMCPlayerView* createPlayerView(IPlayer* player);
 
   void setSurfaceholderCallback(CJNISurfaceHolderCallback* holderCallback);
 
@@ -98,10 +98,10 @@ public:
 
 protected:
   CJNISurfaceHolderCallback* m_holderCallback;
-  std::shared_ptr<CJNIXBMCVideoRenderer> m_renderer;
+  std::shared_ptr<CJNIXBMCPlayerRenderer> m_renderer;
   CEvent m_surfaceCreated;
   CRect m_surfaceRect;
 
 private:
-  CJNIXBMCVideoView();
+  CJNIXBMCPlayerView();
 };

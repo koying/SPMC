@@ -22,7 +22,6 @@ import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.media.tv.TvContractCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.Choreographer;
@@ -33,6 +32,7 @@ import android.widget.TextView;
 
 import @APP_PACKAGE@.channels.util.TvUtil;
 import @APP_PACKAGE@.interfaces.XBMCInputDeviceListener;
+import @APP_PACKAGE@.views.XBMCMainView;
 
 import java.text.MessageFormat;
 

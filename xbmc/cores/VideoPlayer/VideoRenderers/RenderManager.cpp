@@ -1079,7 +1079,7 @@ CRenderInfo CRenderManager::GetRenderInfo()
   }
   info =  m_pRenderer->GetRenderInfo();
 #ifdef TARGET_ANDROID
-  info.opaque_pointer = static_cast<void*>(&(m_player->m_jnivideoview));
+  info.opaque_pointer = static_cast<void*>(&(m_player->m_jniplayerview));
 #endif
   return info;
 }

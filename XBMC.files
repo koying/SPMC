@@ -5969,6 +5969,7 @@ tools/android/packaging/xbmc/res/drawable/progresscolor.xml
 tools/android/packaging/xbmc/src/Service.java.in
 tools/android/packaging/xbmc/src/XBMCMainView.java.in
 tools/android/packaging/xbmc/src/XBMCMediaSession.java.in
+tools/android/packaging/xbmc/src/XBMCPlayerView.java.in
 tools/android/packaging/xbmc/src/XBMCProjection.java.in
 tools/android/packaging/xbmc/src/content/XBMCContentProvider.java.in
 tools/android/packaging/xbmc/src/content/XBMCFileContentProvider.java.in
@@ -6211,6 +6212,8 @@ xbmc/platform/android/activity/JNIXBMCJsonHandler.cpp
 xbmc/platform/android/activity/JNIXBMCJsonHandler.h
 xbmc/platform/android/activity/JNIXBMCMainView.cpp
 xbmc/platform/android/activity/JNIXBMCMainView.h
+xbmc/platform/android/activity/JNIXBMCPlayerView.cpp
+xbmc/platform/android/activity/JNIXBMCPlayerView.h
 xbmc/platform/android/activity/XBMCService.cpp
 xbmc/platform/android/activity/XBMCService.h
 xbmc/platform/android/activity/android_main.cpp

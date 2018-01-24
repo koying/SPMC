@@ -78,7 +78,7 @@
 #include "cores/omxplayer/OMXHelper.h"
 #endif
 #if defined(TARGET_ANDROID)
-#include "platform/android/activity/JNIXBMCVideoView.h"
+#include "platform/android/activity/JNIXBMCPlayerView.h"
 #endif
 #include "VideoPlayerAudio.h"
 #include "cores/DataCacheCore.h"
@@ -663,14 +663,14 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
   m_omxplayer_mode                     = false;
 #endif
 #if defined TARGET_ANDROID
-  m_jnivideoview.reset(CJNIXBMCVideoView::createVideoView(this));
-  if (!m_jnivideoview || !m_jnivideoview->waitForSurface(500))
+  m_jniplayerview.reset(CJNIXBMCPlayerView::createPlayerView(this));
+  if (!m_jniplayerview || !m_jniplayerview->waitForSurface(500))
   {
     CLog::Log(LOGERROR, "VideoPlayer: VideoView creation failed!!");
-    if (m_jnivideoview)
+    if (m_jniplayerview)
     {
-      m_jnivideoview->release();
-      m_jnivideoview.reset();
+      m_jniplayerview->release();
+      m_jniplayerview.reset();
     }
     return;
   }
@@ -690,8 +690,8 @@ CVideoPlayer::~CVideoPlayer()
   CloseFile();
   DestroyPlayers();
 #ifdef TARGET_ANDROID
-  m_jnivideoview->release();
-  m_jnivideoview.reset();
+  m_jniplayerview->release();
+  m_jniplayerview.reset();
 #endif
 }
 

@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.content;
 
 import android.util.Log;
 

@@ -32,9 +32,7 @@ set(package_files strings.xml
                   AndroidManifest.xml
                   build.gradle
                   src/Splash.java
-                  src/XBMCVideoView.java
                   src/XBMCJsonRPC.java
-                  src/XBMCFile.java
                   src/channels/SyncChannelJobService.java
                   src/channels/SyncProgramsJobService.java
                   src/channels/model/XBMCDatabase.java
@@ -64,11 +62,14 @@ set(package_files strings.xml
                   src/XBMCRecommendationBuilder.java
                   src/XBMCProperties.java
                   src/content/XBMCFileContentProvider.java
+                  src/content/XBMCFile.java
                   src/content/XBMCMediaContentProvider.java
                   src/content/XBMCContentProvider.java
                   src/content/XBMCYTDLContentProvider.java
                   src/XBMCSettingsContentObserver.java
-                  src/XBMCMainView.java
+                  src/views/XBMCMainView.java
+                  src/views/XBMCPlayerView.java
+                  src/views/XBMCVideoView.java
                   src/Service.java
                   )
 foreach(file IN LISTS package_files)
