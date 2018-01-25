@@ -5976,6 +5976,9 @@ tools/android/packaging/xbmc/src/content/XBMCFileContentProvider.java.in
 tools/android/packaging/xbmc/src/content/XBMCMediaContentProvider.java.in
 tools/android/packaging/xbmc/src/content/XBMCYTDLContentProvider.java.in
 tools/android/packaging/xbmc/src/interfaces/XBMCInputDeviceListener.java.in
+tools/android/packaging/xbmc/src/views/XBMCMainView.java.in
+tools/android/packaging/xbmc/src/views/XBMCPlayerView.java.in
+tools/android/packaging/xbmc/src/views/XBMCVideoView.java.in
 tools/buildsteps/android/configure-depends
 tools/buildsteps/android/configure-xbmc
 tools/buildsteps/android/make-binary-addons

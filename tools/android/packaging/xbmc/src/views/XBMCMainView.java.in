@@ -32,6 +32,8 @@ public class XBMCMainView extends SurfaceView implements SurfaceHolder.Callback,
   {
     super(context);
     setZOrderOnTop(true);
+    setElevation(50);  // Always on Top
+
     getHolder().addCallback(this);
     addOnLayoutChangeListener(this);
     getHolder().setFormat(PixelFormat.TRANSPARENT);

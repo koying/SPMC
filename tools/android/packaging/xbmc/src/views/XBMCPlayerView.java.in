@@ -57,6 +57,7 @@ public class XBMCPlayerView extends GLSurfaceView
   {
     super(context);
     setZOrderMediaOverlay(true);
+    setElevation(25);
 
     mRenderer = new XBMCPlayerRenderer();
     setEGLContextClientVersion(2);
