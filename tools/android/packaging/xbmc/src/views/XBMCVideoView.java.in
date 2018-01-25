@@ -19,12 +19,10 @@ public class XBMCVideoView extends SurfaceView implements
         SurfaceHolder.Callback
 {
   native void _surfaceChanged(SurfaceHolder holder, int format, int width, int height);
-
   native void _surfaceCreated(SurfaceHolder holder);
-
   native void _surfaceDestroyed(SurfaceHolder holder);
 
-  private static final String TAG = "XBMCVideoPlayView";
+  private static final String TAG = "XBMCVideoView";
 
   public boolean mIsCreated = false;
   private RelativeLayout mVideoLayout = null;

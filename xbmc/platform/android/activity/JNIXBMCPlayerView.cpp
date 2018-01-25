@@ -37,7 +37,7 @@
 using namespace jni;
 
 static std::string s_className = std::string(CCompileInfo::GetClass()) + "/views/XBMCPlayerView";
-static std::string s_renderclassName = std::string(CCompileInfo::GetClass()) + "/XBMCPlayerView$XBMCPlayerRenderer";
+static std::string s_renderclassName = std::string(CCompileInfo::GetClass()) + "/views/XBMCPlayerView$XBMCPlayerRenderer";
 
 void CJNIXBMCPlayerRenderer::RegisterNatives(JNIEnv *env)
 {
