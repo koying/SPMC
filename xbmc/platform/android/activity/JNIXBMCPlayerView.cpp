@@ -110,7 +110,7 @@ void CJNIXBMCPlayerRenderer::onDrawFrame(CJNIGL10 /*gl*/)
   if (m_player)
   {
     m_player->FrameMove();
-    m_player->Render(false, 255, false);
+    m_player->Render(true, 255, false);
   }
 }
 

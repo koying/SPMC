@@ -2,7 +2,6 @@ package @APP_PACKAGE@.views;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.Surface;
@@ -170,8 +169,6 @@ public class XBMCPlayerView extends GLSurfaceView
     @Override
     public void onDrawFrame(GL10 gl10)
     {
-      GLES20.glClearColor(0, 0, 0, 0);
-      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
       _onDrawFrame(gl10);
     }
   }

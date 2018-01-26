@@ -441,7 +441,7 @@ void CLinuxRendererGLES::RenderUpdate(bool clear, DWORD flags, DWORD alpha)
 
   if (clear)
   {
-    glClearColor(m_clearColour, m_clearColour, m_clearColour, 0);
+    glClearColor(m_clearColour, m_clearColour, m_clearColour, 255);
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0,0,0,0);
   }

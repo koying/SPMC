@@ -41,6 +41,7 @@
 
 #include "utils/URIUtils.h"
 #include "cores/DataCacheCore.h"
+#include "guilib/GUIWindowManager.h"
 #include "guilib/StereoscopicsManager.h"
 #include "Application.h"
 #include "ServiceBroker.h"
@@ -59,6 +60,7 @@
 #endif
 #include "settings/AdvancedSettings.h"
 #include "FileItem.h"
+#include "GUIUserMessages.h"
 #include "settings/Settings.h"
 #include "settings/MediaSettings.h"
 #include "utils/log.h"
@@ -67,6 +69,7 @@
 #include "utils/StreamUtils.h"
 #include "utils/Variant.h"
 #include "storage/MediaManager.h"
+#include "dialogs/GUIDialogBusy.h"
 #include "utils/StringUtils.h"
 #include "Util.h"
 #include "LangInfo.h"
@@ -725,9 +728,11 @@ bool CVideoPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options
 
   Create();
 
-//  // wait for the ready event
-//  CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
-  m_ready.WaitMSec(30000);
+  // wait for the ready event
+  if (g_windowManager.Initialized())
+    CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
+  else
+    m_ready.WaitMSec(30000);
 
   // Playback might have been stopped due to some error
   if (m_bStop || m_bAbortRequest)
@@ -4331,10 +4336,13 @@ bool CVideoPlayer::OnAction(const CAction &action)
           SetPlaySpeed(DVD_PLAYSPEED_NORMAL);
           m_callback.OnPlayBackResumed();
         }
-//        // send a message to everyone that we've gone to the menu
-//        CGUIMessage msg(GUI_MSG_VIDEO_MENU_STARTED, 0, 0);
-//        g_windowManager.SendThreadMessage(msg);
-        return true;
+        if (g_windowManager.Initialized())
+        {
+          // send a message to everyone that we've gone to the menu
+          CGUIMessage msg(GUI_MSG_VIDEO_MENU_STARTED, 0, 0);
+          g_windowManager.SendThreadMessage(msg);
+        }
+          return true;
       }
       break;
     }
@@ -4604,11 +4612,11 @@ bool CVideoPlayer::OnAction(const CAction &action)
       break;
 
     case ACTION_PLAYER_PROCESS_INFO:
-//      if (g_windowManager.GetActiveWindow() != WINDOW_DIALOG_PLAYER_PROCESS_INFO)
-//      {
-//        g_windowManager.ActivateWindow(WINDOW_DIALOG_PLAYER_PROCESS_INFO);
-//        return true;
-//      }
+      if (g_windowManager.Initialized() && g_windowManager.GetActiveWindow() != WINDOW_DIALOG_PLAYER_PROCESS_INFO)
+      {
+        g_windowManager.ActivateWindow(WINDOW_DIALOG_PLAYER_PROCESS_INFO);
+        return true;
+      }
       break;
   }
 

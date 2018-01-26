@@ -118,6 +118,12 @@ bool CRendererMediaCodecSurface::LoadShadersHook()
 
 bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, DWORD alpha)
 {
+  if (clear)
+  {
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT);
+  }
+
   CDVDMediaCodecInfo *mci = static_cast<CDVDMediaCodecInfo *>(m_buffers[m_iYV12RenderBuffer].hwDec);
   if (mci)
   {
