@@ -31,7 +31,7 @@
 
 using namespace jni;
 
-static std::string s_className = std::string(CCompileInfo::GetClass()) + "/XBMCFile";
+static std::string s_className = std::string(CCompileInfo::GetClass()) + "/content/XBMCFile";
 
 CJNIXBMCFile::CJNIXBMCFile()
   : CJNIBase()
