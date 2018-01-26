@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.activities;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -9,6 +9,10 @@ import android.app.SearchManager;
 import android.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.widget.ListView;
+
+import @APP_PACKAGE@.R;
+import @APP_PACKAGE@.XBMCJsonRPC;
+import @APP_PACKAGE@.activities.Main;
 
 public class XBMCSearchableActivity extends Activity
 {
@@ -67,7 +71,7 @@ public class XBMCSearchableActivity extends Activity
 
     Intent newIntent = new Intent(origIntent.getAction(), data);
     newIntent.setDataAndType(data, "video/*");
-    newIntent.setClass(this, @APP_PACKAGE@.Main.class);
+    newIntent.setClass(this, Main.class);
     newIntent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(newIntent);
     finish();

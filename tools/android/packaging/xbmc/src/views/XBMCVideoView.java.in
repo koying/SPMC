@@ -1,17 +1,16 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.views;
 
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.view.View;
 import android.widget.RelativeLayout;
+
+import @APP_PACKAGE@.activities.Main;
+import @APP_PACKAGE@.R;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;

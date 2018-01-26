@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import @APP_PACKAGE@.XBMCFile;
 import @APP_PACKAGE@.XBMCJsonRPC;
 import @APP_PACKAGE@.model.File;
 

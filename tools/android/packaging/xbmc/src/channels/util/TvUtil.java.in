@@ -37,7 +37,7 @@ import android.support.media.tv.ChannelLogoUtils;
 import android.support.media.tv.TvContractCompat;
 import android.util.Log;
 
-import @APP_PACKAGE@.Splash;
+import @APP_PACKAGE@.activities.Splash;
 import @APP_PACKAGE@.channels.SyncChannelJobService;
 import @APP_PACKAGE@.channels.SyncProgramsJobService;
 import @APP_PACKAGE@.channels.model.Subscription;

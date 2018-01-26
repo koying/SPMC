@@ -28,7 +28,7 @@ import android.support.media.tv.PreviewProgram;
 import android.support.media.tv.TvContractCompat;
 import android.util.Log;
 
-import @APP_PACKAGE@.Splash;
+import @APP_PACKAGE@.activities.Splash;
 import @APP_PACKAGE@.XBMCJsonRPC;
 import @APP_PACKAGE@.model.Movie;
 import @APP_PACKAGE@.model.TVEpisode;

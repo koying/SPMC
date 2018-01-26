@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import @APP_PACKAGE@.activities.Splash;
 import @APP_PACKAGE@.content.XBMCYTDLContentProvider;
 import @APP_PACKAGE@.model.Album;
 import @APP_PACKAGE@.model.Movie;

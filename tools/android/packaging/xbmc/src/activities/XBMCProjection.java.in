@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.activities;
 
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -10,6 +10,9 @@ import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.Looper;
+
+import @APP_PACKAGE@.XBMCProperties;
+import @APP_PACKAGE@.activities.Main;
 
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;

@@ -50,7 +50,7 @@
         android:label="@string/app_name"
         android:logo="@drawable/banner">
         <activity
-            android:name=".Splash"
+            android:name=".activities.Splash"
             android:configChanges="orientation|keyboard|keyboardHidden|navigation|touchscreen|screenLayout|screenSize"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
@@ -93,7 +93,7 @@
              This will take care of integrating with our NDK code.
         -->
         <activity
-            android:name=".Main"
+            android:name=".activities.Main"
             android:configChanges="orientation|keyboard|keyboardHidden|navigation|touchscreen|screenLayout|screenSize"
             android:finishOnTaskLaunch="true"
             android:label="@string/app_name"
@@ -109,7 +109,7 @@
                 android:value="@APP_NAME_LC@" />
         </activity>
         <activity
-            android:name=".XBMCCrashHandler"
+            android:name=".activities.XBMCCrashHandler"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:exported="false"
             android:process=":XBMCCrashHandler"
@@ -137,7 +137,7 @@
             android:authorities="@APP_PACKAGE@.ytdl"
             android:exported="true" />
 
-        <activity android:name=".XBMCSearchableActivity">
+        <activity android:name=".activities.XBMCSearchableActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
 
@@ -165,7 +165,7 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
-            android:name=".Service"
+            android:name=".activities.Service"
             android:enabled="true"
             android:exported="true"/>
     </application>

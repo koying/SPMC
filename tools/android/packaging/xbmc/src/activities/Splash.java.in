@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.activities;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -43,6 +43,9 @@ import android.os.Message;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.os.Environment;
+
+import @APP_PACKAGE@.R;
+import @APP_PACKAGE@.XBMCProperties;
 
 public class Splash extends Activity
 {
@@ -797,7 +800,7 @@ public class Splash extends Activity
   {
     // Run @APP_NAME@
     Intent intent = getIntent();
-    intent.setClass(this, @APP_PACKAGE@.Main.class);
+    intent.setClass(this, Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
     startActivity(intent);
 
@@ -819,7 +822,7 @@ public class Splash extends Activity
             .getRunningTasks(Integer.MAX_VALUE);
     for (RunningTaskInfo task : tasks)
       if (task.topActivity.toString().equalsIgnoreCase(
-              "ComponentInfo{@APP_PACKAGE@/@APP_PACKAGE@.Main}"))
+              "ComponentInfo{@APP_PACKAGE@/@APP_PACKAGE@.activities.Main}"))
       {
         // @APP_NAME@ already running; just activate it
         startXBMC();

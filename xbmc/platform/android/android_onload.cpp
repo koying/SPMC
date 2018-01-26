@@ -49,8 +49,8 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
 
   std::string pkgRoot = CCompileInfo::GetClass();
   
-  std::string serviceClass = pkgRoot + "/Service";
-  std::string mainClass = pkgRoot + "/Main";
+  std::string serviceClass = pkgRoot + "/activities/Service";
+  std::string mainClass = pkgRoot + "/activities/Main";
   std::string bcReceiver = pkgRoot + "/XBMCBroadcastReceiver";
   std::string settingsObserver = pkgRoot + "/XBMCSettingsContentObserver";
 

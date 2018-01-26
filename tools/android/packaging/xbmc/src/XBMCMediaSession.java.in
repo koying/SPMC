@@ -1,6 +1,5 @@
 package @APP_PACKAGE@;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.media.MediaMetadata;
@@ -10,8 +9,7 @@ import android.media.session.PlaybackState;
 import android.os.Build;
 import android.util.Log;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
+import @APP_PACKAGE@.activities.Main;
 
 import static android.media.Rating.RATING_5_STARS;
 

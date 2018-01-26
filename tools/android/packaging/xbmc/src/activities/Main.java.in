@@ -1,4 +1,4 @@
-package @APP_PACKAGE@;
+package @APP_PACKAGE@.activities;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -22,7 +22,6 @@ import android.media.projection.MediaProjectionManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.media.tv.TvContractCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.Choreographer;
@@ -31,8 +30,14 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import @APP_PACKAGE@.R;
+import @APP_PACKAGE@.XBMCBroadcastReceiver;
+import @APP_PACKAGE@.XBMCJsonRPC;
+import @APP_PACKAGE@.XBMCProperties;
+import @APP_PACKAGE@.XBMCSettingsContentObserver;
 import @APP_PACKAGE@.channels.util.TvUtil;
 import @APP_PACKAGE@.interfaces.XBMCInputDeviceListener;
+import @APP_PACKAGE@.views.XBMCMainView;
 
 import java.text.MessageFormat;
 
