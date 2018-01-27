@@ -213,17 +213,13 @@ bool CRendererMediaCodecSurface::RenderUpdateVideoHook(bool clear, DWORD flags, 
 
     mci->RenderUpdate(dstRect);
     m_readyToRender = true;
-    CXBMCApp::WaitVSync(50);
   }
-  else
+  double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
+  m_prevTime = CurrentHostCounter();
+  if (sleep_time_ms < 15.0)
   {
-    double sleep_time_ms = 1000.0 * (CurrentHostCounter() - m_prevTime) / CurrentHostFrequency();
-    m_prevTime = CurrentHostCounter();
-    if (sleep_time_ms < 20.0)
-    {
-      sleep_time_ms = 20.0 - sleep_time_ms;
-      usleep(sleep_time_ms * 1000);
-    }
+    sleep_time_ms = 15.0 - sleep_time_ms;
+    usleep(sleep_time_ms * 1000);
   }
 
   return true;
