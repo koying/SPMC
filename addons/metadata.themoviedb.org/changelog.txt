@@ -1,3 +1,12 @@
+[B]4.1.2[/B]
+- fixed: TMDb ratings
+
+[B]4.1.1[/B]
+- changed: more cleanup and fixes
+
+[B]4.1.0[/B]
+- changed: major code clean-up of tmdb common scraper library
+
 [B]4.0.3[/B]
 - changed: split zh-cn and zh-tw
 

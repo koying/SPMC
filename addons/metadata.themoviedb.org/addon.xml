@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="metadata.themoviedb.org"
        name="The Movie Database"
-       version="674.0.3"
+       version="674.1.2"
        provider-name="Team Kodi">
   <requires>
     <import addon="xbmc.metadata" version="2.1.0"/>
     <import addon="metadata.common.imdb.com" version="2.7.8"/>
-    <import addon="metadata.common.themoviedb.org" version="672.13.1"/>
+    <import addon="metadata.common.themoviedb.org" version="673.1.0"/>
     <import addon="plugin.video.youtube" version="4.4.10" optional="true"/>
   </requires>
   <extension point="xbmc.metadata.scraper.movies"
