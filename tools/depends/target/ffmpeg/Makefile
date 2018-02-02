@@ -35,7 +35,7 @@ ifeq ($(OS), android)
     ifeq ($(findstring arm, $(CPU)), arm)
       ffmpg_config += --cpu=cortex-a9
     else
-      ffmpg_config += --cpu=i686 --disable-mmx
+      ffmpg_config += --cpu=i686 --disable-mmx --disable-asm
     endif
   endif
   ffmpg_config += --target-os=linux --extra-libs=-liconv
