@@ -10,15 +10,19 @@ As far as I'm concerned, Nvidia Shield has basically cornered the market, so is 
 **Note 1:** As of 16.5.0, Android lollipop (API 21) is required  
 **Note 2:** For recommendations and android voice search, SPMC must be already running.  
 
-Latest Jarvis build is: **16.7.3** [link](https://github.com/koying/SPMC/releases/tag/16.7.3-spmc)   
-ARM32 APK: [link](https://github.com/koying/SPMC/releases/download/16.7.3-spmc/SPMC-16.7.3-spmc-9cc7fff-armeabi-v7a.apk)  
-More downloads at: [link](https://github.com/koying/SPMC/releases/tag/16.7.3-spmc)  
+Latest Jarvis build is: **16.7.4** [link](https://github.com/koying/SPMC/releases/tag/16.7.4-spmc)   
+ARM32 APK: [link](https://github.com/koying/SPMC/releases/download/16.7.4-spmc/SPMC-16.7.4-spmc-94d913d-armeabi-v7a.apk)  
+More downloads at: [link](https://github.com/koying/SPMC/releases/tag/16.7.4-spmc)  
 
 Google Play: [link](https://play.google.com/store/apps/details?id=com.semperpax.spmc16)  
 Issues and questions: [github](https://github.com/koying/SPMC/issues)  
 FAQ: [wiki](https://github.com/koying/SPMC/wiki)
 
 Changelog:
+
+### 16.7.4 (2018/02/26)
+
+- ADD: own repository to mitigate TMDB keys abuse
 
 ### 16.7.3 (2018/02/02)
 
