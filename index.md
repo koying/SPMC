@@ -1,6 +1,6 @@
-<div markdown="1">
-  <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=E9WN2M4HJAQZS"><img align="right" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" alt="Donate" /></a>
-</div>
+# SPMC development has stopped
+I have joined the https://mrmc.tv/ team (https://twitter.com/koying/status/975425129239990273)  
+Thank you for your support all those years, and see you there.
 
 # Jarvis
 
