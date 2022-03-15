@@ -1,5 +1,0 @@
-include 'xbmc'
-
-rootProject.name = "@APP_NAME@-@ARCH@"
-
-project(':xbmc').projectDir = new File('xbmc')
