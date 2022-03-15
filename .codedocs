@@ -1,9 +1,0 @@
-# CodeDocs.xyz Configuration File
-
-DOXYFILE = doxygen_resources/Doxyfile.doxy 
-
-PROJECT_LOGO = doxygen_resources/Thumbnail-symbol-whitebg-small.jpg
-
-INPUT= xbmc \
-       CODING_GUIDELINES.dox \
-       doxygen_resources
