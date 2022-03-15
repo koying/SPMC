@@ -1,3 +1,0 @@
-xbmc/profiles         profiles
-xbmc/profiles/dialogs profiles/dialogs
-xbmc/profiles/windows profiles/windows

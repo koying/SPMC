@@ -1,2 +1,0 @@
-?package(kodi):needs="X11" section="Applications/Video" \
-  title="kodi" command="/usr/bin/kodi"

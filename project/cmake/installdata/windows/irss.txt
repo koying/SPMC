@@ -1,2 +1,0 @@
-system/IRSSmap.xml
-system/X10-Lola-IRSSmap.xml

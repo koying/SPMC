@@ -1,2 +1,0 @@
-tools/darwin/runtime/preflight
-tools/darwin/runtime/org.xbmc.helper.plist
